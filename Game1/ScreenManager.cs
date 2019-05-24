@@ -128,9 +128,16 @@ namespace Game1
 
 		private void _currentScreen_OnReadyScreenUnload(object sender, EventArgs e)
 		{
-			if (sender.GetType() == typeof(SplashScreen))
+			var args = (ScreenEventArgs)e;
+
+			// TODO: This whole logic structure needs to be redone and generalized...
+			if (args.Type == "change")
 			{
-				TransitionScreens(new MainMenu(_graphics, this.ScreenSize));
+				switch (args.Target)
+				{
+					case "MainMenu":	TransitionScreens(new MainMenu(_graphics, this.ScreenSize));	break;
+					case "OptionsMenu":	TransitionScreens(new OptionsMenu(_graphics, this.ScreenSize));	break;
+				}
 			}
 		}
 	}

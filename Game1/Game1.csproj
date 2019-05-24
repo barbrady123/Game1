@@ -42,6 +42,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Effect\EffectEventArgs.cs" />
+    <Compile Include="Effect\FadeCycleEffect.cs" />
     <Compile Include="Effect\FadeInEffect.cs" />
     <Compile Include="Effect\FadeOutEffect.cs" />
     <Compile Include="Effect\ZoomCycleEffect.cs" />
@@ -57,6 +58,8 @@
     <Compile Include="Screen\Menu\MainMenu.cs" />
     <Compile Include="Screen\Menu\MenuItem.cs" />
     <Compile Include="Screen\Menu\MenuScreen.cs" />
+    <Compile Include="Screen\Menu\OptionsMenu.cs" />
+    <Compile Include="Screen\ScreenEventArgs.cs" />
     <Compile Include="Screen\SplashScreen.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -18,9 +18,9 @@ namespace Game1.Screen
 
 		public event EventHandler OnReadyScreenUnload;
 
-		protected void ReadyScreenUnload(object sender)
+		protected void ReadyScreenUnload(object sender, ScreenEventArgs args = null)
 		{
-			OnReadyScreenUnload?.Invoke(sender, null);
+			OnReadyScreenUnload?.Invoke(sender, args);
 		}
 
 		public GameScreen(GraphicsDevice graphics)

@@ -14,6 +14,7 @@ namespace Game1.Effect
 		protected Image _image;
 		private bool _isActive;
 
+		public bool IsIncreasing { get; set; }
 		public float Speed { get; set; }
 		
 		public bool IsActive
@@ -35,6 +36,7 @@ namespace Game1.Effect
 		{
 			_image = image;			
 			this.IsActive = isActive;
+			this.IsIncreasing = false;
 			this.Speed = 1.0f;
 		}
 

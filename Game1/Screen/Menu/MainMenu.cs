@@ -15,29 +15,35 @@ namespace Game1.Screen.Menu
 	{
 		public MainMenu(GraphicsDevice graphics, Vector2 size): base(graphics, size)
 		{
+			// TODO: these should be loaded from file/config...
 			_items.Add(new MenuItem { Image = new Image(graphics, null, "Start New Game", true), LinkID = "new"});
 			_items.Add(new MenuItem { Image = new Image(graphics, null, "Options", true), LinkID = "options"});
 			_items.Add(new MenuItem { Image = new Image(graphics, null, "Exit Game", true), LinkID = "exit"});
 		}
 
-		public override void LoadContent(IServiceProvider services)
+		protected override void PerformAction(string id)
 		{
-			base.LoadContent(services);
+			switch (id)
+			{
+				case "new" :		StartNewGame();	break;
+				case "options" :	Options();		break;
+				case "exit":		ExitGame();		break;
+			}
 		}
 
-		public override void UnloadContent()
+		private void StartNewGame()
 		{
-			base.UnloadContent();
+			
 		}
 
-		public override void Update(GameTime gameTime, bool processInput)
+		private void Options()
 		{
-			base.Update(gameTime, processInput);
+			ReadyScreenUnload(this, new ScreenEventArgs("change", "OptionsMenu"));
 		}
 
-		public override void Draw(SpriteBatch spriteBatch)
+		private void ExitGame()
 		{
-			base.Draw(spriteBatch);
+			Game1.Instance.Exit();			
 		}
 	}
 }

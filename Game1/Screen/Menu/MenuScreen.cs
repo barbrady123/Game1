@@ -18,8 +18,9 @@ namespace Game1.Screen.Menu
 		protected Vector2 _size;
 		protected Vector2 _menuSize;
 		protected int _currentIndex;
-
 		protected List<MenuItem> _items;
+
+		private FadeCycleEffect _selectedEffect;
 
 		public MenuScreen(GraphicsDevice graphics, Vector2 size): base(graphics)
 		{
@@ -28,6 +29,7 @@ namespace Game1.Screen.Menu
 			_backgroundImage = new Image(graphics, "Background/brick", null, true);
 			_currentIndex = -1;
 			_items = new List<MenuItem>();
+			_selectedEffect = null;
 		}
 
 		public override void LoadContent(IServiceProvider services)
@@ -48,6 +50,8 @@ namespace Game1.Screen.Menu
 				item.Image.Position = new Vector2(locX, locY);
 				locY += (int)item.Image.SourceRect.Height + MENU_PADDING;
 			}
+
+			SetCurrentIndex(0);			
 		}
 
 		public override void UnloadContent()
@@ -61,16 +65,27 @@ namespace Game1.Screen.Menu
 		{
 			if (processInput)
 			{
-				/*
-				if (InputManager.Instance.KeyPressed(Keys.Enter))
+				if (InputManager.Instance.KeyPressed(Keys.Down))
 				{
-					_titleText.IsActive = false;
-					ReadyScreenUnload(this);
+					int newIndex = _currentIndex + 1;
+					if (newIndex < _items.Count)
+						SetCurrentIndex(newIndex);
 				}
-				*/
+				else if (InputManager.Instance.KeyPressed(Keys.Up))
+				{
+					int newIndex = _currentIndex - 1;
+					if (newIndex >= 0)
+						SetCurrentIndex(newIndex);
+				}
+				else if (InputManager.Instance.KeyPressed(Keys.Enter))
+				{
+					PerformAction(_items[_currentIndex].LinkID);
+				}
 			}
 
 			base.Update(gameTime, processInput);
+			foreach (var item in _items)
+				item.Image.Update(gameTime);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch)
@@ -80,5 +95,22 @@ namespace Game1.Screen.Menu
 			foreach (var item in _items)
 				item.Image.Draw(spriteBatch);
 		}
+
+		private void SetCurrentIndex(int index)
+		{
+			if (_items.Count < index)
+				return;
+						
+			if (_currentIndex >= 0)
+			{
+				_items[_currentIndex].Image.Effects.Clear();
+				_items[_currentIndex].Image.Alpha = 1.0f;
+			}
+
+			_currentIndex = index;
+			_items[_currentIndex].Image.Effects.Add(_selectedEffect = new FadeCycleEffect(_items[_currentIndex].Image, true));
+		}
+
+		protected virtual void PerformAction(string id) { }
 	}
 }

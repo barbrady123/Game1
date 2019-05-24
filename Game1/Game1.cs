@@ -16,8 +16,11 @@ namespace Game1
 		ScreenManager _screenManager;
 		GameConfiguration _config;
 
+		public static Game Instance { get; set; }
+
 		public Game1()
 		{
+			Game1.Instance = this;
 			_graphics = new GraphicsDeviceManager(this);
 			Content.RootDirectory = "Content";
 		}
