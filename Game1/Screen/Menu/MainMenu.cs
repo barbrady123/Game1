@@ -16,19 +16,9 @@ namespace Game1.Screen.Menu
 		public MainMenu(GraphicsDevice graphics, Vector2 size): base(graphics, size)
 		{
 			// TODO: these should be loaded from file/config...
-			_items.Add(new MenuItem { Image = new Image(graphics, null, "Start New Game", true), LinkID = "new"});
-			_items.Add(new MenuItem { Image = new Image(graphics, null, "Options", true), LinkID = "options"});
-			_items.Add(new MenuItem { Image = new Image(graphics, null, "Exit Game", true), LinkID = "exit"});
-		}
-
-		protected override void PerformAction(string id)
-		{
-			switch (id)
-			{
-				case "new" :		StartNewGame();	break;
-				case "options" :	Options();		break;
-				case "exit":		ExitGame();		break;
-			}
+			_items.Add(new MenuItem { Image = new Image(graphics, null, "Start New Game", true), LinkAction=ActionFromMethodName("StartNewGame")});
+			_items.Add(new MenuItem { Image = new Image(graphics, null, "Options", true), LinkAction=ActionFromMethodName("Options")});
+			_items.Add(new MenuItem { Image = new Image(graphics, null, "Exit Game", true), LinkAction=ActionFromMethodName("ExitGame")});
 		}
 
 		private void StartNewGame()

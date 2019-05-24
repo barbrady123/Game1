@@ -130,7 +130,6 @@ namespace Game1
 		{
 			var args = (ScreenEventArgs)e;
 
-			// TODO: This whole logic structure needs to be redone and generalized...
 			if (args.Type == "change")
 			{
 				switch (args.Target)

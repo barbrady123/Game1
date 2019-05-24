@@ -10,5 +10,6 @@ namespace Game1.Screen.Menu
 	{
 		public Image Image { get; set; }
 		public string LinkID { get; set; }
+		public Action LinkAction { get; set; }
 	}
 }

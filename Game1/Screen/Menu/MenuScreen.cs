@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
@@ -79,7 +80,8 @@ namespace Game1.Screen.Menu
 				}
 				else if (InputManager.Instance.KeyPressed(Keys.Enter))
 				{
-					PerformAction(_items[_currentIndex].LinkID);
+					if (_items[_currentIndex].LinkAction != null)
+						_items[_currentIndex].LinkAction.Invoke();
 				}
 			}
 
@@ -111,6 +113,11 @@ namespace Game1.Screen.Menu
 			_items[_currentIndex].Image.Effects.Add(_selectedEffect = new FadeCycleEffect(_items[_currentIndex].Image, true));
 		}
 
-		protected virtual void PerformAction(string id) { }
+		protected Action ActionFromMethodName(string name)
+		{
+			Type thisType = this.GetType();
+			MethodInfo theMethod = thisType.GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance);
+			return (Action) Delegate.CreateDelegate(typeof(Action), this, theMethod);
+		}
 	}
 }

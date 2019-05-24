@@ -15,26 +15,17 @@ namespace Game1.Screen.Menu
 	{
 		public OptionsMenu(GraphicsDevice graphics, Vector2 size): base(graphics, size)
 		{
-			// TODO: these should be loaded from file/config...
-			_items.Add(new MenuItem { Image = new Image(graphics, null, "Back", true), LinkID = "back"});
-			_items.Add(new MenuItem { Image = new Image(graphics, null, "Setting A", true), LinkID = "settinga"});
-			_items.Add(new MenuItem { Image = new Image(graphics, null, "Setting B", true), LinkID = "settingb"});
-			_items.Add(new MenuItem { Image = new Image(graphics, null, "Setting C", true), LinkID = "settingc"});
-			_items.Add(new MenuItem { Image = new Image(graphics, null, "Setting D", true), LinkID = "settingd"});
-			_items.Add(new MenuItem { Image = new Image(graphics, null, "Setting E", true), LinkID = "settinge"});
-		}
+			// TODO: Eventually we'll probably load all this metadata in (including the LinkActions) from config/file...
+			// here I'm testing how to get from private method name to action delegate for later reference...
 
-		protected override void PerformAction(string id)
-		{
-			switch (id)
-			{
-				case "back" :		Back();		break;
-				case "settinga" :
-				case "settingb" :
-				case "settingc" :
-				case "settingd" :
-				case "settinge" :	Setting();	break;
-			}
+			// TODO: these should be loaded from file/config...
+			_items.Add(new MenuItem { Image = new Image(graphics, null, "Back", true), LinkAction=ActionFromMethodName("Back")});
+			_items.Add(new MenuItem { Image = new Image(graphics, null, "Setting A", true), LinkAction=ActionFromMethodName("Setting")});
+			_items.Add(new MenuItem { Image = new Image(graphics, null, "Setting B", true), LinkAction=ActionFromMethodName("Setting")});
+			_items.Add(new MenuItem { Image = new Image(graphics, null, "Setting C", true), LinkAction=ActionFromMethodName("Setting")});
+			_items.Add(new MenuItem { Image = new Image(graphics, null, "Setting D", true), LinkAction=ActionFromMethodName("Setting")});
+			_items.Add(new MenuItem { Image = new Image(graphics, null, "Setting E", true), LinkAction=ActionFromMethodName("Setting")});
+			_items.Add(new MenuItem { Image = new Image(graphics, null, "Setting F", true), LinkAction=ActionFromMethodName("Setting")});
 		}
 
 		private void Back()
