@@ -54,6 +54,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScreenManager.cs" />
     <Compile Include="Screen\GameScreen.cs" />
+    <Compile Include="Screen\Menu\MainMenu.cs" />
+    <Compile Include="Screen\Menu\MenuItem.cs" />
+    <Compile Include="Screen\Menu\MenuScreen.cs" />
     <Compile Include="Screen\SplashScreen.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -68,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Background\black.png" />
+    <Content Include="Content\Background\brick.jpg" />
     <Content Include="Content\Background\maze.jpg" />
     <Content Include="Icon.ico" />
   </ItemGroup>

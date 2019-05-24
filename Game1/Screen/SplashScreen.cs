@@ -20,7 +20,7 @@ namespace Game1.Screen
 		{
 			_size = size;
 			_backgroundImage = new Image(graphics, "Background/maze", null, true);
-			_titleText = new Image(graphics, null, "The Title", true);
+			_titleText = new Image(graphics, null, "Labyrinth", true);
 			_titleText.Position = _size / 2;
 			_titleText.Effects.Add(new ZoomCycleEffect(_titleText, true));			
 		}

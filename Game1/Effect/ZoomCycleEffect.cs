@@ -16,8 +16,8 @@ namespace Game1.Effect
 		public ZoomCycleEffect(Image img, bool isActive = false) : base(img, isActive)
 		{
 			// TODO: Make these configurable in the future...
-			_minScale = new Vector2(5.0f, 5.0f);
-			_maxScale = new Vector2(10.0f, 10.0f);
+			_minScale = new Vector2(4.0f, 4.0f);
+			_maxScale = new Vector2(6.0f, 6.0f);
 			
 			_deltaScale = _maxScale - _minScale;
 		}

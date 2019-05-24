@@ -20,7 +20,6 @@ namespace Game1
 		private string _text;
 		private string _fontName;
 		private string _name;
-		private Rectangle _sourceRect;
 
 		private Texture2D _texture;
 		private SpriteFont _font;
@@ -30,6 +29,7 @@ namespace Game1
 		public Vector2 Scale { get; set; }
 		public Vector2 Position { get; set; }
 		public float Alpha { get; set; }
+		public Rectangle SourceRect { get; set; }
 
 		public List<ImageEffect> Effects { get; set; }
 
@@ -39,7 +39,7 @@ namespace Game1
 			_name = name;
 			_text = text;
 			_fontName = "Fonts/Orbitron";
-			_sourceRect = Rectangle.Empty;
+			this.SourceRect = Rectangle.Empty;
 			this.Alpha = 1.0f;
 			this.Effects = new List<ImageEffect>();
 			this.Scale = Vector2.One;
@@ -71,7 +71,7 @@ namespace Game1
 				dimensions.Y = Math.Max(_texture?.Height ?? 0, textSize.Y);
 			}
 
-			this._sourceRect = new Rectangle(0, 0, (int)dimensions.X, (int)dimensions.Y);
+			this.SourceRect = new Rectangle(0, 0, (int)dimensions.X, (int)dimensions.Y);
 
 			// Generate the final texture (image and/or text string + effects)...
 			var renderTarget = new RenderTarget2D(_graphics, (int)dimensions.X, (int)dimensions.Y);
@@ -107,8 +107,8 @@ namespace Game1
 		{
 			if (this.IsActive)
 			{
-				var origin = new Vector2(_sourceRect.Width / 2, _sourceRect.Height / 2);
-				spriteBatch.Draw(_texture, this.Position + origin, _sourceRect, Color.White * this.Alpha, 0.0f, origin, this.Scale, SpriteEffects.None, 0.0f);
+				var origin = new Vector2(this.SourceRect.Width / 2, this.SourceRect.Height / 2);
+				spriteBatch.Draw(_texture, this.Position + origin, this.SourceRect, Color.White * this.Alpha, 0.0f, origin, this.Scale, SpriteEffects.None, 0.0f);
 			}
 		}
 	}

@@ -7,8 +7,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Game1.Screen;
 using Game1.Effect;
+using Game1.Screen;
+using Game1.Screen.Menu;
 
 namespace Game1
 {
@@ -33,8 +34,8 @@ namespace Game1
 			this.ScreenSize = new Vector2(graphics.Viewport.Width, graphics.Viewport.Height);
 			_isTransitioning = false;
 			_transitionImage = new Image(graphics, "Background/black") { Scale = this.ScreenSize };
-			_transitionImage.Effects.Add(_fadeOutEffect = new FadeOutEffect(_transitionImage) { Speed = 0.9f });
-			_transitionImage.Effects.Add(_fadeInEffect = new FadeInEffect(_transitionImage) { Speed = 0.9f });
+			_transitionImage.Effects.Add(_fadeOutEffect = new FadeOutEffect(_transitionImage) { Speed = 3.0f });
+			_transitionImage.Effects.Add(_fadeInEffect = new FadeInEffect(_transitionImage) { Speed = 2.0f });
 			_fadeInEffect.OnActiveChange += _fadeInEffect_OnActiveChange;
 			_fadeOutEffect.OnActiveChange += _fadeOutEffect_OnActiveChange;
 		}
@@ -129,8 +130,7 @@ namespace Game1
 		{
 			if (sender.GetType() == typeof(SplashScreen))
 			{
-				// Now we know we need to switch to the next screen...
-				TransitionScreens(new SplashScreen(_graphics, this.ScreenSize));
+				TransitionScreens(new MainMenu(_graphics, this.ScreenSize));
 			}
 		}
 	}
