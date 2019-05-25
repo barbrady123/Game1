@@ -14,13 +14,17 @@ namespace Game1.Screen.Menu.Character
 	{
 		public CharacterNewMenu(Rectangle bounds): base(bounds, hasBackground: false) { }
 
+		public event EventHandler OnNameSelect;
+		public event EventHandler OnSexSelect;
+
 		private void Name()
 		{
-
+			OnNameSelect?.Invoke(this, null);
 		}
 
 		private void Sex()
 		{
+			OnSexSelect?.Invoke(this, null);
 		}
 	}
 }

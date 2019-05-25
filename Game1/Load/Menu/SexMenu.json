@@ -1,14 +1,8 @@
 ﻿[
   {
-    "text": "Female",
-    "link": "Sex"
+    "text": "Female"
   },
   {
-    "text": "Male",
-    "link": "Sex"
-  },
-  {
-    "text": "Other",
-    "link": "Sex"
+    "text": "Male"
   }
 ]

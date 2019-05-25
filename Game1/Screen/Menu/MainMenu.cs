@@ -12,18 +12,25 @@ namespace Game1.Screen.Menu
 	{
 		public MainMenu(Rectangle bounds): base(bounds) { }
 
+		public event EventHandler OnStartNewGameSelect;
+		public event EventHandler OnOptionsSelect;
+		public event EventHandler OnExitGameSelect;
+
 		private void StartNewGame()
 		{
+			OnStartNewGameSelect?.Invoke(this, null);
 			ReadyScreenUnload(this, new ScreenEventArgs("change", "CharacterCreate"));
 		}
 
 		private void Options()
 		{
+			OnOptionsSelect?.Invoke(this, null);
 			ReadyScreenUnload(this, new ScreenEventArgs("change", "OptionsMenu"));
 		}
 
 		private void ExitGame()
 		{
+			OnExitGameSelect?.Invoke(this, null);
 			Game1.Instance.Exit();			
 		}
 	}

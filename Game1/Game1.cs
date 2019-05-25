@@ -80,8 +80,8 @@ namespace Game1
 		protected override void Update(GameTime gameTime)
 		{
 			// TODO: Get rid of this generic hook at some point...
-			if (Keyboard.GetState().IsKeyDown(Keys.Escape))
-				Exit();
+			//if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+				//Exit();
 
 			InputManager.Instance.Update();
 			_screenManager.Update(gameTime);

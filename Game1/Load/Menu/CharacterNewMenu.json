@@ -1,14 +1,8 @@
 ﻿[
-  {
-    "text": "Name",
-    "type": "text",
-    "halign": "Right"
-
-  },
     {
-      "text": "Sex",
-      "type": "sub",
-      "target": "SexMenu",
-      "halign": "Right"
+      "text": "Name"
+    },
+    {
+      "text": "Sex"
     }
 ]

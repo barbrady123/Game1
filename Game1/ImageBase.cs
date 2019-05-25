@@ -25,6 +25,7 @@ namespace Game1
 		public float Alpha { get; set; }
 		public Rectangle SourceRect { get; set; }
 		public Rectangle DrawArea { get; set; }
+		public Color Color { get; set; }
 
 		public List<ImageEffect> Effects { get; set; }
 
@@ -42,6 +43,7 @@ namespace Game1
 			this.SourceRect = Rectangle.Empty;
 			this.Effects = new List<ImageEffect>();
 			this.Alignment = ImageAlignment.Centered;
+			this.Color = Color.White;
 			_origin = Vector2.Zero;
 		}
 
@@ -68,7 +70,7 @@ namespace Game1
 		public virtual void Draw(SpriteBatch spriteBatch)
 		{
 			if (this.IsActive)
-				spriteBatch.Draw(_texture, this.Position + this.DrawArea.TopLeftVector(), this.SourceRect, Color.White * this.Alpha, 0.0f, _origin, this.Scale, SpriteEffects.None, 0.0f);
+				spriteBatch.Draw(_texture, this.Position + this.DrawArea.TopLeftVector(), this.SourceRect, this.Color * this.Alpha, 0.0f, _origin, this.Scale, SpriteEffects.None, 0.0f);
 		}
 
 		protected virtual void SetOrigin()

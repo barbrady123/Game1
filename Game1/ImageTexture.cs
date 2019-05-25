@@ -19,7 +19,7 @@ namespace Game1
 		public ImageTexture(string name, bool isActive = false) : base(isActive)
 		{
 			_name = name;
-			this.Alignment = ImageAlignment.LeftTop;	// Texture images will default to 0, 0
+			this.Alignment = ImageAlignment.LeftTop;
 		}
 
 		public override void LoadContent()
@@ -30,6 +30,14 @@ namespace Game1
 				this.SourceRect = _texture.Bounds;
 
 			SetOrigin();
+		}
+
+		public void SwapTexture(string name, bool resetSourceRect = true)
+		{
+			_name = name;
+			if (resetSourceRect)
+				this.SourceRect = Rectangle.Empty;
+			LoadContent();
 		}
 	}
 }
