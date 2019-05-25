@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -8,7 +9,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Newtonsoft.Json;
 using Game1.Effect;
+using Game1.Enum;
 
 namespace Game1.Screen.Menu
 {
@@ -16,63 +19,108 @@ namespace Game1.Screen.Menu
 	{
 		private const int MENU_PADDING = 20;
 
-		protected Vector2 _size;
-		protected Vector2 _menuSize;
 		protected int _currentIndex;
 		protected List<MenuItem> _items;
+		protected MenuLayout _layout; 
 
 		private FadeCycleEffect _selectedEffect;
 
-		public MenuScreen(GraphicsDevice graphics, Vector2 size): base(graphics)
+		private Keys ForwardKey => (_layout == MenuLayout.Vertical) ? Keys.Down : Keys.Right;
+		private Keys BackwardKey => (_layout == MenuLayout.Vertical) ? Keys.Up : Keys.Left;
+
+		public bool IsActive { get; set; }
+
+		public MenuScreen(Rectangle bounds, MenuLayout layout = MenuLayout.Vertical, bool hasBackground = true): base(bounds, hasBackground ? "brick" : null)
 		{
-			_size = size;
-			_menuSize = Vector2.Zero;
-			_backgroundImage = new Image(graphics, "Background/brick", null, true);
 			_currentIndex = -1;
 			_items = new List<MenuItem>();
 			_selectedEffect = null;
+			_layout = layout;
+			this.IsActive = true;
 		}
 
-		public override void LoadContent(IServiceProvider services)
+		public override void LoadContent()
 		{			
-			base.LoadContent(services);
+			base.LoadContent();
+			LoadItemData();
+
+			int menuSize = 0;
+
 			foreach (var item in _items)
 			{
-				item.Image.LoadContent(services);
-				_menuSize.X = Math.Max(_menuSize.X, item.Image.SourceRect.Width);
-				_menuSize.Y += item.Image.SourceRect.Height + (_menuSize.Y > 0 ? MENU_PADDING : 0);
+				item.Image.LoadContent();
+				menuSize +=  (menuSize > 0 ? MENU_PADDING : 0) + (_layout == MenuLayout.Vertical ? item.Image.SourceRect.Height : item.Image.SourceRect.Width);
 			}
 
-			int locY = (int)(_size.Y - _menuSize.Y) / 2;
+			int locX = this.Bounds.X;
+			int locY = this.Bounds.Y;
+
+			if (_layout == MenuLayout.Vertical)
+			{
+				locX += (int)(this.Bounds.Width / 2);
+				locY += (int)(this.Bounds.Height - menuSize) / 2;
+			}
+			else
+			{
+				locX += (int)(this.Bounds.Width - menuSize) / 2;
+				locY += (int)(this.Bounds.Height / 2);
+			}
 
 			foreach (var item in _items)
 			{
-				int locX = (int)(_size.X - (int)item.Image.SourceRect.Width) / 2;
 				item.Image.Position = new Vector2(locX, locY);
-				locY += (int)item.Image.SourceRect.Height + MENU_PADDING;
+				if (_layout == MenuLayout.Vertical)
+					locY += (int)item.Image.SourceRect.Height + MENU_PADDING;
+				else
+					locX += (int)item.Image.SourceRect.Width + MENU_PADDING;
+
+				if (item.SubMenu != null)
+				{
+					int subLocX = locX;
+					int subLocY = locY;
+
+					if (_layout == MenuLayout.Vertical)
+					{
+						subLocX += item.Image.SourceRect.Width + MENU_PADDING;
+						item.SubMenu.Bounds = new Rectangle(subLocX, subLocY, 200, item.Image.SourceRect.Height);	// No idea how to determine width
+					}
+					else
+					{
+						subLocY += item.Image.SourceRect.Height + MENU_PADDING;
+						item.SubMenu.Bounds = new Rectangle(subLocX, subLocY, item.Image.SourceRect.Width, 200);	// No idea how to determine height
+					}
+					
+					item.SubMenu.LoadContent();
+				}
 			}
 
-			SetCurrentIndex(0);			
+			SetCurrentIndex(0);
 		}
 
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
 			foreach (var item in _items)
+			{
 				item.Image.UnloadContent();
+				item.SubMenu?.UnloadContent();
+			}
 		}
 
 		public override void Update(GameTime gameTime, bool processInput)
 		{
+			if (!this.IsActive)
+				return;
+
 			if (processInput)
 			{
-				if (InputManager.Instance.KeyPressed(Keys.Down))
+				if (InputManager.Instance.KeyPressed(this.ForwardKey))
 				{
 					int newIndex = _currentIndex + 1;
 					if (newIndex < _items.Count)
 						SetCurrentIndex(newIndex);
 				}
-				else if (InputManager.Instance.KeyPressed(Keys.Up))
+				else if (InputManager.Instance.KeyPressed(this.BackwardKey))
 				{
 					int newIndex = _currentIndex - 1;
 					if (newIndex >= 0)
@@ -87,15 +135,22 @@ namespace Game1.Screen.Menu
 
 			base.Update(gameTime, processInput);
 			foreach (var item in _items)
+			{
 				item.Image.Update(gameTime);
+				item.SubMenu?.Update(gameTime, processInput);	// Not sure how to get this parameter
+			}
 		}
 
 		public override void Draw(SpriteBatch spriteBatch)
 		{
+			// I *think* we wanna draw menus even if they are not active
 			base.Draw(spriteBatch);
 
 			foreach (var item in _items)
+			{
 				item.Image.Draw(spriteBatch);
+				item.SubMenu?.Draw(spriteBatch);
+			}
 		}
 
 		private void SetCurrentIndex(int index)
@@ -118,6 +173,37 @@ namespace Game1.Screen.Menu
 			Type thisType = this.GetType();
 			MethodInfo theMethod = thisType.GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance);
 			return (Action) Delegate.CreateDelegate(typeof(Action), this, theMethod);
+		}
+
+		protected virtual void LoadItemData()
+		{
+			using (var reader = new StreamReader($"Load\\Menu\\{this.GetType().Name}.json"))
+			{
+				_items = JsonConvert.DeserializeObject<List<MenuItem>>(reader.ReadToEnd());
+			}
+
+			foreach (var item in _items)
+			{
+				item.Image = new ImageText(item.Text, true);
+				item.Image.Alignment = (_layout == MenuLayout.Vertical) ? ImageAlignment.Centered : ImageAlignment.LeftCentered;
+				if (item.HorizontalAlignment == HorizontalAlignment.Right)
+					item.Image.Alignment = ImageAlignment.RightCentered;
+
+				item.LinkAction = ActionFromMethodName(item.Link ?? item.Text.Replace(" ", ""));
+				if (item.Type == "text")
+				{
+					// Input text...
+				}
+				else if (item.Type == "sub")
+				{
+					item.SubMenu = (MenuScreen)Activator.CreateInstance(Type.GetType($"{this.GetType().Namespace}.{item.Target}"), Rectangle.Empty);
+					item.SubMenu.IsActive = false;
+				}
+				else
+				{
+					item.LinkAction = ActionFromMethodName(item.Link ?? item.Text.Replace(" ", ""));
+				}
+			}
 		}
 	}
 }

@@ -13,25 +13,28 @@ namespace Game1.Screen
 	{
 		private ContentManager _content;
 
-		protected Image _backgroundImage;
-		protected GraphicsDevice _graphics;
+		protected ImageTexture _backgroundImage;
+
+		public Rectangle Bounds { get; set; }
 
 		public event EventHandler OnReadyScreenUnload;
 
-		protected void ReadyScreenUnload(object sender, ScreenEventArgs args = null)
+		public GameScreen(Rectangle bounds, string backgroundName)
 		{
-			OnReadyScreenUnload?.Invoke(sender, args);
+			this.Bounds = bounds;
+
+			if (!String.IsNullOrWhiteSpace(backgroundName))
+			{
+				_backgroundImage = new ImageTexture($"{Game1.BackgroundRoot}/{backgroundName}", true);
+				_backgroundImage.DrawArea = bounds;
+				_backgroundImage.SourceRect = new Rectangle(0, 0, bounds.Width, bounds.Height);
+			}
 		}
 
-		public GameScreen(GraphicsDevice graphics)
+		public virtual void LoadContent()
 		{
-			_graphics = graphics;
-		}
-
-		public virtual void LoadContent(IServiceProvider services)
-		{
-			_content = new ContentManager(services);
-			_backgroundImage.LoadContent(services);
+			_content = new ContentManager(Game1.ServiceProvider);
+			_backgroundImage?.LoadContent();
 		}
 
 		public virtual void UnloadContent()
@@ -42,13 +45,17 @@ namespace Game1.Screen
 
 		public virtual void Update(GameTime gameTime, bool processInput)
 		{
-			_backgroundImage.Update(gameTime);	
+			_backgroundImage?.Update(gameTime);	
 		}
 
 		public virtual void Draw(SpriteBatch spriteBatch)
 		{
-			_backgroundImage.Draw(spriteBatch);
+			_backgroundImage?.Draw(spriteBatch);
 		}
 
+		protected void ReadyScreenUnload(object sender, ScreenEventArgs args = null)
+		{
+			OnReadyScreenUnload?.Invoke(sender, args);
+		}
 	}
 }

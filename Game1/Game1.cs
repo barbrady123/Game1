@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -11,18 +12,26 @@ namespace Game1
 	/// </summary>
 	public class Game1 : Game
 	{
-		GraphicsDeviceManager _graphics;
+		public const string ContentRoot = "Content";
+		public const string FontsRoot = "Fonts";
+		public const string BackgroundRoot = "Background";
+
+		GraphicsDeviceManager _graphicsManager;
 		SpriteBatch _spriteBatch;
 		ScreenManager _screenManager;
 		GameConfiguration _config;
 
-		public static Game Instance { get; set; }
+		public static Game Instance { get; private set; }
+
+		public static IServiceProvider ServiceProvider { get; private set; }
+
+		public static GraphicsDevice Graphics { get; private set; }
 
 		public Game1()
 		{
 			Game1.Instance = this;
-			_graphics = new GraphicsDeviceManager(this);
-			Content.RootDirectory = "Content";
+			_graphicsManager = new GraphicsDeviceManager(this);
+			Content.RootDirectory = Game1.ContentRoot;
 		}
 
 		/// <summary>
@@ -34,10 +43,11 @@ namespace Game1
 		protected override void Initialize()
 		{
 			LoadConfiguration();
-			_graphics.PreferredBackBufferWidth = _config.WindowWidth;
-			_graphics.PreferredBackBufferHeight = _config.WindowHeight;
-			_graphics.ApplyChanges();
-			_screenManager = new ScreenManager(GraphicsDevice);
+			_graphicsManager.PreferredBackBufferWidth = _config.WindowWidth;
+			_graphicsManager.PreferredBackBufferHeight = _config.WindowHeight;
+			_graphicsManager.ApplyChanges();
+			Game1.Graphics = GraphicsDevice;
+			_screenManager = new ScreenManager(GraphicsDevice.Viewport.Bounds);
 			base.Initialize();
 		}
 
@@ -47,8 +57,9 @@ namespace Game1
 		/// </summary>
 		protected override void LoadContent()
 		{
+			Game1.ServiceProvider = Content.ServiceProvider;
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
-			_screenManager.LoadContent(Content.ServiceProvider);
+			_screenManager.LoadContent();
 			_screenManager.StartScreen();
 		}
 

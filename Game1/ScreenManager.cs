@@ -10,41 +10,40 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
 using Game1.Screen;
 using Game1.Screen.Menu;
+using Game1.Screen.Menu.Character;
 
 namespace Game1
 {
 	public class ScreenManager
 	{
-		private IServiceProvider _services;
 		private ContentManager _content;
 		private GameScreen _currentScreen;
 		private GameScreen _newScreen;
-		private GraphicsDevice _graphics;
 		private bool _isTransitioning;
 
-		private Image _transitionImage;
+		private ImageTexture _transitionImage;
 		private FadeOutEffect _fadeOutEffect;
 		private FadeInEffect _fadeInEffect;
 
-		public Vector2 ScreenSize { get; private set; }
+		private Rectangle _bounds;
 
-		public ScreenManager(GraphicsDevice graphics)
+		public ScreenManager(Rectangle bounds)
 		{
-			_graphics = graphics;
-			this.ScreenSize = new Vector2(graphics.Viewport.Width, graphics.Viewport.Height);
+			_bounds = bounds;
 			_isTransitioning = false;
-			_transitionImage = new Image(graphics, "Background/black") { Scale = this.ScreenSize };
+			_transitionImage = new ImageTexture($"{Game1.BackgroundRoot}/black") { Scale = new Vector2(_bounds.Width, _bounds.Height) };
+			_transitionImage.DrawArea = bounds;
+			_transitionImage.SourceRect = new Rectangle(0, 0, bounds.Width, bounds.Height);
 			_transitionImage.Effects.Add(_fadeOutEffect = new FadeOutEffect(_transitionImage) { Speed = 3.0f });
 			_transitionImage.Effects.Add(_fadeInEffect = new FadeInEffect(_transitionImage) { Speed = 2.0f });
 			_fadeInEffect.OnActiveChange += _fadeInEffect_OnActiveChange;
 			_fadeOutEffect.OnActiveChange += _fadeOutEffect_OnActiveChange;
 		}
 
-		public void LoadContent(IServiceProvider services)
+		public void LoadContent()
 		{
-			_services = services;
-			_content = new ContentManager(services, "Content");	
-			_transitionImage.LoadContent(services);
+			_content = new ContentManager(Game1.ServiceProvider, Game1.ContentRoot);	
+			_transitionImage.LoadContent();
 		}
 
 		public void UnloadContent()
@@ -71,7 +70,7 @@ namespace Game1
 
 		public void StartScreen()
 		{
-			TransitionScreens(new SplashScreen(_graphics, this.ScreenSize));
+			TransitionScreens(new SplashScreen(_bounds));
 		}
 
 		private void TransitionScreens(GameScreen newScreen)
@@ -104,7 +103,7 @@ namespace Game1
 			_currentScreen = _newScreen;
 			_newScreen = null;
 			_currentScreen.OnReadyScreenUnload += _currentScreen_OnReadyScreenUnload;
-			_currentScreen.LoadContent(_services);
+			_currentScreen.LoadContent();
 		}
 
 		private void _fadeInEffect_OnActiveChange(object sender, EventArgs e)
@@ -134,8 +133,10 @@ namespace Game1
 			{
 				switch (args.Target)
 				{
-					case "MainMenu":	TransitionScreens(new MainMenu(_graphics, this.ScreenSize));	break;
-					case "OptionsMenu":	TransitionScreens(new OptionsMenu(_graphics, this.ScreenSize));	break;
+					case "MainMenu":		TransitionScreens(new MainMenu(_bounds));						break;
+					case "OptionsMenu":		TransitionScreens(new OptionsMenu(_bounds));					break;
+					case "CharacterCreate": TransitionScreens(new CharacterCreateScreen(_bounds));		break;
+					case "SexMenu":			TransitionScreens(new SexMenu(_bounds));	break;
 				}
 			}
 		}

@@ -13,22 +13,19 @@ namespace Game1.Screen
 {
 	public class SplashScreen : GameScreen
 	{
-		private Image _titleText;
-		private Vector2 _size;
+		private ImageBase _titleText;
 
-		public SplashScreen(GraphicsDevice graphics, Vector2 size): base(graphics)
+		public SplashScreen(Rectangle bounds): base(bounds, "maze")
 		{
-			_size = size;
-			_backgroundImage = new Image(graphics, "Background/maze", null, true);
-			_titleText = new Image(graphics, null, "Labyrinth", true);
-			_titleText.Position = _size / 2;
+			_titleText = new ImageText("Labyrinth", true);
+			_titleText.Position = this.Bounds.CenterVector();
 			_titleText.Effects.Add(new ZoomCycleEffect(_titleText, true));			
 		}
 
-		public override void LoadContent(IServiceProvider services)
+		public override void LoadContent()
 		{
-			base.LoadContent(services);
-			_titleText.LoadContent(services);
+			base.LoadContent();
+			_titleText.LoadContent();
 		}
 
 		public override void UnloadContent()

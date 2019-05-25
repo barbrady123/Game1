@@ -11,7 +11,7 @@ namespace Game1.Effect
 {
 	public abstract class ImageEffect
 	{
-		protected Image _image;
+		protected ImageBase _image;
 		private bool _isActive;
 
 		public bool IsIncreasing { get; set; }
@@ -32,7 +32,7 @@ namespace Game1.Effect
 
 		public event EventHandler OnActiveChange;
 
-		public ImageEffect(Image image, bool isActive = false)
+		public ImageEffect(ImageBase image, bool isActive = false)
 		{
 			_image = image;			
 			this.IsActive = isActive;
@@ -40,7 +40,7 @@ namespace Game1.Effect
 			this.Speed = 1.0f;
 		}
 
-		public virtual void LoadContent(ref Image Image)
+		public virtual void LoadContent(ref ImageBase Image)
 		{
 
 		}

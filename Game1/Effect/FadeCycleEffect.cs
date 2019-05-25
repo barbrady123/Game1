@@ -9,7 +9,7 @@ namespace Game1.Effect
 {
 	public class FadeCycleEffect : ImageEffect
 	{
-		public FadeCycleEffect(Image img, bool isActive = false) : base(img, isActive)
+		public FadeCycleEffect(ImageBase img, bool isActive = false) : base(img, isActive)
 		{
 
 		}
