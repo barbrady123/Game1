@@ -20,9 +20,7 @@ namespace Game1.Screen
 		public ImageText _titleText;
 		public ImageTexture _characterViewBack;
 		public ImageTexture _characterView;
-		public CharacterNewMenu _menuCharacter;
-		public TextInput _nameEdit;
-		public SexMenu _menuSex;
+		public NewCharacterMenu _menuCharacter;
 
 		private string CharacterPreviewImage(CharacterSex sex) => $"Character/Preview/{sex.ToString("g")}";
 
@@ -30,7 +28,6 @@ namespace Game1.Screen
 		{
 			_newChar = new Character();
 
-			// TODO: Figure out a better way to configure this layout...
 			// Title...
 			_titleText = new ImageText("Create New Character", true)	{
 				Scale = new Vector2(1.5f, 1.5f),
@@ -48,15 +45,10 @@ namespace Game1.Screen
 				Scale = new Vector2(5.0f, 5.0f),
 				Position = new Vector2(300.0f, 270.0f)
 			};
+
 			// Menu
-			_menuCharacter = new CharacterNewMenu(new Rectangle(600, 200, 200, 200));
-			_menuCharacter.OnItemSelect += _menuCharacter_OnItemSelect;
-			_nameEdit = new TextInput(275, _newChar.Name, 12, false) { Position = new Vector2(770, 257) };
-			_nameEdit.OnReadyDisable += _nameEdit_OnReadyDisable;
-			_menuSex = new SexMenu(new Rectangle(690, 250, 300, 120)) { IsActive = false };
-			_menuSex.OnCurrentItemChange += _menuSex_OnCurrentItemChange;
-			_menuSex.OnItemSelect += _menuSex_OnItemSelect;
-			_menuSex.OnReadyDisable += _menuSex_OnReadyDisable;
+			_menuCharacter = new NewCharacterMenu(new Rectangle(600, 200, 200, 200));
+			_menuCharacter.OnSexItemChange += _menuCharacter_OnSexItemChange;
 		}
 
 		public override void LoadContent()
@@ -66,9 +58,6 @@ namespace Game1.Screen
 			_characterViewBack.LoadContent();
 			_characterView.LoadContent();
 			_menuCharacter.LoadContent();
-			_nameEdit.LoadContent();
-			_menuSex.LoadContent();
-			_menuSex.SetById(_newChar.Sex.ToString("g").ToLower());
 		}
 
 		public override void UnloadContent()
@@ -78,8 +67,6 @@ namespace Game1.Screen
 			_characterViewBack.UnloadContent();
 			_characterView.UnloadContent();
 			_menuCharacter.UnloadContent();
-			_nameEdit.UnloadContent();
-			_menuSex.UnloadContent();
 		}
 
 		public override void Update(GameTime gameTime, bool processInput)
@@ -87,8 +74,6 @@ namespace Game1.Screen
 			base.Update(gameTime, processInput);
 			_characterView.Update(gameTime);
 			_menuCharacter.Update(gameTime, processInput);
-			_nameEdit.Update(gameTime, processInput);
-			_menuSex.Update(gameTime, processInput);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch)
@@ -98,44 +83,9 @@ namespace Game1.Screen
 			_characterViewBack.Draw(spriteBatch);
 			_characterView.Draw(spriteBatch);
 			_menuCharacter.Draw(spriteBatch);
-			_nameEdit.Draw(spriteBatch);
-			_menuSex.Draw(spriteBatch);
 		}
 
-		private void _nameEdit_OnReadyDisable(object sender, EventArgs e)
-		{
-			var key = ((TextInputEventArgs)e).Key;
-			if (key == Keys.Enter)
-			{
-				_newChar.Name = _nameEdit.Text;
-			}
-			else if (key == Keys.Escape)
-			{
-				_nameEdit.Text = _newChar.Name;
-			}
-
-			_nameEdit.IsActive = false;
-			_menuCharacter.IsActive = true;
-		}
-
-		private void _menuCharacter_OnItemSelect(object sender, EventArgs e)
-		{
-			var args = (MenuEventArgs)e;
-
-			switch (args.Item)
-			{
-				case "name":	_menuCharacter.IsActive = false;
-								_nameEdit.IsActive = true;
-								_nameEdit.DelayInput(1);
-								break;
-				case "sex":		_menuCharacter.IsActive = false;
-								_menuSex.IsActive = true;
-								_menuSex.DelayInput(1);
-								break;
-			}
-		}
-
-		private void _menuSex_OnCurrentItemChange(object sender, EventArgs e)
+		private void _menuCharacter_OnSexItemChange(object sender, EventArgs e)
 		{
 			var args = (MenuEventArgs)e;
 
@@ -148,29 +98,6 @@ namespace Game1.Screen
 					_characterView.SwapTexture(this.CharacterPreviewImage(CharacterSex.Male));
 					break;
 			}
-		}
-
-		private void _menuSex_OnItemSelect(object sender, EventArgs e)
-		{
-			var args = (MenuEventArgs)e;
-
-			switch (args.Item)
-			{
-				case "female" : _newChar.Sex = CharacterSex.Female;	break;
-				case "male" :	_newChar.Sex = CharacterSex.Male;	break;
-			}
-
-			_characterView.SwapTexture(this.CharacterPreviewImage(_newChar.Sex));
-			_menuSex.IsActive = false;
-			_menuCharacter.IsActive = true;
-		}
-
-		private void _menuSex_OnReadyDisable(object sender, EventArgs e)
-		{
-			_characterView.SwapTexture(this.CharacterPreviewImage(_newChar.Sex));
-			_menuSex.SetById(_newChar.Sex.ToString("g").ToLower());
-			_menuSex.IsActive = false;
-			_menuCharacter.IsActive = true;
 		}
 	}
 }

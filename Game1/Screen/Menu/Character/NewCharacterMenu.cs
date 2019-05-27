@@ -28,7 +28,6 @@ namespace Game1.Screen.Menu.Character
 
 		public event EventHandler OnReadyDisable;
 		public event EventHandler OnSexItemChange;
-		public event EventHandler OnSexItemSelect;
 
 		public NewCharacterMenu(Rectangle bounds)
 		{
@@ -40,7 +39,7 @@ namespace Game1.Screen.Menu.Character
 
 			// Name edit box...
 			_nameEdit = new TextInput(275, this.CharacterName, 12, false) {
-				Position = new Vector2(_menuCharacter.Bounds.Left + 170,  _menuCharacter.Bounds.Top + 57)
+				Position = new Vector2(_menuCharacter.Bounds.Left + 170,  _menuCharacter.Bounds.Top + 55)
 			};
 			_nameEdit.OnReadyDisable += _nameEdit_OnReadyDisable;
 
@@ -128,14 +127,17 @@ namespace Game1.Screen.Menu.Character
 				case "male" :	this.CharacterSex = CharacterSex.Male;		break;
 			}
 
-			OnSexItemSelect?.Invoke(this, e);
+			OnSexItemChange?.Invoke(this, e);
 			_menuSex.IsActive = false;
 			_menuCharacter.IsActive = true;
 		}
 
 		private void _menuSex_OnReadyDisable(object sender, EventArgs e)
 		{
+			int index = _menuSex.CurrentIndex;
 			_menuSex.SetById(this.CharacterSex.ToString("g").ToLower());
+			if (index != _menuSex.CurrentIndex)
+				OnSexItemChange?.Invoke(this, new MenuEventArgs("change", this.GetType().Name, this.CharacterSex.ToString("g").ToLower()));
 			_menuSex.IsActive = false;
 			_menuCharacter.IsActive = true;
 		}
