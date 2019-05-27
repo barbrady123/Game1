@@ -80,7 +80,6 @@ namespace Game1.Interface
 			_height = 32;
 			_padding = new Vector2(4.0f, 2.0f);
 			_fontHeight = 24;
-			// TODO : When we enforce this, it needs to be a in loop that continues until the substring fits...possible they type W but the left-most visible character is a "i"...
 			_maxVisibleLength = _width - (_borderWidth * 2) - ((int)_padding.X * 2);
 			_firstVisibleCharIndex = 0;
 			_visibleText = "";
