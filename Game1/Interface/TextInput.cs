@@ -43,7 +43,6 @@ namespace Game1.Interface
 		private Vector2 TextPosition => this.Position 
 										+ new Vector2(_borderWidth, _borderWidth)
 										+ _padding;
-		// TODO: This will have to be refactored to account for the visible text stuff...
 		private int CursorPositionX => (int)(this.TextPosition.X + _textImage.SubstringSize(0, this.CurrentPositionIndex - _firstVisibleCharIndex).X);
 
 		public Vector2 Position { get; set; }
