@@ -4,6 +4,10 @@
     "text": "Start New Game"
   },
   {
+    "id": "loadgame",
+    "text": "Load Game"
+  },
+  {
     "id": "options",
     "text": "Options"
   },

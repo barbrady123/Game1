@@ -55,7 +55,7 @@ namespace Game1.Screen
 		}
 
 		public override void Draw(SpriteBatch spriteBatch)
-		{
+		{	
 			base.Draw(spriteBatch);
 			_titleText.Draw(spriteBatch);
 		}

@@ -14,6 +14,7 @@ namespace Game1
 {
 	public abstract class ImageBase
 	{
+		protected List<ImageEffect> _effects;
 		protected ContentManager _content;
 		protected Vector2 _origin;
 
@@ -26,13 +27,16 @@ namespace Game1
 		public Rectangle DrawArea { get; set; }
 		public Color Color { get; set; }
 
-		public List<ImageEffect> Effects { get; set; }
-
 		public T AddEffect<T>(T effect) where T: ImageEffect
 		{
 			effect.Image = this;
-			this.Effects.Add(effect);
+			_effects.Add(effect);
 			return effect;
+		}
+
+		public void ClearEffects()
+		{
+			_effects.Clear();
 		}
 
 		/// <summary>
@@ -47,7 +51,7 @@ namespace Game1
 			this.Position = Vector2.Zero;
 			this.Alpha = 1.0f;
 			this.SourceRect = Rectangle.Empty;
-			this.Effects = new List<ImageEffect>();
+			_effects = new List<ImageEffect>();
 			this.Alignment = ImageAlignment.Centered;
 			this.Color = Color.White;
 			_origin = Vector2.Zero;
@@ -68,7 +72,7 @@ namespace Game1
 		{
 			if (this.IsActive)
 			{
-				foreach (var effect in this.Effects)
+				foreach (var effect in _effects)
 					effect.Update(gameTime);
 			}
 		}

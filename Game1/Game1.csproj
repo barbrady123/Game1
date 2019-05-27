@@ -69,6 +69,7 @@
     <Compile Include="Screen\CharacterCreateScreen.cs" />
     <Compile Include="Screen\GameScreen.cs" />
     <Compile Include="Screen\Menu\Character\CharacterNewMenu.cs" />
+    <Compile Include="Screen\Menu\Character\NewCharacterMenu.cs" />
     <Compile Include="Screen\Menu\Character\SexMenu.cs" />
     <Compile Include="Screen\Menu\MainMenu.cs" />
     <Compile Include="Screen\Menu\MenuEventArgs.cs" />

@@ -64,7 +64,7 @@ namespace Game1.Screen.Menu
 
 				if (_currentIndex >= 0)
 				{
-					_items[_currentIndex].Image.Effects.Clear();
+					_items[_currentIndex].Image.ClearEffects();
 					if (this.IsActive)
 						_items[_currentIndex].Image.Alpha = 1.0f;
 				}

@@ -28,7 +28,7 @@ namespace Game1.Screen
 
 		public CharacterCreateScreen(Rectangle bounds): base(bounds, "brick")
 		{
-			_newChar = new Character() { Sex = CharacterSex.Male };
+			_newChar = new Character();
 
 			// TODO: Figure out a better way to configure this layout...
 			// Title...
@@ -39,7 +39,7 @@ namespace Game1.Screen
 			// Character View...
 			_characterViewBack = new ImageTexture("Background/black3", true) {
 				Alignment = ImageAlignment.Centered,
-				Alpha = 0.4f,
+				Alpha = 0.6f,
 				Scale = new Vector2(5.0f, 5.0f),
 				Position = new Vector2(300.0f, 270.0f)
 			};
