@@ -33,7 +33,6 @@ namespace Game1
 			_isTransitioning = false;
 			_transitionImage = new ImageTexture($"{Game1.BackgroundRoot}/black") { Scale = new Vector2(_bounds.Width, _bounds.Height) };
 			_transitionImage.DrawArea = bounds;
-			_transitionImage.SourceRect = new Rectangle(0, 0, bounds.Width, bounds.Height);
 			_fadeOutEffect = _transitionImage.AddEffect(new FadeOutEffect() { Speed = 3.0f });
 			_fadeInEffect = _transitionImage.AddEffect(new FadeInEffect() { Speed = 2.0f });
 			_fadeInEffect.OnActiveChange += _fadeInEffect_OnActiveChange;
@@ -165,6 +164,11 @@ namespace Game1
 				{
 					case "continue":	TransitionScreens(new MainMenu(_bounds));	break;
 					case "exit" :		Game1.Instance.Exit();						break;
+				}
+				break;
+				case "CharacterCreateScreen": switch (args.Type)
+				{
+					case "back" :		TransitionScreens(new MainMenu(_bounds));	break;
 				}
 				break;
 			}

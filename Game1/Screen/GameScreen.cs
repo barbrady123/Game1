@@ -27,7 +27,6 @@ namespace Game1.Screen
 			{
 				_backgroundImage = new ImageTexture($"{Game1.BackgroundRoot}/{backgroundName}", true);
 				_backgroundImage.DrawArea = bounds;
-				_backgroundImage.SourceRect = new Rectangle(0, 0, bounds.Width, bounds.Height);
 			}
 		}
 

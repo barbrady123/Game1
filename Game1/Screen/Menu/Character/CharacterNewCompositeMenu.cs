@@ -13,10 +13,7 @@ using Game1.Screen.Menu;
 
 namespace Game1.Screen.Menu.Character
 {
-	/// <summary>
-	/// Testing new concept of a "composite" menu of sorts...to make building/reusing these complex menus easier...
-	/// </summary>
-	public class NewCharacterMenu	// : CompositeMenu (or something)...
+	public class CharacterNewCompositeMenu
 	{
 		private readonly Rectangle _bounds;
 		private readonly CharacterNewMenu _menuCharacter;
@@ -29,13 +26,14 @@ namespace Game1.Screen.Menu.Character
 		public event EventHandler OnReadyDisable;
 		public event EventHandler OnSexItemChange;
 
-		public NewCharacterMenu(Rectangle bounds)
+		public CharacterNewCompositeMenu(Rectangle bounds)
 		{
-			_bounds = bounds;	// for now let's base everything on 600, 200
+			_bounds = bounds;
 			
 			// Main menu...
 			_menuCharacter = new CharacterNewMenu(new Rectangle(_bounds.Left, _bounds.Top, 200, 200));
 			_menuCharacter.OnItemSelect += _menuCharacter_OnItemSelect;
+			_menuCharacter.OnReadyDisable += _menuCharacter_OnReadyDisable;
 
 			// Name edit box...
 			_nameEdit = new TextInput(275, this.CharacterName, 12, false) {
@@ -94,6 +92,11 @@ namespace Game1.Screen.Menu.Character
 								_menuSex.DelayInput(1);
 								break;
 			}
+		}
+
+		private void _menuCharacter_OnReadyDisable(object sender, EventArgs e)
+		{
+			OnReadyDisable?.Invoke(this, new MenuEventArgs("back", this.GetType().Name, null));
 		}
 
 		private void _nameEdit_OnReadyDisable(object sender, EventArgs e)

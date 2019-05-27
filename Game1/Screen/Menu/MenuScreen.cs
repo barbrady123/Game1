@@ -99,7 +99,7 @@ namespace Game1.Screen.Menu
 				item.Image = new ImageText(item.Text, true);
 				item.Image.Alignment = (_layout == MenuLayout.Vertical) ? ImageAlignment.Centered : ImageAlignment.LeftCentered;
 				item.Image.LoadContent();
-				menuSize += (menuSize > 0 ? MENU_PADDING : 0) + (_layout == MenuLayout.Vertical ? item.Image.SourceRect.Height : item.Image.SourceRect.Width);
+				menuSize += (menuSize > 0 ? MENU_PADDING : 0) + (_layout == MenuLayout.Vertical ? (int)item.Image.Size.Y : (int)item.Image.Size.X);
 			}
 
 			SetItemsAlpha(_isActive);
@@ -122,9 +122,9 @@ namespace Game1.Screen.Menu
 			{
 				item.Image.Position = new Vector2(locX, locY);
 				if (_layout == MenuLayout.Vertical)
-					locY += (int)item.Image.SourceRect.Height + MENU_PADDING;
+					locY += (int)item.Image.Size.Y + MENU_PADDING;
 				else
-					locX += (int)item.Image.SourceRect.Width + MENU_PADDING;
+					locX += (int)item.Image.Size.X + MENU_PADDING;
 			}
 
 			this.CurrentIndex = 0;

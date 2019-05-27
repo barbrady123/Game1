@@ -20,7 +20,7 @@ namespace Game1.Screen
 		public ImageText _titleText;
 		public ImageTexture _characterViewBack;
 		public ImageTexture _characterView;
-		public NewCharacterMenu _menuCharacter;
+		public CharacterNewCompositeMenu _menuCharacter;
 
 		private string CharacterPreviewImage(CharacterSex sex) => $"Character/Preview/{sex.ToString("g")}";
 
@@ -47,8 +47,9 @@ namespace Game1.Screen
 			};
 
 			// Menu
-			_menuCharacter = new NewCharacterMenu(new Rectangle(600, 200, 200, 200));
+			_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200));
 			_menuCharacter.OnSexItemChange += _menuCharacter_OnSexItemChange;
+			_menuCharacter.OnReadyDisable += _menuCharacter_OnReadyDisable;
 		}
 
 		public override void LoadContent()
@@ -96,6 +97,23 @@ namespace Game1.Screen
 					break;
 				case "male" :
 					_characterView.SwapTexture(this.CharacterPreviewImage(CharacterSex.Male));
+					break;
+			}
+		}
+
+		private void _menuCharacter_OnReadyDisable(object sender, EventArgs e)
+		{
+			var args = (MenuEventArgs)e;
+
+			switch (args.Type)
+			{
+				case "continue" :
+					_newChar.Name = _menuCharacter.CharacterName;
+					_newChar.Sex = _menuCharacter.CharacterSex;
+					// start the game...
+					break;
+				case "back" :
+					ReadyScreenUnload(this, new ScreenEventArgs("back", this.GetType().Name, null));
 					break;
 			}
 		}

@@ -12,6 +12,8 @@ namespace Game1.Screen.Menu.Character
 {
 	public class CharacterNewMenu : MenuScreen
 	{
-		public CharacterNewMenu(Rectangle bounds): base(bounds, hasBackground: false) { }
+		public CharacterNewMenu(Rectangle bounds): base(bounds,
+														hasBackground: false,
+														escapeToDisable: true) { }
 	}
 }
