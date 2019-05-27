@@ -28,6 +28,13 @@ namespace Game1
 
 		public List<ImageEffect> Effects { get; set; }
 
+		public T AddEffect<T>(T effect) where T: ImageEffect
+		{
+			effect.Image = this;
+			this.Effects.Add(effect);
+			return effect;
+		}
+
 		/// <summary>
 		/// Point in the texture that the Position points to...
 		/// </summary>

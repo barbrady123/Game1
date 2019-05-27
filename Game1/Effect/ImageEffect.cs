@@ -32,9 +32,15 @@ namespace Game1.Effect
 
 		public event EventHandler OnActiveChange;
 
-		public ImageEffect(ImageBase image, bool isActive = false)
+		public ImageBase Image
 		{
-			_image = image;			
+			get { return _image; }
+			set { _image = value; }
+		}
+
+
+		public ImageEffect(bool isActive = false)
+		{
 			this.IsActive = isActive;
 			this.IsIncreasing = false;
 			this.Speed = 1.0f;

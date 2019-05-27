@@ -19,7 +19,7 @@ namespace Game1.Screen
 		{
 			_titleText = new ImageText("Labyrinth", true);
 			_titleText.Position = this.Bounds.CenterVector();
-			_titleText.Effects.Add(new ZoomCycleEffect(_titleText, true));
+			_titleText.AddEffect(new ZoomCycleEffect(true));
 		}
 
 		public override void LoadContent()

@@ -19,6 +19,7 @@ namespace Game1.Screen.Menu
 	{
 		private const int MENU_PADDING = 20;
 		private const float DISABLED_ITEM_ALPHA = 0.4f;
+
 		private static readonly Color ActiveItemColor = Color.White;
 		private static readonly Color SelectedItemColor = new Color(240, 240, 240);
 		private static readonly Color UnselectedItemColor = new Color(100, 100, 100);
@@ -69,7 +70,7 @@ namespace Game1.Screen.Menu
 				}
 
 				_currentIndex = index;
-				_items[_currentIndex].Image.Effects.Add(new FadeCycleEffect(_items[_currentIndex].Image, true));
+				_items[_currentIndex].Image.AddEffect(new FadeCycleEffect(true));
 			}
 		}
 
@@ -211,13 +212,6 @@ namespace Game1.Screen.Menu
 				}
 
 			return -1;
-		}
-
-		protected Action ActionFromMethodName(string name)
-		{
-			Type thisType = this.GetType();
-			MethodInfo theMethod = thisType.GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance);
-			return (Action) Delegate.CreateDelegate(typeof(Action), this, theMethod);
 		}
 
 		protected virtual void LoadItemData()
