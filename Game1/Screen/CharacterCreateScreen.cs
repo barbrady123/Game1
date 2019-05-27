@@ -83,18 +83,10 @@ namespace Game1.Screen
 
 		public override void Update(GameTime gameTime, bool processInput)
 		{
-			if (processInput)
-			{
-				if (InputManager.Instance.KeyPressed(Keys.Enter))
-				{
-
-				}
-			}
-
 			base.Update(gameTime, processInput);
 			_characterView.Update(gameTime);
-			_menuCharacter.Update(gameTime, _menuCharacter.IsActive);
-			_menuSex.Update(gameTime, _menuSex.IsActive);
+			_menuCharacter.Update(gameTime, processInput);
+			_menuSex.Update(gameTime, processInput);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch)
@@ -109,7 +101,8 @@ namespace Game1.Screen
 
 		private void _menuCharacter_OnNameSelect(object sender, EventArgs e)
 		{
-			throw new NotImplementedException();
+			// TODO: Implement this!!
+			// Need a "text box" of some type.....UGH.....
 		}
 
 		private void _menuCharacter_OnSexSelect(object sender, EventArgs e)

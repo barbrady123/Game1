@@ -12,6 +12,8 @@ namespace Game1
 
 		public static ImageAlignment LeftTop => new ImageAlignment(HorizontalAlignment.Left, VerticalAlignment.Top);
 
+		public static ImageAlignment LeftBottom => new ImageAlignment(HorizontalAlignment.Left, VerticalAlignment.Bottom);
+
 		public static ImageAlignment LeftCentered => new ImageAlignment(HorizontalAlignment.Left, VerticalAlignment.Center);
 
 		public static ImageAlignment RightCentered => new ImageAlignment(HorizontalAlignment.Right, VerticalAlignment.Center);

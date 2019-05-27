@@ -15,7 +15,6 @@ namespace Game1
 	public abstract class ImageBase
 	{
 		protected ContentManager _content;
-		protected Texture2D _texture;
 		protected Vector2 _origin;
 
 		public bool IsActive { get; set; }
@@ -70,8 +69,10 @@ namespace Game1
 		public virtual void Draw(SpriteBatch spriteBatch)
 		{
 			if (this.IsActive)
-				spriteBatch.Draw(_texture, this.Position + this.DrawArea.TopLeftVector(), this.SourceRect, this.Color * this.Alpha, 0.0f, _origin, this.Scale, SpriteEffects.None, 0.0f);
+				DrawActive(spriteBatch);
 		}
+
+		public abstract void DrawActive(SpriteBatch spriteBatch);
 
 		protected virtual void SetOrigin()
 		{

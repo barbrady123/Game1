@@ -133,11 +133,15 @@ namespace Game1
 			{
 				switch (args.Target)
 				{
-					case "MainMenu":		TransitionScreens(new MainMenu(_bounds));						break;
-					case "OptionsMenu":		TransitionScreens(new OptionsMenu(_bounds));					break;
-					case "CharacterCreate": TransitionScreens(new CharacterCreateScreen(_bounds));		break;
-					case "SexMenu":			TransitionScreens(new SexMenu(_bounds));	break;
+					case "MainMenu":		TransitionScreens(new MainMenu(_bounds));				break;
+					case "OptionsMenu":		TransitionScreens(new OptionsMenu(_bounds));			break;
+					case "CharacterCreate": TransitionScreens(new CharacterCreateScreen(_bounds));	break;
+					case "SexMenu":			TransitionScreens(new SexMenu(_bounds));				break;
 				}
+			}
+			else if (args.Type == "exit")
+			{
+				Game1.Instance.Exit();
 			}
 		}
 	}

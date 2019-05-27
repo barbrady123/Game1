@@ -31,7 +31,7 @@ namespace Game1.Screen.Menu
 		private void ExitGame()
 		{
 			OnExitGameSelect?.Invoke(this, null);
-			Game1.Instance.Exit();			
+			ReadyScreenUnload(this, new ScreenEventArgs("exit", null));
 		}
 	}
 }

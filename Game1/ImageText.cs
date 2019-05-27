@@ -22,6 +22,17 @@ namespace Game1
 
 		public string FontName { get; set; }
 
+		public Vector2 Size { get; set; }
+
+		public Vector2 SubstringSize(int start, int length)
+		{
+			return StringSize(_text.Substring(start, length));
+		}
+
+		public Vector2 StringSize(string text) => _font.MeasureString(text) * this.Scale;
+
+		public int StringLength(string text) => (int)this.StringSize(text).X;
+
 		public ImageText(string text = null, bool isActive = false) : this(text, null, isActive) { }
 
 		public ImageText(string text = null, string fontName = null, bool isActive = false) : base(isActive)
@@ -33,36 +44,30 @@ namespace Game1
 		public override void LoadContent()
 		{
 			base.LoadContent();
+			_font = _content.Load<SpriteFont>($"{Game1.FontsRoot}/{_fontName}");
+			CalculateTextSize();
+		}
 
-			if (!String.IsNullOrWhiteSpace(_fontName))
-				_font = _content.Load<SpriteFont>($"{Game1.FontsRoot}/{_fontName}");
+		public override void DrawActive(SpriteBatch spriteBatch)
+		{
+			spriteBatch.DrawString(_font, _text, this.Position + this.DrawArea.TopLeftVector(), this.Color * this.Alpha, 0.0f, _origin, this.Scale, SpriteEffects.None, 0.0f);
+		}
 
-			_texture = GenerateTextureFromText(_font.MeasureString(_text));
+		public void UpdateText(string text)
+		{
+			if (text != _text)
+			{
+				_text = text;
+				CalculateTextSize();
+			}
+		}
+
+		private void CalculateTextSize()
+		{
+			this.Size = _font.MeasureString(_text) * this.Scale;
 			if (this.SourceRect == Rectangle.Empty)
-				this.SourceRect = _texture.Bounds;
-
+				this.SourceRect = new Rectangle(0, 0, (int)this.Size.X, (int)this.Size.Y);
 			SetOrigin();
-		}
-
-		public override void Draw(SpriteBatch spriteBatch)
-		{
-			base.Draw(spriteBatch);
-		}
-
-		/// <summary>
-		/// Generate texture from text (to make texture/string rendering sharable...
-		/// </summary>
-		private Texture2D GenerateTextureFromText(Vector2 textSize)
-		{
-			var renderTarget = new RenderTarget2D(Game1.Graphics, (int)textSize.X, (int)textSize.Y);
-			Game1.Graphics.SetRenderTarget(renderTarget);
-			Game1.Graphics.Clear(Color.Transparent);
-			var spriteBatch = new SpriteBatch(Game1.Graphics);
-			spriteBatch.Begin();
-			spriteBatch.DrawString(_font, _text, Vector2.Zero, Color.White);
-			spriteBatch.End();
-			Game1.Graphics.SetRenderTarget(null);
-			return renderTarget;
 		}
 	}
 }

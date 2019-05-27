@@ -164,7 +164,6 @@ namespace Game1.Screen.Menu
 
 		public override void Draw(SpriteBatch spriteBatch)
 		{
-			// I *think* we wanna draw menus even if they are not active
 			base.Draw(spriteBatch);
 
 			foreach (var item in _items)
