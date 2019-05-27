@@ -51,9 +51,8 @@ namespace Game1.Screen
 			_menuCharacter = new CharacterNewMenu(new Rectangle(600, 200, 200, 200));
 			_menuCharacter.OnNameSelect += _menuCharacter_OnNameSelect;
 			_menuCharacter.OnSexSelect += _menuCharacter_OnSexSelect;
-			_nameEdit = new TextInput(200, _newChar.Name, 12, false) { Position = new Vector2(770, 257) };
-			_nameEdit.OnEnterPressed += _nameEdit_OnEnterPressed;
-			_nameEdit.OnEscapePressed += _nameEdit_OnEscapePressed;
+			_nameEdit = new TextInput(275, _newChar.Name, 12, false) { Position = new Vector2(770, 257) };
+			_nameEdit.OnReadyDisable += _nameEdit_OnReadyDisable;
 			_menuSex = new SexMenu(new Rectangle(690, 250, 300, 120)) { IsActive = false };
 			_menuSex.OnFemaleSelect += _menuSex_OnFemaleSelect;
 			_menuSex.OnMaleSelect += _menuSex_OnMaleSelect;
@@ -140,16 +139,18 @@ namespace Game1.Screen
 			}
 		}
 
-		private void _nameEdit_OnEnterPressed(object sender, EventArgs e)
+		private void _nameEdit_OnReadyDisable(object sender, EventArgs e)
 		{
-			_newChar.Name = _nameEdit.Text;
-			_nameEdit.IsActive = false;
-			_menuCharacter.IsActive = true;
-		}
+			var key = ((TextInputEventArgs)e).Key;
+			if (key == Keys.Enter)
+			{
+				_newChar.Name = _nameEdit.Text;
+			}
+			else if (key == Keys.Escape)
+			{
+				_nameEdit.Text = _newChar.Name;
+			}
 
-		private void _nameEdit_OnEscapePressed(object sender, EventArgs e)
-		{
-			_nameEdit.Text = _newChar.Name;
 			_nameEdit.IsActive = false;
 			_menuCharacter.IsActive = true;
 		}

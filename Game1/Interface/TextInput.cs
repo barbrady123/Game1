@@ -29,27 +29,30 @@ namespace Game1.Interface
 		private int _firstVisibleCharIndex;		
 		private string _visibleText;
 		private bool _isActive;
+		private string _text;
 		
 		private int CurrentPositionIndex
 		{
 			get { return _currentPositionIndex; }
-			set {
-				int newValue = Util.Clamp(value, 0, this.Text.Length);
-				if (newValue != _currentPositionIndex)
-					_currentPositionIndex = newValue;
-			}
+			set { _currentPositionIndex = Util.Clamp(value, 0, this.Text.Length); }
 		}
 
-		private Vector2 TextPosition => this.Position 
+		private Vector2 TextPosition => this.Position
 										+ new Vector2(_borderWidth, _borderWidth)
 										+ _padding;
+
 		private int CursorPositionX => (int)(this.TextPosition.X + _textImage.SubstringSize(0, this.CurrentPositionIndex - _firstVisibleCharIndex).X);
 
 		public Vector2 Position { get; set; }
-		public string Text { get; set; }
 		public string AllowedCharacters { get; set; }
 		public string BlockedCharacters { get; set; }
 		public int MaxLength { get; set; }
+
+		public string Text
+		{
+			get { return _text; }
+			set { _text = value ?? ""; }
+		}
 		
 		public bool IsActive
 		{ 
@@ -70,8 +73,7 @@ namespace Game1.Interface
 			_delayInputCycles = Math.Max(0, delayCycles);
 		}
 
-		public event EventHandler OnEnterPressed;
-		public event EventHandler OnEscapePressed;
+		public event EventHandler OnReadyDisable;
 
 		public TextInput(int width, string text = null, int maxLength = 100, bool isActive = false)
 		{
@@ -84,7 +86,7 @@ namespace Game1.Interface
 			_firstVisibleCharIndex = 0;
 			_visibleText = "";
 			_delayInputCycles = 0;
-			this.Text = text ?? "";
+			this.Text = text;
 			this.MaxLength = maxLength;
 			this.Position = Vector2.Zero;
 			this.IsActive = isActive;
@@ -178,6 +180,7 @@ namespace Game1.Interface
 			var newText = new StringBuilder(this.Text);
 			int cursorMove = 0;
 			bool updateText = true;
+			bool finalizeText = false;
 			TextInputAction action = TextInputAction.None;
 
 			foreach (var key in InputManager.Instance.GetPressedKeys())
@@ -185,11 +188,13 @@ namespace Game1.Interface
 				switch (key)
 				{
 					case (Keys.Enter) :		
-						OnEnterPressed?.Invoke(this, null);
+						OnReadyDisable?.Invoke(this, new TextInputEventArgs('\0', key));
+						finalizeText = true;
 						continue;
 					case (Keys.Escape) :
-						OnEscapePressed?.Invoke(this, null);
+						OnReadyDisable?.Invoke(this, new TextInputEventArgs('\0', key));
 						updateText = false;
+						finalizeText = true;
 						continue;
 					case (Keys.Back) :
 						if (this.CurrentPositionIndex > 0)
@@ -243,7 +248,13 @@ namespace Game1.Interface
 			}
 
 			if (updateText)
-				this.Text = newText.ToString().Trim();
+				this.Text = newText.ToString();
+			if (finalizeText)
+			{
+				this.Text = this.Text.Trim();
+				cursorMove = 0;
+				action = TextInputAction.Left;
+			}
 
 			this.CurrentPositionIndex += cursorMove;
 			CalculateVisibleText(action);
@@ -319,7 +330,7 @@ namespace Game1.Interface
 					while (_textImage.StringLength(substring) > _maxVisibleLength)
 					{
 						lastVisible--;
-						substring = this.Text.SubstringByIndex(firstVisible, lastVisible - firstVisible);
+						substring = this.Text.SubstringByIndex(firstVisible, lastVisible);
 						isShrunk = true;
 					}
 
