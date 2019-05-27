@@ -41,12 +41,12 @@ namespace Game1.Screen
 				if (InputManager.Instance.KeyPressed(Keys.Enter))
 				{
 					_titleText.IsActive = false;
-					ReadyScreenUnload(this, new ScreenEventArgs("change", "MainMenu"));
+					ReadyScreenUnload(this, new ScreenEventArgs("continue", this.GetType().Name, null));
 				}
 				else if (InputManager.Instance.KeyPressed(Keys.Escape))
 				{
 					_titleText.IsActive = false;
-					ReadyScreenUnload(this, new ScreenEventArgs("exit", null));
+					ReadyScreenUnload(this, new ScreenEventArgs("exit", this.GetType().Name, null));
 				}
 			}
 

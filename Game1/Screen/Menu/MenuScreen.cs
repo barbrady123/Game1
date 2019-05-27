@@ -27,14 +27,15 @@ namespace Game1.Screen.Menu
 		protected List<MenuItem> _items;
 		protected MenuLayout _layout; 
 
-		private FadeCycleEffect _selectedEffect;
 		private bool _isActive;
 		private bool _escapeToDisable;
 
 		private Keys ForwardKey => (_layout == MenuLayout.Vertical) ? Keys.Down : Keys.Right;
 		private Keys BackwardKey => (_layout == MenuLayout.Vertical) ? Keys.Up : Keys.Left;
 
-		public event EventHandler OnReadyMenuDisable;
+		public event EventHandler OnReadyDisable;
+		public event EventHandler OnCurrentItemChange;
+		public event EventHandler OnItemSelect;
 
 		private int _delayInputCycles;
 
@@ -52,6 +53,26 @@ namespace Game1.Screen.Menu
 			}
 		}
 
+		public int CurrentIndex
+		{
+			get { return _currentIndex; }
+			set {
+				int index = Util.Clamp(value, 0, _items.Count - 1);
+				if (index == _currentIndex)
+					return;
+
+				if (_currentIndex >= 0)
+				{
+					_items[_currentIndex].Image.Effects.Clear();
+					if (this.IsActive)
+						_items[_currentIndex].Image.Alpha = 1.0f;
+				}
+
+				_currentIndex = index;
+				_items[_currentIndex].Image.Effects.Add(new FadeCycleEffect(_items[_currentIndex].Image, true));
+			}
+		}
+
 		public MenuScreen(Rectangle bounds,
 						  MenuLayout layout = MenuLayout.Vertical,
 						  bool hasBackground = true,
@@ -59,7 +80,6 @@ namespace Game1.Screen.Menu
 		{
 			_currentIndex = -1;
 			_items = new List<MenuItem>();
-			_selectedEffect = null;
 			_layout = layout;
 			_escapeToDisable = escapeToDisable;
 			_delayInputCycles = 0;
@@ -78,9 +98,7 @@ namespace Game1.Screen.Menu
 				item.Image = new ImageText(item.Text, true);
 				item.Image.Alignment = (_layout == MenuLayout.Vertical) ? ImageAlignment.Centered : ImageAlignment.LeftCentered;
 				item.Image.LoadContent();
-
-				item.LinkAction = ActionFromMethodName(item.Link ?? item.Text.Replace(" ", ""));
-				menuSize +=  (menuSize > 0 ? MENU_PADDING : 0) + (_layout == MenuLayout.Vertical ? item.Image.SourceRect.Height : item.Image.SourceRect.Width);
+				menuSize += (menuSize > 0 ? MENU_PADDING : 0) + (_layout == MenuLayout.Vertical ? item.Image.SourceRect.Height : item.Image.SourceRect.Width);
 			}
 
 			SetItemsAlpha(_isActive);
@@ -108,7 +126,7 @@ namespace Game1.Screen.Menu
 					locX += (int)item.Image.SourceRect.Width + MENU_PADDING;
 			}
 
-			SetCurrentIndex(0);
+			this.CurrentIndex = 0;
 		}
 
 		public override void UnloadContent()
@@ -149,24 +167,29 @@ namespace Game1.Screen.Menu
 		{
 			if (InputManager.Instance.KeyPressed(this.ForwardKey))
 			{
-				int newIndex = _currentIndex + 1;
-				if (newIndex < _items.Count)
-					SetCurrentIndex(newIndex);
+				int newIndex = Math.Min(_items.Count - 1, _currentIndex + 1);
+				if (newIndex != _currentIndex)
+				{
+					this.CurrentIndex = newIndex;
+					OnCurrentItemChange?.Invoke(this, new MenuEventArgs("currentChange", this.GetType().Name, _items[_currentIndex].Id));
+				}
 			}
 			else if (InputManager.Instance.KeyPressed(this.BackwardKey))
 			{
-				int newIndex = _currentIndex - 1;
-				if (newIndex >= 0)
-					SetCurrentIndex(newIndex);
+				int newIndex = Math.Max(0, _currentIndex - 1);
+				if (newIndex != _currentIndex)
+				{
+					this.CurrentIndex = newIndex;
+					OnCurrentItemChange?.Invoke(this, new MenuEventArgs("currentChange", this.GetType().Name, _items[_currentIndex].Id));
+				}
 			}
 			else if (InputManager.Instance.KeyReleased(Keys.Enter))
 			{
-				if (_items[_currentIndex].LinkAction != null)
-					_items[_currentIndex].LinkAction.Invoke();
+				OnItemSelect?.Invoke(this, new MenuEventArgs("select", this.GetType().Name, _items[_currentIndex].Id));
 			}
 			else if (_escapeToDisable && InputManager.Instance.KeyPressed(Keys.Escape))
 			{
-				OnReadyMenuDisable?.Invoke(this, null);
+				OnReadyDisable?.Invoke(this, null);
 			}
 		}
 
@@ -178,19 +201,16 @@ namespace Game1.Screen.Menu
 				item.Image.Draw(spriteBatch);
 		}
 
-		private void SetCurrentIndex(int index)
+		public int SetById(string id)
 		{
-			if (_items.Count < index)
-				return;
-						
-			if (_currentIndex >= 0)
-			{
-				_items[_currentIndex].Image.Effects.Clear();
-				_items[_currentIndex].Image.Alpha = 1.0f;
-			}
+			for (int i = 0; i < _items.Count; i++)
+				if (_items[i].Id == id)
+				{
+					this.CurrentIndex = i;
+					return i;
+				}
 
-			_currentIndex = index;
-			_items[_currentIndex].Image.Effects.Add(_selectedEffect = new FadeCycleEffect(_items[_currentIndex].Image, true));
+			return -1;
 		}
 
 		protected Action ActionFromMethodName(string name)
@@ -211,12 +231,7 @@ namespace Game1.Screen.Menu
 		private void SetItemsAlpha(bool isActive)
 		{
 			foreach (var item in _items)
-				item.Image.Alpha = IsActive ? 1.0f : MenuScreen.DISABLED_ITEM_ALPHA;
-		}
-
-		protected void ReadyMenuDisable(object sender, MenuEventArgs args = null)
-		{
-			OnReadyMenuDisable?.Invoke(sender, args);
+				item.Image.Alpha = isActive ? 1.0f : MenuScreen.DISABLED_ITEM_ALPHA;
 		}
 	}
 }

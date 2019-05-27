@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Screen.Menu.Character;
 using Game1.Interface;
+using Game1.Screen.Menu;
 
 namespace Game1.Screen
 {
@@ -23,11 +24,11 @@ namespace Game1.Screen
 		public TextInput _nameEdit;
 		public SexMenu _menuSex;
 
-		private string CharacterPreviewImage => $"Character/Preview/{_newChar.Sex.ToString("g")}";
+		private string CharacterPreviewImage(CharacterSex sex) => $"Character/Preview/{sex.ToString("g")}";
 
 		public CharacterCreateScreen(Rectangle bounds): base(bounds, "brick")
 		{
-			_newChar = new Character();
+			_newChar = new Character() { Sex = CharacterSex.Male };
 
 			// TODO: Figure out a better way to configure this layout...
 			// Title...
@@ -40,29 +41,22 @@ namespace Game1.Screen
 				Alignment = ImageAlignment.Centered,
 				Alpha = 0.4f,
 				Scale = new Vector2(5.0f, 5.0f),
-				Position = new Vector2(300.0f, 400.0f)
+				Position = new Vector2(300.0f, 270.0f)
 			};
-			_characterView = new ImageTexture(this.CharacterPreviewImage, true)	{
+			_characterView = new ImageTexture(this.CharacterPreviewImage(_newChar.Sex), true)	{
 				Alignment = ImageAlignment.Centered,
 				Scale = new Vector2(5.0f, 5.0f),
-				Position = new Vector2(300.0f, 400.0f)
+				Position = new Vector2(300.0f, 270.0f)
 			};
 			// Menu
 			_menuCharacter = new CharacterNewMenu(new Rectangle(600, 200, 200, 200));
-			_menuCharacter.OnNameSelect += _menuCharacter_OnNameSelect;
-			_menuCharacter.OnSexSelect += _menuCharacter_OnSexSelect;
+			_menuCharacter.OnItemSelect += _menuCharacter_OnItemSelect;
 			_nameEdit = new TextInput(275, _newChar.Name, 12, false) { Position = new Vector2(770, 257) };
 			_nameEdit.OnReadyDisable += _nameEdit_OnReadyDisable;
 			_menuSex = new SexMenu(new Rectangle(690, 250, 300, 120)) { IsActive = false };
-			_menuSex.OnFemaleSelect += _menuSex_OnFemaleSelect;
-			_menuSex.OnMaleSelect += _menuSex_OnMaleSelect;
-			_menuSex.OnReadyMenuDisable += _menuSex_OnReadyMenuDisable;
-		}
-
-		private void _menuSex_OnReadyMenuDisable(object sender, EventArgs e)
-		{
-			_menuSex.IsActive = false;
-			_menuCharacter.IsActive = true;
+			_menuSex.OnCurrentItemChange += _menuSex_OnCurrentItemChange;
+			_menuSex.OnItemSelect += _menuSex_OnItemSelect;
+			_menuSex.OnReadyDisable += _menuSex_OnReadyDisable;
 		}
 
 		public override void LoadContent()
@@ -74,6 +68,7 @@ namespace Game1.Screen
 			_menuCharacter.LoadContent();
 			_nameEdit.LoadContent();
 			_menuSex.LoadContent();
+			_menuSex.SetById(_newChar.Sex.ToString("g").ToLower());
 		}
 
 		public override void UnloadContent()
@@ -107,38 +102,6 @@ namespace Game1.Screen
 			_menuSex.Draw(spriteBatch);
 		}
 
-		private void _menuCharacter_OnNameSelect(object sender, EventArgs e)
-		{
-			_menuCharacter.IsActive = false;
-			_nameEdit.IsActive = true;
-			_nameEdit.DelayInput(1);
-		}
-
-		private void _menuCharacter_OnSexSelect(object sender, EventArgs e)
-		{
-			_menuCharacter.IsActive = false;
-			_menuSex.IsActive = true;
-			_menuSex.DelayInput(1);
-		}
-
-		private void _menuSex_OnFemaleSelect(object sender, EventArgs e)
-		{
-			if (_newChar.Sex != CharacterSex.Female)
-			{
-				 _newChar.Sex = CharacterSex.Female;
-				 _characterView.SwapTexture(this.CharacterPreviewImage);
-			}
-		}
-
-		private void _menuSex_OnMaleSelect(object sender, EventArgs e)
-		{
-			if (_newChar.Sex != CharacterSex.Male)
-			{
-				_newChar.Sex = CharacterSex.Male;
-				_characterView.SwapTexture(this.CharacterPreviewImage);
-			}
-		}
-
 		private void _nameEdit_OnReadyDisable(object sender, EventArgs e)
 		{
 			var key = ((TextInputEventArgs)e).Key;
@@ -152,6 +115,61 @@ namespace Game1.Screen
 			}
 
 			_nameEdit.IsActive = false;
+			_menuCharacter.IsActive = true;
+		}
+
+		private void _menuCharacter_OnItemSelect(object sender, EventArgs e)
+		{
+			var args = (MenuEventArgs)e;
+
+			switch (args.Item)
+			{
+				case "name":	_menuCharacter.IsActive = false;
+								_nameEdit.IsActive = true;
+								_nameEdit.DelayInput(1);
+								break;
+				case "sex":		_menuCharacter.IsActive = false;
+								_menuSex.IsActive = true;
+								_menuSex.DelayInput(1);
+								break;
+			}
+		}
+
+		private void _menuSex_OnCurrentItemChange(object sender, EventArgs e)
+		{
+			var args = (MenuEventArgs)e;
+
+			switch (args.Item)
+			{
+				case "female" :
+					_characterView.SwapTexture(this.CharacterPreviewImage(CharacterSex.Female));
+					break;
+				case "male" :
+					_characterView.SwapTexture(this.CharacterPreviewImage(CharacterSex.Male));
+					break;
+			}
+		}
+
+		private void _menuSex_OnItemSelect(object sender, EventArgs e)
+		{
+			var args = (MenuEventArgs)e;
+
+			switch (args.Item)
+			{
+				case "female" : _newChar.Sex = CharacterSex.Female;	break;
+				case "male" :	_newChar.Sex = CharacterSex.Male;	break;
+			}
+
+			_characterView.SwapTexture(this.CharacterPreviewImage(_newChar.Sex));
+			_menuSex.IsActive = false;
+			_menuCharacter.IsActive = true;
+		}
+
+		private void _menuSex_OnReadyDisable(object sender, EventArgs e)
+		{
+			_characterView.SwapTexture(this.CharacterPreviewImage(_newChar.Sex));
+			_menuSex.SetById(_newChar.Sex.ToString("g").ToLower());
+			_menuSex.IsActive = false;
 			_menuCharacter.IsActive = true;
 		}
 	}

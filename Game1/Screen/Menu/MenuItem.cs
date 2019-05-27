@@ -10,6 +10,10 @@ namespace Game1.Screen.Menu
 {
 	public class MenuItem
 	{
+		private string _id;
+
+		[JsonProperty("id")]
+		public string Id { get; set; }
 		[JsonProperty("text")]
 		public string Text { get; set; }
 		[JsonProperty("link")]

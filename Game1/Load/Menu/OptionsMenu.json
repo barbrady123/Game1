@@ -1,36 +1,38 @@
 ﻿[
   {
+    "id": "back",
     "text": "Back"
   },
   {
+    "id": "sex",
     "text": "Sex"
   },
   {
-    "text": "Setting B",
-    "link": "Setting"
+    "id": "settingb",
+    "text": "Setting B"
   },
   {
-    "text": "Setting C",
-    "link": "Setting"
+    "id": "settingc",
+    "text": "Setting C"
   },
   {
-    "text": "Setting D",
-    "link": "Setting"
+    "id": "settingd",
+    "text": "Setting D"
   },
   {
-    "text": "Setting E",
-    "link": "Setting"
+    "id": "settinge",
+    "text": "Setting E"
   },
   {
-    "text": "Setting F",
-    "link": "Setting"
+    "id": "settingf",
+    "text": "Setting F"
   },
   {
-    "text": "Setting G",
-    "link": "Setting"
+    "id": "settingg",
+    "text": "Setting G"
   },
   {
-    "text": "Setting H",
-    "link": "Setting"
+    "id": "settingh",
+    "text": "Setting H"
   }
 ]

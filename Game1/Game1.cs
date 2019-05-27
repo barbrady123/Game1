@@ -79,10 +79,6 @@ namespace Game1
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update(GameTime gameTime)
 		{
-			// TODO: Get rid of this generic hook at some point...
-			//if (Keyboard.GetState().IsKeyDown(Keys.Escape))
-				//Exit();
-
 			InputManager.Instance.Update();
 			_screenManager.Update(gameTime);
 			base.Update(gameTime);

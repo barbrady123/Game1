@@ -7,14 +7,17 @@ namespace Game1.Screen.Menu
 		// TODO: Maybe make this an enum...
 		public string Type { get; set; }
 
-		public string Target { get; set; }
+		public string Source { get; set; }
+
+		public string Item { get; set; }
 
 		public MenuEventArgs() { }
 
-		public MenuEventArgs(string type, string target)
+		public MenuEventArgs(string type, string source, string item)
 		{
 			this.Type = type;
-			this.Target = target;
+			this.Source = source;
+			this.Item = item;
 		}
 	}
 }

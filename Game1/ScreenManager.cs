@@ -70,8 +70,8 @@ namespace Game1
 
 		public void StartScreen()
 		{
-			//TransitionScreens(new SplashScreen(_bounds));
-			TransitionScreens(new CharacterCreateScreen(_bounds));
+			TransitionScreens(new SplashScreen(_bounds));
+			//TransitionScreens(new CharacterCreateScreen(_bounds));
 		}
 
 		private void TransitionScreens(GameScreen newScreen)
@@ -104,6 +104,9 @@ namespace Game1
 			_currentScreen = _newScreen;
 			_newScreen = null;
 			_currentScreen.OnReadyScreenUnload += _currentScreen_OnReadyScreenUnload;
+			if (_currentScreen is MenuScreen menuScreen)
+				menuScreen.OnItemSelect += MenuScreen_OnItemSelect;
+
 			_currentScreen.LoadContent();
 		}
 
@@ -126,23 +129,44 @@ namespace Game1
 			}
 		}
 
+		private void MenuScreen_OnItemSelect(object sender, EventArgs e)
+		{
+			var args = (MenuEventArgs)e;
+
+			if (args.Type == "select")
+			{
+				switch (args.Source)
+				{
+					case "MainMenu" : switch (args.Item)
+					{
+						case "startnewgame":	TransitionScreens(new CharacterCreateScreen(_bounds));	break;
+						case "options":			TransitionScreens(new OptionsMenu(_bounds));			break;
+						case "exitgame":		Game1.Instance.Exit();									break;
+						default: break;
+					}
+					break;
+					case "OptionsMenu" : switch (args.Item)
+					{
+						case "back":	TransitionScreens(new MainMenu(_bounds));	break;
+						case "sex":		TransitionScreens(new SexMenu(_bounds));	break;
+					}
+					break;
+				}
+			}
+		}
+
 		private void _currentScreen_OnReadyScreenUnload(object sender, EventArgs e)
 		{
 			var args = (ScreenEventArgs)e;
 
-			if (args.Type == "change")
+			switch (args.Source)
 			{
-				switch (args.Target)
+				case "SplashScreen": switch (args.Type)
 				{
-					case "MainMenu":		TransitionScreens(new MainMenu(_bounds));				break;
-					case "OptionsMenu":		TransitionScreens(new OptionsMenu(_bounds));			break;
-					case "CharacterCreate": TransitionScreens(new CharacterCreateScreen(_bounds));	break;
-					case "SexMenu":			TransitionScreens(new SexMenu(_bounds));				break;
+					case "continue":	TransitionScreens(new MainMenu(_bounds));	break;
+					case "exit" :		Game1.Instance.Exit();						break;
 				}
-			}
-			else if (args.Type == "exit")
-			{
-				Game1.Instance.Exit();
+				break;
 			}
 		}
 	}

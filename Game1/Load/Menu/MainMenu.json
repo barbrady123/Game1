@@ -1,11 +1,14 @@
 ﻿[
-    {
-      "text": "Start New Game"
-    },
-    {
-      "text": "Options"
-    },
-    {
-      "text": "Exit Game"
-    }
+  {
+    "id": "startnewgame",
+    "text": "Start New Game"
+  },
+  {
+    "id": "options",
+    "text": "Options"
+  },
+  {
+    "id": "exitgame",
+    "text": "Exit Game"
+  }
 ]

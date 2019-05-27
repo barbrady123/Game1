@@ -39,8 +39,7 @@ namespace Game1.Screen
 
 		public virtual void UnloadContent()
 		{
-			if (_content != null)
-				_content.Unload();
+			_content?.Unload();
 		}
 
 		public virtual void Update(GameTime gameTime, bool processInput)

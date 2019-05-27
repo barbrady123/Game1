@@ -1,8 +1,10 @@
 ﻿[
   {
+    "id": "female",
     "text": "Female"
   },
   {
+    "id": "male",
     "text": "Male"
   }
 ]

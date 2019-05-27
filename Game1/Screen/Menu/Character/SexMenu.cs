@@ -16,18 +16,5 @@ namespace Game1.Screen.Menu.Character
 												layout: MenuLayout.Horizontal,
 												hasBackground: false,
 												escapeToDisable: true) { }
-
-		public event EventHandler OnFemaleSelect;
-		public event EventHandler OnMaleSelect;
-
-		private void Female()
-		{
-			OnFemaleSelect?.Invoke(this, null);
-		}
-
-		private void Male()
-		{
-			OnMaleSelect?.Invoke(this, null);
-		}
 	}
 }

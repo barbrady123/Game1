@@ -1,8 +1,10 @@
 ﻿[
-    {
-      "text": "Name"
-    },
-    {
-      "text": "Sex"
-    }
+  {
+    "id": "name",
+    "text": "Name"
+  },
+  {
+    "id": "sex",
+    "text": "Sex"
+  }
 ]
