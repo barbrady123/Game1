@@ -64,6 +64,13 @@ namespace Game1.Interface
 			}
 		}
 
+		private int _delayInputCycles;
+
+		public void DelayInput(int delayCycles)
+		{
+			_delayInputCycles = Math.Max(0, delayCycles);
+		}
+
 		public event EventHandler OnEnterPressed;
 		public event EventHandler OnEscapePressed;
 
@@ -78,6 +85,7 @@ namespace Game1.Interface
 			_maxVisibleLength = _width - (_borderWidth * 2) - ((int)_padding.X * 2);
 			_firstVisibleCharIndex = 0;
 			_visibleText = "";
+			_delayInputCycles = 0;
 			this.Text = text ?? "";
 			this.MaxLength = maxLength;
 			this.Position = Vector2.Zero;
@@ -113,9 +121,12 @@ namespace Game1.Interface
 			_textImage.UnloadContent();
 		}
 
-		public void Update(GameTime gameTime)
+		public void Update(GameTime gameTime, bool processInput)
 		{
-			ProcessInput();
+			if (processInput && (_delayInputCycles == 0))
+				ProcessInput();
+			_delayInputCycles = Math.Max(0, _delayInputCycles - 1);
+
 			_border.Update(gameTime);
 			_textImage.UpdateText(_visibleText);
 			_textImage.Update(gameTime);
@@ -168,6 +179,7 @@ namespace Game1.Interface
 
 			var newText = new StringBuilder(this.Text);
 			int cursorMove = 0;
+			bool updateText = true;
 			TextInputAction action = TextInputAction.None;
 
 			foreach (var key in InputManager.Instance.GetPressedKeys())
@@ -179,6 +191,7 @@ namespace Game1.Interface
 						continue;
 					case (Keys.Escape) :
 						OnEscapePressed?.Invoke(this, null);
+						updateText = false;
 						continue;
 					case (Keys.Back) :
 						if (this.CurrentPositionIndex > 0)
@@ -231,7 +244,9 @@ namespace Game1.Interface
 				}
 			}
 
-			this.Text = newText.ToString();
+			if (updateText)
+				this.Text = newText.ToString().Trim();
+
 			this.CurrentPositionIndex += cursorMove;
 			CalculateVisibleText(action);
 		}
@@ -260,7 +275,7 @@ namespace Game1.Interface
 					lastVisible = Math.Min(this.Text.Length - 1, this.CurrentPositionIndex - 1);
 					substring = this.Text.SubstringByIndex(firstVisible, lastVisible);
 
-					while (_textImage.StringLength(substring) >= _maxVisibleLength)
+					while (_textImage.StringLength(substring) > _maxVisibleLength)
 					{
 						firstVisible++;
 						substring = this.Text.SubstringByIndex(firstVisible, lastVisible);
@@ -325,13 +340,6 @@ namespace Game1.Interface
 					_firstVisibleCharIndex = firstVisible;
 					_visibleText = this.Text.SubstringByIndex(firstVisible, lastVisible);
 					return;
-				/*
-				case TextInputAction.Delete:
-					firstVisible = _firstVisibleCharIndex;
-					lastVisible = Math.Max(this.Text.Length - 1, this.CurrentPositionIndex - 1);
-
-					return;
-				*/
 			}
 		}
 	}

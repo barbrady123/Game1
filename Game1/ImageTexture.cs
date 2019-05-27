@@ -57,6 +57,7 @@ namespace Game1
 		public void SwapTexture(string name, bool resetSourceRect = true)
 		{
 			_name = name;
+			_texture = null;
 			if (resetSourceRect)
 				this.SourceRect = Rectangle.Empty;
 			LoadContent();

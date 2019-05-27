@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Screen.Menu.Character;
+using Game1.Interface;
 
 namespace Game1.Screen
 {
@@ -19,6 +20,7 @@ namespace Game1.Screen
 		public ImageTexture _characterViewBack;
 		public ImageTexture _characterView;
 		public CharacterNewMenu _menuCharacter;
+		public TextInput _nameEdit;
 		public SexMenu _menuSex;
 
 		private string CharacterPreviewImage => $"Character/Preview/{_newChar.Sex.ToString("g")}";
@@ -49,7 +51,10 @@ namespace Game1.Screen
 			_menuCharacter = new CharacterNewMenu(new Rectangle(600, 200, 200, 200));
 			_menuCharacter.OnNameSelect += _menuCharacter_OnNameSelect;
 			_menuCharacter.OnSexSelect += _menuCharacter_OnSexSelect;
-			_menuSex = new SexMenu(new Rectangle(700, 250, 300, 120)) { IsActive = false };
+			_nameEdit = new TextInput(200, _newChar.Name, 12, false) { Position = new Vector2(770, 257) };
+			_nameEdit.OnEnterPressed += _nameEdit_OnEnterPressed;
+			_nameEdit.OnEscapePressed += _nameEdit_OnEscapePressed;
+			_menuSex = new SexMenu(new Rectangle(690, 250, 300, 120)) { IsActive = false };
 			_menuSex.OnFemaleSelect += _menuSex_OnFemaleSelect;
 			_menuSex.OnMaleSelect += _menuSex_OnMaleSelect;
 			_menuSex.OnReadyMenuDisable += _menuSex_OnReadyMenuDisable;
@@ -68,6 +73,7 @@ namespace Game1.Screen
 			_characterViewBack.LoadContent();
 			_characterView.LoadContent();
 			_menuCharacter.LoadContent();
+			_nameEdit.LoadContent();
 			_menuSex.LoadContent();
 		}
 
@@ -78,6 +84,7 @@ namespace Game1.Screen
 			_characterViewBack.UnloadContent();
 			_characterView.UnloadContent();
 			_menuCharacter.UnloadContent();
+			_nameEdit.UnloadContent();
 			_menuSex.UnloadContent();
 		}
 
@@ -86,6 +93,7 @@ namespace Game1.Screen
 			base.Update(gameTime, processInput);
 			_characterView.Update(gameTime);
 			_menuCharacter.Update(gameTime, processInput);
+			_nameEdit.Update(gameTime, processInput);
 			_menuSex.Update(gameTime, processInput);
 		}
 
@@ -96,19 +104,22 @@ namespace Game1.Screen
 			_characterViewBack.Draw(spriteBatch);
 			_characterView.Draw(spriteBatch);
 			_menuCharacter.Draw(spriteBatch);
+			_nameEdit.Draw(spriteBatch);
 			_menuSex.Draw(spriteBatch);
 		}
 
 		private void _menuCharacter_OnNameSelect(object sender, EventArgs e)
 		{
-			// TODO: Implement this!!
-			// Need a "text box" of some type.....UGH.....
+			_menuCharacter.IsActive = false;
+			_nameEdit.IsActive = true;
+			_nameEdit.DelayInput(1);
 		}
 
 		private void _menuCharacter_OnSexSelect(object sender, EventArgs e)
 		{
 			_menuCharacter.IsActive = false;
 			_menuSex.IsActive = true;
+			_menuSex.DelayInput(1);
 		}
 
 		private void _menuSex_OnFemaleSelect(object sender, EventArgs e)
@@ -127,6 +138,20 @@ namespace Game1.Screen
 				_newChar.Sex = CharacterSex.Male;
 				_characterView.SwapTexture(this.CharacterPreviewImage);
 			}
+		}
+
+		private void _nameEdit_OnEnterPressed(object sender, EventArgs e)
+		{
+			_newChar.Name = _nameEdit.Text;
+			_nameEdit.IsActive = false;
+			_menuCharacter.IsActive = true;
+		}
+
+		private void _nameEdit_OnEscapePressed(object sender, EventArgs e)
+		{
+			_nameEdit.Text = _newChar.Name;
+			_nameEdit.IsActive = false;
+			_menuCharacter.IsActive = true;
 		}
 	}
 }

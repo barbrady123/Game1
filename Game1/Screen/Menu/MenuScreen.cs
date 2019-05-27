@@ -18,6 +18,7 @@ namespace Game1.Screen.Menu
 	public class MenuScreen : GameScreen
 	{
 		private const int MENU_PADDING = 20;
+		private const float DISABLED_ITEM_ALPHA = 0.4f;
 		private static readonly Color ActiveItemColor = Color.White;
 		private static readonly Color SelectedItemColor = new Color(240, 240, 240);
 		private static readonly Color UnselectedItemColor = new Color(100, 100, 100);
@@ -34,6 +35,13 @@ namespace Game1.Screen.Menu
 		private Keys BackwardKey => (_layout == MenuLayout.Vertical) ? Keys.Up : Keys.Left;
 
 		public event EventHandler OnReadyMenuDisable;
+
+		private int _delayInputCycles;
+
+		public void DelayInput(int delayCycles)
+		{
+			_delayInputCycles = Math.Max(0, delayCycles);
+		}
 
 		public bool IsActive
 		{
@@ -54,6 +62,7 @@ namespace Game1.Screen.Menu
 			_selectedEffect = null;
 			_layout = layout;
 			_escapeToDisable = escapeToDisable;
+			_delayInputCycles = 0;
 			this.IsActive = true;
 		}
 
@@ -127,10 +136,9 @@ namespace Game1.Screen.Menu
 			for (int x = 0; x < _items.Count; x++)
 				_items[x].Image.Color = MenuScreen.ActiveItemColor;
 
-			if (processInput)
-			{
+			if (processInput && (_delayInputCycles == 0))
 				UpdateInput(gameTime);
-			}
+			_delayInputCycles = Math.Max(0, _delayInputCycles - 1);
 
 			base.Update(gameTime, processInput);
 			foreach (var item in _items)
@@ -151,7 +159,7 @@ namespace Game1.Screen.Menu
 				if (newIndex >= 0)
 					SetCurrentIndex(newIndex);
 			}
-			else if (InputManager.Instance.KeyPressed(Keys.Enter))
+			else if (InputManager.Instance.KeyReleased(Keys.Enter))
 			{
 				if (_items[_currentIndex].LinkAction != null)
 					_items[_currentIndex].LinkAction.Invoke();
@@ -203,7 +211,7 @@ namespace Game1.Screen.Menu
 		private void SetItemsAlpha(bool isActive)
 		{
 			foreach (var item in _items)
-				item.Image.Alpha = IsActive ? 1.0f : 0.3f;
+				item.Image.Alpha = IsActive ? 1.0f : MenuScreen.DISABLED_ITEM_ALPHA;
 		}
 
 		protected void ReadyMenuDisable(object sender, MenuEventArgs args = null)

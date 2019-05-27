@@ -78,16 +78,19 @@ namespace Game1
 		{
 			_origin = Vector2.Zero;
 
+			// For some reason this has to be the pre-scaled size...
+			var originalScale = new Vector2(this.SourceRect.Width / this.Scale.X, this.SourceRect.Height / this.Scale.Y);			
+
 			switch (this.Alignment.Horizatal)
 			{
-				case (HorizontalAlignment.Center) : _origin.X += this.SourceRect.Width / 2;	break;
-				case (HorizontalAlignment.Right):	_origin.X += this.SourceRect.Width;		break;
+				case (HorizontalAlignment.Center) : _origin.X += originalScale.X / 2;	break;
+				case (HorizontalAlignment.Right):	_origin.X += originalScale.X;		break;
 			}
 
 			switch (this.Alignment.Vertical)
 			{
-				case (VerticalAlignment.Center) :	_origin.Y += this.SourceRect.Height / 2;	break;
-				case (VerticalAlignment.Bottom):	_origin.Y += this.SourceRect.Height;		break;
+				case (VerticalAlignment.Center) :	_origin.Y += originalScale.Y / 2;	break;
+				case (VerticalAlignment.Bottom):	_origin.Y += originalScale.Y;		break;
 			}
 		}
 	}
