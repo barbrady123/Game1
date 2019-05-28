@@ -104,7 +104,10 @@ namespace Game1
 			_newScreen = null;
 			_currentScreen.OnReadyScreenUnload += _currentScreen_OnReadyScreenUnload;
 			if (_currentScreen is MenuScreen menuScreen)
+			{
 				menuScreen.OnItemSelect += MenuScreen_OnItemSelect;
+				menuScreen.OnReadyDisable += MenuScreen_OnReadyDisable;
+			}
 
 			_currentScreen.LoadContent();
 		}
@@ -169,6 +172,20 @@ namespace Game1
 				case "CharacterCreateScreen": switch (args.Type)
 				{
 					case "back" :		TransitionScreens(new MainMenu(_bounds));	break;
+				}
+				break;
+			}
+		}
+
+		private void MenuScreen_OnReadyDisable(object sender, EventArgs e)
+		{
+			var args = (MenuEventArgs)e;
+
+			switch (args.Source)
+			{
+				case "MainMenu": switch (args.Type)
+				{
+					case "escape":	Game1.Instance.Exit();	break;
 				}
 				break;
 			}

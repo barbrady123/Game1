@@ -10,6 +10,6 @@ namespace Game1.Screen.Menu
 {
 	public class MainMenu : MenuScreen
 	{
-		public MainMenu(Rectangle bounds): base(bounds) { }
+		public MainMenu(Rectangle bounds): base(bounds, escapeToDisable: true) { }
 	}
 }

@@ -20,7 +20,6 @@ namespace Game1.Screen.Menu.Character
 		public override void UpdateInput(GameTime gameTime)
 		{
 			base.UpdateInput(gameTime);
-
 		}
 	}
 }

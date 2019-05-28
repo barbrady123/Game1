@@ -21,6 +21,7 @@ namespace Game1.Screen
 		public ImageTexture _characterViewBack;
 		public ImageTexture _characterView;
 		public CharacterNewCompositeMenu _menuCharacter;
+		public DialogBox _dialogBox;
 
 		private string CharacterPreviewImage(CharacterSex sex) => $"Character/Preview/{sex.ToString("g")}";
 
@@ -50,6 +51,9 @@ namespace Game1.Screen
 			_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200));
 			_menuCharacter.OnSexItemChange += _menuCharacter_OnSexItemChange;
 			_menuCharacter.OnReadyDisable += _menuCharacter_OnReadyDisable;
+
+			// Dialog Box
+			_dialogBox = new DialogBox("You done messed up!", DialogButton.Ok, new Rectangle(600, 450, 400, 300), null, false);
 		}
 
 		public override void LoadContent()
@@ -59,6 +63,7 @@ namespace Game1.Screen
 			_characterViewBack.LoadContent();
 			_characterView.LoadContent();
 			_menuCharacter.LoadContent();
+			_dialogBox.LoadContent();
 		}
 
 		public override void UnloadContent()
@@ -68,6 +73,7 @@ namespace Game1.Screen
 			_characterViewBack.UnloadContent();
 			_characterView.UnloadContent();
 			_menuCharacter.UnloadContent();
+			_dialogBox.UnloadContent();
 		}
 
 		public override void Update(GameTime gameTime, bool processInput)
@@ -75,6 +81,11 @@ namespace Game1.Screen
 			base.Update(gameTime, processInput);
 			_characterView.Update(gameTime);
 			_menuCharacter.Update(gameTime, processInput);
+			_dialogBox.Update(gameTime);
+
+			// Temp...
+			if (InputManager.Instance.KeyPressed(Keys.D))
+				_dialogBox.IsActive = true;
 		}
 
 		public override void Draw(SpriteBatch spriteBatch)
@@ -84,6 +95,7 @@ namespace Game1.Screen
 			_characterViewBack.Draw(spriteBatch);
 			_characterView.Draw(spriteBatch);
 			_menuCharacter.Draw(spriteBatch);
+			_dialogBox.Draw(spriteBatch);
 		}
 
 		private void _menuCharacter_OnSexItemChange(object sender, EventArgs e)

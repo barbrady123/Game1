@@ -48,6 +48,7 @@
     <Compile Include="Effect\FadeOutEffect.cs" />
     <Compile Include="Effect\ZoomCycleEffect.cs" />
     <Compile Include="Enum\CharacterSexEnum.cs" />
+    <Compile Include="Enum\DialogButtonEnum.cs" />
     <Compile Include="Enum\MenuLayoutEnum.cs" />
     <Compile Include="Enum\HorizontalAlignmentEnum.cs" />
     <Compile Include="Enum\TextInputActionEnum.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="ImageTexture.cs" />
     <Compile Include="InputManager.cs" />
     <Compile Include="Interface\TextInput.cs" />
+    <Compile Include="Screen\Menu\OkMenu.cs" />
     <Compile Include="Screen\Menu\Character\StartCancelMenu.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -77,6 +79,7 @@
     <Compile Include="Screen\Menu\MenuItem.cs" />
     <Compile Include="Screen\Menu\MenuScreen.cs" />
     <Compile Include="Screen\Menu\OptionsMenu.cs" />
+    <Compile Include="Screen\DialogBox.cs" />
     <Compile Include="Screen\ScreenEventArgs.cs" />
     <Compile Include="Screen\SplashScreen.cs" />
     <Compile Include="Util.cs" />

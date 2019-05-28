@@ -44,7 +44,6 @@ namespace Game1
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-
 			// In case this texture was generated elsewhere...
 			_texture?.Dispose();
 		}

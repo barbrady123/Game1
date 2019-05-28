@@ -64,9 +64,10 @@ namespace Game1
 
 		private void CalculateTextSize()
 		{
-			this.Size = _font.MeasureString(_text) * this.Scale;
+			var baseSize = _font.MeasureString(_text);
+			this.Size = baseSize * this.Scale;
 			if (this.SourceRect == Rectangle.Empty)
-				this.SourceRect = new Rectangle(0, 0, (int)this.Size.X, (int)this.Size.Y);
+				this.SourceRect = new Rectangle(0, 0, (int)baseSize.X, (int)baseSize.Y);
 			SetOrigin();
 		}
 	}

@@ -88,9 +88,7 @@ namespace Game1
 		protected virtual void SetOrigin()
 		{
 			_origin = Vector2.Zero;
-
-			// For some reason this has to be the pre-scaled size...
-			var originalScale = new Vector2(this.SourceRect.Width / this.Scale.X, this.SourceRect.Height / this.Scale.Y);			
+			var originalScale = this.SourceRect.SizeVector();
 
 			switch (this.Alignment.Horizatal)
 			{
