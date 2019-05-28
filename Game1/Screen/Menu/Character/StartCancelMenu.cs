@@ -4,23 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Enum;
 
 namespace Game1.Screen.Menu.Character
 {
-	public class CharacterNewMenu : MenuScreen
+	public class StartCancelMenu : MenuScreen
 	{
-		public CharacterNewMenu(Rectangle bounds): base(bounds,
+		public StartCancelMenu (Rectangle bounds): base(bounds: bounds,
+														layout: MenuLayout.Horizontal,
 														hasBackground: false,
 														escapeToDisable: true,
-														beyondBoundaryDisable: true) { }
-
-		public override void UpdateInput(GameTime gameTime)
-		{
-			base.UpdateInput(gameTime);
-
-		}
+														fireAltAxisEvents: true) { }
 	}
 }

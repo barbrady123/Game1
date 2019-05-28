@@ -30,9 +30,13 @@ namespace Game1.Screen.Menu
 
 		private bool _isActive;
 		private bool _escapeToDisable;
+		private bool _beyondBoundaryDisable;
+		private bool _fireAltAxisEvents;
 
 		private Keys ForwardKey => (_layout == MenuLayout.Vertical) ? Keys.Down : Keys.Right;
 		private Keys BackwardKey => (_layout == MenuLayout.Vertical) ? Keys.Up : Keys.Left;
+		private Keys AltAxisFowardKey  => (_layout == MenuLayout.Vertical) ? Keys.Right : Keys.Down;
+		private Keys AltAxisBackwardKey  => (_layout == MenuLayout.Vertical) ? Keys.Left : Keys.Up;
 
 		public event EventHandler OnReadyDisable;
 		public event EventHandler OnCurrentItemChange;
@@ -45,12 +49,19 @@ namespace Game1.Screen.Menu
 			_delayInputCycles = Math.Max(0, delayCycles);
 		}
 
+		public int ItemCount => _items?.Count ?? 0;
+
 		public bool IsActive
 		{
 			get { return _isActive; }
 			set {
-				_isActive = value;
-				SetItemsAlpha(_isActive);
+				if (value != _isActive)
+				{
+					_isActive = value;
+					SetItemsAlpha(_isActive);
+					if (_isActive && (_currentIndex < 0))
+						this.CurrentIndex = 0;
+				}
 			}
 		}
 
@@ -61,7 +72,7 @@ namespace Game1.Screen.Menu
 				int index = Util.Clamp(value, 0, _items.Count - 1);
 				if (index == _currentIndex)
 					return;
-
+				
 				if (_currentIndex >= 0)
 				{
 					_items[_currentIndex].Image.ClearEffects();
@@ -74,15 +85,31 @@ namespace Game1.Screen.Menu
 			}
 		}
 
+		public void ClearSelection()
+		{
+			if (_currentIndex >= 0)
+			{
+				_items[_currentIndex].Image.ClearEffects();
+				if (this.IsActive)
+					_items[_currentIndex].Image.Alpha = 1.0f;
+			}
+
+			_currentIndex = -1;
+		}
+
 		public MenuScreen(Rectangle bounds,
 						  MenuLayout layout = MenuLayout.Vertical,
 						  bool hasBackground = true,
-						  bool escapeToDisable = false): base(bounds, hasBackground ? "brick" : null)
+						  bool escapeToDisable = false,
+						  bool beyondBoundaryDisable = false,
+						  bool fireAltAxisEvents = false): base(bounds, hasBackground ? "brick" : null)
 		{
 			_currentIndex = -1;
 			_items = new List<MenuItem>();
 			_layout = layout;
 			_escapeToDisable = escapeToDisable;
+			_beyondBoundaryDisable = beyondBoundaryDisable;
+			_fireAltAxisEvents = fireAltAxisEvents;
 			_delayInputCycles = 0;
 			this.IsActive = true;
 		}
@@ -139,7 +166,6 @@ namespace Game1.Screen.Menu
 
 		public override void Update(GameTime gameTime, bool processInput)
 		{
-
 			if (!this.IsActive)
 			{
 				for (int x = 0; x < _items.Count; x++)
@@ -166,23 +192,35 @@ namespace Game1.Screen.Menu
 
 		public virtual void UpdateInput(GameTime gameTime)
 		{
+			bool beyondBoundary = false;
+
 			if (InputManager.Instance.KeyPressed(this.ForwardKey))
 			{
+				beyondBoundary = (_currentIndex >= _items.Count - 1);
+
 				int newIndex = Math.Min(_items.Count - 1, _currentIndex + 1);
 				if (newIndex != _currentIndex)
 				{
 					this.CurrentIndex = newIndex;
 					OnCurrentItemChange?.Invoke(this, new MenuEventArgs("currentChange", this.GetType().Name, _items[_currentIndex].Id));
 				}
+
+				if (beyondBoundary && _beyondBoundaryDisable)
+					OnReadyDisable?.Invoke(this, new MenuEventArgs("beyondend", this.GetType().Name, null));
 			}
 			else if (InputManager.Instance.KeyPressed(this.BackwardKey))
 			{
+				beyondBoundary = (_currentIndex <= 0);
+
 				int newIndex = Math.Max(0, _currentIndex - 1);
 				if (newIndex != _currentIndex)
 				{
 					this.CurrentIndex = newIndex;
 					OnCurrentItemChange?.Invoke(this, new MenuEventArgs("currentChange", this.GetType().Name, _items[_currentIndex].Id));
 				}
+
+				if (beyondBoundary && _beyondBoundaryDisable)
+					OnReadyDisable?.Invoke(this, new MenuEventArgs("beyondbeginning", this.GetType().Name, null));
 			}
 			else if (InputManager.Instance.KeyReleased(Keys.Enter))
 			{
@@ -190,7 +228,15 @@ namespace Game1.Screen.Menu
 			}
 			else if (_escapeToDisable && InputManager.Instance.KeyPressed(Keys.Escape))
 			{
-				OnReadyDisable?.Invoke(this, null);
+				OnReadyDisable?.Invoke(this, new MenuEventArgs("escape", this.GetType().Name, null));
+			}
+			else if (_fireAltAxisEvents && InputManager.Instance.KeyPressed(this.AltAxisFowardKey))
+			{
+				OnReadyDisable?.Invoke(this, new MenuEventArgs("altfoward", this.GetType().Name, _items[_currentIndex].Id));
+			}
+			else if (_fireAltAxisEvents && InputManager.Instance.KeyPressed(this.AltAxisBackwardKey))
+			{
+				OnReadyDisable?.Invoke(this, new MenuEventArgs("altbackward", this.GetType().Name, _items[_currentIndex].Id));
 			}
 		}
 

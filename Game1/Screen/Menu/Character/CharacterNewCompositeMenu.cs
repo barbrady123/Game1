@@ -19,12 +19,13 @@ namespace Game1.Screen.Menu.Character
 		private readonly CharacterNewMenu _menuCharacter;
 		private readonly TextInput _nameEdit;
 		private readonly SexMenu _menuSex;
+		private readonly StartCancelMenu _menuStart;
 
 		public string CharacterName { get; set; }
 		public CharacterSex CharacterSex { get; set; }
 
 		public event EventHandler OnReadyDisable;
-		public event EventHandler OnSexItemChange;
+		public event EventHandler OnSexItemChange;		
 
 		public CharacterNewCompositeMenu(Rectangle bounds)
 		{
@@ -46,6 +47,11 @@ namespace Game1.Screen.Menu.Character
 			_menuSex.OnCurrentItemChange += _menuSex_OnCurrentItemChange;
 			_menuSex.OnItemSelect += _menuSex_OnItemSelect;
 			_menuSex.OnReadyDisable += _menuSex_OnReadyDisable;
+
+			// Start/Cancel menu...
+			_menuStart = new StartCancelMenu(new Rectangle(_menuCharacter.Bounds.Left + 50, _menuCharacter.Bounds.Top + 300, 300, 50)) { IsActive = false };
+			_menuStart.OnItemSelect += _menuStart_OnItemSelect;
+			_menuStart.OnReadyDisable += _menuStart_OnReadyDisable;
 		}
 
 		public void LoadContent()
@@ -54,6 +60,8 @@ namespace Game1.Screen.Menu.Character
 			_nameEdit.LoadContent();
 			_menuSex.LoadContent();
 			_menuSex.SetById(this.CharacterSex.ToString("g").ToLower());
+			_menuStart.LoadContent();
+			_menuStart.ClearSelection();
 		}
 
 		public void UnloadContent()
@@ -61,6 +69,7 @@ namespace Game1.Screen.Menu.Character
 			_menuCharacter.UnloadContent();
 			_nameEdit.UnloadContent();
 			_menuSex.UnloadContent();
+			_menuStart.UnloadContent();
 		}
 
 		public void Update(GameTime gameTime, bool processInput)
@@ -68,6 +77,7 @@ namespace Game1.Screen.Menu.Character
 			_menuCharacter.Update(gameTime, processInput);
 			_nameEdit.Update(gameTime, processInput);
 			_menuSex.Update(gameTime, processInput);
+			_menuStart.Update(gameTime, processInput);
 		}
 
 		public void Draw(SpriteBatch spriteBatch)
@@ -75,6 +85,7 @@ namespace Game1.Screen.Menu.Character
 			_menuCharacter.Draw(spriteBatch);
 			_nameEdit.Draw(spriteBatch);
 			_menuSex.Draw(spriteBatch);
+			_menuStart.Draw(spriteBatch);
 		}
 
 		private void _menuCharacter_OnItemSelect(object sender, EventArgs e)
@@ -83,20 +94,34 @@ namespace Game1.Screen.Menu.Character
 
 			switch (args.Item)
 			{
-				case "name":	_menuCharacter.IsActive = false;
-								_nameEdit.IsActive = true;
-								_nameEdit.DelayInput(1);
-								break;
-				case "sex":		_menuCharacter.IsActive = false;
-								_menuSex.IsActive = true;
-								_menuSex.DelayInput(1);
-								break;
+				case "name":
+					_menuCharacter.IsActive = false;
+					_nameEdit.IsActive = true;
+					_nameEdit.DelayInput(1);
+					break;
+				case "sex":
+					_menuCharacter.IsActive = false;
+					_menuSex.IsActive = true;
+					_menuSex.DelayInput(1);
+					break;
 			}
 		}
 
 		private void _menuCharacter_OnReadyDisable(object sender, EventArgs e)
 		{
-			OnReadyDisable?.Invoke(this, new MenuEventArgs("back", this.GetType().Name, null));
+			var args = (MenuEventArgs)e;
+
+			switch (args.Type)
+			{
+				case "escape" :	
+					OnReadyDisable?.Invoke(this, new MenuEventArgs("back", this.GetType().Name, null));
+					break;
+				case "beyondend" :
+					_menuCharacter.IsActive = false;
+					_menuCharacter.ClearSelection();
+					_menuStart.IsActive = true;
+					break;
+			}
 		}
 
 		private void _nameEdit_OnReadyDisable(object sender, EventArgs e)
@@ -143,6 +168,53 @@ namespace Game1.Screen.Menu.Character
 				OnSexItemChange?.Invoke(this, new MenuEventArgs("change", this.GetType().Name, this.CharacterSex.ToString("g").ToLower()));
 			_menuSex.IsActive = false;
 			_menuCharacter.IsActive = true;
+		}
+
+		private void _menuStart_OnItemSelect(object sender, EventArgs e)
+		{
+			var args = (MenuEventArgs)e;
+
+			switch (args.Item)
+			{
+				case "startgame" :
+					if (!ValidateInput())
+						// Do something that indicates there's an input error
+						break;
+					// Start the game!!!
+					break;
+				case "cancel" :
+					OnReadyDisable?.Invoke(this, new MenuEventArgs("back", this.GetType().Name, null));
+					break;
+			}
+		}
+
+		private void _menuStart_OnReadyDisable(object sender, EventArgs e)
+		{
+			var args = (MenuEventArgs)e;
+
+			switch (args.Type)
+			{
+				case "escape" :
+					OnReadyDisable?.Invoke(this, new MenuEventArgs("back", this.GetType().Name, null));
+					break;
+				case "altbackward" :
+					_menuStart.IsActive = false;
+					_menuStart.ClearSelection();
+					_menuCharacter.IsActive = true;
+					_menuCharacter.CurrentIndex = _menuCharacter.ItemCount - 1;
+					break;
+			}
+		}
+
+		private bool ValidateInput()
+		{
+			if (String.IsNullOrWhiteSpace(this.CharacterName))
+			{
+				// show an error...or something...
+				return false;
+			}
+
+			return true;
 		}
 	}
 }

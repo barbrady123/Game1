@@ -9,7 +9,7 @@ namespace Game1.Screen.Menu
 
 		public string Source { get; set; }
 
-		public string Item { get; set; }
+		public string Item { get; set; }		
 
 		public MenuEventArgs() { }
 
