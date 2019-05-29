@@ -9,11 +9,11 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
 
-namespace Game1.Screen
+namespace Game1.Screens
 {
-	public class SplashScreen : GameScreen
+	public class SplashScreen : Screen
 	{
-		private ImageBase _titleText;
+		private Image _titleText;
 
 		public SplashScreen(Rectangle bounds): base(bounds, "maze")
 		{
@@ -38,12 +38,12 @@ namespace Game1.Screen
 		{
 			if (processInput)
 			{
-				if (InputManager.Instance.KeyPressed(Keys.Enter))
+				if (InputManager.KeyPressed(Keys.Enter))
 				{
 					_titleText.IsActive = false;
 					ReadyScreenUnload(this, new ScreenEventArgs("continue", this.GetType().Name, null));
 				}
-				else if (InputManager.Instance.KeyPressed(Keys.Escape))
+				else if (InputManager.KeyPressed(Keys.Escape))
 				{
 					_titleText.IsActive = false;
 					ReadyScreenUnload(this, new ScreenEventArgs("exit", this.GetType().Name, null));

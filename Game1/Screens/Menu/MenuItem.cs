@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Game1.Enum;
 
-namespace Game1.Screen.Menu
+namespace Game1.Screens.Menu
 {
 	public class MenuItem
 	{

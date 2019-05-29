@@ -12,9 +12,20 @@ namespace Game1
 	/// </summary>
 	public class Game1 : Game
 	{
+		public static readonly string GameName = typeof(Game1).Name;
+		public static readonly string GameStorageRoot = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\{Game1.GameName}";
+		public static readonly string PlayerFile = $"{Game1.GameStorageRoot}\\player";
+		public static readonly string MapFile = $"{Game1.MapRoot}\\map";
 		public const string ContentRoot = "Content";
 		public const string FontsRoot = "Fonts";
 		public const string BackgroundRoot = "Background";
+		public const string MenuConfigRoot = "Load\\Menu";
+		public const string MapRoot = "Load\\Map";
+		public const string TilesheetRoot = "Gameplay\\TileSheet";
+		public const string SpriteSheetRoot = "Gameplay\\Character";
+		public const int TileSize = 64;
+		public const int TileSheetSize = 10;
+		public const int SpriteSheetWalkFrameCount = 9;
 
 		GraphicsDeviceManager _graphicsManager;
 		SpriteBatch _spriteBatch;
@@ -79,7 +90,7 @@ namespace Game1
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update(GameTime gameTime)
 		{
-			InputManager.Instance.Update();
+			InputManager.Update();
 			_screenManager.Update(gameTime);
 			base.Update(gameTime);
 		}

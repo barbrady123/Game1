@@ -12,7 +12,7 @@ using Game1.Enum;
 
 namespace Game1
 {
-	public class ImageText : ImageBase
+	public class ImageText : Image
 	{
 		public const string DefaultFont = "Orbitron";
 
@@ -48,13 +48,14 @@ namespace Game1
 			CalculateTextSize();
 		}
 
-		public override void DrawActive(SpriteBatch spriteBatch)
+		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend)
 		{
-			spriteBatch.DrawString(_font, _text, this.Position + this.DrawArea.TopLeftVector(), this.Color * this.Alpha, 0.0f, _origin, this.Scale, SpriteEffects.None, 0.0f);
+			spriteBatch.DrawString(_font, _text, this.Position + this.DrawArea.TopLeftVector(), this.Color * this.Alpha * (alphaBlend ?? 1.0f), 0.0f, _origin, this.Scale, SpriteEffects.None, 0.0f);
 		}
 
 		public void UpdateText(string text)
 		{
+			text = text ?? "";
 			if (text != _text)
 			{
 				_text = text;

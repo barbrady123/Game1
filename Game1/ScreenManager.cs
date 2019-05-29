@@ -8,17 +8,17 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
-using Game1.Screen;
-using Game1.Screen.Menu;
-using Game1.Screen.Menu.Character;
+using Game1.Screens;
+using Game1.Screens.Menu;
+using Game1.Screens.Menu.Character;
 
 namespace Game1
 {
 	public class ScreenManager
 	{
 		private ContentManager _content;
-		private GameScreen _currentScreen;
-		private GameScreen _newScreen;
+		private Screen _currentScreen;
+		private Screen _newScreen;
 		private bool _isTransitioning;
 
 		private ImageTexture _transitionImage;
@@ -73,7 +73,7 @@ namespace Game1
 			TransitionScreens(new CharacterCreateScreen(_bounds));
 		}
 
-		private void TransitionScreens(GameScreen newScreen)
+		private void TransitionScreens(Screens.Screen newScreen)
 		{
 			if (_isTransitioning)
 				return;
@@ -104,9 +104,10 @@ namespace Game1
 			_newScreen = null;
 			_currentScreen.OnReadyScreenUnload += _currentScreen_OnReadyScreenUnload;
 			if (_currentScreen is MenuScreen menuScreen)
-			{
+			{				
 				menuScreen.OnItemSelect += MenuScreen_OnItemSelect;
 				menuScreen.OnReadyDisable += MenuScreen_OnReadyDisable;
+				menuScreen.IsActive = true;
 			}
 
 			_currentScreen.LoadContent();
@@ -171,7 +172,16 @@ namespace Game1
 				break;
 				case "CharacterCreateScreen": switch (args.Type)
 				{
-					case "back" :		TransitionScreens(new MainMenu(_bounds));	break;
+					case "back" : TransitionScreens(new MainMenu(_bounds));	break;
+					case "game" :
+						// This should NOT go directly to game screen...we need a "loading" transition screen with a call back (probably just part of the ScreenManager)....
+						// TODO: Move this to the correct place...
+						var world = new World();
+						world.Player = IOManager.ObjectFromFile<Character>(Game1.PlayerFile);
+						world.Player.Position = new Vector2(Game1.TileSize / 2, Game1.TileSize / 2);
+						world.CurrentMap = IOManager.ObjectFromFile<Map>(Game1.MapFile);
+						TransitionScreens(new GameScreen(_bounds, world));
+						break;
 				}
 				break;
 			}

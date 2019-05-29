@@ -12,7 +12,7 @@ using Game1.Enum;
 
 namespace Game1.Interface
 {
-	public class TextInput
+	public class TextInput : IActivatable
 	{
 		private readonly int _width;
 		private readonly int _height;
@@ -62,6 +62,8 @@ namespace Game1.Interface
 				{
 					_isActive = value;
 					this.CurrentPositionIndex = 0;
+					if (_isActive)
+						DelayInput(1);
 				}
 			}
 		}
@@ -99,7 +101,8 @@ namespace Game1.Interface
 		{
 			_background = GenerateBackground();
 			_background.LoadContent();
-			_border = GenerateBorder();
+			_border = Util.GenerateBorderTexture(_width, _height, _borderWidth, Color.Gray);
+			_border.Position = this.Position;
 			_border.LoadContent();
 			_textImage = new ImageText(this.Text, true) { 
 				Position = this.TextPosition + new Vector2(0.0f, _fontHeight),
@@ -159,19 +162,6 @@ namespace Game1.Interface
 			return new ImageTexture(t, true) { Position = this.Position };
 		}
 
-		private ImageTexture GenerateBorder()
-		{
-			var data = new Color[_width * _height];
-			for (int w = 0; w < _width; w++)
-			for (int h = 0; h < _height; h++)
-				if ((h < _borderWidth) || (h >= _height - _borderWidth) || (w < _borderWidth) || (w >= _width - _borderWidth))
-					data[w + (h * _width)] = Color.Gray;
-
-			var t = new Texture2D(Game1.Graphics, _width, _height);
-			t.SetData(data);
-			return new ImageTexture(t, true) { Position = this.Position };
-		}
-
 		private void ProcessInput()
 		{
 			if (!this.IsActive)
@@ -183,7 +173,7 @@ namespace Game1.Interface
 			bool finalizeText = false;
 			TextInputAction action = TextInputAction.None;
 
-			foreach (var key in InputManager.Instance.GetPressedKeys())
+			foreach (var key in InputManager.GetPressedKeys())
 			{
 				switch (key)
 				{
@@ -235,7 +225,7 @@ namespace Game1.Interface
 						continue;
 				}
 				
-				char newChar = InputManager.Instance.KeyToChar(key, InputManager.Instance.KeyDown(Keys.LeftShift, Keys.RightShift) || InputManager.Instance.CapsLock);
+				char newChar = InputManager.KeyToChar(key, InputManager.KeyDown(new[] { Keys.LeftShift, Keys.RightShift} ) || InputManager.CapsLock);
 				if (newChar == '\0')
 					continue;		
 

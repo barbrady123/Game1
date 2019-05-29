@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Game1
 {
-	public class InputManager
+	public static class InputManager
 	{
 		private readonly static Dictionary<Keys, (char, char)> KeyMap = new Dictionary<Keys, (char, char)>
 		{
@@ -64,40 +64,47 @@ namespace Game1
 			{ Keys.OemMinus, ('-', '_') }
 		};
 
-		private KeyboardState _currentKeyState;
-		private KeyboardState _prevKeyState;
+		private static KeyboardState _currentKeyState;
+		private static KeyboardState _prevKeyState;
 
-		private static readonly InputManager _instance = new InputManager();
-
-		private InputManager() { }
-
-		public static InputManager Instance => _instance;
-
-		public void Update()
+		public static void Update()
 		{
 			_prevKeyState = _currentKeyState;
 			_currentKeyState = Keyboard.GetState();			
 		}
 
-		public bool KeyPressed(params Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyDown(k) && _prevKeyState.IsKeyUp(k));
+		public static bool KeyPressed(Keys key, bool clearAfterMatch = false)
+		{
+			bool result = KeyPressed(new[] { key });
+			if (clearAfterMatch)
+				_currentKeyState = new KeyboardState(_currentKeyState.GetPressedKeys().Where(k => k != key).ToArray(), _currentKeyState.CapsLock, _currentKeyState.NumLock);
 
-		public bool KeyReleased(params Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyUp(k) && _prevKeyState.IsKeyDown(k));
+			return result;
+		}
 
-		public bool KeyDown(params Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyDown(k));	
+		public static bool KeyPressed(Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyDown(k) && _prevKeyState.IsKeyUp(k));
 
-		public bool CapsLock => _currentKeyState.CapsLock;
+		public static bool KeyReleased(Keys key, bool clearAfterMatch = false) => KeyReleased(new[] { key });
 
-		public List<Keys> GetPressedKeys()
+		public static bool KeyReleased(Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyUp(k) && _prevKeyState.IsKeyDown(k));
+
+		public static bool KeyDown(Keys key, bool clearAfterMatch = false) => KeyDown(new[] { key });
+
+		public static bool KeyDown(Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyDown(k));	
+
+		public static bool CapsLock => _currentKeyState.CapsLock;
+
+		public static List<Keys> GetPressedKeys()
 		{
 			List<Keys> keysPressed = new List<Keys>();
-			foreach (var key in _prevKeyState.GetPressedKeys())
-				if (_currentKeyState.IsKeyUp(key))
+			foreach (var key in _currentKeyState.GetPressedKeys())
+				if (_prevKeyState.IsKeyUp(key))
 					keysPressed.Add(key);
 
 			return keysPressed;			
 		}
 
-		public char KeyToChar(Keys key, bool isUpper)
+		public static char KeyToChar(Keys key, bool isUpper)
 		{
 			if (!InputManager.KeyMap.TryGetValue(key, out (char lower, char upper) values))
 				return '\0';

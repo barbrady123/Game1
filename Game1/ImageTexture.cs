@@ -12,7 +12,7 @@ using Game1.Enum;
 
 namespace Game1
 {
-	public class ImageTexture : ImageBase
+	public class ImageTexture : Image
 	{
 		protected Texture2D _texture;
 		private string _name;
@@ -28,6 +28,8 @@ namespace Game1
 			_texture = texture;
 			this.Alignment = ImageAlignment.LeftTop;
 		}
+
+		public Texture2D Texture => _texture;
 
 		public override void LoadContent()
 		{
@@ -48,9 +50,9 @@ namespace Game1
 			_texture?.Dispose();
 		}
 
-		public override void DrawActive(SpriteBatch spriteBatch)
+		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null)
 		{
-			spriteBatch.Draw(_texture, this.Position + this.DrawArea.TopLeftVector(), this.SourceRect, this.Color * this.Alpha, 0.0f, _origin, this.Scale, SpriteEffects.None, 0.0f);
+			spriteBatch.Draw(_texture, this.Position + this.DrawArea.TopLeftVector(), this.SourceRect, this.Color * this.Alpha * (alphaBlend ?? 1.0f), 0.0f, _origin, this.Scale, SpriteEffects.None, 0.0f);
 		}
 
 		public void SwapTexture(string name, bool resetSourceRect = true)

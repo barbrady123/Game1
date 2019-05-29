@@ -13,12 +13,14 @@ using Newtonsoft.Json;
 using Game1.Effect;
 using Game1.Enum;
 
-namespace Game1.Screen.Menu
+namespace Game1.Screens.Menu
 {
-	public class MenuScreen : GameScreen
+	public class MenuScreen : Screen, IActivatable
 	{
 		private const int MENU_PADDING = 20;
-		private const float DISABLED_ITEM_ALPHA = 0.4f;
+		private const float ENABLED_MENU_ALPHA = 1.0f;
+		private const float DISABLED_MENU_ALPHA = 0.4f;
+		private const float DEFAULT_ITEM_ALPHA = 1.0f;
 
 		private static readonly Color ActiveItemColor = Color.White;
 		private static readonly Color SelectedItemColor = new Color(240, 240, 240);
@@ -58,9 +60,18 @@ namespace Game1.Screen.Menu
 				if (value != _isActive)
 				{
 					_isActive = value;
-					SetItemsAlpha(_isActive);
-					if (_isActive && (_currentIndex < 0))
-						this.CurrentIndex = 0;
+					if (_isActive)
+					{
+						if (_currentIndex < 0)
+							this.CurrentIndex = 0;
+
+						SetCurrentItemEffects(true);
+						DelayInput(1);
+					}
+					else
+					{
+						SetCurrentItemEffects(false);
+					}
 				}
 			}
 		}
@@ -73,27 +84,15 @@ namespace Game1.Screen.Menu
 				if (index == _currentIndex)
 					return;
 				
-				if (_currentIndex >= 0)
-				{
-					_items[_currentIndex].Image.ClearEffects();
-					if (this.IsActive)
-						_items[_currentIndex].Image.Alpha = 1.0f;
-				}
-
+				SetCurrentItemEffects(false);
 				_currentIndex = index;
-				_items[_currentIndex].Image.AddEffect(new FadeCycleEffect(true));
+				SetCurrentItemEffects(true);
 			}
 		}
 
 		public void ClearSelection()
 		{
-			if (_currentIndex >= 0)
-			{
-				_items[_currentIndex].Image.ClearEffects();
-				if (this.IsActive)
-					_items[_currentIndex].Image.Alpha = 1.0f;
-			}
-
+			SetCurrentItemEffects(false);
 			_currentIndex = -1;
 		}
 
@@ -111,7 +110,7 @@ namespace Game1.Screen.Menu
 			_beyondBoundaryDisable = beyondBoundaryDisable;
 			_fireAltAxisEvents = fireAltAxisEvents;
 			_delayInputCycles = 0;
-			this.IsActive = true;
+			this.IsActive = false;
 		}
 
 		public override void LoadContent()
@@ -128,8 +127,6 @@ namespace Game1.Screen.Menu
 				item.Image.LoadContent();
 				menuSize += (menuSize > 0 ? MENU_PADDING : 0) + (_layout == MenuLayout.Vertical ? (int)item.Image.Size.Y : (int)item.Image.Size.X);
 			}
-
-			SetItemsAlpha(_isActive);
 
 			int locX = this.Bounds.X;
 			int locY = this.Bounds.Y;
@@ -194,7 +191,7 @@ namespace Game1.Screen.Menu
 		{
 			bool beyondBoundary = false;
 
-			if (InputManager.Instance.KeyPressed(this.ForwardKey))
+			if (InputManager.KeyPressed(this.ForwardKey))
 			{
 				beyondBoundary = (_currentIndex >= _items.Count - 1);
 
@@ -208,7 +205,7 @@ namespace Game1.Screen.Menu
 				if (beyondBoundary && _beyondBoundaryDisable)
 					OnReadyDisable?.Invoke(this, new MenuEventArgs("beyondend", this.GetType().Name, null));
 			}
-			else if (InputManager.Instance.KeyPressed(this.BackwardKey))
+			else if (InputManager.KeyPressed(this.BackwardKey))
 			{
 				beyondBoundary = (_currentIndex <= 0);
 
@@ -222,19 +219,19 @@ namespace Game1.Screen.Menu
 				if (beyondBoundary && _beyondBoundaryDisable)
 					OnReadyDisable?.Invoke(this, new MenuEventArgs("beyondbeginning", this.GetType().Name, null));
 			}
-			else if (InputManager.Instance.KeyReleased(Keys.Enter))
+			else if (InputManager.KeyPressed(Keys.Enter))
 			{
 				OnItemSelect?.Invoke(this, new MenuEventArgs("select", this.GetType().Name, _items[_currentIndex].Id));
 			}
-			else if (_escapeToDisable && InputManager.Instance.KeyPressed(Keys.Escape))
+			else if (_escapeToDisable && InputManager.KeyPressed(Keys.Escape))
 			{
 				OnReadyDisable?.Invoke(this, new MenuEventArgs("escape", this.GetType().Name, null));
 			}
-			else if (_fireAltAxisEvents && InputManager.Instance.KeyPressed(this.AltAxisFowardKey))
+			else if (_fireAltAxisEvents && InputManager.KeyPressed(this.AltAxisFowardKey))
 			{
 				OnReadyDisable?.Invoke(this, new MenuEventArgs("altfoward", this.GetType().Name, _items[_currentIndex].Id));
 			}
-			else if (_fireAltAxisEvents && InputManager.Instance.KeyPressed(this.AltAxisBackwardKey))
+			else if (_fireAltAxisEvents && InputManager.KeyPressed(this.AltAxisBackwardKey))
 			{
 				OnReadyDisable?.Invoke(this, new MenuEventArgs("altbackward", this.GetType().Name, _items[_currentIndex].Id));
 			}
@@ -245,7 +242,7 @@ namespace Game1.Screen.Menu
 			base.Draw(spriteBatch);
 
 			foreach (var item in _items)
-				item.Image.Draw(spriteBatch);
+				item.Image.Draw(spriteBatch, this.IsActive ? MenuScreen.ENABLED_MENU_ALPHA : MenuScreen.DISABLED_MENU_ALPHA);
 		}
 
 		public int SetById(string id)
@@ -268,10 +265,20 @@ namespace Game1.Screen.Menu
 			}
 		}
 
-		private void SetItemsAlpha(bool isActive)
+		private void SetCurrentItemEffects(bool active)
 		{
-			foreach (var item in _items)
-				item.Image.Alpha = isActive ? 1.0f : MenuScreen.DISABLED_ITEM_ALPHA;
+			if (_currentIndex < 0)
+				return;
+
+			if (active)
+			{
+				_items[_currentIndex].Image.AddEffect(new FadeCycleEffect(true));
+			}
+			else
+			{
+				_items[_currentIndex].Image.ClearEffects();
+				_items[_currentIndex].Image.Alpha = MenuScreen.DEFAULT_ITEM_ALPHA;
+			}
 		}
 	}
 }

@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 
-namespace Game1.Screen.Menu.Character
+namespace Game1.Screens.Menu.Character
 {
 	public class StartCancelMenu : MenuScreen
 	{

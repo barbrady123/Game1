@@ -7,9 +7,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Game1.Screen.Menu;
+using Game1.Screens.Menu;
 
-namespace Game1.Screen.Menu
+namespace Game1.Screens.Menu
 {
 	public class OkMenu : MenuScreen
 	{

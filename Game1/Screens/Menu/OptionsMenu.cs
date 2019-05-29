@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
 
-namespace Game1.Screen.Menu
+namespace Game1.Screens.Menu
 {
 	public class OptionsMenu : MenuScreen
 	{

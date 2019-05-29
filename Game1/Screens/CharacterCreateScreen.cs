@@ -8,20 +8,23 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
-using Game1.Screen.Menu.Character;
+using Game1.Screens.Menu.Character;
 using Game1.Interface;
-using Game1.Screen.Menu;
+using Game1.Screens.Menu;
 
-namespace Game1.Screen
+namespace Game1.Screens
 {
-	public class CharacterCreateScreen : GameScreen
+	public class CharacterCreateScreen : Screen
 	{
+		private ActivationManager _activation = new ActivationManager();
 		private Character _newChar;
+		private Vector2 _characterViewPosition = new Vector2(450.0f, 400.0f);
+		private readonly DialogBox _dialogBox;
+
 		public ImageText _titleText;
 		public ImageTexture _characterViewBack;
 		public ImageTexture _characterView;
 		public CharacterNewCompositeMenu _menuCharacter;
-		public DialogBox _dialogBox;
 
 		private string CharacterPreviewImage(CharacterSex sex) => $"Character/Preview/{sex.ToString("g")}";
 
@@ -35,25 +38,30 @@ namespace Game1.Screen
 				Position = new Vector2(this.Bounds.Width / 2, 50.0f)
 			};
 			// Character View...
-			_characterViewBack = new ImageTexture("Background/black3", true) {
+			_characterViewBack = new ImageTexture("Background/black", true) {
 				Alignment = ImageAlignment.Centered,
 				Alpha = 0.6f,
-				Scale = new Vector2(5.0f, 5.0f),
-				Position = new Vector2(300.0f, 270.0f)
+				Scale = new Vector2(320.0f, 320.0f),
+				Position = _characterViewPosition
 			};
 			_characterView = new ImageTexture(this.CharacterPreviewImage(_newChar.Sex), true)	{
 				Alignment = ImageAlignment.Centered,
 				Scale = new Vector2(5.0f, 5.0f),
-				Position = new Vector2(300.0f, 270.0f)
+				Position = _characterViewPosition
 			};
 
 			// Menu
-			_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200));
+			_activation.Add(_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200)));
 			_menuCharacter.OnSexItemChange += _menuCharacter_OnSexItemChange;
 			_menuCharacter.OnReadyDisable += _menuCharacter_OnReadyDisable;
+			_menuCharacter.OnUserNotify += _menuCharacter_OnUserNotify;
 
-			// Dialog Box
-			_dialogBox = new DialogBox("You done messed up!", DialogButton.Ok, new Rectangle(600, 450, 400, 300), null, false);
+			// Dialog
+			_activation.Add(_dialogBox = new DialogBox(null, DialogButton.Ok, new Rectangle(600, 500, 400, 200), null));
+			_dialogBox.OnButtonClick += _dialogBox_OnButtonClick;
+			_dialogBox.OnReadyDisable += _dialogBox_OnButtonClick;
+
+			_activation.Activate(_menuCharacter);
 		}
 
 		public override void LoadContent()
@@ -82,10 +90,6 @@ namespace Game1.Screen
 			_characterView.Update(gameTime);
 			_menuCharacter.Update(gameTime, processInput);
 			_dialogBox.Update(gameTime);
-
-			// Temp...
-			if (InputManager.Instance.KeyPressed(Keys.D))
-				_dialogBox.IsActive = true;
 		}
 
 		public override void Draw(SpriteBatch spriteBatch)
@@ -122,12 +126,27 @@ namespace Game1.Screen
 				case "continue" :
 					_newChar.Name = _menuCharacter.CharacterName;
 					_newChar.Sex = _menuCharacter.CharacterSex;
-					// start the game...
+					IOManager.ObjectToFile(Game1.PlayerFile, _newChar);
+					// TODO: Eventually we need to handle some kind of identifier of this new player to the parent, when we have multiple player/world files...
+					ReadyScreenUnload(this, new ScreenEventArgs("game", this.GetType().Name, null));
 					break;
 				case "back" :
 					ReadyScreenUnload(this, new ScreenEventArgs("back", this.GetType().Name, null));
 					break;
 			}
+		}
+
+		private void _menuCharacter_OnUserNotify(object sender, EventArgs e)
+		{
+			var args = (UserNotifyArgs)e;
+			_dialogBox.Text = args.Text;
+			_dialogBox.Duration = 300;
+			_activation.Activate(_dialogBox);
+		}
+
+		private void _dialogBox_OnButtonClick(object sender, EventArgs e)
+		{
+			_activation.Deactivate(_dialogBox);
 		}
 	}
 }

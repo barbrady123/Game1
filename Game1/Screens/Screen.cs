@@ -7,9 +7,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Game1.Screen
+namespace Game1.Screens
 {
-	public abstract class GameScreen
+	public abstract class Screen
 	{
 		private ContentManager _content;
 
@@ -19,7 +19,7 @@ namespace Game1.Screen
 
 		public event EventHandler OnReadyScreenUnload;
 
-		public GameScreen(Rectangle bounds, string backgroundName)
+		public Screen(Rectangle bounds, string backgroundName)
 		{
 			this.Bounds = bounds;
 

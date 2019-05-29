@@ -9,9 +9,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Game1.Effect
 {
-	public abstract class ImageEffect
+	public abstract class ImageEffect : IActivatable
 	{
-		protected ImageBase _image;
+		protected Image _image;
 		private bool _isActive;
 
 		public bool IsIncreasing { get; set; }
@@ -32,7 +32,7 @@ namespace Game1.Effect
 
 		public event EventHandler OnActiveChange;
 
-		public ImageBase Image
+		public Image Image
 		{
 			get { return _image; }
 			set { _image = value; }
@@ -46,7 +46,7 @@ namespace Game1.Effect
 			this.Speed = 1.0f;
 		}
 
-		public virtual void LoadContent(ref ImageBase Image)
+		public virtual void LoadContent(ref Image Image)
 		{
 
 		}

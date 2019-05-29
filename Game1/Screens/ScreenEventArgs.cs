@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Game1.Screen
+namespace Game1.Screens
 {
 	public class ScreenEventArgs : EventArgs
 	{

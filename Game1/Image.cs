@@ -12,8 +12,8 @@ using Game1.Enum;
 
 namespace Game1
 {
-	public abstract class ImageBase
-	{
+	public abstract class Image : IActivatable
+	{		
 		protected List<ImageEffect> _effects;
 		protected ContentManager _content;
 		protected Vector2 _origin;
@@ -44,7 +44,7 @@ namespace Game1
 		/// </summary>
 		public ImageAlignment Alignment { get; set; }
 
-		public ImageBase(bool isActive = false)
+		public Image(bool isActive = false)
 		{
 			this.IsActive = isActive;
 			this.Scale = Vector2.One;
@@ -77,13 +77,13 @@ namespace Game1
 			}
 		}
 
-		public virtual void Draw(SpriteBatch spriteBatch)
+		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null)
 		{
 			if (this.IsActive)
-				DrawActive(spriteBatch);
+				DrawActive(spriteBatch, alphaBlend);
 		}
 
-		public abstract void DrawActive(SpriteBatch spriteBatch);
+		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null);
 
 		protected virtual void SetOrigin()
 		{

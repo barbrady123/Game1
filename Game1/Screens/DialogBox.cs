@@ -8,11 +8,12 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
-using Game1.Screen.Menu;
+using Game1.Screens.Menu;
 
-namespace Game1.Screen
+namespace Game1.Screens
 {
-	public class DialogBox
+	// TODO: Support text wrap/multiline...
+	public class DialogBox : IActivatable
 	{
 		private readonly Rectangle _bounds;
 
@@ -20,6 +21,7 @@ namespace Game1.Screen
 		private ImageText _textImage;
 		private MenuScreen _buttonMenu;
 		private string _text;
+		private bool _isActive;
 
 		public string Text
 		{ 
@@ -29,25 +31,45 @@ namespace Game1.Screen
 				if (_text != value)
 				{
 					_text = value;
-					_textImage.UpdateText(_text);
-					// TODO: We'll need to reposition this stuff (once we actually have positioning here)...
+					_textImage.UpdateText(_text);					
 				}
 			}
 		}
 
 		public DialogButton Buttons { get; set; }
-		public bool IsActive { get; set; }
+		
+		public bool IsActive
+		{
+			get { return _isActive; }
+			set {
+				if (_isActive != value)
+				{
+					_isActive = value;
+					if (_isActive)
+						DelayInput(1);
+					else
+						this.Duration = null;
+				}
+			}
+		}
 
 		public event EventHandler OnButtonClick;
 		public event EventHandler OnReadyDisable;
 
+		private int _delayInputCycles;
+
+		public void DelayInput(int delayCycles)
+		{
+			_delayInputCycles = Math.Max(0, delayCycles);
+		}
+
 		public int? Duration { get; set; }
 
-		public DialogBox(string text, DialogButton buttons, Rectangle bounds, int? duration, bool isActive = false)
+		public DialogBox(string text, DialogButton buttons, Rectangle bounds, int? duration)
 		{
-			_text = text;
+			_text = text ?? "";
 			this.Buttons = buttons;
-			this.IsActive = isActive;
+			this.IsActive = false;
 			this.Duration = duration;
 			_bounds = bounds;
 			_backgroundImage = new ImageTexture($"{Game1.BackgroundRoot}/black", true) { 
@@ -56,7 +78,7 @@ namespace Game1.Screen
 				DrawArea = _bounds,
 				Position = _bounds.SizeVector() / 2
 			};
-			_textImage = new ImageText(_text, true) { Position = _bounds.CenterVector(yOffset: -100) };
+			_textImage = new ImageText(_text, true) { Position = _bounds.CenterVector(yOffset: - _bounds.Height / 3) };
 			switch (this.Buttons)
 			{
 				case DialogButton.Ok :	
@@ -65,6 +87,7 @@ namespace Game1.Screen
 					_buttonMenu.OnReadyDisable += _buttonMenu_OnReadyDisable;
 					break;
 			}
+			_delayInputCycles = 0;
 		}
 
 		public void LoadContent()
@@ -86,15 +109,37 @@ namespace Game1.Screen
 			if (!this.IsActive)
 				return;
 
+			if (this.Duration != null)
+			{
+				if (this.Duration <= 0)
+				{
+					OnReadyDisable?.Invoke(this, new ScreenEventArgs("timer", this.GetType().Name, null));
+					this.Duration = null;
+				}
+				else
+				{
+					this.Duration--;
+				}
+			}
+
 			_backgroundImage.Update(gameTime);
+			_textImage.Update(gameTime);
+
+			if (_delayInputCycles != 0)
+			{
+				_delayInputCycles = Math.Max(0, _delayInputCycles - 1);
+				return;
+			}
+
 			if (_buttonMenu != null)
+			{
 				_buttonMenu.Update(gameTime, this.IsActive);
+			}
 			else
 			{
-				if (InputManager.Instance.KeyPressed(Keys.Escape))
+				if (InputManager.KeyPressed(Keys.Escape, true))
 					_buttonMenu_OnReadyDisable(this, null);
 			}
-			_textImage.Update(gameTime);
 		}
 
 		public void Draw(SpriteBatch spriteBatch)
