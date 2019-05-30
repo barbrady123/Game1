@@ -74,7 +74,6 @@ namespace Game1
 			_currentKeyState = Keyboard.GetState();			
 		}
 
-		// TODO: Verify that we still need this...
 		private static List<Keys> excludedKeys = new List<Keys>();
 
 		public static bool KeyPressed(Keys key, bool clearAfterMatch = false)
@@ -104,8 +103,8 @@ namespace Game1
 		public static List<Keys> GetPressedKeys()
 		{
 			List<Keys> keysPressed = new List<Keys>();
-			foreach (var key in _currentKeyState.GetPressedKeys())
-				if (_prevKeyState.IsKeyUp(key) && (!excludedKeys.Contains(key)))
+			foreach (var key in _currentKeyState.GetPressedKeys().Where(k => !excludedKeys.Contains(k)))
+				if (_prevKeyState.IsKeyUp(key))
 					keysPressed.Add(key);
 
 			return keysPressed;			

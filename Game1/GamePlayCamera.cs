@@ -23,6 +23,8 @@ namespace Game1
 
 	public class GamePlayCamera
 	{
+		private const float OverLayerAlpha = 0.7f;
+
 		private readonly World _world;
 		private readonly Rectangle _gameViewArea;
 		private ImageTexture _terrainTileSheet;
@@ -140,7 +142,11 @@ namespace Game1
 			foreach (var data in _renderData.Where(d => d.Value.Character.Position.Y > _playerRenderData.Character.Position.Y).OrderBy(d => d.Value.Character.Position.Y))
 				data.Value.SpriteSheet.Draw(gameplayBatch);
 			foreach (var map in _terrainMaps.OrderBy(m => m.Index).Where(m => m.Index > Game1.PlayerDrawIndex))
+			{
+				// Just toying with this idea, but it's pretty cool...
+				map.Alpha = GamePlayCamera.OverLayerAlpha;
 				map.Draw(gameplayBatch);
+			}
 		}
 
 		private void LoadCharacterSpriteSheet(CharacterRenderData renderData)
