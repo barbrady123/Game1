@@ -46,9 +46,9 @@ namespace Game1
 			_camera.Update(gameTime);
 		}
 
-		public void Draw(SpriteBatch spriteBatch)
+		public void Draw()
 		{
-			_camera.Draw(spriteBatch);
+			_camera.Draw();
 		}
 	}
 }

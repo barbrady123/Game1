@@ -19,15 +19,15 @@ namespace Game1
 
 		public override Vector2 UpdateMotion()
 		{
-			if (_latestMotion == Vector2.Zero)
+			if (this.Motion == Vector2.Zero)
 			{
 				if (GameRandom.Next(0, 99) < NPC.ContinueStopBias)
-					return _latestMotion;
+					return this.Motion;
 			}
 			else
 			{
 				if (GameRandom.Next(0, 99) < NPC.SameDirectionBias)
-					return _latestMotion;
+					return this.Motion;
 			}
 
 			return new Vector2(GameRandom.Next(-1, 1), GameRandom.Next(-1, 1));

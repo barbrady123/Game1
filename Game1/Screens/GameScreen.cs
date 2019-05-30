@@ -65,7 +65,7 @@ namespace Game1.Screens
 		{	
 			base.Draw(spriteBatch);
 			_gameViewBorder.Draw(spriteBatch);
-			_gameplay.Draw(spriteBatch);
+			_gameplay.Draw();
 		}
 	}
 }

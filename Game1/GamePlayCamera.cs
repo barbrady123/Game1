@@ -128,7 +128,7 @@ namespace Game1
 			renderData.PreviousPosition = character.Position;
 		}
 
-		public void Draw(SpriteBatch spriteBatch)
+		public void Draw()
 		{
 			var gameplayBatch = SpriteBatchManager.Get("gameplay");
 			gameplayBatch.GraphicsDevice.ScissorRectangle = _gameViewArea;

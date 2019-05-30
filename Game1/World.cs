@@ -17,6 +17,8 @@ namespace Game1
 		public Character Character { get; set; }
 		public Map CurrentMap { get; set; }
 
+		public List<Character> AllCharacters => new List<Character>((this.NPCs?.Count ?? 0) + 1) { this.Character }.Concat(this.NPCs).ToList();
+
 		public void Initialize()
 		{
 			this.CurrentMap = IOManager.ObjectFromFile<Map>(Game1.MapFile);

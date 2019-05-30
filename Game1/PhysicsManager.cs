@@ -7,13 +7,14 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Enum;
 
 namespace Game1
 {
 	public class PhysicsManager
 	{
 		// Eventually these should be a config file (either load here or pass a PhysicsConfig object from outside)....
-		private Vector2 _playerBoxSize = new Vector2(28.0f, 54.0f);
+		private Vector2 _humanoidBoxSize = new Vector2(28.0f, 54.0f);
 
 		private World _world;
 		private List<Rectangle> _solidBlocks;
@@ -26,52 +27,54 @@ namespace Game1
 		public void Update(GameTime gameTime)
 		{
 			var mapBounds = new Rectangle(0, 0, _world.CurrentMap.Width * Game1.TileSize, _world.CurrentMap.Height * Game1.TileSize);
-			var playerBox = _world.Character.Position.ExpandToRectange((int)_playerBoxSize.X / 2, (int)_playerBoxSize.Y / 2);
+			var allChars = _world.AllCharacters;
+		
+			foreach (var character in allChars)
+			{
+				if (character.Motion == Vector2.Zero)
+					continue;
 
-			// TODO: This needs to support continuing is a single direction if 2 keys are pushed but only one direction is blocked
-			// Player - Map bounds
-			if (!mapBounds.Contains(playerBox))
-			{
-				_world.Character.RevertPosition();
-			}
-			else
-			{
-				// Player - Solid blocks
-				foreach (var solidBlock in _solidBlocks)
-				{
-					if (solidBlock.Intersects(playerBox))
-					{
-						_world.Character.RevertPosition();
-						break;
-					}
+				// Eventually need to check mob "size" or "type" for bounding box settings...
+				var charBox = character.Position.ExpandToRectangle((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
+				bool moved = true;
+
+				// Map bounds
+				if (!mapBounds.Contains(charBox))
+				{				
+					character.RevertPosition();
+					moved = AttemptPartialMotion(character, mapBounds, IntersectionType.Contains, true);
 				}
-			}
 
-			// NPC code is reusable technically, but might evolve differently over time...
-
-			// NPC - Map bounds
-			foreach (var npc in _world.NPCs)
-			{
-				var npcBox = npc.Position.ExpandToRectange((int)_playerBoxSize.X / 2, (int)_playerBoxSize.Y / 2);
-				if (!mapBounds.Contains(npcBox))
+				if (moved)
 				{
-					npc.RevertPosition();
-				}
-				else
-				{
-					// NPC - Solid blocks
+					// Solid blocks
 					foreach (var solidBlock in _solidBlocks)
 					{
-						if (solidBlock.Intersects(npcBox))
+						if (solidBlock.Intersects(charBox))
+						{						
+							character.RevertPosition();
+							if (!AttemptPartialMotion(character, solidBlock, IntersectionType.Intersects, false))
+								break;
+						}
+					}
+				}
+
+				if (moved)
+				{
+					// Other mobs
+					foreach (var otherChar in allChars.Where(c => c != character))
+					{
+						// Eventually need to check mob "size" or "type" for bounding box settings...
+						var otherCharBox = otherChar.Position.ExpandToRectangle((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
+						if (otherCharBox.Intersects(charBox))
 						{
-							npc.RevertPosition();
-							break;
+							character.RevertPosition();
+							//if (!AttemptPartialMotion(character, otherCharBox, IntersectionType.Intersects, false))
+							//	break;
 						}
 					}
 				}
 			}
-
-			// Eventually...mobs, etc...things that actually move will make this more complex...
 		}
 
 		public void CalculateParameters()	
@@ -94,6 +97,47 @@ namespace Game1
 			}
 
 			_solidBlocks = solidBlocks.Values.ToList();
+		}
+
+		private bool AttemptPartialMotion(Character character, Rectangle boundary, IntersectionType type, bool condition)
+		{
+			bool acceptHorizontal = false;
+			bool acceptVeritical = false;
+
+			var motion = character.Motion;
+			if ((motion.X == 0.0f) || (motion.Y == 0.0f))
+				return false;
+
+			var proposedHorizontalPosition = (character.Position + new Vector2(motion.X, 0.0f)).ExpandToRectangle((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
+			var proposedVerticalPosition = (character.Position + new Vector2(0.0f, motion.Y)).ExpandToRectangle((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
+
+			if (type == IntersectionType.Contains)
+			{
+				if (boundary.Contains(proposedHorizontalPosition) == condition)
+					acceptHorizontal = true;
+				else if (boundary.Contains(proposedVerticalPosition) == condition)
+					acceptVeritical = true;
+			}
+			else if (type == IntersectionType.Intersects)
+			{
+				if (boundary.Intersects(proposedHorizontalPosition) == condition)
+					acceptHorizontal = true;
+				else if (boundary.Intersects(proposedVerticalPosition) == condition)
+					acceptVeritical = true;
+			}
+
+			if (acceptHorizontal)
+			{
+				character.Motion = new Vector2(motion.X, 0);
+				character.Position += character.Motion;
+			}
+			else if (acceptVeritical)
+			{
+				character.Motion = new Vector2(0, motion.Y);
+				character.Position += character.Motion;
+			}
+
+			return (acceptHorizontal || acceptVeritical);
 		}
 	}
 }

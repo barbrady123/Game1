@@ -52,6 +52,7 @@
     <Compile Include="Enum\CharacterSexEnum.cs" />
     <Compile Include="Enum\DialogButtonEnum.cs" />
     <Compile Include="Enum\CardinalEnum.cs" />
+    <Compile Include="Enum\IntersectionTypeEnum.cs" />
     <Compile Include="Enum\MenuLayoutEnum.cs" />
     <Compile Include="Enum\HorizontalAlignmentEnum.cs" />
     <Compile Include="Enum\TextInputActionEnum.cs" />

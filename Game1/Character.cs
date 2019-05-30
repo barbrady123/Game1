@@ -16,7 +16,6 @@ namespace Game1
 	{
 		private Vector2 _position;
 		private Vector2 _previousPosition;
-		protected Vector2 _latestMotion;
 
 		public string Name { get; set; }
 		public CharacterSex Sex { get; set; }
@@ -68,7 +67,7 @@ namespace Game1
 				this.Direction = Cardinal.North;
 			}
 			if (InputManager.KeyDown(Keys.S))
-			{
+			{	
 				motion.Y = 1;
 				this.Direction = Cardinal.South;
 			}
@@ -95,10 +94,9 @@ namespace Game1
 				motion.Normalize();
 				motion *= (this.Speed * (float)gameTime.ElapsedGameTime.TotalSeconds);
 				this.Position += motion;
-				this.Motion = motion;
 			}
 
-			_latestMotion = motion;
+			this.Motion = motion;
 		}
 
 		public void Draw(SpriteBatch spriteBatch)

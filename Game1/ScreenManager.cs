@@ -69,8 +69,9 @@ namespace Game1
 
 		public void StartScreen()
 		{
-			TransitionScreens(new SplashScreen(_bounds));
+			//TransitionScreens(new SplashScreen(_bounds));
 			//TransitionScreens(new CharacterCreateScreen(_bounds));
+			TransitionScreens(new GameScreen(_bounds));
 		}
 
 		private void TransitionScreens(Screens.Screen newScreen)
@@ -151,7 +152,6 @@ namespace Game1
 					case "OptionsMenu" : switch (args.Item)
 					{
 						case "back":	TransitionScreens(new MainMenu(_bounds));	break;
-						case "sex":		TransitionScreens(new SexMenu(_bounds));	break;
 					}
 					break;
 				}
