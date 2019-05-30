@@ -8,7 +8,8 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
-using Game1.Screens;
+using Game1.Interface;
+using Game1.Items;
 
 namespace Game1
 {
@@ -19,7 +20,7 @@ namespace Game1
 		private readonly PhysicsManager _physics;
 		private readonly World _world;
 		private readonly DialogBox _dialogBox;
-
+		private readonly ItemContainerView _inventoryView;
 
 		public bool IsActive { get; set; }
 
@@ -37,6 +38,10 @@ namespace Game1
 			_activation.Add(_dialogBox = new DialogBox("Paused", DialogButton.Ok, new Rectangle(600, 500, 400, 200), null));
 			_dialogBox.OnButtonClick += _dialogBox_OnButtonClick;
 			_dialogBox.OnReadyDisable += _dialogBox_OnButtonClick;
+
+			// Inventory View
+			_activation.Add(_inventoryView = new ItemContainerView(_world.Character.Backpack, "Backpack", new Rectangle(200, 200, 1200, 800)));
+			_inventoryView.OnReadyDisable += _inventoryView_OnReadyDisable;
 		}
 
 		public void LoadContent()
@@ -47,6 +52,7 @@ namespace Game1
 			_camera.LoadContent();
 			_physics.CalculateParameters();
 			_dialogBox.LoadContent();
+			_inventoryView.LoadContent();
 		}
 
 		public void UnloadContent()
@@ -54,14 +60,15 @@ namespace Game1
 			_world.UnloadContent();
 			_camera.UnloadContent();
 			_dialogBox.UnloadContent();
+			_inventoryView.UnloadContent();
 		}
-
-		private int count = 0;
 
 		public void Update(GameTime gameTime)
 		{
-			count++;
+			// This is up here in case a modal is active...this is the problem with self-registration in the ActivationManager...do we want to keep it this way or 
+			// move modals outside the GamePlayManager?
 			_dialogBox.Update(gameTime);
+			_inventoryView.Update(gameTime);
 
 			if (!this.IsActive)
 				return;
@@ -71,7 +78,10 @@ namespace Game1
 			_camera.Update(gameTime);
 
 
-			if (InputManager.KeyPressed(Keys.Escape))
+			// TODO: Move this to a better location...
+			if (InputManager.KeyPressed(Keys.I))
+				_activation.Activate(_inventoryView);
+			else if (InputManager.KeyPressed(Keys.Escape))
 				_activation.Activate(_dialogBox);
 		}
 
@@ -79,9 +89,16 @@ namespace Game1
 		{
 			_camera.Draw();
 			_dialogBox.Draw();
+			_inventoryView.Draw();
 		}
 
 		private void _dialogBox_OnButtonClick(object sender, EventArgs e)
+		{
+			_activation.Activate(this);
+		}
+
+		// Can we just have a general "modal closed" event hanlder?  
+		private void _inventoryView_OnReadyDisable(object sender, EventArgs e)
 		{
 			_activation.Activate(this);
 		}

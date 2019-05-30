@@ -99,7 +99,7 @@ namespace Game1.Interface
 
 		public void LoadContent()
 		{
-			_background = GenerateBackground();
+			_background = Util.GenerateSolidBackground(_width, _width, Color.Black);
 			_background.LoadContent();
 			_border = Util.GenerateBorderTexture(_width, _height, _borderWidth, Color.Gray);
 			_border.Position = this.Position;
@@ -148,18 +148,6 @@ namespace Game1.Interface
 			}
 			
 			_textImage.Draw(spriteBatch);
-		}
-
-		private ImageTexture GenerateBackground()
-		{
-			var t = new Texture2D(Game1.Graphics, _width, _height);
-			int size = _width * _height;
-			var data  = new Color[size];
-			for (int x = 0; x < size; x++)
-				data[x] = Color.Black;
-
-			t.SetData(data);
-			return new ImageTexture(t, true) { Position = this.Position };
 		}
 
 		private void ProcessInput()

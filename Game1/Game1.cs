@@ -83,7 +83,7 @@ namespace Game1
 			gameplayBatch.GraphicsDevice.ScissorRectangle = new Rectangle(28, 28, 960, 960);
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), new RasterizerState { ScissorTestEnable = true }, 200, "gameplay");
 			// Modals...
-			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), null, 300, "modal");
+			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice),  new RasterizerState { ScissorTestEnable = true }, 300, "modal");
 
 			_screenManager.LoadContent();
 			_screenManager.StartScreen();
@@ -117,16 +117,17 @@ namespace Game1
 		protected override void Draw(GameTime gameTime)
 		{
 			GraphicsDevice.Clear(Color.Black);
-			foreach (var data in SpriteBatchManager.GetAllDataSorted())
+			foreach (var data in SpriteBatchManager.GetAllSorted())
 			{
 				data.SpriteBatch.Begin(samplerState: SamplerState.LinearWrap, rasterizerState: data.RasterizeState);
 			}
 			
 			// General use one is used in the main Draw pipeline...
-			_screenManager.Draw(SpriteBatchManager.Get("general"));
+			_screenManager.Draw(SpriteBatchManager.Get("general").SpriteBatch);
 
-			foreach (var data in SpriteBatchManager.GetAllDataSorted())
+			foreach (var data in SpriteBatchManager.GetAllSorted())
 			{
+				data.SpriteBatch.GraphicsDevice.ScissorRectangle = (data.ScissorWindow != Rectangle.Empty) ? data.ScissorWindow : GraphicsDevice.Viewport.Bounds;
 				data.SpriteBatch.End();
 			}
 

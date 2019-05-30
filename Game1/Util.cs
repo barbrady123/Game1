@@ -22,5 +22,24 @@ namespace Game1
 			t.SetData(data);
 			return new ImageTexture(t, true);
 		}
+
+		public static ImageTexture GenerateSolidBackground(int width, int height, Color color)
+		{
+			int size = width * height;
+			var data  = new Color[size];
+			for (int x = 0; x < size; x++)
+				data[x] = color;
+
+			var t = new Texture2D(Game1.Graphics, width, height);
+			t.SetData(data);
+			return new ImageTexture(t, true);
+		}
+
+		public static void WrappedDraw(Action<SpriteBatch> func, string batchName, Rectangle bounds)
+		{
+			var batchData = SpriteBatchManager.Get(batchName);
+			batchData.ScissorWindow = bounds;
+			func.Invoke(batchData.SpriteBatch);
+		}
 	}
 }

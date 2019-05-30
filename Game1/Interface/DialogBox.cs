@@ -8,9 +8,10 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
+using Game1.Screens;
 using Game1.Screens.Menu;
 
-namespace Game1.Screens
+namespace Game1.Interface
 {
 	// TODO: Support text wrap/multiline...
 	public class DialogBox : IActivatable
@@ -146,11 +147,15 @@ namespace Game1.Screens
 		{
 			if (!this.IsActive)
 				return;
+			
+			Util.WrappedDraw(DrawInternal, "modal", _bounds);
+		}
 
-			var modalBatch = SpriteBatchManager.Get("modal");
-			_backgroundImage.Draw(modalBatch);
-			_buttonMenu?.Draw(modalBatch);
-			_textImage.Draw(modalBatch);
+		private void DrawInternal(SpriteBatch spriteBatch)
+		{
+			_backgroundImage.Draw(spriteBatch);
+			_buttonMenu?.Draw(spriteBatch);
+			_textImage.Draw(spriteBatch);
 		}
 
 		private void _buttonMenu_OnItemSelect(object sender, EventArgs e)

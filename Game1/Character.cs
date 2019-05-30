@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
 using Game1.Enum;
+using Game1.Items;
 
 namespace Game1
 {
@@ -16,13 +17,52 @@ namespace Game1
 	{
 		private Vector2 _position;
 		private Vector2 _previousPosition;
+		private ItemContainer _hotbar;
+		private int _hotbarActiveIndex;
+		private ItemContainer _backpack;
+		private int _itemDefense;
+		private int _baseDefense;
+
+		public string SpriteSheetName => this.Sex.ToString("g");
+		public Vector2 Motion { get; set; }
+		public float Speed { get; set; }
+		public Cardinal Direction { get; set; }
 
 		public string Name { get; set; }
 		public CharacterSex Sex { get; set; }
-		public Cardinal Direction { get; set; }
-		public float Speed { get; set; }
-		public Vector2 Motion { get; set; }
-		public string SpriteSheetName => this.Sex.ToString("g");
+		public int Level { get; set; }
+		public int Experience { get; set; }
+		public int Strength { get; set; }
+		public int Intelligence { get; set; }
+		public int Constitution { get; set ;}
+
+		public int MaxHP { get; set; }
+		public int CurrentHP { get; set; }
+		public int MaxMana { get; set; }
+		public int CurrentMana { get; set; }
+
+		public int Gold { get; set; }
+
+		// Or we store the effective def (and other stats) to reduce realtime computations during combat...
+		// Also will have other modifiers (buffs, debuffs, etc)
+		public int Defense => _baseDefense + _itemDefense;
+
+		public ItemContainer HotBar => _hotbar;
+		public ItemContainer Backpack => _backpack;
+
+		// TODO: Clean all this up when we start getting this stuff functional...
+		private ItemArmor _headArmor;
+		private ItemArmor _chestArmor;
+		private ItemArmor _legArmor;
+		private ItemArmor _footArmor;
+
+		public Item ActiveItem => _hotbar[_hotbarActiveIndex]?.Item;
+
+		public int HotbarActiveIndex
+		{
+			get { return _hotbarActiveIndex; }
+			set { _hotbarActiveIndex = Util.Clamp(value, 0, _hotbar.Size - 1); }
+		}
 
 		public Vector2 Position
 		{
@@ -40,6 +80,9 @@ namespace Game1
 		{
 			this.Direction = Cardinal.South;
 			this.Speed = 150.0f;
+			_hotbar = new ItemContainer(10);
+			_hotbarActiveIndex = 0;
+			_backpack = new ItemContainer(40);
 		}
 
 		public void RevertPosition()
@@ -50,6 +93,7 @@ namespace Game1
 
 		public void LoadContent()
 		{
+
 		}
 
 		public void UnloadContent()

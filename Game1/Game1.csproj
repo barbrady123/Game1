@@ -72,8 +72,16 @@
     <Compile Include="ImageText.cs" />
     <Compile Include="ImageTexture.cs" />
     <Compile Include="InputManager.cs" />
+    <Compile Include="Interface\ItemContainerView.cs" />
+    <Compile Include="Interface\InventoryItemView.cs" />
     <Compile Include="Interface\TextInput.cs" />
+    <Compile Include="Items\InventoryItem.cs" />
     <Compile Include="IOManager.cs" />
+    <Compile Include="Items\Item.cs" />
+    <Compile Include="Items\ItemArmor.cs" />
+    <Compile Include="Items\ItemContainer.cs" />
+    <Compile Include="Items\ItemGeneral.cs" />
+    <Compile Include="Items\ItemManager.cs" />
     <Compile Include="Layer.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="NPC.cs" />
@@ -94,7 +102,7 @@
     <Compile Include="Screens\Menu\MenuItem.cs" />
     <Compile Include="Screens\Menu\MenuScreen.cs" />
     <Compile Include="Screens\Menu\OptionsMenu.cs" />
-    <Compile Include="Screens\DialogBox.cs" />
+    <Compile Include="Interface\DialogBox.cs" />
     <Compile Include="Screens\ScreenEventArgs.cs" />
     <Compile Include="Screens\SplashScreen.cs" />
     <Compile Include="Screens\UserNotifyArgs.cs" />

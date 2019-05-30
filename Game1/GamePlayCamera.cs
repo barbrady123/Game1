@@ -132,25 +132,29 @@ namespace Game1
 
 		public void Draw()
 		{
-			var gameplayBatch = SpriteBatchManager.Get("gameplay");
-			gameplayBatch.GraphicsDevice.ScissorRectangle = _gameViewArea;
+			Util.WrappedDraw(DrawInternal, "gameplay", _gameViewArea);
+		}
+
+		public void DrawInternal(SpriteBatch spriteBatch)
+		{
 			foreach (var map in _terrainMaps.OrderBy(m => m.Index).Where(m => m.Index <= Game1.PlayerDrawIndex))
-				map.Draw(gameplayBatch);
+				map.Draw(spriteBatch);
 			foreach (var data in _renderData.Where(d => d.Value.Character.Position.Y <= _playerRenderData.Character.Position.Y).OrderBy(d => d.Value.Character.Position.Y))
-				data.Value.SpriteSheet.Draw(gameplayBatch);
-			_playerRenderData.SpriteSheet.Draw(gameplayBatch);
+				data.Value.SpriteSheet.Draw(spriteBatch);
+			_playerRenderData.SpriteSheet.Draw(spriteBatch);
 			foreach (var data in _renderData.Where(d => d.Value.Character.Position.Y > _playerRenderData.Character.Position.Y).OrderBy(d => d.Value.Character.Position.Y))
-				data.Value.SpriteSheet.Draw(gameplayBatch);
+				data.Value.SpriteSheet.Draw(spriteBatch);
 			foreach (var map in _terrainMaps.OrderBy(m => m.Index).Where(m => m.Index > Game1.PlayerDrawIndex))
 			{
 				// Just toying with this idea, but it's pretty cool...
 				map.Alpha = GamePlayCamera.OverLayerAlpha;
-				map.Draw(gameplayBatch);
+				map.Draw(spriteBatch);
 			}
 		}
 
 		private void LoadCharacterSpriteSheet(CharacterRenderData renderData)
 		{
+			// TODO: Fix this so it loads unique sprite sheets into collection ONLY and they are referenced by index here...
 			renderData.SpriteSheet = new ImageTexture($"{Game1.SpriteSheetRoot}\\{renderData.Character.SpriteSheetName}") { 
 				IsActive = true,
 				Alignment = ImageAlignment.Centered,
@@ -210,6 +214,7 @@ namespace Game1
 				int tileIndexX = tileIndex % Game1.TileSheetSize;
 				int tileIndexY = tileIndex / Game1.TileSheetSize;
 				var sourceRect = new Rectangle(tileIndexX * Game1.TileSize, tileIndexY * Game1.TileSize, Game1.TileSize, Game1.TileSize);
+				// TODO: Why are we not calling _terrainTileSheet.Draw() here, why bypassing the class draw?? (this is the only place that does this)
 				spriteBatch.Draw(_terrainTileSheet.Texture, position, sourceRect, Color.White);
 			}
 

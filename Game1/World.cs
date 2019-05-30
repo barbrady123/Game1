@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
+using Game1.Items;
 
 namespace Game1
 {
@@ -21,9 +22,21 @@ namespace Game1
 
 		public void Initialize()
 		{
+			// TODO: All this crap should be coming from load game files, map files, etc...
 			this.CurrentMap = IOManager.ObjectFromFile<Map>(Game1.MapFile);
 			this.CurrentMap.GenerateTiles();
 			this.Character = IOManager.ObjectFromFile<Character>(Game1.PlayerFile);
+			this.Character.Strength = GameRandom.Next(10, 20);
+			this.Character.Intelligence = GameRandom.Next(10, 20);
+			this.Character.Constitution = GameRandom.Next(10, 20);
+			this.Character.HotBar.AddItem(ItemManager.GetItem());
+			this.Character.HotBar.AddItem(ItemManager.GetItem());
+			this.Character.HotBar.AddItem(ItemManager.GetItem());
+			this.Character.Backpack.AddItem(ItemManager.GetItem());
+			this.Character.Backpack.AddItem(ItemManager.GetItem());
+			this.Character.Backpack.AddItem(ItemManager.GetItem());
+			this.Character.Backpack.AddItem(ItemManager.GetItem());
+			this.Character.Backpack.AddItem(ItemManager.GetItem());
 
 			CharacterSex oppositeSex = (this.Character.Sex == CharacterSex.Male) ? CharacterSex.Female : CharacterSex.Male;
 			this.NPCs = new List<NPC> {
