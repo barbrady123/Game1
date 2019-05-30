@@ -82,6 +82,8 @@ namespace Game1
 			var gameplayBatch = new SpriteBatch(GraphicsDevice);
 			gameplayBatch.GraphicsDevice.ScissorRectangle = new Rectangle(28, 28, 960, 960);
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), new RasterizerState { ScissorTestEnable = true }, 200, "gameplay");
+			// Modals...
+			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), null, 300, "modal");
 
 			_screenManager.LoadContent();
 			_screenManager.StartScreen();

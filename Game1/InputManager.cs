@@ -69,16 +69,22 @@ namespace Game1
 
 		public static void Update()
 		{
+			excludedKeys.Clear();
 			_prevKeyState = _currentKeyState;
 			_currentKeyState = Keyboard.GetState();			
 		}
 
 		// TODO: Verify that we still need this...
+		private static List<Keys> excludedKeys = new List<Keys>();
+
 		public static bool KeyPressed(Keys key, bool clearAfterMatch = false)
 		{
+			if (excludedKeys.Contains(key))
+				return false;
+
 			bool result = KeyPressed(new[] { key });
-			if (clearAfterMatch)
-				_currentKeyState = new KeyboardState(_currentKeyState.GetPressedKeys().Where(k => k != key).ToArray(), _currentKeyState.CapsLock, _currentKeyState.NumLock);
+			if (result && clearAfterMatch)
+				excludedKeys.Add(key);
 
 			return result;
 		}
@@ -99,7 +105,7 @@ namespace Game1
 		{
 			List<Keys> keysPressed = new List<Keys>();
 			foreach (var key in _currentKeyState.GetPressedKeys())
-				if (_prevKeyState.IsKeyUp(key))
+				if (_prevKeyState.IsKeyUp(key) && (!excludedKeys.Contains(key)))
 					keysPressed.Add(key);
 
 			return keysPressed;			

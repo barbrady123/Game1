@@ -29,7 +29,7 @@ namespace Game1.Screens
 		public GameScreen(Rectangle bounds): base(bounds, "rock")
 		{
 			_world = new World();
-			_gameplay = new GamePlayManager(_gameViewArea, _world);
+			_gameplay = new GamePlayManager(_gameViewArea, _world) { IsActive = true };
 		}
 
 		public override void LoadContent()

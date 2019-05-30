@@ -142,14 +142,15 @@ namespace Game1.Screens
 			}
 		}
 
-		public void Draw(SpriteBatch spriteBatch)
+		public void Draw()
 		{
 			if (!this.IsActive)
 				return;
 
-			_backgroundImage.Draw(spriteBatch);
-			_buttonMenu?.Draw(spriteBatch);
-			_textImage.Draw(spriteBatch);
+			var modalBatch = SpriteBatchManager.Get("modal");
+			_backgroundImage.Draw(modalBatch);
+			_buttonMenu?.Draw(modalBatch);
+			_textImage.Draw(modalBatch);
 		}
 
 		private void _buttonMenu_OnItemSelect(object sender, EventArgs e)

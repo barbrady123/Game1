@@ -89,6 +89,8 @@ namespace Game1.Screens
 			base.Update(gameTime, processInput);
 			_characterView.Update(gameTime);
 			_menuCharacter.Update(gameTime, processInput);
+			if (InputManager.KeyPressed(Keys.D))
+				_activation.Activate(_dialogBox);
 			_dialogBox.Update(gameTime);
 		}
 
@@ -99,7 +101,7 @@ namespace Game1.Screens
 			_characterViewBack.Draw(spriteBatch);
 			_characterView.Draw(spriteBatch);
 			_menuCharacter.Draw(spriteBatch);
-			_dialogBox.Draw(spriteBatch);
+			_dialogBox.Draw();
 		}
 
 		private void _menuCharacter_OnSexItemChange(object sender, EventArgs e)

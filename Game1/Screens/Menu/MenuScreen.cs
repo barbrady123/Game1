@@ -219,11 +219,11 @@ namespace Game1.Screens.Menu
 				if (beyondBoundary && _beyondBoundaryDisable)
 					OnReadyDisable?.Invoke(this, new MenuEventArgs("beyondbeginning", this.GetType().Name, null));
 			}
-			else if (InputManager.KeyPressed(Keys.Enter))
+			else if (InputManager.KeyPressed(Keys.Enter, true))
 			{
 				OnItemSelect?.Invoke(this, new MenuEventArgs("select", this.GetType().Name, _items[_currentIndex].Id));
 			}
-			else if (_escapeToDisable && InputManager.KeyPressed(Keys.Escape))
+			else if (_escapeToDisable && InputManager.KeyPressed(Keys.Escape, true))
 			{
 				OnReadyDisable?.Invoke(this, new MenuEventArgs("escape", this.GetType().Name, null));
 			}

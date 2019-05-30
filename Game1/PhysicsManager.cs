@@ -69,8 +69,8 @@ namespace Game1
 						if (otherCharBox.Intersects(charBox))
 						{
 							character.RevertPosition();
-							//if (!AttemptPartialMotion(character, otherCharBox, IntersectionType.Intersects, false))
-							//	break;
+							if (!AttemptPartialMotion(character, otherCharBox, IntersectionType.Intersects, false))
+								break;
 						}
 					}
 				}
