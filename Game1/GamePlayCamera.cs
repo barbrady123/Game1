@@ -134,8 +134,10 @@ namespace Game1
 			gameplayBatch.GraphicsDevice.ScissorRectangle = _gameViewArea;
 			foreach (var map in _terrainMaps.OrderBy(m => m.Index).Where(m => m.Index <= Game1.PlayerDrawIndex))
 				map.Draw(gameplayBatch);
+			foreach (var data in _renderData.Where(d => d.Value.Character.Position.Y <= _playerRenderData.Character.Position.Y).OrderBy(d => d.Value.Character.Position.Y))
+				data.Value.SpriteSheet.Draw(gameplayBatch);
 			_playerRenderData.SpriteSheet.Draw(gameplayBatch);
-			foreach (var data in _renderData)
+			foreach (var data in _renderData.Where(d => d.Value.Character.Position.Y > _playerRenderData.Character.Position.Y).OrderBy(d => d.Value.Character.Position.Y))
 				data.Value.SpriteSheet.Draw(gameplayBatch);
 			foreach (var map in _terrainMaps.OrderBy(m => m.Index).Where(m => m.Index > Game1.PlayerDrawIndex))
 				map.Draw(gameplayBatch);
