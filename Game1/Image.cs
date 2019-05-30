@@ -17,15 +17,25 @@ namespace Game1
 		protected List<ImageEffect> _effects;
 		protected ContentManager _content;
 		protected Vector2 _origin;
+		protected Rectangle _sourceRect;
 
 		public bool IsActive { get; set; }
 
 		public Vector2 Scale { get; set; }
 		public Vector2 Position{ get; set; }
 		public float Alpha { get; set; }
-		public Rectangle SourceRect { get; set; }
 		public Rectangle DrawArea { get; set; }
 		public Color Color { get; set; }
+		public int Index { get; set; }
+
+		public Rectangle SourceRect
+		{ 
+			get { return _sourceRect; }
+			set	{
+				_sourceRect = value;
+				SetOrigin();
+			}
+		}
 
 		public T AddEffect<T>(T effect) where T: ImageEffect
 		{

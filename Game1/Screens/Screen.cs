@@ -33,7 +33,12 @@ namespace Game1.Screens
 		public virtual void LoadContent()
 		{
 			_content = new ContentManager(Game1.ServiceProvider);
-			_backgroundImage?.LoadContent();
+			if (_backgroundImage != null)
+			{
+				_backgroundImage.LoadContent();
+				// This will let a smaller background tile...
+				_backgroundImage.SourceRect = this.Bounds;
+			}
 		}
 
 		public virtual void UnloadContent()

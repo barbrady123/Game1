@@ -58,9 +58,13 @@
     <Compile Include="Enum\VerticalAlignmentEnum.cs" />
     <Compile Include="Extensions\RectangleExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\Vector2Extensions.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="GameConfiguration.cs" />
     <Compile Include="Effect\ImageEffect.cs" />
+    <Compile Include="GamePlayCamera.cs" />
+    <Compile Include="GamePlayManager.cs" />
+    <Compile Include="GameRandom.cs" />
     <Compile Include="IActivatable.cs" />
     <Compile Include="ImageAlignment.cs" />
     <Compile Include="Image.cs" />
@@ -69,7 +73,10 @@
     <Compile Include="InputManager.cs" />
     <Compile Include="Interface\TextInput.cs" />
     <Compile Include="IOManager.cs" />
+    <Compile Include="Layer.cs" />
     <Compile Include="Map.cs" />
+    <Compile Include="NPC.cs" />
+    <Compile Include="PhysicsManager.cs" />
     <Compile Include="Screens\GameScreen.cs" />
     <Compile Include="Screens\Menu\OkMenu.cs" />
     <Compile Include="Screens\Menu\Character\StartCancelMenu.cs" />
@@ -90,6 +97,7 @@
     <Compile Include="Screens\ScreenEventArgs.cs" />
     <Compile Include="Screens\SplashScreen.cs" />
     <Compile Include="Screens\UserNotifyArgs.cs" />
+    <Compile Include="SpriteBatchManager.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="World.cs" />
@@ -111,6 +119,7 @@
     <Content Include="Content\Background\black.png" />
     <Content Include="Content\Background\brick.jpg" />
     <Content Include="Content\Background\maze.jpg" />
+    <Content Include="Content\Background\rock.jpg" />
     <Content Include="Content\Background\stone.jpg" />
     <Content Include="Content\Character\Preview\female.png" />
     <Content Include="Content\Character\Preview\male.png" />

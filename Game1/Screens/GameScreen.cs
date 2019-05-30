@@ -13,52 +13,59 @@ namespace Game1.Screens
 {
 	public class GameScreen : Screen
 	{
-		private World _world;
 		private const int BorderWidth = 3;
-		private Rectangle _mapAreaBounds = new Rectangle(20 + GameScreen.BorderWidth, 20 + GameScreen.BorderWidth, Game1.TileSize * 7, Game1.TileSize * 7);
+		private const int ViewWindowOffset = 25;
+		private static readonly Rectangle _gameViewArea = new Rectangle(
+			GameScreen.ViewWindowOffset + GameScreen.BorderWidth,
+			GameScreen.ViewWindowOffset + GameScreen.BorderWidth,
+			Game1.TileSize * Game1.GameViewAreaWidth,
+			Game1.TileSize * Game1.GameViewAreaHeight);
+		private GamePlayManager _gameplay;
+		private ImageTexture _gameViewBorder;
+		private World _world;
 
-		private ActivationManager _activation = new ActivationManager();
-		private ImageTexture _mapAreaBorder;
+		//private ActivationManager _activation = new ActivationManager();
 
-		public GameScreen(Rectangle bounds, World world): base(bounds, "stone")
+		public GameScreen(Rectangle bounds): base(bounds, "rock")
 		{
-			_world = world;
+			_world = new World();
+			_gameplay = new GamePlayManager(_gameViewArea, _world);
 		}
 
 		public override void LoadContent()
 		{
 			base.LoadContent();
-			_mapAreaBorder = Util.GenerateBorderTexture(
-				_mapAreaBounds.Width + (GameScreen.BorderWidth * 2),
-				_mapAreaBounds.Height + (GameScreen.BorderWidth * 2),
+			_gameplay.LoadContent();
+			_gameViewBorder = Util.GenerateBorderTexture(
+				_gameViewArea.Width + (GameScreen.BorderWidth * 2),
+				_gameViewArea.Height + (GameScreen.BorderWidth * 2),
 				GameScreen.BorderWidth,
 				Color.DarkSlateBlue);
-			_mapAreaBorder.Alignment = ImageAlignment.Centered;
-			_mapAreaBorder.Position = _mapAreaBounds.CenterVector();
-			_mapAreaBorder.LoadContent();
-			_world.DrawArea = _mapAreaBounds;
-			_world.LoadContent();
+			_gameViewBorder.Alignment = ImageAlignment.Centered;
+			_gameViewBorder.Position = _gameViewArea.CenterVector();
+			_gameViewBorder.LoadContent();
+			_gameplay.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-			_mapAreaBorder.UnloadContent();
-			_world.UnloadContent();
+			_gameViewBorder.UnloadContent();
+			_gameplay.UnloadContent();
 		}
 
 		public override void Update(GameTime gameTime, bool processInput)
 		{
 			base.Update(gameTime, processInput);
-			_mapAreaBorder.Update(gameTime);
-			_world.Update(gameTime);
+			_gameViewBorder.Update(gameTime);
+			_gameplay.Update(gameTime);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch)
 		{	
 			base.Draw(spriteBatch);
-			_mapAreaBorder.Draw(spriteBatch);
-			_world.Draw(spriteBatch);
+			_gameViewBorder.Draw(spriteBatch);
+			_gameplay.Draw(spriteBatch);
 		}
 	}
 }

@@ -7,75 +7,50 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Enum;
 
 namespace Game1
 {
 	public class World
 	{
-		private Rectangle _currentMapSourceRect;
-		private Rectangle _drawArea;
-
-		public Character Player { get; set; }
+		public List<NPC> NPCs { get; set; }
+		public Character Character { get; set; }
 		public Map CurrentMap { get; set; }
 
-		public Rectangle DrawArea
-		{ 
-			get { return _drawArea; }
-			set {
-				_drawArea = value;
-				if (this.CurrentMap != null)
-					this.CurrentMap.DrawArea = _drawArea;
-			}
+		public void Initialize()
+		{
+			this.CurrentMap = IOManager.ObjectFromFile<Map>(Game1.MapFile);
+			this.CurrentMap.GenerateTiles();
+			this.Character = IOManager.ObjectFromFile<Character>(Game1.PlayerFile);
+
+			CharacterSex oppositeSex = (this.Character.Sex == CharacterSex.Male) ? CharacterSex.Female : CharacterSex.Male;
+			this.NPCs = new List<NPC> {
+				new NPC { Name = Guid.NewGuid().ToString(), Sex = oppositeSex, Position = new Vector2 (128.0f, 128.0f) },
+				new NPC { Name = Guid.NewGuid().ToString(), Sex = oppositeSex, Position = new Vector2 (256.0f, 256.0f) },
+				new NPC { Name = Guid.NewGuid().ToString(), Sex = oppositeSex, Position = new Vector2 (1024.0f, 1024.0f) }
+			};
 		}
 
 		public void LoadContent()
 		{
-			this.CurrentMap.LoadContent();
-			this.Player.LoadContent();
 		}
 
 		public void UnloadContent()
 		{
-			this.CurrentMap.UnloadContent();
-			this.Player.UnloadContent();
+
 		}
 
 		public void Update(GameTime gameTime)
 		{
 			this.CurrentMap.Update(gameTime);
-			this.Player.Update(gameTime);
-
-			var drawAreaSize = this.DrawArea.SizeVector();
-			var drawAreaPadding = this.DrawArea.SizeVector() / 2;
-			var mapSize = this.CurrentMap.GroundSize;
-
-			int sourceX = 0;
-			int sourceY = 0;
-			
-			if (this.Player.Position.X > drawAreaPadding.X)
-			{
-				if (this.Player.Position.X > this.CurrentMap.GroundSize.X - (drawAreaPadding.X))
-					sourceX = this.DrawArea.Width;
-				else
-					sourceX = (int)(this.Player.Position.X - drawAreaPadding.X);
-			}
-
-			if (this.Player.Position.Y > drawAreaPadding.Y)
-			{
-				if (this.Player.Position.Y > this.CurrentMap.GroundSize.Y - (drawAreaPadding.Y))
-					sourceY = this.DrawArea.Height;
-				else
-					sourceY = (int)(this.Player.Position.Y - drawAreaPadding.Y);
-			}
-
-			_currentMapSourceRect = new Rectangle(sourceX, sourceY, this.DrawArea.Width, this.DrawArea.Height);
-			this.CurrentMap.SourceRect = _currentMapSourceRect;
+			this.Character.Update(gameTime);
+			foreach (var npc in this.NPCs)
+				npc.Update(gameTime);
 		}
 
 		public void Draw(SpriteBatch spriteBatch)
-		{						
-			this.CurrentMap.Draw(spriteBatch);
-			this.Player.Draw(spriteBatch);
+		{
+
 		}
 	}
 }

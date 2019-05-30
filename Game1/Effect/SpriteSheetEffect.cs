@@ -14,7 +14,7 @@ namespace Game1.Effect
 
 		public SpriteSheetEffect(bool isActive) : base(isActive)
 		{
-			_switchInterval = 100;
+			_switchInterval = 5;
 			_currentInterval = 0;
 		}
 
@@ -31,11 +31,11 @@ namespace Game1.Effect
 
 			var sourceRect = _image.SourceRect;
 			int currentFrame = sourceRect.X / Game1.TileSize;
-			int newFrame = currentFrame++;
+			int newFrame = currentFrame + 1;
 			if (newFrame >= Game1.SpriteSheetWalkFrameCount)
 				newFrame = 0;
 
-			_image.SourceRect = new Rectangle(newFrame * Game1.TileSize, sourceRect.Y, sourceRect.Width, sourceRect.Height);
+			_image.SourceRect = new Rectangle(newFrame * Game1.TileSize, sourceRect.Y, Game1.TileSize, Game1.TileSize);
 			_currentInterval = 0;
 		}
 	}

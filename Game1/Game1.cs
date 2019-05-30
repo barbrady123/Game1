@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json;
+using Game1.Enum;
 
 namespace Game1
 {
@@ -26,9 +27,14 @@ namespace Game1
 		public const int TileSize = 64;
 		public const int TileSheetSize = 10;
 		public const int SpriteSheetWalkFrameCount = 9;
+		public const int SpriteSheetDefaultFrame = 0;
+		public const Cardinal SpriteSheetDefaultDirection = Cardinal.South;
+		public const int GameViewAreaWidth = 15;
+		public const int GameViewAreaHeight = 15;
+		public const int PlayerDrawIndex = 100;
 
 		GraphicsDeviceManager _graphicsManager;
-		SpriteBatch _spriteBatch;
+		//SpriteBatch _spriteBatch;
 		ScreenManager _screenManager;
 		GameConfiguration _config;
 
@@ -43,6 +49,7 @@ namespace Game1
 			Game1.Instance = this;
 			_graphicsManager = new GraphicsDeviceManager(this);
 			Content.RootDirectory = Game1.ContentRoot;
+			GameRandom.InitializeSeed(9872343);
 		}
 
 		/// <summary>
@@ -69,7 +76,13 @@ namespace Game1
 		protected override void LoadContent()
 		{
 			Game1.ServiceProvider = Content.ServiceProvider;
-			_spriteBatch = new SpriteBatch(GraphicsDevice);
+			// General use...
+			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), null, 100, "general");
+			// Gameplay camera drawing...
+			var gameplayBatch = new SpriteBatch(GraphicsDevice);
+			gameplayBatch.GraphicsDevice.ScissorRectangle = new Rectangle(28, 28, 960, 960);
+			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), new RasterizerState { ScissorTestEnable = true }, 200, "gameplay");
+
 			_screenManager.LoadContent();
 			_screenManager.StartScreen();
 		}
@@ -102,9 +115,19 @@ namespace Game1
 		protected override void Draw(GameTime gameTime)
 		{
 			GraphicsDevice.Clear(Color.Black);
-			_spriteBatch.Begin();
-			_screenManager.Draw(_spriteBatch);
-			_spriteBatch.End();
+			foreach (var data in SpriteBatchManager.GetAllDataSorted())
+			{
+				data.SpriteBatch.Begin(samplerState: SamplerState.LinearWrap, rasterizerState: data.RasterizeState);
+			}
+			
+			// General use one is used in the main Draw pipeline...
+			_screenManager.Draw(SpriteBatchManager.Get("general"));
+
+			foreach (var data in SpriteBatchManager.GetAllDataSorted())
+			{
+				data.SpriteBatch.End();
+			}
+
 			base.Draw(gameTime);
 		}
 

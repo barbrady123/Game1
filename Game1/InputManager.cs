@@ -73,6 +73,7 @@ namespace Game1
 			_currentKeyState = Keyboard.GetState();			
 		}
 
+		// TODO: Verify that we still need this...
 		public static bool KeyPressed(Keys key, bool clearAfterMatch = false)
 		{
 			bool result = KeyPressed(new[] { key });
@@ -84,11 +85,11 @@ namespace Game1
 
 		public static bool KeyPressed(Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyDown(k) && _prevKeyState.IsKeyUp(k));
 
-		public static bool KeyReleased(Keys key, bool clearAfterMatch = false) => KeyReleased(new[] { key });
+		public static bool KeyReleased(Keys key) => KeyReleased(new[] { key });
 
 		public static bool KeyReleased(Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyUp(k) && _prevKeyState.IsKeyDown(k));
 
-		public static bool KeyDown(Keys key, bool clearAfterMatch = false) => KeyDown(new[] { key });
+		public static bool KeyDown(Keys key) => KeyDown(new[] { key });
 
 		public static bool KeyDown(Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyDown(k));	
 

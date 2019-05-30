@@ -172,16 +172,9 @@ namespace Game1
 				break;
 				case "CharacterCreateScreen": switch (args.Type)
 				{
-					case "back" : TransitionScreens(new MainMenu(_bounds));	break;
-					case "game" :
-						// This should NOT go directly to game screen...we need a "loading" transition screen with a call back (probably just part of the ScreenManager)....
-						// TODO: Move this to the correct place...
-						var world = new World();
-						world.Player = IOManager.ObjectFromFile<Character>(Game1.PlayerFile);
-						world.Player.Position = new Vector2(Game1.TileSize / 2, Game1.TileSize / 2);
-						world.CurrentMap = IOManager.ObjectFromFile<Map>(Game1.MapFile);
-						TransitionScreens(new GameScreen(_bounds, world));
-						break;
+					case "back" : TransitionScreens(new MainMenu(_bounds));		break;
+					// This should NOT go directly to game screen...we need a "loading" transition screen with a call back (probably just part of the ScreenManager)....
+					case "game" : TransitionScreens(new GameScreen(_bounds));	break;
 				}
 				break;
 			}

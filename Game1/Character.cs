@@ -14,27 +14,43 @@ namespace Game1
 {
 	public class Character
 	{
-		private ContentManager _content;
-		private ImageTexture _spriteSheet;
+		private Vector2 _position;
+		private Vector2 _previousPosition;
+		protected Vector2 _latestMotion;
 
 		public string Name { get; set; }
 		public CharacterSex Sex { get; set; }
-		public Vector2 Position { get; set; }
 		public Cardinal Direction { get; set; }
 		public float Speed { get; set; }
+		public Vector2 Motion { get; set; }
+		public string SpriteSheetName => this.Sex.ToString("g");
+
+		public Vector2 Position
+		{
+			get { return _position; }
+			set {
+				if (_position != value)
+				{
+					_previousPosition = _position;
+					_position = value;
+				}
+			}
+		}
 
 		public Character()
 		{
 			this.Direction = Cardinal.South;
-			this.Speed = 1.0f;
+			this.Speed = 150.0f;
+		}
+
+		public void RevertPosition()
+		{
+			if (_previousPosition != null)
+				this.Position = _previousPosition;
 		}
 
 		public void LoadContent()
 		{
-			_content = new ContentManager(Game1.ServiceProvider, Game1.ContentRoot);
-			_spriteSheet = new ImageTexture(_content.Load<Texture2D>($"{Game1.SpriteSheetRoot}\\{this.Sex.ToString("g")}")) { IsActive = true };
-			_spriteSheet.AddEffect(new SpriteSheetEffect(true));
-			_spriteSheet.LoadContent();
 		}
 
 		public void UnloadContent()
@@ -42,45 +58,52 @@ namespace Game1
 
 		}
 
-		public void Update(GameTime gameTime)
+		public virtual Vector2 UpdateMotion()
 		{
 			Vector2 motion = Vector2.Zero;
 
-			if (InputManager.KeyPressed(Keys.W))
+			if (InputManager.KeyDown(Keys.W))
 			{
 				motion.Y = -1;
 				this.Direction = Cardinal.North;
 			}
-			if (InputManager.KeyPressed(Keys.S))
+			if (InputManager.KeyDown(Keys.S))
 			{
 				motion.Y = 1;
 				this.Direction = Cardinal.South;
 			}
-			if (InputManager.KeyPressed(Keys.A))
+			if (InputManager.KeyDown(Keys.A))
 			{
 				motion.X = -1;
 				this.Direction = Cardinal.West;
 			}
-			if (InputManager.KeyPressed(Keys.D))
+			if (InputManager.KeyDown(Keys.D))
 			{
 				motion.X = 1;
 				this.Direction = Cardinal.East;
 			}
+
+			return motion;
+		}
+
+		public void Update(GameTime gameTime)
+		{
+			Vector2 motion = UpdateMotion();
 
 			if (motion != Vector2.Zero)
 			{
 				motion.Normalize();
 				motion *= (this.Speed * (float)gameTime.ElapsedGameTime.TotalSeconds);
 				this.Position += motion;
+				this.Motion = motion;
 			}
 
-			_spriteSheet.SourceRect = new Rectangle(_spriteSheet.SourceRect.X, (int)this.Direction * Game1.TileSize, Game1.TileSize, Game1.TileSize);
+			_latestMotion = motion;
 		}
 
 		public void Draw(SpriteBatch spriteBatch)
 		{
-			//this.Position = 
-			_spriteSheet.Draw(spriteBatch);
+
 		}
 	}
 }
