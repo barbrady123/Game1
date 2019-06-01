@@ -74,14 +74,13 @@ namespace Game1.Interface
 			this.Duration = duration;
 			_bounds = bounds;
 			_backgroundImage = new ImageTexture($"{Game1.BackgroundRoot}/black", true) { 
-				Alignment = ImageAlignment.Centered,
 				Scale = _bounds.SizeVector(),
-				DrawArea = _bounds,
-				Position = _bounds.SizeVector() / 2
+				Position = _bounds.TopLeftVector()
 			};
 			_textImage = new ImageText(_text, true) { Position = _bounds.CenterVector(yOffset: - _bounds.Height / 3) };
 			switch (this.Buttons)
 			{
+				// TODO : Move this to a buttons component...
 				case DialogButton.Ok :	
 					_buttonMenu = new OkMenu(new Rectangle(_bounds.X, _bounds.Y + (int)(_bounds.Height * 0.75f),  _bounds.Width, (int)(_bounds.Height * 0.25f))) { IsActive = true };
 					_buttonMenu.OnItemSelect += _buttonMenu_OnItemSelect;

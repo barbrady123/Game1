@@ -9,95 +9,110 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Interface;
+using Game1.Interface.Windows;
 using Game1.Items;
 
 namespace Game1
 {
 	public class GamePlayManager : IActivatable
 	{
+		private const int BorderWidth = 3;
+		private const int ViewWindowOffset = 25;
+		private static readonly Rectangle _gameViewArea = new Rectangle(
+			GamePlayManager.ViewWindowOffset + GamePlayManager.BorderWidth,
+			GamePlayManager.ViewWindowOffset + GamePlayManager.BorderWidth,
+			Game1.TileSize * Game1.GameViewAreaWidth,
+			Game1.TileSize * Game1.GameViewAreaHeight);
+
+		private readonly Rectangle _bounds;
 		private readonly ActivationManager _activation;
 		private readonly GamePlayCamera _camera;
 		private readonly PhysicsManager _physics;
 		private readonly World _world;
-		private readonly DialogBox _dialogBox;
-		private readonly ItemContainerView _inventoryView;
+		private readonly InventoryWindow _inventoryWindow;
+
+		private ImageTexture _gameViewBorder;
 
 		public bool IsActive { get; set; }
 
-		public GamePlayManager(Rectangle gameViewArea, World world)
+		public GamePlayManager(Rectangle bounds)
 		{
-			_world = world;
+			_bounds = bounds;
+
+			_world = new World();
 			_world.Initialize();
-			_camera = new GamePlayCamera(_world, gameViewArea);
+
+			_gameViewBorder = GenerateGameViewBorder();
+			_gameViewBorder.LoadContent();
+
+			_camera = new GamePlayCamera(_world, _gameViewArea);
 			_physics = new PhysicsManager(_world);
 			_activation = new ActivationManager();
 			_activation.Add(this);
 			_activation.Activate(this);
 
-			// Dialog
-			_activation.Add(_dialogBox = new DialogBox("Paused", DialogButton.Ok, new Rectangle(600, 500, 400, 200), null));
-			_dialogBox.OnButtonClick += _dialogBox_OnButtonClick;
-			_dialogBox.OnReadyDisable += _dialogBox_OnButtonClick;
-
-			// Inventory View
-			_activation.Add(_inventoryView = new ItemContainerView(_world.Character.Backpack, "Backpack", new Rectangle(200, 200, 1200, 800)));
-			_inventoryView.OnReadyDisable += _inventoryView_OnReadyDisable;
+			_activation.Add(_inventoryWindow = new InventoryWindow("Backpack", DialogButton.None, _bounds.CenteredRegion(1000, 600), null, _world.Character.Backpack, _world.Character.HotBar));
+			_inventoryWindow.OnReadyDisable += _inventoryView_OnReadyDisable;
 		}
 
 		public void LoadContent()
 		{
+			ItemManager.LoadContent();
 			_world.LoadContent();
 			_camera.TerrainTileSheetName = _world.CurrentMap.TileSheet;
 			_camera.TerrainLayerData  = _world.CurrentMap.Layers;
 			_camera.LoadContent();
 			_physics.CalculateParameters();
-			_dialogBox.LoadContent();
-			_inventoryView.LoadContent();
+			_inventoryWindow.LoadContent();
 		}
 
 		public void UnloadContent()
 		{
+			ItemManager.UnloadContent();
+			_gameViewBorder.UnloadContent();
 			_world.UnloadContent();
 			_camera.UnloadContent();
-			_dialogBox.UnloadContent();
-			_inventoryView.UnloadContent();
+			_inventoryWindow.UnloadContent();
 		}
 
 		public void Update(GameTime gameTime)
 		{
-			// This is up here in case a modal is active...this is the problem with self-registration in the ActivationManager...do we want to keep it this way or 
-			// move modals outside the GamePlayManager?
-			_dialogBox.Update(gameTime);
-			_inventoryView.Update(gameTime);
+			_inventoryWindow.Update(gameTime, true);
 
+			// In this case "IsActive" effectively means the game is running, pausing the GamePlayManager pauses the game,
+			// So anything like a modal that would cause the game to pause must be Updated above here...
 			if (!this.IsActive)
 				return;
 
+			_gameViewBorder.Update(gameTime);
 			_world.Update(gameTime);
 			_physics.Update(gameTime);
 			_camera.Update(gameTime);
 
-
 			// TODO: Move this to a better location...
 			if (InputManager.KeyPressed(Keys.I))
-				_activation.Activate(_inventoryView);
-			else if (InputManager.KeyPressed(Keys.Escape))
-				_activation.Activate(_dialogBox);
+				_activation.Activate(_inventoryWindow);
 		}
 
-		public void Draw()
+		public void Draw(SpriteBatch spriteBatch)
 		{
+			_gameViewBorder.Draw(spriteBatch);
 			_camera.Draw();
-			_dialogBox.Draw();
-			_inventoryView.Draw();
+			_inventoryWindow.Draw(spriteBatch);
 		}
 
-		private void _dialogBox_OnButtonClick(object sender, EventArgs e)
+		private ImageTexture GenerateGameViewBorder()
 		{
-			_activation.Activate(this);
+			var texture = Util.GenerateBorderTexture(
+				_gameViewArea.Width + (GamePlayManager.BorderWidth * 2),
+				_gameViewArea.Height + (GamePlayManager.BorderWidth * 2),
+				GamePlayManager.BorderWidth,
+				Color.DarkSlateBlue);
+			texture.Alignment = ImageAlignment.Centered;
+			texture.Position = _gameViewArea.CenterVector();
+			return texture;
 		}
 
-		// Can we just have a general "modal closed" event hanlder?  
 		private void _inventoryView_OnReadyDisable(object sender, EventArgs e)
 		{
 			_activation.Activate(this);

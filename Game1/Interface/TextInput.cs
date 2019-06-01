@@ -99,7 +99,8 @@ namespace Game1.Interface
 
 		public void LoadContent()
 		{
-			_background = Util.GenerateSolidBackground(_width, _width, Color.Black);
+			_background = Util.GenerateSolidBackground(_width, _height, Color.Black);
+			_background.Position = this.Position;
 			_background.LoadContent();
 			_border = Util.GenerateBorderTexture(_width, _height, _borderWidth, Color.Gray);
 			_border.Position = this.Position;

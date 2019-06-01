@@ -24,7 +24,11 @@ namespace Game1
 		public const string MapRoot = "Load\\Map";
 		public const string TilesheetRoot = "Gameplay\\TileSheet";
 		public const string SpriteSheetRoot = "Gameplay\\Character";
+		public const string IconRoot = "Gameplay\\Icon";
 		public const int TileSize = 64;
+		public const int TileHalfSize = TileSize / 2;
+		public const int IconSize = 64;
+		public const int IconHalfSize = IconSize / 2;
 		public const int TileSheetSize = 10;
 		public const int SpriteSheetWalkFrameCount = 9;
 		public const int SpriteSheetDefaultFrame = 0;
@@ -46,10 +50,11 @@ namespace Game1
 
 		public Game1()
 		{
+            this.IsMouseVisible = true;
 			Game1.Instance = this;
 			_graphicsManager = new GraphicsDeviceManager(this);
 			Content.RootDirectory = Game1.ContentRoot;
-			GameRandom.InitializeSeed(9872343);
+			//GameRandom.InitializeSeed(9872343);
 		}
 
 		/// <summary>

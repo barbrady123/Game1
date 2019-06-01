@@ -35,11 +35,12 @@ namespace Game1
 			return new ImageTexture(t, true);
 		}
 
-		public static void WrappedDraw(Action<SpriteBatch> func, string batchName, Rectangle bounds)
+		public static SpriteBatch WrappedDraw(Action<SpriteBatch> func, string batchName, Rectangle bounds)
 		{
 			var batchData = SpriteBatchManager.Get(batchName);
 			batchData.ScissorWindow = bounds;
 			func.Invoke(batchData.SpriteBatch);
+			return batchData.SpriteBatch;
 		}
 	}
 }

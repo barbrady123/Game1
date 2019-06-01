@@ -35,7 +35,7 @@ namespace Game1
 					continue;
 
 				// Eventually need to check mob "size" or "type" for bounding box settings...
-				var charBox = character.Position.ExpandToRectangle((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
+				var charBox = character.Position.ExpandToRectangleCentered((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
 				bool moved = true;
 
 				// Map bounds
@@ -65,7 +65,7 @@ namespace Game1
 					foreach (var otherChar in allChars.Where(c => c != character))
 					{
 						// Eventually need to check mob "size" or "type" for bounding box settings...
-						var otherCharBox = otherChar.Position.ExpandToRectangle((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
+						var otherCharBox = otherChar.Position.ExpandToRectangleCentered((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
 						if (otherCharBox.Intersects(charBox))
 						{
 							character.RevertPosition();
@@ -108,8 +108,8 @@ namespace Game1
 			if ((motion.X == 0.0f) || (motion.Y == 0.0f))
 				return false;
 
-			var proposedHorizontalPosition = (character.Position + new Vector2(motion.X, 0.0f)).ExpandToRectangle((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
-			var proposedVerticalPosition = (character.Position + new Vector2(0.0f, motion.Y)).ExpandToRectangle((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
+			var proposedHorizontalPosition = (character.Position + new Vector2(motion.X, 0.0f)).ExpandToRectangleCentered((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
+			var proposedVerticalPosition = (character.Position + new Vector2(0.0f, motion.Y)).ExpandToRectangleCentered((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
 
 			if (type == IntersectionType.Contains)
 			{

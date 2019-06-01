@@ -29,14 +29,6 @@ namespace Game1
 			this.Character.Strength = GameRandom.Next(10, 20);
 			this.Character.Intelligence = GameRandom.Next(10, 20);
 			this.Character.Constitution = GameRandom.Next(10, 20);
-			this.Character.HotBar.AddItem(ItemManager.GetItem());
-			this.Character.HotBar.AddItem(ItemManager.GetItem());
-			this.Character.HotBar.AddItem(ItemManager.GetItem());
-			this.Character.Backpack.AddItem(ItemManager.GetItem());
-			this.Character.Backpack.AddItem(ItemManager.GetItem());
-			this.Character.Backpack.AddItem(ItemManager.GetItem());
-			this.Character.Backpack.AddItem(ItemManager.GetItem());
-			this.Character.Backpack.AddItem(ItemManager.GetItem());
 
 			CharacterSex oppositeSex = (this.Character.Sex == CharacterSex.Male) ? CharacterSex.Female : CharacterSex.Male;
 			this.NPCs = new List<NPC> {
@@ -48,6 +40,14 @@ namespace Game1
 
 		public void LoadContent()
 		{
+			this.Character.HotBar.AddItem(ItemManager.GetItem());
+			this.Character.HotBar.AddItem(ItemManager.GetItem());
+			this.Character.HotBar.AddItem(ItemManager.GetItem());
+			this.Character.Backpack.AddItem(ItemManager.GetItem());
+			this.Character.Backpack.AddItem(ItemManager.GetItem());
+			this.Character.Backpack.AddItem(ItemManager.GetItem());
+			this.Character.Backpack.AddItem(ItemManager.GetItem());
+			this.Character.Backpack.AddItem(ItemManager.GetItem());
 		}
 
 		public void UnloadContent()

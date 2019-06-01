@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Screens.Menu.Character;
 using Game1.Interface;
+using Game1.Interface.Windows;
 using Game1.Screens.Menu;
 
 namespace Game1.Screens
@@ -19,7 +20,7 @@ namespace Game1.Screens
 		private ActivationManager _activation = new ActivationManager();
 		private Character _newChar;
 		private Vector2 _characterViewPosition = new Vector2(450.0f, 400.0f);
-		private readonly DialogBox _dialogBox;
+		private readonly Dialog _dialog;
 
 		public ImageText _titleText;
 		public ImageTexture _characterViewBack;
@@ -57,9 +58,9 @@ namespace Game1.Screens
 			_menuCharacter.OnUserNotify += _menuCharacter_OnUserNotify;
 
 			// Dialog
-			_activation.Add(_dialogBox = new DialogBox(null, DialogButton.Ok, new Rectangle(600, 500, 400, 200), null));
-			_dialogBox.OnButtonClick += _dialogBox_OnButtonClick;
-			_dialogBox.OnReadyDisable += _dialogBox_OnButtonClick;
+			_activation.Add(_dialog = new Dialog(null, DialogButton.Ok, new Rectangle(600, 500, 400, 200), null));
+			_dialog.OnButtonClick += _dialogBox_OnButtonClick;
+			_dialog.OnReadyDisable += _dialogBox_OnButtonClick;
 
 			_activation.Activate(_menuCharacter);
 		}
@@ -71,7 +72,7 @@ namespace Game1.Screens
 			_characterViewBack.LoadContent();
 			_characterView.LoadContent();
 			_menuCharacter.LoadContent();
-			_dialogBox.LoadContent();
+			_dialog.LoadContent();
 		}
 
 		public override void UnloadContent()
@@ -81,7 +82,7 @@ namespace Game1.Screens
 			_characterViewBack.UnloadContent();
 			_characterView.UnloadContent();
 			_menuCharacter.UnloadContent();
-			_dialogBox.UnloadContent();
+			_dialog.UnloadContent();
 		}
 
 		public override void Update(GameTime gameTime, bool processInput)
@@ -89,9 +90,7 @@ namespace Game1.Screens
 			base.Update(gameTime, processInput);
 			_characterView.Update(gameTime);
 			_menuCharacter.Update(gameTime, processInput);
-			if (InputManager.KeyPressed(Keys.D))
-				_activation.Activate(_dialogBox);
-			_dialogBox.Update(gameTime);
+			_dialog.Update(gameTime, processInput);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch)
@@ -101,7 +100,7 @@ namespace Game1.Screens
 			_characterViewBack.Draw(spriteBatch);
 			_characterView.Draw(spriteBatch);
 			_menuCharacter.Draw(spriteBatch);
-			_dialogBox.Draw();
+			_dialog.Draw(spriteBatch);
 		}
 
 		private void _menuCharacter_OnSexItemChange(object sender, EventArgs e)
@@ -142,14 +141,14 @@ namespace Game1.Screens
 		private void _menuCharacter_OnUserNotify(object sender, EventArgs e)
 		{
 			var args = (UserNotifyArgs)e;
-			_dialogBox.Text = args.Text;
-			_dialogBox.Duration = 300;
-			_activation.Activate(_dialogBox);
+			_dialog.Title = args.Text;
+			_dialog.Duration = 300;
+			_activation.Activate(_dialog);
 		}
 
 		private void _dialogBox_OnButtonClick(object sender, EventArgs e)
 		{
-			_activation.Deactivate(_dialogBox);
+			_activation.Deactivate(_dialog);
 		}
 	}
 }

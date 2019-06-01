@@ -11,8 +11,6 @@ namespace Game1.Screens
 {
 	public abstract class Screen
 	{
-		private ContentManager _content;
-
 		protected ImageTexture _backgroundImage;
 
 		public Rectangle Bounds { get; set; }
@@ -24,15 +22,11 @@ namespace Game1.Screens
 			this.Bounds = bounds;
 
 			if (!String.IsNullOrWhiteSpace(backgroundName))
-			{
-				_backgroundImage = new ImageTexture($"{Game1.BackgroundRoot}/{backgroundName}", true);
-				_backgroundImage.DrawArea = bounds;
-			}
+				_backgroundImage = new ImageTexture($"{Game1.BackgroundRoot}/{backgroundName}", true) { Position = bounds.TopLeftVector() };
 		}
 
 		public virtual void LoadContent()
 		{
-			_content = new ContentManager(Game1.ServiceProvider);
 			if (_backgroundImage != null)
 			{
 				_backgroundImage.LoadContent();
@@ -43,7 +37,7 @@ namespace Game1.Screens
 
 		public virtual void UnloadContent()
 		{
-			_content?.Unload();
+			_backgroundImage?.UnloadContent();
 		}
 
 		public virtual void Update(GameTime gameTime, bool processInput)

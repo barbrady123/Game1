@@ -10,7 +10,7 @@ namespace Game1.Items
 	public class Item
 	{
 		// This is another place where we may load images seperate and change this to a pointer so we can share images...
-		private ImageTexture Icon { get; set; }
+		public ImageTexture Icon { get; set; }
 
 		public int Id { get; set; }
 

@@ -24,7 +24,6 @@ namespace Game1
 		public Vector2 Scale { get; set; }
 		public Vector2 Position{ get; set; }
 		public float Alpha { get; set; }
-		public Rectangle DrawArea { get; set; }
 		public Color Color { get; set; }
 		public int Index { get; set; }
 
@@ -87,13 +86,13 @@ namespace Game1
 			}
 		}
 
-		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null)
+		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null)
 		{
 			if (this.IsActive)
-				DrawActive(spriteBatch, alphaBlend);
+				DrawActive(spriteBatch, alphaBlend, position);
 		}
 
-		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null);
+		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null);
 
 		protected virtual void SetOrigin()
 		{

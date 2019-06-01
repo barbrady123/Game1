@@ -8,64 +8,63 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
+using Game1.Enum;
+using Game1.Interface;
+using Game1.Interface.Windows;
+using Game1.Items;
 
 namespace Game1.Screens
 {
 	public class GameScreen : Screen
 	{
-		private const int BorderWidth = 3;
-		private const int ViewWindowOffset = 25;
-		private static readonly Rectangle _gameViewArea = new Rectangle(
-			GameScreen.ViewWindowOffset + GameScreen.BorderWidth,
-			GameScreen.ViewWindowOffset + GameScreen.BorderWidth,
-			Game1.TileSize * Game1.GameViewAreaWidth,
-			Game1.TileSize * Game1.GameViewAreaHeight);
 		private GamePlayManager _gameplay;
-		private ImageTexture _gameViewBorder;
-		private World _world;
-
-		//private ActivationManager _activation = new ActivationManager();
+		private readonly Dialog _dialog;
+		private readonly ActivationManager _activation;
 
 		public GameScreen(Rectangle bounds): base(bounds, "rock")
 		{
-			_world = new World();
-			_gameplay = new GamePlayManager(_gameViewArea, _world) { IsActive = true };
+			_activation = new ActivationManager();
+			_activation.Add(_gameplay = new GamePlayManager(bounds) { IsActive = true });
+			// Dialog
+			_activation.Add(_dialog = new Dialog("Paused", DialogButton.Ok, bounds.CenteredRegion(400, 200), null));
+			_dialog.OnButtonClick += _dialogBox_OnButtonClick;
+			_dialog.OnReadyDisable += _dialogBox_OnButtonClick;
 		}
 
 		public override void LoadContent()
 		{
 			base.LoadContent();
 			_gameplay.LoadContent();
-			_gameViewBorder = Util.GenerateBorderTexture(
-				_gameViewArea.Width + (GameScreen.BorderWidth * 2),
-				_gameViewArea.Height + (GameScreen.BorderWidth * 2),
-				GameScreen.BorderWidth,
-				Color.DarkSlateBlue);
-			_gameViewBorder.Alignment = ImageAlignment.Centered;
-			_gameViewBorder.Position = _gameViewArea.CenterVector();
-			_gameViewBorder.LoadContent();
-			_gameplay.LoadContent();
+			_dialog.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-			_gameViewBorder.UnloadContent();
 			_gameplay.UnloadContent();
+			_dialog.UnloadContent();
 		}
 
 		public override void Update(GameTime gameTime, bool processInput)
 		{
 			base.Update(gameTime, processInput);
-			_gameViewBorder.Update(gameTime);
 			_gameplay.Update(gameTime);
+			_dialog.Update(gameTime, processInput);
+
+			if (InputManager.KeyPressed(Keys.Escape))
+				_activation.Activate(_dialog);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch)
 		{	
 			base.Draw(spriteBatch);
-			_gameViewBorder.Draw(spriteBatch);
-			_gameplay.Draw();
+			_gameplay.Draw(spriteBatch);
+			_dialog.Draw(spriteBatch);
+		}
+
+		private void _dialogBox_OnButtonClick(object sender, EventArgs e)
+		{
+			_activation.Activate(_gameplay);
 		}
 	}
 }

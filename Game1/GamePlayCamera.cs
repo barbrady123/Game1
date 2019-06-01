@@ -126,7 +126,7 @@ namespace Game1
 			renderData.Animation.IsActive = (renderData.PreviousPosition != character.Position);
 			renderData.SpriteSheet.SourceRect = new Rectangle(renderData.SpriteSheet.SourceRect.X, (int)character.Direction * Game1.TileSize, Game1.TileSize, Game1.TileSize);
 			renderData.SpriteSheet.Update(gameTime);
-			renderData.SpriteSheet.Position = new Vector2(character.Position.X - _terrainSourceRect.X, character.Position.Y - _terrainSourceRect.Y);
+			renderData.SpriteSheet.Position = new Vector2(character.Position.X - _terrainSourceRect.X + _gameViewArea.X, character.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
 			renderData.PreviousPosition = character.Position;
 		}
 
@@ -146,7 +146,6 @@ namespace Game1
 				data.Value.SpriteSheet.Draw(spriteBatch);
 			foreach (var map in _terrainMaps.OrderBy(m => m.Index).Where(m => m.Index > Game1.PlayerDrawIndex))
 			{
-				// Just toying with this idea, but it's pretty cool...
 				map.Alpha = GamePlayCamera.OverLayerAlpha;
 				map.Draw(spriteBatch);
 			}
@@ -154,11 +153,10 @@ namespace Game1
 
 		private void LoadCharacterSpriteSheet(CharacterRenderData renderData)
 		{
-			// TODO: Fix this so it loads unique sprite sheets into collection ONLY and they are referenced by index here...
+			// TODO: Fix this so it loads unique sprite sheets into collection ONLY and they are referenced by id here...
 			renderData.SpriteSheet = new ImageTexture($"{Game1.SpriteSheetRoot}\\{renderData.Character.SpriteSheetName}") { 
 				IsActive = true,
 				Alignment = ImageAlignment.Centered,
-				DrawArea = _gameViewArea
 			};
 			renderData.SpriteSheet.LoadContent();
 			renderData.SpriteSheet.AddEffect(renderData.Animation);
@@ -221,7 +219,7 @@ namespace Game1
 			spriteBatch.End();
 			var texture = (Texture2D)renderTarget;
 			Game1.Graphics.SetRenderTarget(null);
-			return new ImageTexture(texture) { IsActive = true, DrawArea = _gameViewArea };
+			return new ImageTexture(texture) { IsActive = true, Position = _gameViewArea.TopLeftVector() };
 		}
 	}
 }

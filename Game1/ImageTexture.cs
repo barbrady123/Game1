@@ -50,9 +50,9 @@ namespace Game1
 			_texture?.Dispose();
 		}
 
-		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null)
+		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null)
 		{
-			spriteBatch.Draw(_texture, this.Position + this.DrawArea.TopLeftVector(), this.SourceRect, this.Color * this.Alpha * (alphaBlend ?? 1.0f), 0.0f, _origin, this.Scale, SpriteEffects.None, 0.0f);
+			spriteBatch.Draw(_texture, position ?? this.Position, this.SourceRect, this.Color * this.Alpha * (alphaBlend ?? 1.0f), 0.0f, _origin, this.Scale, SpriteEffects.None, 0.0f);
 		}
 
 		public void SwapTexture(string name, bool resetSourceRect = true)

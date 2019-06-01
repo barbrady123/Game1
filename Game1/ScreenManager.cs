@@ -32,7 +32,7 @@ namespace Game1
 			_bounds = bounds;
 			_isTransitioning = false;
 			_transitionImage = new ImageTexture($"{Game1.BackgroundRoot}/black") { Scale = new Vector2(_bounds.Width, _bounds.Height) };
-			_transitionImage.DrawArea = bounds;
+			_transitionImage.Position = bounds.TopLeftVector();
 			_fadeOutEffect = _transitionImage.AddEffect(new FadeOutEffect() { Speed = 3.0f });
 			_fadeInEffect = _transitionImage.AddEffect(new FadeInEffect() { Speed = 2.0f });
 			_fadeInEffect.OnActiveChange += _fadeInEffect_OnActiveChange;
