@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Enum;
 using Game1.Items;
 
 namespace Game1.Interface
@@ -22,12 +23,16 @@ namespace Game1.Interface
 		private ImageTexture _highlight;
 		private ImageText _quantity;
 		private Vector2 _position;
+		private bool _mouseover;
+		private int _containerIndex;
 
 		public InventoryItem Item { get; set; }
 
 		public Vector2 CenterPosition { get; set; }
 
 		public bool Highlight { get; set; }
+
+		public event EventHandler OnMouseClick;
 		
 		public Vector2 Position
 		{ 
@@ -39,9 +44,10 @@ namespace Game1.Interface
 			}
 		}
 
-		public InventoryItemView(Rectangle bounds)
+		public InventoryItemView(Rectangle bounds, int containerIndex)
 		{
 			_bounds = bounds;
+			_containerIndex = containerIndex;
 		}
 
 		public void LoadContent()
@@ -75,18 +81,28 @@ namespace Game1.Interface
 
 		public void Update(GameTime gameTime)
 		{
+			_highlight.IsActive = this.Highlight;
+			_mouseover = InputManager.MouseOver(_bounds);
 			if (this.Item?.Item != null)
 				_quantity.UpdateText((this.Item.Item.MaxStackSize > 1) ? this.Item.Quantity.ToString() : "");
-			_highlight.IsActive = this.Highlight;
+
+			if (InputManager.LeftMouseClick(_bounds))
+				OnMouseClick?.Invoke(this, new MouseEventArgs(MouseButton.Left, _containerIndex));
 		}
 
 		public void Draw(SpriteBatch spriteBatch)
 		{
+			_background.Scale = (_mouseover ? new Vector2(1.1f, 1.1f) : Vector2.One);
 			_background.Draw(spriteBatch);
+			_border.Scale = (_mouseover ? new Vector2(1.1f, 1.1f) : Vector2.One);
 			_border.Draw(spriteBatch);
 			_highlight.Draw(spriteBatch);
-			this.Item?.Item?.Icon?.Draw(spriteBatch, null, this.CenterPosition);
-			_quantity.Draw(spriteBatch);
+			if (this.Item?.Item?.Icon != null)
+			{
+				this.Item.Item.Icon.Scale = (_mouseover ? new Vector2(1.1f, 1.1f) : Vector2.One);
+				this.Item.Item.Icon.Draw(spriteBatch, null, this.CenterPosition);
+				_quantity.Draw(spriteBatch);
+			}
 		}
 	}
 }

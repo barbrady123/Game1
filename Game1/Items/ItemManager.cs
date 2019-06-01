@@ -61,7 +61,7 @@ namespace Game1.Items
 				case 5 : newItem = new ItemArmor {		DisplayName = "Gold Armor",		Icon = _icons["upg_armor"],	Id = val,	MaxStackSize = 1,	Weight = 5.5f };	break;
 			}
 
-			return new InventoryItem { Item = newItem, Quantity = GameRandom.Next(1, newItem.MaxStackSize) };
+			return new InventoryItem(newItem, GameRandom.Next(1, newItem.MaxStackSize));
 		}
 	}
 }

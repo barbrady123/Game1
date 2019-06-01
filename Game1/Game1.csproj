@@ -55,6 +55,7 @@
     <Compile Include="Enum\IntersectionTypeEnum.cs" />
     <Compile Include="Enum\MenuLayoutEnum.cs" />
     <Compile Include="Enum\HorizontalAlignmentEnum.cs" />
+    <Compile Include="Enum\MouseButtonEnum.cs" />
     <Compile Include="Enum\TextInputActionEnum.cs" />
     <Compile Include="Enum\VerticalAlignmentEnum.cs" />
     <Compile Include="Extensions\RectangleExtensions.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Items\ItemManager.cs" />
     <Compile Include="Layer.cs" />
     <Compile Include="Map.cs" />
+    <Compile Include="MouseEventArgs.cs" />
     <Compile Include="NPC.cs" />
     <Compile Include="PhysicsManager.cs" />
     <Compile Include="Primatives.cs" />

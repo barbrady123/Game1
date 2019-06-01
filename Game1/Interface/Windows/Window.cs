@@ -33,7 +33,10 @@ namespace Game1.Interface.Windows
 					if (_isActive)
 						DelayInput(1);
 					else
+					{
 						this.Duration = null;
+						InputManager.ResetMouseCursor();
+					}
 				}
 			}
 		}

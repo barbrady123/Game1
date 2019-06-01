@@ -31,6 +31,7 @@ namespace Game1
 		private readonly World _world;
 		private readonly InventoryWindow _inventoryWindow;
 		private readonly HotbarView _hotbarView;
+		private readonly Dialog _tooltip;
 
 		private ImageTexture _gameViewBorder;
 
@@ -56,6 +57,8 @@ namespace Game1
 			_inventoryWindow.OnReadyDisable += _inventoryView_OnReadyDisable;
 
 			_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(GamePlayManager.ViewWindowOffset, _gameViewArea.Bottom + ViewWindowOffset), true);
+
+			_tooltip = new Dialog(null, DialogButton.None, Rectangle.Empty, null);
 		}
 
 		public void LoadContent()
@@ -68,6 +71,7 @@ namespace Game1
 			_physics.CalculateParameters();
 			_inventoryWindow.LoadContent();
 			_hotbarView.LoadContent();
+			_tooltip.LoadContent();
 		}
 
 		public void UnloadContent()
@@ -78,6 +82,7 @@ namespace Game1
 			_camera.UnloadContent();
 			_inventoryWindow.UnloadContent();
 			_hotbarView.UnloadContent();
+			_tooltip.UnloadContent();
 		}
 
 		public void Update(GameTime gameTime)
@@ -94,6 +99,7 @@ namespace Game1
 			_physics.Update(gameTime);
 			_camera.Update(gameTime);
 			_hotbarView.Update(gameTime);
+			_tooltip.Update(gameTime, false);
 
 			// TODO: Move this to a better location...
 			if (InputManager.KeyPressed(Keys.I))
@@ -102,11 +108,11 @@ namespace Game1
 			// Hot bar functionality...this code should be moved...
 			var hotbar = _world.Character.HotBar;
 			int hotbarIndex = hotbar.ActiveItemIndex;
-			if (InputManager.KeyPressed(Keys.Right))
+			if (InputManager.KeyPressed(Keys.Right) || (InputManager.MouseScrollAmount < 0))
 			{
 				hotbar.ActiveItemIndex = (hotbarIndex < hotbar.Size - 1) ? hotbarIndex + 1 : 0;
 			}
-			if (InputManager.KeyPressed(Keys.Left))
+			if (InputManager.KeyPressed(Keys.Left)  || (InputManager.MouseScrollAmount > 0))
 			{
 				hotbar.ActiveItemIndex = (hotbarIndex > 0 ) ? hotbarIndex - 1 : hotbar.Size - 1;
 			}
@@ -118,6 +124,7 @@ namespace Game1
 			_camera.Draw();
 			_inventoryWindow.Draw(spriteBatch);
 			_hotbarView.Draw(spriteBatch);
+			_tooltip.Draw(spriteBatch);
 		}
 
 		private ImageTexture GenerateGameViewBorder()

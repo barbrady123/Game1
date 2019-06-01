@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace Game1
@@ -66,12 +67,16 @@ namespace Game1
 
 		private static KeyboardState _currentKeyState;
 		private static KeyboardState _prevKeyState;
+		private static MouseState _currentMouseState;
+		private static MouseState _prevMouseState;
 
 		public static void Update()
 		{
 			excludedKeys.Clear();
 			_prevKeyState = _currentKeyState;
-			_currentKeyState = Keyboard.GetState();			
+			_currentKeyState = Keyboard.GetState();
+			_prevMouseState = _currentMouseState;
+			_currentMouseState = Mouse.GetState();
 		}
 
 		private static List<Keys> excludedKeys = new List<Keys>();
@@ -116,6 +121,28 @@ namespace Game1
 				return '\0';
 
 			return (isUpper ? values.upper : values.lower);
+		}
+
+		public static Point MousePosition => _currentMouseState.Position;
+
+		public static bool MouseOver(Rectangle bounds) => bounds.Contains(_currentMouseState.Position);
+
+		public static bool LeftMouseClick() => (_currentMouseState.LeftButton == ButtonState.Pressed) && (_prevMouseState.LeftButton == ButtonState.Released);
+
+		public static bool LeftMouseClick(Rectangle bounds) => MouseOver(bounds) && LeftMouseClick();
+
+		public static bool RightMouseClick() => (_currentMouseState.RightButton == ButtonState.Pressed) && (_prevMouseState.RightButton == ButtonState.Released);
+
+		public static int MouseScrollAmount => _currentMouseState.ScrollWheelValue - _prevMouseState.ScrollWheelValue;
+
+		public static void SetMouseCursor(Texture2D texture)
+		{
+			Mouse.SetCursor(MouseCursor.FromTexture2D(texture, texture.Bounds.Center.X, texture.Bounds.Center.Y));
+		}
+
+		public static void ResetMouseCursor()
+		{
+			Mouse.SetCursor(MouseCursor.Arrow);
 		}
 	}
 }

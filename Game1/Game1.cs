@@ -68,6 +68,7 @@ namespace Game1
 			LoadConfiguration();
 			_graphicsManager.PreferredBackBufferWidth = _config.WindowWidth;
 			_graphicsManager.PreferredBackBufferHeight = _config.WindowHeight;
+			//_graphicsManager.IsFullScreen = true;
 			_graphicsManager.ApplyChanges();
 			Game1.Graphics = GraphicsDevice;
 			_screenManager = new ScreenManager(GraphicsDevice.Viewport.Bounds);
