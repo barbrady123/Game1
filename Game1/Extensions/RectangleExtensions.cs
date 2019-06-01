@@ -10,6 +10,8 @@ namespace Game1
 {
 	public static class RectangleExtensions
 	{
+		public static Vector2 TopCenterVector (this Rectangle rect, int? xOffset = null, int? yOffset = null) => new Vector2(rect.Center.X + (xOffset ?? 0), rect.Y + (yOffset ?? 0));
+
 		public static Vector2 CenterVector(this Rectangle rect, int? xOffset = null, int? yOffset = null) => new Vector2(rect.Center.X + (xOffset ?? 0), rect.Center.Y + (yOffset ?? 0));
 
 		public static Vector2 TopLeftVector(this Rectangle rect, int? xOffset = null, int? yOffset = null) => new Vector2(rect.X + (xOffset ?? 0), rect.Y + (yOffset ?? 0));

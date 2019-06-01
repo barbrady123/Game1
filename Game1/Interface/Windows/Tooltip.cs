@@ -49,7 +49,7 @@ namespace Game1.Interface.Windows
 
 			_sender = sender;
 			this.Title = text;			
-			this.Bounds = new Rectangle(position.X, position.Y, (int)this.TitleSize.X + 2, (int)this.TitleSize.Y + 2);
+			this.Bounds = new Rectangle(position.X, position.Y, (int)this.TitleSize.X + Window.TitleOffset * 2, (int)this.TitleSize.Y + Window.TitleOffset * 2);
 		}
 
 		public void Reset(object sender)

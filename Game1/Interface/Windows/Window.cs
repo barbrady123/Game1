@@ -61,7 +61,7 @@ namespace Game1.Interface.Windows
 		{
 			base.RepositionScreenObjects();
 			if (_titleImage != null)
-				_titleImage.Position = this.Bounds.CenterVector(yOffset: - this.Bounds.Height / 2 + Window.TitleOffset);
+				_titleImage.Position = this.Bounds.TopCenterVector(yOffset: + Window.TitleOffset);
 		}
 
 		public Vector2 TitleSize => _titleImage?.Size ?? Vector2.Zero;

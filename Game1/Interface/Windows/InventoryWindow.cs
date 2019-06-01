@@ -111,7 +111,7 @@ namespace Game1.Interface.Windows
 			var overItem = overContainer[overIndex];
 
 			if (overItem != null)
-				_tooltip.Show(overItem.Item.DisplayName, InputManager.MousePosition, 0, sender);
+				_tooltip.Show(overItem.Item.DisplayName, InputManager.MousePosition, 30, sender);
 			else
 				_tooltip.Reset(sender);
 		}

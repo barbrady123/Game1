@@ -30,7 +30,13 @@ namespace Game1.Screens
 		public virtual void RepositionScreenObjects()
 		{
 			if (_backgroundImage != null)
-				_backgroundImage.Position = Bounds.TopLeftVector();
+			{
+				_backgroundImage.Position = this.Bounds.TopLeftVector();
+				// We're basically tiling here instead of scaling....might be smarter to have an
+				// option to scale instead of tile (not sure about performance???) and/or use
+				// a larger black image as our base (does that even matter??)
+				_backgroundImage.SourceRect = this.Bounds;
+			}
 		}
 
 		public event EventHandler OnReadyScreenUnload;

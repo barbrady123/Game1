@@ -154,6 +154,9 @@ namespace Game1
 
 		private void _hotbarView_OnMouseClick(object sender, EventArgs e)
 		{
+			if (!this.IsActive)
+				return; 
+
 			var args = (MouseEventArgs)e;
 			_hotbarView.Container.ActiveItemIndex = args.SourceIndex;
 		}
