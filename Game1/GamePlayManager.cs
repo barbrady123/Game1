@@ -53,10 +53,11 @@ namespace Game1
 			_activation.Add(this);
 			_activation.Activate(this);
 
-			_activation.Add(_inventoryWindow = new InventoryWindow("Backpack", DialogButton.None, _bounds.CenteredRegion(870, 575), null, _world.Character.Backpack, _world.Character.HotBar));
+			_activation.Add(_inventoryWindow = new InventoryWindow("Backpack", DialogButton.None, _bounds.CenteredRegion(870, 575), null, _world.Character));
 			_inventoryWindow.OnReadyDisable += _inventoryView_OnReadyDisable;
 
 			_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(GamePlayManager.ViewWindowOffset, _gameViewArea.Bottom + ViewWindowOffset), true);
+			_hotbarView.OnMouseClick += _hotbarView_OnMouseClick;
 
 			_tooltip = new Dialog(null, DialogButton.None, Rectangle.Empty, null);
 		}
@@ -88,6 +89,7 @@ namespace Game1
 		public void Update(GameTime gameTime)
 		{
 			_inventoryWindow.Update(gameTime, true);
+			_hotbarView.Update(gameTime);
 
 			// In this case "IsActive" effectively means the game is running, pausing the GamePlayManager pauses the game,
 			// So anything like a modal that would cause the game to pause must be Updated above here...
@@ -98,7 +100,6 @@ namespace Game1
 			_world.Update(gameTime);
 			_physics.Update(gameTime);
 			_camera.Update(gameTime);
-			_hotbarView.Update(gameTime);
 			_tooltip.Update(gameTime, false);
 
 			// TODO: Move this to a better location...
@@ -115,6 +116,12 @@ namespace Game1
 			if (InputManager.KeyPressed(Keys.Left)  || (InputManager.MouseScrollAmount > 0))
 			{
 				hotbar.ActiveItemIndex = (hotbarIndex > 0 ) ? hotbarIndex - 1 : hotbar.Size - 1;
+			}
+			foreach (var key in InputManager.GetPressedKeys())
+			{
+				char newChar = InputManager.KeyToChar(key, false);
+				if (Int32.TryParse(newChar.ToString(), out int val))
+					hotbar.ActiveItemIndex = (val == 0 ? 10 : val) - 1;
 			}
 		}
 
@@ -142,6 +149,12 @@ namespace Game1
 		private void _inventoryView_OnReadyDisable(object sender, EventArgs e)
 		{
 			_activation.Activate(this);
+		}
+
+		private void _hotbarView_OnMouseClick(object sender, EventArgs e)
+		{
+			var args = (MouseEventArgs)e;
+			_hotbarView.Container.ActiveItemIndex = args.SourceIndex;
 		}
 	}
 }

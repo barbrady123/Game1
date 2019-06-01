@@ -100,6 +100,7 @@ namespace Game1.Interface
 			if (this.Item?.Item?.Icon != null)
 			{
 				this.Item.Item.Icon.Scale = (_mouseover ? new Vector2(1.1f, 1.1f) : Vector2.One);
+				this.Item.Item.Icon.Alpha = (this.Item.InTransition ? 0.3f : 1.0f);
 				this.Item.Item.Icon.Draw(spriteBatch, null, this.CenterPosition);
 				_quantity.Draw(spriteBatch);
 			}

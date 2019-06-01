@@ -50,7 +50,7 @@ namespace Game1.Screens
 			_backgroundImage?.Draw(spriteBatch);
 		}
 
-		protected void ReadyScreenUnload(object sender, ScreenEventArgs args = null)
+		protected virtual void ReadyScreenUnload(object sender, ScreenEventArgs args = null)
 		{
 			OnReadyScreenUnload?.Invoke(sender, args);
 		}

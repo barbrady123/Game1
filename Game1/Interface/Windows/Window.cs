@@ -89,7 +89,7 @@ namespace Game1.Interface.Windows
 			{
 				if (this.Duration <= 0)
 				{
-					OnReadyDisable?.Invoke(this, new ScreenEventArgs("timer", this.GetType().Name, null));
+					BeforeReadyDisable(new ScreenEventArgs("timer", this.GetType().Name, null));
 					this.Duration = null;
 				}
 				else
@@ -119,7 +119,7 @@ namespace Game1.Interface.Windows
 			if (_readyDisableOnEscape)
 			{
 				if (InputManager.KeyPressed(Keys.Escape, true))
-					OnReadyDisable?.Invoke(this, new ScreenEventArgs("escape", this.GetType().Name, null));
+					BeforeReadyDisable(new ScreenEventArgs("escape", this.GetType().Name, null));
 			}
 		}
 
@@ -145,6 +145,11 @@ namespace Game1.Interface.Windows
 		protected void ButtonClick(MenuEventArgs menuArgs)
 		{
 			OnButtonClick?.Invoke(this, new ScreenEventArgs(menuArgs.Type, this.GetType().Name, menuArgs.Item));
+		}
+
+		protected virtual void BeforeReadyDisable(ScreenEventArgs args)
+		{
+			OnReadyDisable?.Invoke(this, args);
 		}
 	}
 }

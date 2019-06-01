@@ -21,26 +21,22 @@ namespace Game1.Interface
 		private const int ItemViewPadding = 10;
 
 		private InventoryItemView[] _itemViews;
-		private readonly ItemContainer _container;
+		
+		public ItemContainer Container { get; private set; }
 
 		private static readonly Size ContentMargin = new Size(10, 10);
 
-		// TODO: These will need to be more global if we want to be able to move items across containers!  (move these to view, have event like "item move" or something that 
-		// bubbles to the top with the index)
-		// ALSO...........WE NEED TO MAKE THIS "SAFE" SO THAT ITEMS CAN'T BE LOST.  IF THE WINDOW CLOSES OR SOMETHING (ICON RESETS)....WE NEED TO PUT THE ITEM BACK WHERE IT WAS!
-		// or , have some kind of system where the item is "in transition" so it's not drawn but not actually moved until it can be placed at the destination atomically...
-
-		public InventoryItem HeldItem { get; set; }
-		public InventoryItem SwapItem { get; set; }
 		public Rectangle Bounds { get; set; }		
 
 		public bool HightlightActiveItem { get; set; }
 
+		public event EventHandler OnMouseClick;
+
 		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem)
 		{
 			this.Bounds = bounds;
-			_container = container;
-			_itemViews = new InventoryItemView[_container.Size];
+			this.Container = container;
+			_itemViews = new InventoryItemView[this.Container.Size];
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
 				var position = CalculateItemViewPosition(i);
@@ -48,8 +44,6 @@ namespace Game1.Interface
 				_itemViews[i].OnMouseClick += ItemContainerView_OnMouseClick;
 			}
 			this.HightlightActiveItem = highlightActiveItem;
-			this.HeldItem = null;
-			this.SwapItem = null;
 		}
 
 		public void LoadContent()
@@ -96,8 +90,8 @@ namespace Game1.Interface
 		{
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
-				_itemViews[i].Item = _container[i];
-				_itemViews[i].Highlight = this.HightlightActiveItem && (_container.ActiveItemIndex == i);
+				_itemViews[i].Item = this.Container[i];
+				_itemViews[i].Highlight = this.HightlightActiveItem && (this.Container.ActiveItemIndex == i);
 				_itemViews[i].Update(gameTime);
 			}
 		}
@@ -118,31 +112,7 @@ namespace Game1.Interface
 
 		private void ItemContainerView_OnMouseClick(object sender, EventArgs e)
 		{
-			var args = (MouseEventArgs)e;
-			var item = _container[args.SourceIndex];
-
-			if (item != null)
-			{
-				if (this.HeldItem != null)
-					this.SwapItem = HeldItem;
-
-				this.HeldItem = item;
-				_container.Items[args.SourceIndex] = this.SwapItem;
-			}
-			else
-			{
-				if (this.HeldItem != null)
-				{
-					_container.Items[args.SourceIndex] = this.HeldItem;
-					this.HeldItem = null;
-				}
-			}
-
-			this.SwapItem = null;
-			if (this.HeldItem != null)
-				InputManager.SetMouseCursor(this.HeldItem.Item.Icon.Texture);
-			else
-				InputManager.ResetMouseCursor();
+			OnMouseClick?.Invoke(this, e);
 		}
 	}
 }

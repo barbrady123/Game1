@@ -48,6 +48,7 @@ namespace Game1
 
 		public ItemContainer HotBar => _hotbar;
 		public ItemContainer Backpack => _backpack;
+		public InventoryItem HeldItem { get; set; }
 
 		// TODO: Clean all this up when we start getting this stuff functional...
 		private ItemArmor _headArmor;
@@ -79,16 +80,6 @@ namespace Game1
 		{
 			if (_previousPosition != null)
 				this.Position = _previousPosition;
-		}
-
-		public void LoadContent()
-		{
-
-		}
-
-		public void UnloadContent()
-		{
-
 		}
 
 		public virtual Vector2 UpdateMotion()
@@ -133,9 +124,21 @@ namespace Game1
 			this.Motion = motion;
 		}
 
-		public void Draw(SpriteBatch spriteBatch)
+		public void PutItem(ItemContainer container, int? index = null)
 		{
+			if (index == null)
+			{
+				index = container.AddItem(this.HeldItem);
+				if (index == null)
+				{
+					// Here we need to do something with the held item that we don't have room for...
+					// Minecraft just "throws" (drops) it...that might when when we are able to have 
+					// items in the environment??
+					return;
+				}
+			}
 
+			this.HeldItem = container.AddItem(this.HeldItem, (int)index);
 		}
 	}
 }
