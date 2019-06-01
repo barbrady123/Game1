@@ -14,7 +14,7 @@ using Game1.Screens.Menu;
 
 namespace Game1.Interface
 {
-	public class ItemContainerViewNew
+	public class ItemContainerView
 	{
 		public const int ItemViewSize = Game1.IconSize + ((InventoryItemView.BorderWidth + InventoryItemView.ImagePadding) * 2);
 		private const int ItemsPerRow = 10;
@@ -25,9 +25,11 @@ namespace Game1.Interface
 
 		private static readonly Size ContentMargin = new Size(10, 10);
 
-		public Rectangle Bounds { get; set; }
+		public Rectangle Bounds { get; set; }		
 
-		public ItemContainerViewNew(ItemContainer container, Rectangle bounds)
+		public bool HightlightActiveItem { get; set; }
+
+		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem)
 		{
 			this.Bounds = bounds;
 			_container = container;
@@ -35,8 +37,9 @@ namespace Game1.Interface
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
 				var position = CalculateItemViewPosition(i);
-				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(ItemContainerViewNew.ItemViewSize, ItemContainerViewNew.ItemViewSize)) { Position = position };
+				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(ItemContainerView.ItemViewSize, ItemContainerView.ItemViewSize)) { Position = position };
 			}
+			this.HightlightActiveItem = highlightActiveItem;
 		}
 
 		public void LoadContent()
@@ -64,17 +67,17 @@ namespace Game1.Interface
 
 		private Vector2 CalculateItemViewPosition(int index)
 		{
-			int row = index / ItemContainerViewNew.ItemsPerRow;
-			int col = index % ItemContainerViewNew.ItemsPerRow;
+			int row = index / ItemContainerView.ItemsPerRow;
+			int col = index % ItemContainerView.ItemsPerRow;
 
 			int xPos = this.Bounds.X
-						+ ItemContainerViewNew.ContentMargin.Width
-						+ (ItemContainerViewNew.ItemViewSize * col)
-						+ (ItemContainerViewNew.ItemViewPadding * col);
+						+ ItemContainerView.ContentMargin.Width
+						+ (ItemContainerView.ItemViewSize * col)
+						+ (ItemContainerView.ItemViewPadding * col);
 			int yPos = this.Bounds.Y
-						+ ItemContainerViewNew.ContentMargin.Height
-						+ (ItemContainerViewNew.ItemViewSize * row)
-						+ (ItemContainerViewNew.ItemViewPadding * row);
+						+ ItemContainerView.ContentMargin.Height
+						+ (ItemContainerView.ItemViewSize * row)
+						+ (ItemContainerView.ItemViewPadding * row);
 
 			return new Vector2(xPos, yPos);
 		}
@@ -84,6 +87,7 @@ namespace Game1.Interface
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
 				_itemViews[i].Item = _container[i];
+				_itemViews[i].Highlight = this.HightlightActiveItem && (_container.ActiveItemIndex == i);
 				_itemViews[i].Update(gameTime);
 			}
 		}
@@ -96,10 +100,10 @@ namespace Game1.Interface
 			return new Size(width, height);
 		}
 
-		public static ItemContainerViewNew New(ItemContainer container, Point position)
+		public static T New<T>(ItemContainer container, Point position, bool hightlightActiveItem) where T: ItemContainerView
 		{
-			var requiredSize = ItemContainerViewNew.RequiredViewSize(container.Items.Length);
-			return new ItemContainerViewNew(container, new Rectangle(position.X, position.Y, requiredSize.Width, requiredSize.Height));			
+			var requiredSize = ItemContainerView.RequiredViewSize(container.Items.Length);
+			return (T)Activator.CreateInstance(typeof(T), container, new Rectangle(position.X, position.Y, requiredSize.Width, requiredSize.Height), hightlightActiveItem);
 		}
 	}
 }

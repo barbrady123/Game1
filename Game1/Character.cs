@@ -18,7 +18,6 @@ namespace Game1
 		private Vector2 _position;
 		private Vector2 _previousPosition;
 		private ItemContainer _hotbar;
-		private int _hotbarActiveIndex;
 		private ItemContainer _backpack;
 		private int _itemDefense;
 		private int _baseDefense;
@@ -56,14 +55,6 @@ namespace Game1
 		private ItemArmor _legArmor;
 		private ItemArmor _footArmor;
 
-		public Item ActiveItem => _hotbar[_hotbarActiveIndex]?.Item;
-
-		public int HotbarActiveIndex
-		{
-			get { return _hotbarActiveIndex; }
-			set { _hotbarActiveIndex = Util.Clamp(value, 0, _hotbar.Size - 1); }
-		}
-
 		public Vector2 Position
 		{
 			get { return _position; }
@@ -81,7 +72,6 @@ namespace Game1
 			this.Direction = Cardinal.South;
 			this.Speed = 150.0f;
 			_hotbar = new ItemContainer(10);
-			_hotbarActiveIndex = 0;
 			_backpack = new ItemContainer(40);
 		}
 

@@ -19,12 +19,15 @@ namespace Game1.Interface
 		private Rectangle _bounds;
 		private ImageTexture _background;
 		private ImageTexture _border;
+		private ImageTexture _highlight;
 		private ImageText _quantity;
 		private Vector2 _position;
 
 		public InventoryItem Item { get; set; }
 
 		public Vector2 CenterPosition { get; set; }
+
+		public bool Highlight { get; set; }
 		
 		public Vector2 Position
 		{ 
@@ -43,10 +46,19 @@ namespace Game1.Interface
 
 		public void LoadContent()
 		{
+			this.Highlight = false;
 			_background = Util.GenerateSolidBackground(_bounds.Width, _bounds.Height, Color.Black);
-			_background.Position = this.Position;
+			_background.Alignment = ImageAlignment.Centered;
+			_background.Position = this.CenterPosition;
 			_background.LoadContent();
 			_border = Util.GenerateBorderTexture(_bounds.Width, _bounds.Height, InventoryItemView.BorderWidth, Color.Gray);
+			_border.Alignment = ImageAlignment.Centered;
+			_border.Position = this.CenterPosition;
+			_border.LoadContent();
+			_highlight = Util.GenerateBorderTexture(_bounds.Width + 8, _bounds.Height + 8, InventoryItemView.BorderWidth + 2, Color.Red);
+			_highlight.Alignment = ImageAlignment.Centered;
+			_highlight.Position = this.CenterPosition;
+			_highlight.LoadContent();
 			_border.LoadContent();
 			_quantity = new ImageText("", true) { Alignment = ImageAlignment.RightBottom };
 			_quantity.Position = _bounds.BottomRightVector(-InventoryItemView.ImagePadding, -InventoryItemView.ImagePadding);
@@ -57,6 +69,7 @@ namespace Game1.Interface
 		{
 			_background.UnloadContent();
 			_border.UnloadContent();
+			_highlight.UnloadContent();
 			_quantity.UnloadContent();
 		}
 
@@ -64,12 +77,14 @@ namespace Game1.Interface
 		{
 			if (this.Item?.Item != null)
 				_quantity.UpdateText((this.Item.Item.MaxStackSize > 1) ? this.Item.Quantity.ToString() : "");
+			_highlight.IsActive = this.Highlight;
 		}
 
 		public void Draw(SpriteBatch spriteBatch)
 		{
 			_background.Draw(spriteBatch);
 			_border.Draw(spriteBatch);
+			_highlight.Draw(spriteBatch);
 			this.Item?.Item?.Icon?.Draw(spriteBatch, null, this.CenterPosition);
 			_quantity.Draw(spriteBatch);
 		}

@@ -16,8 +16,8 @@ namespace Game1.Interface.Windows
 {
 	public class InventoryWindow : Window
 	{
-		private ItemContainerViewNew _containerViewBackpack;
-		private ItemContainerViewNew _containerViewHotbar;
+		private ItemContainerView _containerViewBackpack;
+		private ItemContainerView _containerViewHotbar;
 		private ItemContainer _containerBackpack;
 		private ItemContainer _containerHotbar;
 
@@ -26,14 +26,14 @@ namespace Game1.Interface.Windows
 								Rectangle bounds, 
 								int? duration, 
 								ItemContainer containerBackpack, 
-								ItemContainer containerHotbar) : base(bounds, "maze", text, duration, true)
+								ItemContainer containerHotbar) : base(bounds, "brick", text, duration, true)
 		{
 			_containerBackpack = containerBackpack;
 			var viewPosition = bounds.TopLeftPoint(this.ContentMargin.Width, this.ContentMargin.Height);
-			_containerViewBackpack = ItemContainerViewNew.New(containerBackpack, viewPosition);
+			_containerViewBackpack = ItemContainerView.New<ItemContainerView>(containerBackpack, viewPosition, false);
 
 			_containerHotbar = containerHotbar;
-			_containerViewHotbar = ItemContainerViewNew.New(containerHotbar, new Point(viewPosition.X, viewPosition.Y + _containerViewBackpack.Bounds.Size.Y + this.ContentMargin.Height));
+			_containerViewHotbar = ItemContainerView.New<ItemContainerView>(containerHotbar, new Point(viewPosition.X, viewPosition.Y + _containerViewBackpack.Bounds.Size.Y + this.ContentMargin.Height), false);
 			viewPosition = bounds.TopLeftPoint(this.ContentMargin.Width, this.ContentMargin.Height);
 		}
 

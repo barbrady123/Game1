@@ -9,13 +9,24 @@ namespace Game1.Items
 	public class ItemContainer
 	{
 		private readonly InventoryItem[] _items;
+		private int _activeItemIndex;
 		
 		public int Size { get; private set; }
+
+		
+		public InventoryItem ActiveItem => _items[this.ActiveItemIndex];
+
+		public int ActiveItemIndex
+		{
+			get { return _activeItemIndex; }
+			set { _activeItemIndex = Util.Clamp(value, 0, _items.Length - 1); }
+		}
 
 		public ItemContainer(int size)
 		{
 			this.Size = size;
 			_items = new InventoryItem[size];
+			this.ActiveItemIndex = 0;
 		}
 
 		public InventoryItem[] Items => _items;
