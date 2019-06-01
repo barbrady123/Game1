@@ -8,10 +8,12 @@ namespace Game1.Enum
 {
 	public enum MouseButton
 	{
-		Left = 0,
+		None = 0,
 
-		Right = 1,
+		Left = 1,
 
-		Middle = 2
+		Right = 2,
+
+		Middle = 3
 	}
 }

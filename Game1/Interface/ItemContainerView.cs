@@ -31,6 +31,8 @@ namespace Game1.Interface
 		public bool HightlightActiveItem { get; set; }
 
 		public event EventHandler OnMouseClick;
+		public event EventHandler OnMouseOver;
+		public event EventHandler OnMouseOut;
 
 		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem)
 		{
@@ -42,6 +44,8 @@ namespace Game1.Interface
 				var position = CalculateItemViewPosition(i);
 				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(ItemContainerView.ItemViewSize, ItemContainerView.ItemViewSize), i) { Position = position };
 				_itemViews[i].OnMouseClick += ItemContainerView_OnMouseClick;
+				_itemViews[i].OnMouseOver += ItemContainerView_OnMouseOver;
+				_itemViews[i].OnMouseOut += ItemContainerView_OnMouseOut;
 			}
 			this.HightlightActiveItem = highlightActiveItem;
 		}
@@ -113,6 +117,16 @@ namespace Game1.Interface
 		private void ItemContainerView_OnMouseClick(object sender, EventArgs e)
 		{
 			OnMouseClick?.Invoke(this, e);
+		}
+
+		private void ItemContainerView_OnMouseOver(object sender, EventArgs e)
+		{
+			OnMouseOver?.Invoke(this, e);
+		}
+
+		private void ItemContainerView_OnMouseOut(object sender, EventArgs e)
+		{
+			OnMouseOut?.Invoke(this, e);
 		}
 	}
 }

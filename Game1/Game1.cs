@@ -90,6 +90,8 @@ namespace Game1
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), new RasterizerState { ScissorTestEnable = true }, 200, "gameplay");
 			// Modals...
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice),  new RasterizerState { ScissorTestEnable = true }, 300, "modal");
+			// Tooltips
+			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice),  new RasterizerState { ScissorTestEnable = true }, 400, "tooltip");
 
 			_screenManager.LoadContent();
 			_screenManager.StartScreen();

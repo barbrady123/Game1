@@ -33,6 +33,8 @@ namespace Game1.Interface
 		public bool Highlight { get; set; }
 
 		public event EventHandler OnMouseClick;
+		public event EventHandler OnMouseOver;
+		public event EventHandler OnMouseOut;
 		
 		public Vector2 Position
 		{ 
@@ -81,6 +83,7 @@ namespace Game1.Interface
 
 		public void Update(GameTime gameTime)
 		{
+			bool previousMouseOver = _mouseover;
 			_highlight.IsActive = this.Highlight;
 			_mouseover = InputManager.MouseOver(_bounds);
 			if (this.Item?.Item != null)
@@ -88,6 +91,11 @@ namespace Game1.Interface
 
 			if (InputManager.LeftMouseClick(_bounds))
 				OnMouseClick?.Invoke(this, new MouseEventArgs(MouseButton.Left, _containerIndex));
+
+			if (_mouseover)
+				OnMouseOver?.Invoke(this, new MouseEventArgs(MouseButton.None, _containerIndex));
+			else if (previousMouseOver)
+				OnMouseOut?.Invoke(this, new MouseEventArgs(MouseButton.None, _containerIndex));
 		}
 
 		public void Draw(SpriteBatch spriteBatch)

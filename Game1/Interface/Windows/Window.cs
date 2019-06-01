@@ -14,12 +14,15 @@ namespace Game1.Interface.Windows
 {
 	public class Window : Screen, IActivatable
 	{
-		public Size ContentMargin => new Size(20, String.IsNullOrWhiteSpace(this.Title) ? 20 : 60);
+		public const int TitleOffset = 30;
+		public Size ContentMargin => new Size(20, this.Title == null ? 20 : 60);
 		private ImageText _titleImage;
 		private string _title;
 		private bool _isActive;
 		private int _delayInputCycles;
 		private bool _readyDisableOnEscape;
+
+		public virtual string SpriteBatchName => "modal";
 
 		public int? Duration { get; set; }
 
@@ -54,6 +57,15 @@ namespace Game1.Interface.Windows
 			}
 		}
 
+		public override void RepositionScreenObjects()
+		{
+			base.RepositionScreenObjects();
+			if (_titleImage != null)
+				_titleImage.Position = this.Bounds.CenterVector(yOffset: - this.Bounds.Height / 2 + Window.TitleOffset);
+		}
+
+		public Vector2 TitleSize => _titleImage?.Size ?? Vector2.Zero;
+
 		public event EventHandler OnButtonClick;
 		public event EventHandler OnReadyDisable;
 
@@ -61,11 +73,11 @@ namespace Game1.Interface.Windows
 		{
 			_title = title ?? "";
 			this.IsActive = false;
-			this.Bounds = bounds;
 			this.Duration = duration;
-			_titleImage = new ImageText(_title, true) { Position = this.Bounds.CenterVector(yOffset: - this.Bounds.Height / 2 + 30) };
+			_titleImage = new ImageText(_title, true);
 			_readyDisableOnEscape = readyDisableOnEscape;
 			_delayInputCycles = 0;
+			RepositionScreenObjects();
 		}
 
 		public override void LoadContent()
@@ -128,7 +140,7 @@ namespace Game1.Interface.Windows
 			if (!this.IsActive)
 				return;
 
-			var modalBatch = Util.WrappedDraw(base.Draw, "modal", this.Bounds);
+			var modalBatch = Util.WrappedDraw(base.Draw, this.SpriteBatchName, this.Bounds);
 			DrawInternal(modalBatch);
 		}
 

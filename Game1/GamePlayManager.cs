@@ -92,7 +92,8 @@ namespace Game1
 			_hotbarView.Update(gameTime);
 
 			// In this case "IsActive" effectively means the game is running, pausing the GamePlayManager pauses the game,
-			// So anything like a modal that would cause the game to pause must be Updated above here...
+			// So anything like a modal that would cause the game to pause but still need to be updated
+			// must be Updated before here...
 			if (!this.IsActive)
 				return;
 

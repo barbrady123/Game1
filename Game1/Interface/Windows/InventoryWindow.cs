@@ -21,6 +21,7 @@ namespace Game1.Interface.Windows
 		private ItemContainerView _containerViewHotbar;
 		private ItemContainer _containerBackpack;
 		private ItemContainer _containerHotbar;
+		private Tooltip _tooltip;
 
 		public InventoryWindow(	string text,
 								DialogButton buttons,
@@ -34,10 +35,57 @@ namespace Game1.Interface.Windows
 
 			_containerViewBackpack = ItemContainerView.New<ItemContainerView>(_containerBackpack, viewPosition, false);
 			_containerViewBackpack.OnMouseClick += _containerView_OnMouseClick;
+			_containerViewBackpack.OnMouseOver += _containerView_OnMouseOver;
+			_containerViewBackpack.OnMouseOut += _containerView_OnMouseOut;
 
 			_containerHotbar = character.HotBar;
 			_containerViewHotbar = ItemContainerView.New<ItemContainerView>(_containerHotbar, new Point(viewPosition.X, viewPosition.Y + _containerViewBackpack.Bounds.Size.Y + this.ContentMargin.Height), false);
 			_containerViewHotbar.OnMouseClick += _containerView_OnMouseClick;
+
+			_tooltip = new Tooltip();
+		}
+
+		public override void LoadContent()
+		{
+			base.LoadContent();
+			_containerViewBackpack.LoadContent();
+			_containerViewHotbar.LoadContent();
+			_tooltip.LoadContent();
+		}
+
+		public override void UnloadContent()
+		{
+			base.UnloadContent();
+			_containerViewBackpack.UnloadContent();
+			_containerViewHotbar.UnloadContent();
+			_tooltip.UnloadContent();
+		}
+
+		public override void UpdateReady(GameTime gameTime, bool processInput)
+		{
+			base.UpdateReady(gameTime, processInput);
+			_containerViewBackpack.Update(gameTime);
+			_containerViewHotbar.Update(gameTime);
+			_tooltip.Update(gameTime, processInput);
+		}
+
+		public override void DrawInternal(SpriteBatch spriteBatch)
+		{
+			base.DrawInternal(spriteBatch);
+			_containerViewBackpack.Draw(spriteBatch);
+			_containerViewHotbar.Draw(spriteBatch);
+			_tooltip.Draw(spriteBatch);
+		}
+
+		protected override void BeforeReadyDisable(ScreenEventArgs args)
+		{
+			if (_character.HeldItem != null)
+			{
+				_character.PutItem(_containerViewBackpack.Container);
+				_character.HeldItem = null;
+			}
+
+			base.BeforeReadyDisable(args);
 		}
 
 		private void _containerView_OnMouseClick(object sender, EventArgs e)
@@ -55,43 +103,22 @@ namespace Game1.Interface.Windows
 				InputManager.ResetMouseCursor();
 		}
 
-		public override void LoadContent()
+		private void _containerView_OnMouseOver(object sender, EventArgs e)
 		{
-			base.LoadContent();
-			_containerViewBackpack.LoadContent();
-			_containerViewHotbar.LoadContent();
+			var args = (MouseEventArgs)e;
+			var overContainer = (sender as ItemContainerView).Container;
+			int overIndex = args.SourceIndex;
+			var overItem = overContainer[overIndex];
+
+			if (overItem != null)
+				_tooltip.Show(overItem.Item.DisplayName, InputManager.MousePosition, 0, sender);
+			else
+				_tooltip.Reset(sender);
 		}
 
-		public override void UnloadContent()
+		private void _containerView_OnMouseOut(object sender, EventArgs e)
 		{
-			base.UnloadContent();
-			_containerViewBackpack.UnloadContent();
-			_containerViewHotbar.UnloadContent();
-		}
-
-		public override void UpdateReady(GameTime gameTime, bool processInput)
-		{
-			base.UpdateReady(gameTime, processInput);
-			_containerViewBackpack.Update(gameTime);
-			_containerViewHotbar.Update(gameTime);
-		}
-
-		public override void DrawInternal(SpriteBatch spriteBatch)
-		{
-			base.DrawInternal(spriteBatch);
-			_containerViewBackpack.Draw(spriteBatch);
-			_containerViewHotbar.Draw(spriteBatch);
-		}
-
-		protected override void BeforeReadyDisable(ScreenEventArgs args)
-		{
-			if (_character.HeldItem != null)
-			{
-				_character.PutItem(_containerViewBackpack.Container);
-				_character.HeldItem = null;
-			}
-
-			base.BeforeReadyDisable(args);
+			_tooltip.Reset(sender);
 		}
 	}
 }

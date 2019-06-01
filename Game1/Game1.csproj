@@ -79,6 +79,7 @@
     <Compile Include="Interface\TextInput.cs" />
     <Compile Include="Interface\Windows\Dialog.cs" />
     <Compile Include="Interface\Windows\InventoryWindow.cs" />
+    <Compile Include="Interface\Windows\Tooltip.cs" />
     <Compile Include="Interface\Windows\Window.cs" />
     <Compile Include="Items\InventoryItem.cs" />
     <Compile Include="IOManager.cs" />

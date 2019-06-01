@@ -12,17 +12,34 @@ namespace Game1.Screens
 	public abstract class Screen
 	{
 		protected ImageTexture _backgroundImage;
+		private Rectangle _bounds;
 
-		public Rectangle Bounds { get; set; }
+		public Rectangle Bounds
+		{ 
+			get { return _bounds; }
+			set
+			{
+				if (_bounds != value)
+				{
+					_bounds = value;
+					RepositionScreenObjects();
+				}
+			}
+		}
+
+		public virtual void RepositionScreenObjects()
+		{
+			if (_backgroundImage != null)
+				_backgroundImage.Position = Bounds.TopLeftVector();
+		}
 
 		public event EventHandler OnReadyScreenUnload;
 
 		public Screen(Rectangle bounds, string backgroundName)
 		{
-			this.Bounds = bounds;
-
 			if (!String.IsNullOrWhiteSpace(backgroundName))
-				_backgroundImage = new ImageTexture($"{Game1.BackgroundRoot}/{backgroundName}", true) { Position = bounds.TopLeftVector() };
+				_backgroundImage = new ImageTexture($"{Game1.BackgroundRoot}/{backgroundName}", true);
+			this.Bounds = bounds;
 		}
 
 		public virtual void LoadContent()
