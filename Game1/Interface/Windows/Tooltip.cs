@@ -20,11 +20,14 @@ namespace Game1.Interface.Windows
 		private int _timer;
 
 		public override string SpriteBatchName => "tooltip";
+		public override int TitleOffset => 5;
 
 		// Eventually we'll want prettier tooltips with more than just a line of text...
 		public Tooltip() : base(Rectangle.Empty, "black", "", null, false)
 		{
 			_timer = -1;
+			_titleImage.Alignment = ImageAlignment.CenteredTop;
+			_titleImage.Scale = new Vector2(0.9f, 0.9f);
 		}
 
 		public override void Update(GameTime gameTime, bool processInput)
@@ -42,14 +45,15 @@ namespace Game1.Interface.Windows
 			base.Update(gameTime, processInput);
 		}
 
+		// Something isn't getting reset correctly here when the text changes...(first one shows up is already ok, others don't seem to resize)....
 		public void Show(string text, Point position, int timer, object sender)
 		{			
 			if (sender != _sender)
 				_timer = Math.Max(0, timer);
 
 			_sender = sender;
-			this.Title = text;			
-			this.Bounds = new Rectangle(position.X, position.Y, (int)this.TitleSize.X + Window.TitleOffset * 2, (int)this.TitleSize.Y + Window.TitleOffset * 2);
+			this.Title = text;
+			this.Bounds = new Rectangle(position.X, position.Y, (int)this.TitleSize.X + this.TitleOffset * 2, (int)this.TitleSize.Y + this.TitleOffset * 2);
 		}
 
 		public void Reset(object sender)

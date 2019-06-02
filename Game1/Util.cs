@@ -25,14 +25,21 @@ namespace Game1
 
 		public static ImageTexture GenerateSolidBackground(int width, int height, Color color)
 		{
-			int size = width * height;
-			var data  = new Color[size];
-			for (int x = 0; x < size; x++)
-				data[x] = color;
+			if (width > 0)
+			{
+				int size = width * height;
+				var data  = new Color[size];
+				for (int x = 0; x < size; x++)
+					data[x] = color;
 
-			var t = new Texture2D(Game1.Graphics, width, height);
-			t.SetData(data);
-			return new ImageTexture(t, true);
+				var t = new Texture2D(Game1.Graphics, width, height);
+				t.SetData(data);
+				return new ImageTexture(t, true);
+			}
+			else
+			{
+				return new ImageTexture(new Texture2D(Game1.Graphics, 1, 1));
+			}
 		}
 
 		public static SpriteBatch WrappedDraw(Action<SpriteBatch> func, string batchName, Rectangle bounds)

@@ -13,5 +13,7 @@ namespace Game1
 		{
 			return new Rectangle((int)vector.X, (int)vector.Y, expansionX, expansionY);
 		}
+
+		public static Vector2 Offset(this Vector2 vector, int offsetX, int offsetY) => new Vector2(vector.X + offsetX, vector.Y + offsetY);
 	}
 }

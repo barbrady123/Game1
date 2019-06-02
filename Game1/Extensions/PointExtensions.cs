@@ -7,17 +7,15 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Enum;
+using Game1.Items;
+using Game1.Screens;
 using Game1.Screens.Menu;
 
-namespace Game1.Screens.Menu
+namespace Game1
 {
-	public class OkMenu : MenuScreen
+	public static class PointExtensions
 	{
-		public OkMenu(Rectangle bounds) : base(bounds, hasBackground: false) { }
-
-		protected override void LoadItemData()
-		{
-			_items = new List<MenuItem> { new MenuItem() { Id = "ok", Text = "OK" } };
-		}
+		public static Point Offset(this Point point, int xOffset, int yOffset) => new Point(point.X + xOffset, point.Y + yOffset);
 	}
 }

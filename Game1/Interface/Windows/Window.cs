@@ -14,15 +14,16 @@ namespace Game1.Interface.Windows
 {
 	public class Window : Screen, IActivatable
 	{
-		public const int TitleOffset = 30;
 		public Size ContentMargin => new Size(20, this.Title == null ? 20 : 60);
-		private ImageText _titleImage;
+		protected ImageText _titleImage;
 		private string _title;
 		private bool _isActive;
 		private int _delayInputCycles;
 		private bool _readyDisableOnEscape;
+		private bool _resetMouseOnInactive;
 
 		public virtual string SpriteBatchName => "modal";
+		public virtual int TitleOffset => 30;
 
 		public int? Duration { get; set; }
 
@@ -38,7 +39,8 @@ namespace Game1.Interface.Windows
 					else
 					{
 						this.Duration = null;
-						InputManager.ResetMouseCursor();
+						if (_resetMouseOnInactive)
+							InputManager.ResetMouseCursor();
 					}
 				}
 			}
@@ -61,7 +63,7 @@ namespace Game1.Interface.Windows
 		{
 			base.RepositionScreenObjects();
 			if (_titleImage != null)
-				_titleImage.Position = this.Bounds.TopCenterVector(yOffset: + Window.TitleOffset);
+				_titleImage.Position = this.Bounds.TopCenterVector(yOffset: this.TitleOffset);
 		}
 
 		public Vector2 TitleSize => _titleImage?.Size ?? Vector2.Zero;
@@ -69,13 +71,19 @@ namespace Game1.Interface.Windows
 		public event EventHandler OnButtonClick;
 		public event EventHandler OnReadyDisable;
 
-		public Window(Rectangle bounds, string backgroundName, string title, int? duration = null, bool readyDisableOnEscape = true) : base(bounds, backgroundName)
+		public Window(Rectangle bounds,
+					  string backgroundName,
+					  string title,
+					  int? duration = null,
+					  bool readyDisableOnEscape = true,
+					  bool resetMouseOnInactive = false) : base(bounds, backgroundName)
 		{
 			_title = title ?? "";
 			this.IsActive = false;
 			this.Duration = duration;
 			_titleImage = new ImageText(_title, true);
 			_readyDisableOnEscape = readyDisableOnEscape;
+			_resetMouseOnInactive = resetMouseOnInactive;
 			_delayInputCycles = 0;
 			RepositionScreenObjects();
 		}

@@ -45,7 +45,7 @@ namespace Game1
 		{
 			base.LoadContent();
 			_font = _content.Load<SpriteFont>($"{Game1.FontsRoot}/{_fontName}");
-			CalculateTextSize();
+			CalculateTextSize(false);
 		}
 
 		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend, Vector2? position)
@@ -59,15 +59,16 @@ namespace Game1
 			if (text != _text)
 			{
 				_text = text;
-				CalculateTextSize();
+				// I think this is safe because 1.  UpdateText most certainly will want the source rect updated, and 2. I don't think we ever explicitly set this for text images...?
+				CalculateTextSize(true);
 			}
 		}
 
-		private void CalculateTextSize()
+		private void CalculateTextSize(bool recalculateSourceRect)
 		{
 			var baseSize = _font.MeasureString(_text);
 			this.Size = baseSize * this.Scale;
-			if (this.SourceRect == Rectangle.Empty)
+			if ((this.SourceRect == Rectangle.Empty) || recalculateSourceRect)
 				this.SourceRect = new Rectangle(0, 0, (int)baseSize.X, (int)baseSize.Y);
 			SetOrigin();
 		}

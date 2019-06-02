@@ -58,6 +58,7 @@
     <Compile Include="Enum\MouseButtonEnum.cs" />
     <Compile Include="Enum\TextInputActionEnum.cs" />
     <Compile Include="Enum\VerticalAlignmentEnum.cs" />
+    <Compile Include="Extensions\PointExtensions.cs" />
     <Compile Include="Extensions\RectangleExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\Vector2Extensions.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Interface\HotbarView.cs" />
     <Compile Include="Interface\ItemContainerView.cs" />
     <Compile Include="Interface\InventoryItemView.cs" />
+    <Compile Include="Interface\StatBar.cs" />
     <Compile Include="Interface\TextInput.cs" />
     <Compile Include="Interface\Windows\Dialog.cs" />
     <Compile Include="Interface\Windows\InventoryWindow.cs" />
@@ -95,6 +97,7 @@
     <Compile Include="PhysicsManager.cs" />
     <Compile Include="Primatives.cs" />
     <Compile Include="Screens\GameScreen.cs" />
+    <Compile Include="Screens\Menu\GamePauseMenu.cs" />
     <Compile Include="Screens\Menu\OkMenu.cs" />
     <Compile Include="Screens\Menu\Character\StartCancelMenu.cs" />
     <Compile Include="Program.cs" />

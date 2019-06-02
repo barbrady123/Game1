@@ -19,6 +19,8 @@ namespace Game1
 		private Vector2 _previousPosition;
 		private ItemContainer _hotbar;
 		private ItemContainer _backpack;
+		private int _currentHP;
+		private int _currentMana;
 		private int _itemDefense;
 		private int _baseDefense;
 
@@ -36,9 +38,18 @@ namespace Game1
 		public int Constitution { get; set ;}
 
 		public int MaxHP { get; set; }
-		public int CurrentHP { get; set; }
+		public int CurrentHP 
+		{ 
+			get { return _currentHP; }
+			set { _currentHP = Util.Clamp(value, 0, this.MaxHP); }
+		}
+
 		public int MaxMana { get; set; }
-		public int CurrentMana { get; set; }
+		public int CurrentMana
+		{ 
+			get { return _currentMana; }
+			set { _currentMana = Util.Clamp(value, 0, this.MaxMana); }
+		}
 
 		public int Gold { get; set; }
 

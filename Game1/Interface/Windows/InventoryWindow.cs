@@ -27,7 +27,7 @@ namespace Game1.Interface.Windows
 								DialogButton buttons,
 								Rectangle bounds, 
 								int? duration, 
-								Character character) : base(bounds, "brick", text, duration, true)
+								Character character) : base(bounds, "brick", text, duration, true, true)
 		{
 			_character = character;
 			_containerBackpack = character.Backpack;
@@ -111,7 +111,7 @@ namespace Game1.Interface.Windows
 			var overItem = overContainer[overIndex];
 
 			if (overItem != null)
-				_tooltip.Show(overItem.Item.DisplayName, InputManager.MousePosition, 30, sender);
+				_tooltip.Show(overItem.Item.DisplayName, InputManager.MousePosition.Offset(10, 10), 15, sender);
 			else
 				_tooltip.Reset(sender);
 		}

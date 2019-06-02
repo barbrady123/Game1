@@ -16,11 +16,13 @@ namespace Game1
 {
 	public class GamePlayManager : IActivatable
 	{
+		public const int StatBarSize = 300;
+
 		private const int BorderWidth = 3;
-		private const int ViewWindowOffset = 25;
+		private const int ContentMargin = 25;
 		private static readonly Rectangle _gameViewArea = new Rectangle(
-			GamePlayManager.ViewWindowOffset + GamePlayManager.BorderWidth,
-			GamePlayManager.ViewWindowOffset + GamePlayManager.BorderWidth,
+			GamePlayManager.ContentMargin + GamePlayManager.BorderWidth,
+			GamePlayManager.ContentMargin + GamePlayManager.BorderWidth,
 			Game1.TileSize * Game1.GameViewAreaWidth,
 			Game1.TileSize * Game1.GameViewAreaHeight);
 
@@ -32,6 +34,8 @@ namespace Game1
 		private readonly InventoryWindow _inventoryWindow;
 		private readonly HotbarView _hotbarView;
 		private readonly Dialog _tooltip;
+		private readonly StatBar _barHealth;
+		private readonly StatBar  _barMana;
 
 		private ImageTexture _gameViewBorder;
 
@@ -56,10 +60,12 @@ namespace Game1
 			_activation.Add(_inventoryWindow = new InventoryWindow("Backpack", DialogButton.None, _bounds.CenteredRegion(870, 575), null, _world.Character));
 			_inventoryWindow.OnReadyDisable += _inventoryView_OnReadyDisable;
 
-			_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(GamePlayManager.ViewWindowOffset, _gameViewArea.Bottom + ViewWindowOffset), true);
+			_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(GamePlayManager.ContentMargin, _gameViewArea.Bottom + ContentMargin), true);
 			_hotbarView.OnMouseClick += _hotbarView_OnMouseClick;
 
 			_tooltip = new Dialog(null, DialogButton.None, Rectangle.Empty, null);
+			_barHealth = new StatBar(GamePlayManager.StatBarSize, _bounds.TopRightVector(-GamePlayManager.StatBarSize-GamePlayManager.ContentMargin, GamePlayManager.ContentMargin), Color.Red, _world.Character, "CurrentHP", "MaxHP");
+			_barMana = new StatBar(GamePlayManager.StatBarSize, _bounds.TopRightVector(-GamePlayManager.StatBarSize-GamePlayManager.ContentMargin, GamePlayManager.ContentMargin * 3), Color.Blue, _world.Character, "CurrentMana", "MaxMana");
 		}
 
 		public void LoadContent()
@@ -73,6 +79,8 @@ namespace Game1
 			_inventoryWindow.LoadContent();
 			_hotbarView.LoadContent();
 			_tooltip.LoadContent();
+			_barHealth.LoadContent();
+			_barMana.LoadContent();
 		}
 
 		public void UnloadContent()
@@ -84,12 +92,17 @@ namespace Game1
 			_inventoryWindow.UnloadContent();
 			_hotbarView.UnloadContent();
 			_tooltip.UnloadContent();
+			_barHealth.UnloadContent();
+			_barMana.UnloadContent();
 		}
 
 		public void Update(GameTime gameTime)
 		{
 			_inventoryWindow.Update(gameTime, true);
 			_hotbarView.Update(gameTime);
+			_tooltip.Update(gameTime, false);
+			_barHealth.Update(gameTime);
+			_barMana.Update(gameTime);
 
 			// In this case "IsActive" effectively means the game is running, pausing the GamePlayManager pauses the game,
 			// So anything like a modal that would cause the game to pause but still need to be updated
@@ -101,7 +114,6 @@ namespace Game1
 			_world.Update(gameTime);
 			_physics.Update(gameTime);
 			_camera.Update(gameTime);
-			_tooltip.Update(gameTime, false);
 
 			// TODO: Move this to a better location...
 			if (InputManager.KeyPressed(Keys.I))
@@ -124,6 +136,11 @@ namespace Game1
 				if (Int32.TryParse(newChar.ToString(), out int val))
 					hotbar.ActiveItemIndex = (val == 0 ? 10 : val) - 1;
 			}
+			if (InputManager.KeyPressed(Keys.H))
+			{
+				_world.Character.CurrentHP += 3;
+				_world.Character.CurrentMana -= 1;
+			}
 		}
 
 		public void Draw(SpriteBatch spriteBatch)
@@ -133,6 +150,8 @@ namespace Game1
 			_inventoryWindow.Draw(spriteBatch);
 			_hotbarView.Draw(spriteBatch);
 			_tooltip.Draw(spriteBatch);
+			_barHealth.Draw(spriteBatch);
+			_barMana.Draw(spriteBatch);
 		}
 
 		private ImageTexture GenerateGameViewBorder()

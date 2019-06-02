@@ -11,13 +11,16 @@ using Game1.Screens.Menu;
 
 namespace Game1.Screens.Menu
 {
-	public class OkMenu : MenuScreen
+	public class GamePauseMenu : MenuScreen
 	{
-		public OkMenu(Rectangle bounds) : base(bounds, hasBackground: false) { }
+		public GamePauseMenu(Rectangle bounds) : base(bounds, hasBackground: false) { }
 
 		protected override void LoadItemData()
 		{
-			_items = new List<MenuItem> { new MenuItem() { Id = "ok", Text = "OK" } };
+			_items = new List<MenuItem> { 
+				new MenuItem() { Id = "back", Text = "Return To Game" },
+				new MenuItem() { Id = "exit", Text = "Exit Game" }
+			};
 		}
 	}
 }
