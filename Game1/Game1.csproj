@@ -49,6 +49,8 @@
     <Compile Include="Effect\FadeOutEffect.cs" />
     <Compile Include="Effect\SpriteSheetEffect.cs" />
     <Compile Include="Effect\ZoomCycleEffect.cs" />
+    <Compile Include="Enum\ArmorSlotEnum.cs" />
+    <Compile Include="Enum\CharacterAttributeEnum.cs" />
     <Compile Include="Enum\CharacterSexEnum.cs" />
     <Compile Include="Enum\DialogButtonEnum.cs" />
     <Compile Include="Enum\CardinalEnum.cs" />
@@ -79,6 +81,7 @@
     <Compile Include="Interface\InventoryItemView.cs" />
     <Compile Include="Interface\StatBar.cs" />
     <Compile Include="Interface\TextInput.cs" />
+    <Compile Include="Interface\Windows\CharacterWindow.cs" />
     <Compile Include="Interface\Windows\Dialog.cs" />
     <Compile Include="Interface\Windows\InventoryWindow.cs" />
     <Compile Include="Interface\Windows\Tooltip.cs" />
@@ -154,6 +157,11 @@
     <Content Include="Content\Gameplay\Icon\bow.png" />
     <Content Include="Content\Gameplay\Icon\coin.png" />
     <Content Include="Content\Gameplay\Icon\dagger.png" />
+    <Content Include="Content\Gameplay\Icon\Empty\chest.png" />
+    <Content Include="Content\Gameplay\Icon\Empty\feet.png" />
+    <Content Include="Content\Gameplay\Icon\Empty\frame.png" />
+    <Content Include="Content\Gameplay\Icon\Empty\head.png" />
+    <Content Include="Content\Gameplay\Icon\Empty\legs.png" />
     <Content Include="Content\Gameplay\Icon\envelope.png" />
     <Content Include="Content\Gameplay\Icon\gemBlue.png" />
     <Content Include="Content\Gameplay\Icon\gemGreen.png" />

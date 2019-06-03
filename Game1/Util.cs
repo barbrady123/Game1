@@ -1,16 +1,20 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Game1.Enum;
 
 namespace Game1
 {
 	public static class Util
 	{
+		public static BindingFlags GetPropertyFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty;
+
 		public static int Clamp(int input, int min, int max) => Math.Min(Math.Max(input, min), max);
 
 		public static bool InRange(int input, int min, int max, bool inclusiveMin = true, bool inclusiveMax = true) => (input >= (inclusiveMin ? min : min + 1)) && (input <= (inclusiveMax ? max : max - 1));
 
-		public static ImageTexture GenerateBorderTexture(int width, int height, int thickness, Color color)
+		public static ImageTexture GenerateBorderTexture(int width, int height, int thickness, Color color, bool isActive = true)
 		{
 			var data = new Color[width * height];
 			for (int w = 0; w < width; w++)
@@ -20,7 +24,7 @@ namespace Game1
 
 			var t = new Texture2D(Game1.Graphics, width, height);
 			t.SetData(data);
-			return new ImageTexture(t, true);
+			return new ImageTexture(t, isActive);
 		}
 
 		public static ImageTexture GenerateSolidBackground(int width, int height, Color color)

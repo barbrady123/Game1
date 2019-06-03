@@ -34,8 +34,11 @@ namespace Game1
 		public int Level { get; set; }
 		public int Experience { get; set; }
 		public int Strength { get; set; }
+		public int Dexterity { get; set; }
 		public int Intelligence { get; set; }
-		public int Constitution { get; set ;}
+		public int Wisdom { get; set; }
+		public int Charisma { get; set; }
+		public int Constitution { get; set; }
 
 		public int MaxHP { get; set; }
 		public int CurrentHP 
@@ -61,11 +64,10 @@ namespace Game1
 		public ItemContainer Backpack => _backpack;
 		public InventoryItem HeldItem { get; set; }
 
-		// TODO: Clean all this up when we start getting this stuff functional...
-		private ItemArmor _headArmor;
-		private ItemArmor _chestArmor;
-		private ItemArmor _legArmor;
-		private ItemArmor _footArmor;
+		public InventoryItem EquippedArmorHead	{ get; set; }
+		public InventoryItem EquippedArmorChest { get; set; }
+		public InventoryItem EquippedArmorLegs	{ get; set; }
+		public InventoryItem EquippedArmorFeet	{ get; set; }
 
 		public Vector2 Position
 		{

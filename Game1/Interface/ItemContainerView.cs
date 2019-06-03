@@ -16,7 +16,6 @@ namespace Game1.Interface
 {
 	public class ItemContainerView
 	{
-		public const int ItemViewSize = Game1.IconSize + ((InventoryItemView.BorderWidth + InventoryItemView.ImagePadding) * 2);
 		private const int ItemsPerRow = 10;
 		private const int ItemViewPadding = 10;
 
@@ -42,7 +41,7 @@ namespace Game1.Interface
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
 				var position = CalculateItemViewPosition(i);
-				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(ItemContainerView.ItemViewSize, ItemContainerView.ItemViewSize), i) { Position = position };
+				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(InventoryItemView.Size, InventoryItemView.Size), i, null);
 				_itemViews[i].OnMouseClick += ItemContainerView_OnMouseClick;
 				_itemViews[i].OnMouseOver += ItemContainerView_OnMouseOver;
 				_itemViews[i].OnMouseOut += ItemContainerView_OnMouseOut;
@@ -80,11 +79,11 @@ namespace Game1.Interface
 
 			int xPos = this.Bounds.X
 						+ ItemContainerView.ContentMargin.Width
-						+ (ItemContainerView.ItemViewSize * col)
+						+ (InventoryItemView.Size * col)
 						+ (ItemContainerView.ItemViewPadding * col);
 			int yPos = this.Bounds.Y
 						+ ItemContainerView.ContentMargin.Height
-						+ (ItemContainerView.ItemViewSize * row)
+						+ (InventoryItemView.Size * row)
 						+ (ItemContainerView.ItemViewPadding * row);
 
 			return new Vector2(xPos, yPos);
@@ -102,9 +101,9 @@ namespace Game1.Interface
 
 		public static Size RequiredViewSize(int numItems)
 		{
-			int width = (ItemViewSize * ItemsPerRow) + (ItemViewPadding * (ItemsPerRow - 1)) + (ContentMargin.Width * 2);
+			int width = (InventoryItemView.Size * ItemsPerRow) + (ItemViewPadding * (ItemsPerRow - 1)) + (ContentMargin.Width * 2);
 			int numRows = (numItems / ItemsPerRow) + ((numItems % ItemsPerRow) > 0 ? 1 : 0);
-			int height = (ItemViewSize * numRows) + (ItemViewPadding * (numRows - 1)) + (ContentMargin.Height * 2);
+			int height = (InventoryItemView.Size * numRows) + (ItemViewPadding * (numRows - 1)) + (ContentMargin.Height * 2);
 			return new Size(width, height);
 		}
 

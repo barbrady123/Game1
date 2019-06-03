@@ -14,7 +14,7 @@ namespace Game1.Interface.Windows
 {
 	public class Window : Screen, IActivatable
 	{
-		public Size ContentMargin => new Size(20, this.Title == null ? 20 : 60);
+		public virtual Size ContentMargin => new Size(20, this.Title == null ? 20 : 60);
 		protected ImageText _titleImage;
 		private string _title;
 		private bool _isActive;
@@ -35,7 +35,10 @@ namespace Game1.Interface.Windows
 				{
 					_isActive = value;
 					if (_isActive)
+					{
 						DelayInput(1);
+						OnBecomeActive();
+					}
 					else
 					{
 						this.Duration = null;
@@ -171,5 +174,7 @@ namespace Game1.Interface.Windows
 		{
 			OnReadyDisable?.Invoke(this, args);
 		}
+
+		protected virtual void OnBecomeActive() { }
 	}
 }

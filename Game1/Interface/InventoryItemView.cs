@@ -14,6 +14,7 @@ namespace Game1.Interface
 {
 	public class InventoryItemView
 	{
+		public const int Size = Game1.IconSize + ((InventoryItemView.BorderWidth + InventoryItemView.ImagePadding) * 2);
 		public const int BorderWidth = 2;
 		public const int ImagePadding = 2;
 
@@ -21,10 +22,12 @@ namespace Game1.Interface
 		private ImageTexture _background;
 		private ImageTexture _border;
 		private ImageTexture _highlight;
+		private ImageTexture _empty;
 		private ImageText _quantity;
 		private Vector2 _position;
 		private bool _mouseover;
 		private int _containerIndex;
+		private string _emptyImageName;
 
 		public InventoryItem Item { get; set; }
 
@@ -46,10 +49,14 @@ namespace Game1.Interface
 			}
 		}
 
-		public InventoryItemView(Rectangle bounds, int containerIndex)
+		public InventoryItemView(Rectangle bounds, int containerIndex, string emptyImage)
 		{
 			_bounds = bounds;
 			_containerIndex = containerIndex;
+			this.Position = bounds.TopLeftVector();
+			_emptyImageName = emptyImage;
+			if (!String.IsNullOrWhiteSpace(_emptyImageName))
+				_empty = new ImageTexture($"{Game1.IconRoot}\\Empty\\{_emptyImageName}") { Position = this.CenterPosition, Alignment = ImageAlignment.Centered };
 		}
 
 		public void LoadContent()
@@ -63,7 +70,7 @@ namespace Game1.Interface
 			_border.Alignment = ImageAlignment.Centered;
 			_border.Position = this.CenterPosition;
 			_border.LoadContent();
-			_highlight = Util.GenerateBorderTexture(_bounds.Width + 8, _bounds.Height + 8, InventoryItemView.BorderWidth + 2, Color.Red);
+			_highlight = Util.GenerateBorderTexture(_bounds.Width + 8, _bounds.Height + 8, InventoryItemView.BorderWidth + 2, Color.Red, false);
 			_highlight.Alignment = ImageAlignment.Centered;
 			_highlight.Position = this.CenterPosition;
 			_highlight.LoadContent();
@@ -71,6 +78,7 @@ namespace Game1.Interface
 			_quantity = new ImageText("", true) { Alignment = ImageAlignment.RightBottom };
 			_quantity.Position = _bounds.BottomRightVector(-InventoryItemView.ImagePadding, -InventoryItemView.ImagePadding);
 			_quantity.LoadContent();
+			_empty?.LoadContent();
 		}
 
 		public void UnloadContent()
@@ -79,6 +87,7 @@ namespace Game1.Interface
 			_border.UnloadContent();
 			_highlight.UnloadContent();
 			_quantity.UnloadContent();
+			_empty?.UnloadContent();
 		}
 
 		public void Update(GameTime gameTime)
@@ -86,6 +95,8 @@ namespace Game1.Interface
 			bool previousMouseOver = _mouseover;
 			_highlight.IsActive = this.Highlight;
 			_mouseover = InputManager.MouseOver(_bounds);
+			if (_empty != null)
+				_empty.IsActive = (this.Item?.Item == null);
 			if (this.Item?.Item != null)
 				_quantity.UpdateText((this.Item.Item.MaxStackSize > 1) ? this.Item.Quantity.ToString() : "");
 
@@ -105,6 +116,7 @@ namespace Game1.Interface
 			_border.Scale = (_mouseover ? new Vector2(1.1f, 1.1f) : Vector2.One);
 			_border.Draw(spriteBatch);
 			_highlight.Draw(spriteBatch);
+			_empty?.Draw(spriteBatch);
 			if (this.Item?.Item?.Icon != null)
 			{
 				this.Item.Item.Icon.Scale = (_mouseover ? new Vector2(1.1f, 1.1f) : Vector2.One);

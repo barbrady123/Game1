@@ -27,7 +27,10 @@ namespace Game1
 			this.CurrentMap.GenerateTiles();
 			this.Character = IOManager.ObjectFromFile<Character>(Game1.PlayerFile);
 			this.Character.Strength = GameRandom.Next(10, 20);
+			this.Character.Dexterity = GameRandom.Next(10, 20);
 			this.Character.Intelligence = GameRandom.Next(10, 20);
+			this.Character.Wisdom = GameRandom.Next(10, 20);
+			this.Character.Charisma = GameRandom.Next(10, 20);
 			this.Character.Constitution = GameRandom.Next(10, 20);
 
 			CharacterSex oppositeSex = (this.Character.Sex == CharacterSex.Male) ? CharacterSex.Female : CharacterSex.Male;
@@ -48,6 +51,10 @@ namespace Game1
 			this.Character.Backpack.AddItem(ItemManager.GetItem());
 			this.Character.Backpack.AddItem(ItemManager.GetItem());
 			this.Character.Backpack.AddItem(ItemManager.GetItem());
+			this.Character.EquippedArmorHead = ItemManager.GetItem();
+			this.Character.EquippedArmorChest = ItemManager.GetItem();
+			//this.Character.EquippedArmorLegs = ItemManager.GetItem();
+			this.Character.EquippedArmorFeet = ItemManager.GetItem();
 		}
 
 		public void UnloadContent()

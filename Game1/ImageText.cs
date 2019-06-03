@@ -37,7 +37,7 @@ namespace Game1
 
 		public ImageText(string text = null, string fontName = null, bool isActive = false) : base(isActive)
 		{
-			_text = text;
+			_text = text ?? "";
 			_fontName = fontName ?? ImageText.DefaultFont;
 		}
 

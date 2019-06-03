@@ -24,10 +24,8 @@ namespace Game1.Interface.Windows
 		private Tooltip _tooltip;
 
 		public InventoryWindow(	string text,
-								DialogButton buttons,
 								Rectangle bounds, 
-								int? duration, 
-								Character character) : base(bounds, "brick", text, duration, true, true)
+								Character character) : base(bounds, "brick", text, null, true, true)
 		{
 			_character = character;
 			_containerBackpack = character.Backpack;

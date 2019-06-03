@@ -31,6 +31,7 @@ namespace Game1
 		private readonly GamePlayCamera _camera;
 		private readonly PhysicsManager _physics;
 		private readonly World _world;
+		private readonly CharacterWindow _characterWindow;
 		private readonly InventoryWindow _inventoryWindow;
 		private readonly HotbarView _hotbarView;
 		private readonly Dialog _tooltip;
@@ -57,7 +58,10 @@ namespace Game1
 			_activation.Add(this);
 			_activation.Activate(this);
 
-			_activation.Add(_inventoryWindow = new InventoryWindow("Backpack", DialogButton.None, _bounds.CenteredRegion(870, 575), null, _world.Character));
+			_activation.Add(_characterWindow = new CharacterWindow(_bounds.CenteredRegion(870, 575), _world.Character));
+			_characterWindow.OnReadyDisable += _characterWindow_OnReadyDisable;
+
+			_activation.Add(_inventoryWindow = new InventoryWindow("Backpack", _bounds.CenteredRegion(870, 575),  _world.Character));
 			_inventoryWindow.OnReadyDisable += _inventoryView_OnReadyDisable;
 
 			_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(GamePlayManager.ContentMargin, _gameViewArea.Bottom + ContentMargin), true);
@@ -76,6 +80,7 @@ namespace Game1
 			_camera.TerrainLayerData  = _world.CurrentMap.Layers;
 			_camera.LoadContent();
 			_physics.CalculateParameters();
+			_characterWindow.LoadContent();
 			_inventoryWindow.LoadContent();
 			_hotbarView.LoadContent();
 			_tooltip.LoadContent();
@@ -89,6 +94,7 @@ namespace Game1
 			_gameViewBorder.UnloadContent();
 			_world.UnloadContent();
 			_camera.UnloadContent();
+			_characterWindow.UnloadContent();
 			_inventoryWindow.UnloadContent();
 			_hotbarView.UnloadContent();
 			_tooltip.UnloadContent();
@@ -98,6 +104,7 @@ namespace Game1
 
 		public void Update(GameTime gameTime)
 		{
+			_characterWindow.Update(gameTime, true);
 			_inventoryWindow.Update(gameTime, true);
 			_hotbarView.Update(gameTime);
 			_tooltip.Update(gameTime, false);
@@ -118,6 +125,8 @@ namespace Game1
 			// TODO: Move this to a better location...
 			if (InputManager.KeyPressed(Keys.I))
 				_activation.Activate(_inventoryWindow);
+			else if (InputManager.KeyPressed(Keys.C))
+				_activation.Activate(_characterWindow);
 
 			// Hot bar functionality...this code should be moved...
 			var hotbar = _world.Character.HotBar;
@@ -147,6 +156,7 @@ namespace Game1
 		{
 			_gameViewBorder.Draw(spriteBatch);
 			_camera.Draw();
+			_characterWindow.Draw(spriteBatch);
 			_inventoryWindow.Draw(spriteBatch);
 			_hotbarView.Draw(spriteBatch);
 			_tooltip.Draw(spriteBatch);
@@ -164,6 +174,11 @@ namespace Game1
 			texture.Alignment = ImageAlignment.Centered;
 			texture.Position = _gameViewArea.CenterVector();
 			return texture;
+		}
+
+		private void _characterWindow_OnReadyDisable(object sender, EventArgs e)
+		{
+			_activation.Activate(this);
 		}
 
 		private void _inventoryView_OnReadyDisable(object sender, EventArgs e)
