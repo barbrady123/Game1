@@ -147,7 +147,8 @@ namespace Game1.Interface
 				_border.Draw(spriteBatch);
 				_cursor.Draw(spriteBatch);
 			}
-			
+
+			_textImage.Alpha = (this.IsActive) ? 1.0f : 0.7f;			
 			_textImage.Draw(spriteBatch);
 		}
 

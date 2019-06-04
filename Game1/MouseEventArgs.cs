@@ -18,7 +18,7 @@ namespace Game1
 
 		public int SourceIndex { get; set; }
 
-		public MouseEventArgs(MouseButton button, int sourceIndex)
+		public MouseEventArgs(MouseButton button = MouseButton.None, int sourceIndex = -1)
 		{
 			this.Button = button;
 			this.SourceIndex = sourceIndex;

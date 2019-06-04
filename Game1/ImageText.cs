@@ -44,7 +44,7 @@ namespace Game1
 		public override void LoadContent()
 		{
 			base.LoadContent();
-			_font = _content.Load<SpriteFont>($"{Game1.FontsRoot}/{_fontName}");
+			_font = FontManager.Get(_fontName);
 			CalculateTextSize(false);
 		}
 

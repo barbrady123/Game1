@@ -21,6 +21,7 @@ namespace Game1.Interface.Windows
 		private Character _character;
 		private InventoryItemView[] _armorItemView;
 		private ImageText[] _characterStat;
+		private InventoryContextMenu _contextMenu;
 
 		private Tooltip _tooltip;
 
@@ -46,6 +47,7 @@ namespace Game1.Interface.Windows
 			}
 
 			_tooltip = new Tooltip();
+			_contextMenu = null;
 		}
 
 		public override void LoadContent()
@@ -78,6 +80,7 @@ namespace Game1.Interface.Windows
 			UpdateCharacterStats();
 			foreach (var stat in _characterStat)
 				stat.Update(gameTime);
+			_contextMenu?.Update(gameTime, processInput);
 		}
 
 		public override void DrawInternal(SpriteBatch spriteBatch)
@@ -88,6 +91,12 @@ namespace Game1.Interface.Windows
 				armorView.Draw(spriteBatch);
 			foreach (var stat in _characterStat)
 				stat.Draw(spriteBatch);
+			if (_contextMenu != null)
+			{
+				var batchData = SpriteBatchManager.Get("context");
+				batchData.ScissorWindow = _contextMenu.Bounds;
+				_contextMenu?.Draw(batchData.SpriteBatch);
+			}
 		}
 
 		protected override void BeforeReadyDisable(ScreenEventArgs args)
@@ -95,31 +104,16 @@ namespace Game1.Interface.Windows
 			base.BeforeReadyDisable(args);
 		}
 
-		private void _containerView_OnMouseClick(object sender, EventArgs e)
-		{
-			/*
-			var args = (MouseEventArgs)e;
-			var clickedContainer = (sender as InventoryItemView);
-			int clickedIndex = args.SourceIndex;
-			var clickedItem = clickedContainer[clickedIndex];
-
-			_character.PutItem(clickedContainer, clickedIndex);
-
-			if (_character.HeldItem?.Item != null)
-				InputManager.SetMouseCursor(_character.HeldItem.Item.Icon.Texture);
-			else
-				InputManager.ResetMouseCursor();
-			*/
-		}
-
-		private void _containerView_OnMouseOut(object sender, EventArgs e)
-		{
-			_tooltip.Reset(sender);
-		}
-
 		private void ArmorItemView_OnMouseClick(object sender, EventArgs e)
 		{
-
+			var args = (MouseEventArgs)e;
+			if ((args.Button == MouseButton.Right) && (_armorItemView[args.SourceIndex]?.Item != null))
+			{
+				_contextMenu = new InventoryContextMenu(sender, "armorview", args.SourceIndex,  InputManager.MousePosition.Offset(-10, -10), _armorItemView[args.SourceIndex].Item, true) { IsActive = true };
+				_contextMenu.LoadContent();
+				_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
+				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
+			}
 		}
 
 		private void ArmorItemView_OnMouseOver(object sender, EventArgs e)
@@ -128,7 +122,7 @@ namespace Game1.Interface.Windows
 			var overItem = (sender as InventoryItemView).Item;
 			int overIndex = args.SourceIndex;
 
-			if (overItem != null)
+			if ((overItem != null) && (_contextMenu?.Owner != sender))
 				_tooltip.Show(overItem.Item.DisplayName, InputManager.MousePosition.Offset(10, 10), 15, sender);
 			else
 				_tooltip.Reset(sender);
@@ -155,6 +149,17 @@ namespace Game1.Interface.Windows
 				int currentVal = (int)typeof(Character).InvokeMember(statName, Util.GetPropertyFlags, Type.DefaultBinder, _character, null);
 				_characterStat[i].UpdateText($"{statName}: {currentVal}");
 			}
+		}
+
+		private void _contextMenu_OnItemSelect(object sender, EventArgs e)
+		{
+			throw new NotImplementedException();
+		}
+
+		private void _contextMenu_OnMouseOut(object sender, EventArgs e)
+		{
+			_contextMenu.IsActive = false;
+			_contextMenu = null;
 		}
 	}
 }

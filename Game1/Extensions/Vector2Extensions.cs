@@ -14,6 +14,11 @@ namespace Game1
 			return new Rectangle((int)vector.X, (int)vector.Y, expansionX, expansionY);
 		}
 
+		public static Rectangle ExpandToRectangeTopLeft(this Vector2 vector, float expansionX, float expansionY)
+		{
+			return ExpandToRectangeTopLeft(vector, (int)expansionX, (int)expansionY);
+		}
+
 		public static Vector2 Offset(this Vector2 vector, int offsetX, int offsetY) => new Vector2(vector.X + offsetX, vector.Y + offsetY);
 	}
 }

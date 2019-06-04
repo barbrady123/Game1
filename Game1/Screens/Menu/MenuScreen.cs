@@ -14,10 +14,10 @@ using Game1.Effect;
 using Game1.Enum;
 
 namespace Game1.Screens.Menu
-{
+{	
 	public class MenuScreen : Screen, IActivatable
 	{
-		private const int MENU_PADDING = 20;
+		public const int MENU_PADDING = 20;
 		private const float ENABLED_MENU_ALPHA = 1.0f;
 		private const float DISABLED_MENU_ALPHA = 0.4f;
 		private const float DEFAULT_ITEM_ALPHA = 1.0f;
@@ -26,23 +26,22 @@ namespace Game1.Screens.Menu
 		private static readonly Color SelectedItemColor = new Color(240, 240, 240);
 		private static readonly Color UnselectedItemColor = new Color(100, 100, 100);
 
+		protected string EventSource { get; set; } = typeof(MenuScreen).Name;
+		protected int? EventSourceIndex { get; set; } = null;
 		protected int _currentIndex;
 		protected List<MenuItem> _items;
 		protected MenuLayout _layout; 
 
 		private bool _isActive;
 		private bool _escapeToDisable;
-		private bool _beyondBoundaryDisable;
-		private bool _fireAltAxisEvents;
-
-		private Keys ForwardKey => (_layout == MenuLayout.Vertical) ? Keys.Down : Keys.Right;
-		private Keys BackwardKey => (_layout == MenuLayout.Vertical) ? Keys.Up : Keys.Left;
-		private Keys AltAxisFowardKey  => (_layout == MenuLayout.Vertical) ? Keys.Right : Keys.Down;
-		private Keys AltAxisBackwardKey  => (_layout == MenuLayout.Vertical) ? Keys.Left : Keys.Up;
 
 		public event EventHandler OnReadyDisable;
 		public event EventHandler OnCurrentItemChange;
 		public event EventHandler OnItemSelect;
+		public event EventHandler OnMouseIn;
+		public event EventHandler OnMouseOut;
+
+		private bool _mouseOverMenu;
 
 		private int _delayInputCycles;
 
@@ -62,9 +61,6 @@ namespace Game1.Screens.Menu
 					_isActive = value;
 					if (_isActive)
 					{
-						if (_currentIndex < 0)
-							this.CurrentIndex = 0;
-
 						SetCurrentItemEffects(true);
 						DelayInput(1);
 					}
@@ -80,12 +76,11 @@ namespace Game1.Screens.Menu
 		{
 			get { return _currentIndex; }
 			set {
-				int index = Util.Clamp(value, 0, _items.Count - 1);
-				if (index == _currentIndex)
+				if (_currentIndex == value)
 					return;
 				
 				SetCurrentItemEffects(false);
-				_currentIndex = index;
+				_currentIndex = value;
 				SetCurrentItemEffects(true);
 			}
 		}
@@ -98,18 +93,15 @@ namespace Game1.Screens.Menu
 
 		public MenuScreen(Rectangle bounds,
 						  MenuLayout layout = MenuLayout.Vertical,
-						  bool hasBackground = true,
-						  bool escapeToDisable = false,
-						  bool beyondBoundaryDisable = false,
-						  bool fireAltAxisEvents = false): base(bounds, hasBackground ? "brick" : null)
+						  string background = "brick",
+						  bool escapeToDisable = false): base(bounds, background)
 		{
 			_currentIndex = -1;
 			_items = new List<MenuItem>();
 			_layout = layout;
 			_escapeToDisable = escapeToDisable;
-			_beyondBoundaryDisable = beyondBoundaryDisable;
-			_fireAltAxisEvents = fireAltAxisEvents;
 			_delayInputCycles = 0;
+			_mouseOverMenu = false;
 			this.IsActive = false;
 		}
 
@@ -123,7 +115,7 @@ namespace Game1.Screens.Menu
 			foreach (var item in _items)
 			{
 				item.Image = new ImageText(item.Text, true);
-				item.Image.Alignment = (_layout == MenuLayout.Vertical) ? ImageAlignment.Centered : ImageAlignment.LeftCentered;
+				item.Image.Alignment = ImageAlignment.LeftTop;
 				item.Image.LoadContent();
 				menuSize += (menuSize > 0 ? MENU_PADDING : 0) + (_layout == MenuLayout.Vertical ? (int)item.Image.Size.Y : (int)item.Image.Size.X);
 			}
@@ -144,14 +136,16 @@ namespace Game1.Screens.Menu
 
 			foreach (var item in _items)
 			{
-				item.Image.Position = new Vector2(locX, locY);
+				var size = item.Image.Size;
+				item.Image.Position = new Vector2(
+					locX - ((_layout == MenuLayout.Vertical) ? (int)(size.X / 2) : 0),
+					locY - ((_layout == MenuLayout.Horizontal) ? (int)(size.Y / 2) : 0));
+				item.Bounds = item.Image.Position.ExpandToRectangeTopLeft(size.X, size.Y);
 				if (_layout == MenuLayout.Vertical)
 					locY += (int)item.Image.Size.Y + MENU_PADDING;
 				else
 					locX += (int)item.Image.Size.X + MENU_PADDING;
 			}
-
-			this.CurrentIndex = 0;
 		}
 
 		public override void UnloadContent()
@@ -163,6 +157,20 @@ namespace Game1.Screens.Menu
 
 		public override void Update(GameTime gameTime, bool processInput)
 		{
+			base.Update(gameTime, processInput);
+
+			// Need to check this even if menu is inactive, in case this triggers the container to activate it...
+			bool mouseOverMenu = InputManager.MouseOver(this.Bounds);
+			if (mouseOverMenu != !_mouseOverMenu)
+			{
+				if (mouseOverMenu)
+					OnMouseIn?.Invoke(this, new MouseEventArgs());
+				else
+					OnMouseOut?.Invoke(this, new MouseEventArgs());
+			}
+
+			_mouseOverMenu = mouseOverMenu;
+
 			if (!this.IsActive)
 			{
 				for (int x = 0; x < _items.Count; x++)
@@ -182,60 +190,38 @@ namespace Game1.Screens.Menu
 				UpdateInput(gameTime);
 			_delayInputCycles = Math.Max(0, _delayInputCycles - 1);
 
-			base.Update(gameTime, processInput);
 			foreach (var item in _items)
 				item.Image.Update(gameTime);
 		}
 
 		public virtual void UpdateInput(GameTime gameTime)
 		{
-			bool beyondBoundary = false;
+			bool mouseOverItem = false;
 
-			if (InputManager.KeyPressed(this.ForwardKey))
+			for (int i = 0; i < _items.Count; i++)
 			{
-				beyondBoundary = (_currentIndex >= _items.Count - 1);
+				if (!InputManager.MouseOver(_items[i].Bounds))
+					continue;
 
-				int newIndex = Math.Min(_items.Count - 1, _currentIndex + 1);
-				if (newIndex != _currentIndex)
+				mouseOverItem = true;
+
+				if (this.CurrentIndex != i)
 				{
-					this.CurrentIndex = newIndex;
-					OnCurrentItemChange?.Invoke(this, new MenuEventArgs("currentChange", this.GetType().Name, _items[_currentIndex].Id));
+					this.CurrentIndex = i;
+					OnCurrentItemChange?.Invoke(this, new MenuEventArgs("currentChange", this.EventSource, this.EventSourceIndex, _items[_currentIndex].Id));
 				}
 
-				if (beyondBoundary && _beyondBoundaryDisable)
-					OnReadyDisable?.Invoke(this, new MenuEventArgs("beyondend", this.GetType().Name, null));
-			}
-			else if (InputManager.KeyPressed(this.BackwardKey))
-			{
-				beyondBoundary = (_currentIndex <= 0);
+				if (InputManager.LeftMouseClick())
+					OnItemSelect?.Invoke(this, new MenuEventArgs("select", this.EventSource, this.EventSourceIndex, _items[_currentIndex].Id));				}
 
-				int newIndex = Math.Max(0, _currentIndex - 1);
-				if (newIndex != _currentIndex)
-				{
-					this.CurrentIndex = newIndex;
-					OnCurrentItemChange?.Invoke(this, new MenuEventArgs("currentChange", this.GetType().Name, _items[_currentIndex].Id));
-				}
+			if (!mouseOverItem)
+				this.CurrentIndex = -1;
 
-				if (beyondBoundary && _beyondBoundaryDisable)
-					OnReadyDisable?.Invoke(this, new MenuEventArgs("beyondbeginning", this.GetType().Name, null));
-			}
-			else if (InputManager.KeyPressed(Keys.Enter, true))
+			if (_escapeToDisable && InputManager.KeyPressed(Keys.Escape, true))
 			{
-				OnItemSelect?.Invoke(this, new MenuEventArgs("select", this.GetType().Name, _items[_currentIndex].Id));
+				OnReadyDisable?.Invoke(this, new MenuEventArgs("escape", this.EventSource, this.EventSourceIndex, null));
 			}
-			else if (_escapeToDisable && InputManager.KeyPressed(Keys.Escape, true))
-			{
-				OnReadyDisable?.Invoke(this, new MenuEventArgs("escape", this.GetType().Name, null));
-			}
-			else if (_fireAltAxisEvents && InputManager.KeyPressed(this.AltAxisFowardKey))
-			{
-				OnReadyDisable?.Invoke(this, new MenuEventArgs("altfoward", this.GetType().Name, _items[_currentIndex].Id));
-			}
-			else if (_fireAltAxisEvents && InputManager.KeyPressed(this.AltAxisBackwardKey))
-			{
-				OnReadyDisable?.Invoke(this, new MenuEventArgs("altbackward", this.GetType().Name, _items[_currentIndex].Id));
-			}
-		}
+		}	
 
 		public override void Draw(SpriteBatch spriteBatch)
 		{
@@ -279,6 +265,34 @@ namespace Game1.Screens.Menu
 				_items[_currentIndex].Image.ClearEffects();
 				_items[_currentIndex].Image.Alpha = MenuScreen.DEFAULT_ITEM_ALPHA;
 			}
+		}
+
+		public static Size CalculateMenuSize(int padding, int spacing, List<string> options, MenuLayout layout)
+		{
+			float width = 0;
+			float height = 0;
+
+			foreach (var option in options)
+			{
+				var size = FontManager.MeasureString(option);
+				width = (layout == MenuLayout.Vertical) ? Math.Max(width, size.X) : width + size.X;
+				height = (layout == MenuLayout.Vertical) ? height + size.Y : Math.Max(height, size.Y);
+			}
+
+			int paddingWidth = padding * 2;
+			if (layout == MenuLayout.Horizontal)
+				paddingWidth += padding * (options.Count - 1);
+
+			int paddingHeight = padding * 2;
+			if (layout == MenuLayout.Vertical)
+				paddingHeight += padding * (options.Count - 1);
+
+			return new Size((int)width + paddingWidth, (int)height + paddingHeight);
+		}
+
+		protected virtual void ReadyDisable(object sender, MenuEventArgs e)
+		{
+			OnReadyDisable?.Invoke(sender, e);
 		}
 	}
 }

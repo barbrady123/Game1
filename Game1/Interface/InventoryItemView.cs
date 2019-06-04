@@ -102,6 +102,8 @@ namespace Game1.Interface
 
 			if (InputManager.LeftMouseClick(_bounds))
 				OnMouseClick?.Invoke(this, new MouseEventArgs(MouseButton.Left, _containerIndex));
+			if (InputManager.RightMouseClick(_bounds))
+				OnMouseClick?.Invoke(this, new MouseEventArgs(MouseButton.Right, _containerIndex));
 
 			if (_mouseover)
 				OnMouseOver?.Invoke(this, new MouseEventArgs(MouseButton.None, _containerIndex));

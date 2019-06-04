@@ -15,10 +15,10 @@ using Game1.Screens.Menu;
 namespace Game1.Interface.Windows
 {
 	public class Tooltip : Window
-	{
-		private object _sender;
+	{		
 		private int _timer;
 
+		public object Owner { get; private set; }
 		public override string SpriteBatchName => "tooltip";
 		public override int TitleOffset => 5;
 
@@ -45,24 +45,23 @@ namespace Game1.Interface.Windows
 			base.Update(gameTime, processInput);
 		}
 
-		// Something isn't getting reset correctly here when the text changes...(first one shows up is already ok, others don't seem to resize)....
 		public void Show(string text, Point position, int timer, object sender)
 		{			
-			if (sender != _sender)
+			if (sender != this.Owner)
 				_timer = Math.Max(0, timer);
 
-			_sender = sender;
+			this.Owner = sender;
 			this.Title = text;
 			this.Bounds = new Rectangle(position.X, position.Y, (int)this.TitleSize.X + this.TitleOffset * 2, (int)this.TitleSize.Y + this.TitleOffset * 2);
 		}
 
 		public void Reset(object sender)
 		{
-			if (sender != _sender)
+			if (sender != this.Owner)
 				return;
 
 			_timer = -1;
-			_sender = null;
+			this.Owner = null;
 			this.IsActive = false;
 		}
 	}

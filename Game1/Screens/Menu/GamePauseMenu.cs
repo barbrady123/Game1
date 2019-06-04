@@ -13,7 +13,7 @@ namespace Game1.Screens.Menu
 {
 	public class GamePauseMenu : MenuScreen
 	{
-		public GamePauseMenu(Rectangle bounds) : base(bounds, hasBackground: false) { }
+		public GamePauseMenu(Rectangle bounds) : base(bounds, background: null) { }
 
 		protected override void LoadItemData()
 		{

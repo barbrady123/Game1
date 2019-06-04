@@ -32,6 +32,10 @@ namespace Game1
 			this.Character.Wisdom = GameRandom.Next(10, 20);
 			this.Character.Charisma = GameRandom.Next(10, 20);
 			this.Character.Constitution = GameRandom.Next(10, 20);
+			this.Character.MaxHP = GameRandom.Next(30, 50);
+			this.Character.CurrentHP = this.Character.MaxHP / 2;
+			this.Character.MaxMana = GameRandom.Next(30, 50);
+			this.Character.CurrentMana = this.Character.MaxMana;
 
 			CharacterSex oppositeSex = (this.Character.Sex == CharacterSex.Male) ? CharacterSex.Female : CharacterSex.Male;
 			this.NPCs = new List<NPC> {

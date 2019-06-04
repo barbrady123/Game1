@@ -13,7 +13,7 @@ namespace Game1.Screens.Menu
 {
 	public class OkMenu : MenuScreen
 	{
-		public OkMenu(Rectangle bounds) : base(bounds, hasBackground: false) { }
+		public OkMenu(Rectangle bounds) : base(bounds, background: null) { }
 
 		protected override void LoadItemData()
 		{

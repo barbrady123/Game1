@@ -14,8 +14,6 @@ namespace Game1.Screens.Menu.Character
 	{
 		public StartCancelMenu (Rectangle bounds): base(bounds: bounds,
 														layout: MenuLayout.Horizontal,
-														hasBackground: false,
-														escapeToDisable: true,
-														fireAltAxisEvents: true) { }
+														background: null) { }
 	}
 }

@@ -12,10 +12,8 @@ namespace Game1.Screens.Menu.Character
 {
 	public class CharacterNewMenu : MenuScreen
 	{
-		public CharacterNewMenu(Rectangle bounds): base(bounds,
-														hasBackground: false,
-														escapeToDisable: true,
-														beyondBoundaryDisable: true) { }
+		// shouldn't need escape to disable here either
+		public CharacterNewMenu(Rectangle bounds): base(bounds, background: null) { }
 
 		public override void UpdateInput(GameTime gameTime)
 		{

@@ -21,8 +21,8 @@ namespace Game1
 		private ItemContainer _backpack;
 		private int _currentHP;
 		private int _currentMana;
-		private int _itemDefense;
-		private int _baseDefense;
+		//private int _itemDefense;
+		//private int _baseDefense;
 
 		public string SpriteSheetName => this.Sex.ToString("g");
 		public Vector2 Motion { get; set; }
@@ -58,7 +58,7 @@ namespace Game1
 
 		// Or we store the effective def (and other stats) to reduce realtime computations during combat...
 		// Also will have other modifiers (buffs, debuffs, etc)
-		public int Defense => _baseDefense + _itemDefense;
+		//public int Defense => _baseDefense + _itemDefense;
 
 		public ItemContainer HotBar => _hotbar;
 		public ItemContainer Backpack => _backpack;

@@ -107,8 +107,8 @@ namespace Game1.Interface
 
 			if (_fill != null)
 				_fill.UnloadContent();
-
-			_fill = Util.GenerateSolidBackground(_width * currentVal / maxVal, _height, _color);
+				
+			_fill = Util.GenerateSolidBackground((int)(_width * (maxVal > 0 ? (float)currentVal / (float)maxVal : 0.0f)), _height, _color);
 			_fill.Position = this.Position;
 			_fill.LoadContent();
 

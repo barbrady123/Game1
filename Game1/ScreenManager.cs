@@ -72,6 +72,7 @@ namespace Game1
 			//TransitionScreens(new SplashScreen(_bounds));
 			//TransitionScreens(new CharacterCreateScreen(_bounds));
 			TransitionScreens(new GameScreen(_bounds));
+			//TransitionScreens(new MainMenu(_bounds));
 		}
 
 		private void TransitionScreens(Screens.Screen newScreen)
@@ -189,6 +190,11 @@ namespace Game1
 				case "MainMenu": switch (args.Type)
 				{
 					case "escape":	Game1.Instance.Exit();	break;
+				}
+				break;
+				case "OptionsMenu" : switch (args.Type)
+				{
+					case "escape": TransitionScreens(new MainMenu(_bounds)); break;
 				}
 				break;
 			}

@@ -134,6 +134,8 @@ namespace Game1
 
 		public static bool RightMouseClick() => (_currentMouseState.RightButton == ButtonState.Pressed) && (_prevMouseState.RightButton == ButtonState.Released);
 
+		public static bool RightMouseClick(Rectangle bounds) => MouseOver(bounds) && RightMouseClick();
+
 		public static int MouseScrollAmount => _currentMouseState.ScrollWheelValue - _prevMouseState.ScrollWheelValue;
 
 		public static void SetMouseCursor(Texture2D texture)

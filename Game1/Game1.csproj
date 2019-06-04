@@ -64,6 +64,7 @@
     <Compile Include="Extensions\RectangleExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\Vector2Extensions.cs" />
+    <Compile Include="FontManager.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="GameConfiguration.cs" />
     <Compile Include="Effect\ImageEffect.cs" />
@@ -90,9 +91,11 @@
     <Compile Include="IOManager.cs" />
     <Compile Include="Items\Item.cs" />
     <Compile Include="Items\ItemArmor.cs" />
+    <Compile Include="Items\ItemConsumable.cs" />
     <Compile Include="Items\ItemContainer.cs" />
     <Compile Include="Items\ItemGeneral.cs" />
     <Compile Include="Items\ItemManager.cs" />
+    <Compile Include="Items\ItemWeapon.cs" />
     <Compile Include="Layer.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="MouseEventArgs.cs" />
@@ -101,6 +104,9 @@
     <Compile Include="Primatives.cs" />
     <Compile Include="Screens\GameScreen.cs" />
     <Compile Include="Screens\Menu\GamePauseMenu.cs" />
+    <Compile Include="Screens\Menu\InventoryContextMenu.cs" />
+    <Compile Include="Screens\Menu\MenuItem.cs" />
+    <Compile Include="Screens\Menu\MenuScreen.cs" />
     <Compile Include="Screens\Menu\OkMenu.cs" />
     <Compile Include="Screens\Menu\Character\StartCancelMenu.cs" />
     <Compile Include="Program.cs" />
@@ -113,8 +119,6 @@
     <Compile Include="Screens\Menu\Character\SexMenu.cs" />
     <Compile Include="Screens\Menu\MainMenu.cs" />
     <Compile Include="Screens\Menu\MenuEventArgs.cs" />
-    <Compile Include="Screens\Menu\MenuItem.cs" />
-    <Compile Include="Screens\Menu\MenuScreen.cs" />
     <Compile Include="Screens\Menu\OptionsMenu.cs" />
     <Compile Include="Interface\DialogBox.cs" />
     <Compile Include="Screens\ScreenEventArgs.cs" />

@@ -34,6 +34,8 @@ namespace Game1
 			_previous = null;
 		}
 
+		public bool IsActive(IActivatable obj) => _active == obj;
+
 		public void Add(IActivatable obj)
 		{
 			_activatables.Add(obj);
