@@ -153,12 +153,21 @@ namespace Game1.Interface.Windows
 
 		private void _contextMenu_OnItemSelect(object sender, EventArgs e)
 		{
-			throw new NotImplementedException();
+			var args = (MenuEventArgs)e;
+			switch (args.Item)
+			{
+				case "unequip"	:	
+					_character.UnequipArmor((ArmorSlot)args.SourceIndex);
+					_character.PutItem(_character.Backpack);
+					break;
+				case "split"	:	break;
+				case "cancel"	:	break;
+			}
+			_contextMenu = null;
 		}
 
 		private void _contextMenu_OnMouseOut(object sender, EventArgs e)
 		{
-			_contextMenu.IsActive = false;
 			_contextMenu = null;
 		}
 	}

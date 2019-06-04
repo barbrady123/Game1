@@ -138,20 +138,52 @@ namespace Game1
 		}
 
 		public void PutItem(ItemContainer container, int? index = null)
-		{
+		{			
 			if (index == null)
 			{
 				index = container.AddItem(this.HeldItem);
 				if (index == null)
 				{
 					// Here we need to do something with the held item that we don't have room for...
-					// Minecraft just "throws" (drops) it...that might when when we are able to have 
+					// Minecraft just "throws" (drops) it...that might work when we are able to have 
 					// items in the environment??
-					return;
 				}
+				// This should be safe since the above version of AddItem won't swap with an existing item...
+				this.HeldItem = null;
+				return;
 			}
 
 			this.HeldItem = container.AddItem(this.HeldItem, (int)index);
+		}
+
+		public void UnequipArmor(ArmorSlot slot, bool holdItem = true)
+		{
+			InventoryItem unequipped = null;
+
+			switch (slot)
+			{
+				case ArmorSlot.Head:
+					unequipped = this.EquippedArmorHead;	
+					this.EquippedArmorHead = null;
+					break;
+				case ArmorSlot.Chest:
+					unequipped = this.EquippedArmorChest;
+					this.EquippedArmorChest = null;
+					break;
+				case ArmorSlot.Legs:
+					unequipped = this.EquippedArmorLegs;
+					this.EquippedArmorLegs = null;
+					break;
+				case ArmorSlot.Feet:
+					unequipped = this.EquippedArmorFeet;
+					this.EquippedArmorFeet = null;
+					break;
+			}
+
+			// Do we need to check if there's something there arleady?   
+			// We should probably have this property auto-store anything in there in a container if avialable
+			if (unequipped != null)
+				this.HeldItem = unequipped;
 		}
 	}
 }
