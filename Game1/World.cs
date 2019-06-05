@@ -55,10 +55,10 @@ namespace Game1
 			this.Character.Backpack.AddItem(ItemManager.GetItem());
 			this.Character.Backpack.AddItem(ItemManager.GetItem());
 			this.Character.Backpack.AddItem(ItemManager.GetItem());
-			this.Character.EquippedArmorHead = ItemManager.GetItem();
-			this.Character.EquippedArmorChest = ItemManager.GetItem();
+			//this.Character.EquippedArmorHead = ItemManager.GetItem();
+			//this.Character.EquippedArmorChest = ItemManager.GetItem();
 			//this.Character.EquippedArmorLegs = ItemManager.GetItem();
-			this.Character.EquippedArmorFeet = ItemManager.GetItem();
+			//this.Character.EquippedArmorFeet = ItemManager.GetItem();
 		}
 
 		public void UnloadContent()

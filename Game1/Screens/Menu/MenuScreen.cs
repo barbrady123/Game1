@@ -15,6 +15,11 @@ using Game1.Enum;
 
 namespace Game1.Screens.Menu
 {	
+	/// <summary>
+	/// TODO: This should just take a Position and optional Size...and calculate based on items if size isn't specified...
+	/// This would greatly simplify other parts of the code where the items are dynamic, etc....and we don't have arbitrary
+	/// menu sizes, such as "the entire screen", etc...
+	/// </summary>
 	public class MenuScreen : Screen, IActivatable
 	{
 		public const int MENU_PADDING = 20;
@@ -108,7 +113,7 @@ namespace Game1.Screens.Menu
 		public override void LoadContent()
 		{			
 			base.LoadContent();
-			LoadItemData();
+			_items = LoadItemData();
 
 			int menuSize = 0;
 
@@ -161,7 +166,7 @@ namespace Game1.Screens.Menu
 
 			// Need to check this even if menu is inactive, in case this triggers the container to activate it...
 			bool mouseOverMenu = InputManager.MouseOver(this.Bounds);
-			if (mouseOverMenu != !_mouseOverMenu)
+			if (mouseOverMenu != _mouseOverMenu)
 			{
 				if (mouseOverMenu)
 					OnMouseIn?.Invoke(this, new MouseEventArgs());
@@ -178,7 +183,7 @@ namespace Game1.Screens.Menu
 				return;
 			}
 
-			UpdateActive(gameTime, processInput);			
+			UpdateActive(gameTime, processInput);
 		}
 
 		public virtual void UpdateActive(GameTime gameTime, bool processInput)
@@ -221,6 +226,9 @@ namespace Game1.Screens.Menu
 			{
 				OnReadyDisable?.Invoke(this, new MenuEventArgs("escape", this.EventSource, this.EventSourceIndex, null));
 			}
+
+			if (_mouseOverMenu)
+				InputManager.BlockButtonClicks();
 		}	
 
 		public override void Draw(SpriteBatch spriteBatch)
@@ -243,11 +251,11 @@ namespace Game1.Screens.Menu
 			return -1;
 		}
 
-		protected virtual void LoadItemData()
+		protected virtual List<MenuItem> LoadItemData()
 		{
 			using (var reader = new StreamReader($"Load\\Menu\\{this.GetType().Name}.json"))
 			{
-				_items = JsonConvert.DeserializeObject<List<MenuItem>>(reader.ReadToEnd());
+				return JsonConvert.DeserializeObject<List<MenuItem>>(reader.ReadToEnd());
 			}
 		}
 

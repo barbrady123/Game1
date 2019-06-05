@@ -40,6 +40,14 @@ namespace Game1
 		public int Charisma { get; set; }
 		public int Constitution { get; set; }
 
+		// Again...if these were indexed array slots, this would be way easier!
+		public int Defense =>
+			(((ItemArmor)this.EquippedArmorHead?.Item)?.Defense ?? 0) +
+			(((ItemArmor)this.EquippedArmorChest?.Item)?.Defense ?? 0) +
+			(((ItemArmor)this.EquippedArmorLegs?.Item)?.Defense ?? 0) +
+			(((ItemArmor)this.EquippedArmorFeet?.Item)?.Defense ?? 0);
+			// TODO: Need other modifiers here eventually...(buffs/debuffs/etc)
+
 		public int MaxHP { get; set; }
 		public int CurrentHP 
 		{ 
@@ -55,10 +63,6 @@ namespace Game1
 		}
 
 		public int Gold { get; set; }
-
-		// Or we store the effective def (and other stats) to reduce realtime computations during combat...
-		// Also will have other modifiers (buffs, debuffs, etc)
-		//public int Defense => _baseDefense + _itemDefense;
 
 		public ItemContainer HotBar => _hotbar;
 		public ItemContainer Backpack => _backpack;
@@ -154,6 +158,25 @@ namespace Game1
 			}
 
 			this.HeldItem = container.AddItem(this.HeldItem, (int)index);
+		}
+
+		// Maybe we should move armor slots to indexed (by enum value) array, to make these types of methods easier 
+		public void EquipArmor(ItemContainer container, int index)
+		{
+			var item = container[index];
+			if (item?.Item is ItemArmor armor)
+			{
+				UnequipArmor(armor.Slot);
+				switch (armor.Slot)
+				{
+					case ArmorSlot.Head:	this.EquippedArmorHead = item;	break;
+					case ArmorSlot.Chest:	this.EquippedArmorChest = item;	break;
+					case ArmorSlot.Legs:	this.EquippedArmorLegs= item;	break;
+					case ArmorSlot.Feet:	this.EquippedArmorFeet= item;	break;
+				}
+				container.Items[index] = null;
+				PutItem(container, index);
+			}
 		}
 
 		public void UnequipArmor(ArmorSlot slot, bool holdItem = true)

@@ -160,8 +160,10 @@ namespace Game1.Interface.Windows
 					_character.UnequipArmor((ArmorSlot)args.SourceIndex);
 					_character.PutItem(_character.Backpack);
 					break;
-				case "split"	:	break;
-				case "cancel"	:	break;
+				case "split"	:
+					// TODO: Need to implement this...(also need to display stack size on Held item)...
+					// Need a "split" popup screen....
+					break;
 			}
 			_contextMenu = null;
 		}

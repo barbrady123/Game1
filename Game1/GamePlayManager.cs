@@ -37,6 +37,7 @@ namespace Game1
 		private readonly Dialog _tooltip;
 		private readonly StatBar _barHealth;
 		private readonly StatBar  _barMana;
+		private readonly ImageText _defense;
 
 		private ImageTexture _gameViewBorder;
 
@@ -70,6 +71,8 @@ namespace Game1
 			_tooltip = new Dialog(null, DialogButton.None, Rectangle.Empty, null);
 			_barHealth = new StatBar(GamePlayManager.StatBarSize, _bounds.TopRightVector(-GamePlayManager.StatBarSize-GamePlayManager.ContentMargin, GamePlayManager.ContentMargin), Color.Red, _world.Character, "CurrentHP", "MaxHP");
 			_barMana = new StatBar(GamePlayManager.StatBarSize, _bounds.TopRightVector(-GamePlayManager.StatBarSize-GamePlayManager.ContentMargin, GamePlayManager.ContentMargin * 3), Color.Blue, _world.Character, "CurrentMana", "MaxMana");
+
+			_defense = new ImageText("", true) { Position = _bounds.TopRightVector(-100-GamePlayManager.ContentMargin, GamePlayManager.ContentMargin * 6) };
 		}
 
 		public void LoadContent()
@@ -86,6 +89,7 @@ namespace Game1
 			_tooltip.LoadContent();
 			_barHealth.LoadContent();
 			_barMana.LoadContent();
+			_defense.LoadContent();
 		}
 
 		public void UnloadContent()
@@ -100,6 +104,7 @@ namespace Game1
 			_tooltip.UnloadContent();
 			_barHealth.UnloadContent();
 			_barMana.UnloadContent();
+			_defense.UnloadContent();
 		}
 
 		public void Update(GameTime gameTime)
@@ -110,6 +115,8 @@ namespace Game1
 			_tooltip.Update(gameTime, false);
 			_barHealth.Update(gameTime);
 			_barMana.Update(gameTime);
+			UpdateVisibleStats();
+			_defense.Update(gameTime);
 
 			// In this case "IsActive" effectively means the game is running, pausing the GamePlayManager pauses the game,
 			// So anything like a modal that would cause the game to pause but still need to be updated
@@ -162,6 +169,7 @@ namespace Game1
 			_tooltip.Draw(spriteBatch);
 			_barHealth.Draw(spriteBatch);
 			_barMana.Draw(spriteBatch);
+			_defense.Draw(spriteBatch);
 		}
 
 		private ImageTexture GenerateGameViewBorder()
@@ -193,6 +201,13 @@ namespace Game1
 
 			var args = (MouseEventArgs)e;
 			_hotbarView.Container.ActiveItemIndex = args.SourceIndex;
+		}
+
+		// Eventually we may want to encapsulate this in some kind of control that shows all these things and removes this from the GamePlayManager....
+		private void UpdateVisibleStats()
+		{
+			// Currently the only stat is Defense...
+			_defense.UpdateText($"Defense: {_world.Character.Defense}");
 		}
 	}
 }

@@ -74,6 +74,7 @@ namespace Game1
 		public static void Update()
 		{
 			excludedKeys.Clear();
+			_blockMouseButtons = false;
 			_prevKeyState = _currentKeyState;
 			_currentKeyState = Keyboard.GetState();
 			_prevMouseState = _currentMouseState;
@@ -81,6 +82,7 @@ namespace Game1
 		}
 
 		private static List<Keys> excludedKeys = new List<Keys>();
+		private static bool _blockMouseButtons;
 
 		public static bool KeyPressed(Keys key, bool clearAfterMatch = false)
 		{
@@ -128,11 +130,11 @@ namespace Game1
 
 		public static bool MouseOver(Rectangle bounds) => bounds.Contains(_currentMouseState.Position);
 
-		public static bool LeftMouseClick() => (_currentMouseState.LeftButton == ButtonState.Pressed) && (_prevMouseState.LeftButton == ButtonState.Released);
+		public static bool LeftMouseClick() => (!_blockMouseButtons) &&  (_currentMouseState.LeftButton == ButtonState.Pressed) && (_prevMouseState.LeftButton == ButtonState.Released);
 
 		public static bool LeftMouseClick(Rectangle bounds) => MouseOver(bounds) && LeftMouseClick();
 
-		public static bool RightMouseClick() => (_currentMouseState.RightButton == ButtonState.Pressed) && (_prevMouseState.RightButton == ButtonState.Released);
+		public static bool RightMouseClick() => (!_blockMouseButtons) &&  (_currentMouseState.RightButton == ButtonState.Pressed) && (_prevMouseState.RightButton == ButtonState.Released);
 
 		public static bool RightMouseClick(Rectangle bounds) => MouseOver(bounds) && RightMouseClick();
 
@@ -146,6 +148,11 @@ namespace Game1
 		public static void ResetMouseCursor()
 		{
 			Mouse.SetCursor(MouseCursor.Arrow);
+		}
+
+		public static void BlockButtonClicks()
+		{
+			_blockMouseButtons = true;
 		}
 	}
 }

@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Enum;
 
 namespace Game1.Items
 {
@@ -56,9 +57,9 @@ namespace Game1.Items
 				case 1 : newItem = new ItemGeneral {	DisplayName = "Ruby",			Icon = _icons["gemRed"],	Id = val,	MaxStackSize = 99,	Weight = 0.2f };	break;
 				case 2 : newItem = new ItemGeneral {	DisplayName = "Health Potion",	Icon = _icons["potionRed"],	Id = val,	MaxStackSize = 99,	Weight = 0.1f };	break;
 				// Things like metal type, etc. should be modifiers to a base type...
-				case 3 : newItem = new ItemArmor {		DisplayName = "Chain Helm",		Icon = _icons["helmet"],	Id = val,	MaxStackSize = 1,	Weight = 3.2f };	break;
-				case 4 : newItem = new ItemArmor {		DisplayName = "Iron Armor",		Icon = _icons["armor"],		Id = val,	MaxStackSize = 1,	Weight = 7.4f };	break;
-				case 5 : newItem = new ItemArmor {		DisplayName = "Gold Armor",		Icon = _icons["upg_armor"],	Id = val,	MaxStackSize = 1,	Weight = 5.5f };	break;
+				case 3 : newItem = new ItemArmor {		DisplayName = "Chain Helm",		Icon = _icons["helmet"],	Id = val,	MaxStackSize = 1,	Weight = 3.2f,	Slot = ArmorSlot.Head,	Defense = 2	};	break;
+				case 4 : newItem = new ItemArmor {		DisplayName = "Iron Armor",		Icon = _icons["armor"],		Id = val,	MaxStackSize = 1,	Weight = 7.4f,	Slot = ArmorSlot.Chest, Defense = 5	};	break;
+				case 5 : newItem = new ItemArmor {		DisplayName = "Gold Armor",		Icon = _icons["upg_armor"],	Id = val,	MaxStackSize = 1,	Weight = 5.5f,	Slot = ArmorSlot.Chest, Defense = 8	};	break;
 			}
 
 			return new InventoryItem(newItem, GameRandom.Next(1, newItem.MaxStackSize));

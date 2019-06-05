@@ -7,17 +7,21 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Enum;
 using Game1.Screens.Menu;
 
 namespace Game1.Screens.Menu
 {
-	public class OkMenu : MenuScreen
+	public class OkCancelMenu : MenuScreen
 	{
-		public OkMenu(Rectangle bounds) : base(bounds, background: null) { }
+		public OkCancelMenu(Rectangle bounds) : base(bounds, MenuLayout.Horizontal, null, true) { }
 
 		protected override List<MenuItem> LoadItemData()
 		{
-			return new List<MenuItem> { new MenuItem() { Id = "ok", Text = "OK" } };
+			return new List<MenuItem> {
+				new MenuItem() { Id = "ok", Text = "OK" },
+				new MenuItem() { Id = "cancel", Text = "Cancel" }
+			};
 		}
 	}
 }

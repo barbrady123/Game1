@@ -21,7 +21,9 @@ namespace Game1.Interface.Windows
 		private ItemContainerView _containerViewHotbar;
 		private ItemContainer _containerBackpack;
 		private ItemContainer _containerHotbar;
+		private InventoryContextMenu _contextMenu;
 		private Tooltip _tooltip;
+		private SplitWindow _splitWindow;
 
 		public InventoryWindow(	string text,
 								Rectangle bounds, 
@@ -41,6 +43,8 @@ namespace Game1.Interface.Windows
 			_containerViewHotbar.OnMouseClick += _containerView_OnMouseClick;
 
 			_tooltip = new Tooltip();
+			_contextMenu = null;
+			_splitWindow = null;
 		}
 
 		public override void LoadContent()
@@ -57,11 +61,15 @@ namespace Game1.Interface.Windows
 			_containerViewBackpack.UnloadContent();
 			_containerViewHotbar.UnloadContent();
 			_tooltip.UnloadContent();
+			DisableContextMenu();
+			DisableSplitWindow();
 		}
 
 		public override void UpdateReady(GameTime gameTime, bool processInput)
 		{
 			base.UpdateReady(gameTime, processInput);
+			_splitWindow?.Update(gameTime, processInput);
+			_contextMenu?.Update(gameTime, processInput);	// Check first since it's "on top" and might need to kill a click-through if it's over another clickable item...
 			_containerViewBackpack.Update(gameTime);
 			_containerViewHotbar.Update(gameTime);
 			_tooltip.Update(gameTime, processInput);
@@ -73,6 +81,18 @@ namespace Game1.Interface.Windows
 			_containerViewBackpack.Draw(spriteBatch);
 			_containerViewHotbar.Draw(spriteBatch);
 			_tooltip.Draw(spriteBatch);
+			var batchData = SpriteBatchManager.Get("context");
+			if (_contextMenu != null)
+			{
+				batchData.ScissorWindow = _contextMenu.Bounds;
+				_contextMenu.Draw(batchData.SpriteBatch);
+			}
+			if (_splitWindow != null)
+			{
+				// Why the fuck is this changing the scissorwindow for the modal batch????
+				batchData.ScissorWindow = _splitWindow.Bounds;
+				_splitWindow.Draw(batchData.SpriteBatch);
+			}
 		}
 
 		protected override void BeforeReadyDisable(ScreenEventArgs args)
@@ -93,12 +113,48 @@ namespace Game1.Interface.Windows
 			int clickedIndex = args.SourceIndex;
 			var clickedItem = clickedContainer[clickedIndex];
 
-			_character.PutItem(clickedContainer, clickedIndex);
+			if (args.Button == MouseButton.Left)
+			{
+				_character.PutItem(clickedContainer, clickedIndex);
 
-			if (_character.HeldItem?.Item != null)
-				InputManager.SetMouseCursor(_character.HeldItem.Item.Icon.Texture);
-			else
-				InputManager.ResetMouseCursor();
+				if (_character.HeldItem?.Item != null)
+					InputManager.SetMouseCursor(_character.HeldItem.Item.Icon.Texture);
+				else
+					InputManager.ResetMouseCursor();
+			}
+			else if ((args.Button == MouseButton.Right) && (clickedItem != null))
+			{
+				// We need to know which container....
+				_contextMenu = new InventoryContextMenu(sender, (clickedContainer == _containerBackpack) ? "backpack" : "hotbar", args.SourceIndex,  InputManager.MousePosition.Offset(-10, -10), clickedItem, false) { IsActive = true };
+				_contextMenu.LoadContent();
+				_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
+				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
+			}
+		}
+
+		private void _contextMenu_OnItemSelect(object sender, EventArgs e)
+		{
+			var args = (MenuEventArgs)e;
+			var container = (args.Source == "backpack") ? _containerBackpack : _containerHotbar;
+
+			switch (args.Item)
+			{
+				case "equip"	:	
+					_character.EquipArmor(container, (int)args.SourceIndex);
+					_character.PutItem(_character.Backpack);
+					break;
+				case "split"	:
+					var startPosition = InputManager.MousePosition.Offset(-10, -10);
+					_splitWindow = new SplitWindow(new Rectangle(startPosition.X, startPosition.Y, 200, 200), container[(int)args.SourceIndex]) { IsActive = true };
+					_splitWindow.LoadContent();
+					break;
+			}
+			DisableContextMenu();
+		}
+
+		private void _contextMenu_OnMouseOut(object sender, EventArgs e)
+		{
+			DisableContextMenu();
 		}
 
 		private void _containerView_OnMouseOver(object sender, EventArgs e)
@@ -108,7 +164,7 @@ namespace Game1.Interface.Windows
 			int overIndex = args.SourceIndex;
 			var overItem = overContainer[overIndex];
 
-			if (overItem != null)
+			if ((overItem != null) && (_contextMenu?.Owner != sender))
 				_tooltip.Show(overItem.Item.DisplayName, InputManager.MousePosition.Offset(10, 10), 15, sender);
 			else
 				_tooltip.Reset(sender);
@@ -117,6 +173,24 @@ namespace Game1.Interface.Windows
 		private void _containerView_OnMouseOut(object sender, EventArgs e)
 		{
 			_tooltip.Reset(sender);
+		}
+
+		private void DisableContextMenu()
+		{
+			if (_contextMenu != null)
+			{
+				_contextMenu.UnloadContent();
+				_contextMenu = null;
+			}
+		}
+
+		private void DisableSplitWindow()
+		{
+			if (_splitWindow != null)
+			{
+				_splitWindow.UnloadContent();
+				_splitWindow = null;
+			}
 		}
 	}
 }

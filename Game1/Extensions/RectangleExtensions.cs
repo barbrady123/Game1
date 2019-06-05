@@ -16,9 +16,11 @@ namespace Game1
 
 		public static Vector2 TopLeftVector(this Rectangle rect, int? xOffset = null, int? yOffset = null) => new Vector2(rect.X + (xOffset ?? 0), rect.Y + (yOffset ?? 0));
 
-		public static Vector2 TopRightVector(this Rectangle rect, int? xOffset = null, int? yOffset = null) => new Vector2(rect.X + rect.Width -1 + (xOffset ?? 0), rect.Y + (yOffset ?? 0));
+		public static Vector2 TopRightVector(this Rectangle rect, int? xOffset = null, int? yOffset = null) => new Vector2(rect.Right + (xOffset ?? 0), rect.Y + (yOffset ?? 0));
 
-		public static Vector2 BottomRightVector(this Rectangle rect, int? xOffset = null, int? yOffset = null) => new Vector2(rect.X + rect.Width -1 + (xOffset ?? 0), rect.Y + rect.Height - 1 + (yOffset ?? 0));
+		public static Vector2 BottomCenterVector(this Rectangle rect, int? xOffset = null, int? yOffset = null) => new Vector2(rect.Center.X + (xOffset ?? 0), rect.Bottom + (yOffset ?? 0));
+
+		public static Vector2 BottomRightVector(this Rectangle rect, int? xOffset = null, int? yOffset = null) => new Vector2(rect.Right + (xOffset ?? 0), rect.Bottom + (yOffset ?? 0));
 
 		public static Vector2 SizeVector(this Rectangle rect, int? xOffset = null, int? yOffset = null) => new Vector2(rect.Width + (xOffset ?? 0), rect.Height + (yOffset ?? 0));
 

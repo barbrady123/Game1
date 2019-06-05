@@ -34,9 +34,9 @@ namespace Game1.Screens.Menu
 			this.EventSourceIndex = eventSourceIndex ?? this.EventSourceIndex;
 		}
 
-		protected override void LoadItemData()
+		protected override List<MenuItem> LoadItemData()
 		{
-			_items = InventoryContextMenu.GetItemMenuOptions(_item, _isEquipped).Select(o => new MenuItem { Id = o.ToLower(), Text = o }).ToList();
+			return InventoryContextMenu.GetItemMenuOptions(_item, _isEquipped).Select(o => new MenuItem { Id = o.ToLower(), Text = o }).ToList();
 		}
 
 		private static List<string> GetItemMenuOptions(InventoryItem item, bool isEquipped)
