@@ -22,6 +22,7 @@ namespace Game1.Interface.Windows
 		private InventoryItemView[] _armorItemView;
 		private ImageText[] _characterStat;
 		private InventoryContextMenu _contextMenu;
+		private readonly ComponentManager _components;
 
 		private Tooltip _tooltip;
 
@@ -46,7 +47,10 @@ namespace Game1.Interface.Windows
 				_characterStat[i] = new ImageText(null, true) { Position = position, Alignment = ImageAlignment.LeftCentered };
 			}
 
-			_tooltip = new Tooltip();
+			_components = new ComponentManager();
+			_components.Register(_tooltip = new Tooltip());
+			_components.SetState(_tooltip, ComponentState.Active);
+
 			_contextMenu = null;
 		}
 
@@ -73,7 +77,7 @@ namespace Game1.Interface.Windows
 		public override void UpdateReady(GameTime gameTime)
 		{
 			base.UpdateReady(gameTime);
-			_tooltip.Update(gameTime, true);
+			_tooltip.Update(gameTime);
 			UpdateArmorViews();
 			foreach (var armorView in _armorItemView)
 				armorView.Update(gameTime, _contextMenu == null);
@@ -86,14 +90,15 @@ namespace Game1.Interface.Windows
 		public override void DrawInternal(SpriteBatch spriteBatch)
 		{
 			base.DrawInternal(spriteBatch);
-			_tooltip.Draw(spriteBatch);
+			var batchData = SpriteBatchManager.Get("tooltip");
+			_tooltip.Draw(batchData.SpriteBatch);
 			foreach (var armorView in _armorItemView)
 				armorView.Draw(spriteBatch);
 			foreach (var stat in _characterStat)
 				stat.Draw(spriteBatch);
 			if (_contextMenu != null)
 			{
-				var batchData = SpriteBatchManager.Get("context");
+				batchData = SpriteBatchManager.Get("context");
 				batchData.ScissorWindow = _contextMenu.Bounds;
 				_contextMenu?.Draw(batchData.SpriteBatch);
 			}

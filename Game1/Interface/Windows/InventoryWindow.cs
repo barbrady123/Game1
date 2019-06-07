@@ -24,6 +24,7 @@ namespace Game1.Interface.Windows
 		private InventoryContextMenu _contextMenu;
 		private Tooltip _tooltip;
 		private SplitWindow _splitWindow;
+		private readonly ComponentManager _components;
 
 		public InventoryWindow(	string text,
 								Rectangle bounds, 
@@ -42,7 +43,10 @@ namespace Game1.Interface.Windows
 			_containerViewHotbar = ItemContainerView.New<ItemContainerView>(_containerHotbar, new Point(viewPosition.X, viewPosition.Y + _containerViewBackpack.Bounds.Size.Y + this.ContentMargin.Height), false);
 			_containerViewHotbar.OnMouseClick += _containerView_OnMouseClick;
 
-			_tooltip = new Tooltip();
+			_components = new ComponentManager();
+			_components.Register(_tooltip = new Tooltip());
+			_components.SetState(_tooltip, ComponentState.Active);
+
 			_contextMenu = null;
 			_splitWindow = null;
 		}
@@ -72,7 +76,7 @@ namespace Game1.Interface.Windows
 			base.UpdateReady(gameTime);
 			_containerViewBackpack.Update(gameTime, (_contextMenu == null) && (_splitWindow == null));
 			_containerViewHotbar.Update(gameTime, (_contextMenu == null) && (_splitWindow == null));
-			_tooltip.Update(gameTime, true);			
+			_tooltip.Update(gameTime);			
 		}
 
 		public override void DrawInternal(SpriteBatch spriteBatch)
@@ -80,8 +84,15 @@ namespace Game1.Interface.Windows
 			base.DrawInternal(spriteBatch);
 			_containerViewBackpack.Draw(spriteBatch);
 			_containerViewHotbar.Draw(spriteBatch);
-			_tooltip.Draw(spriteBatch);
-			var batchData = SpriteBatchManager.Get("context");
+			// This whole mechanism should be cleaned up also....
+			SpriteBatchData batchData = null;
+			if (_tooltip.State.HasFlag(ComponentState.Visible))
+			{
+				batchData = SpriteBatchManager.Get("tooltip");
+				batchData.ScissorWindow = _tooltip.Bounds;	// one reason why it was good to have the components self-aware of the batch andwrap the call...
+				_tooltip.Draw(batchData.SpriteBatch);
+			}
+			batchData = SpriteBatchManager.Get("context");
 			if (_contextMenu != null)
 			{
 				batchData.ScissorWindow = _contextMenu.Bounds;

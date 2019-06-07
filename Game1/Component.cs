@@ -16,6 +16,7 @@ using Game1.Screens.Menu;
 
 namespace Game1
 {
+	// Do we want to make screens components?  
 	public class Component
 	{
 		private int _delayInputCycles;
@@ -24,6 +25,7 @@ namespace Game1
 		private bool _mouseover;
 		private bool _readyDisableOnEscape;
 		private Rectangle _bounds;
+		private bool _hasBorder;
 
 		public ComponentState State { get; set; }
 		public int? Duration { get; set; }
@@ -36,6 +38,7 @@ namespace Game1
 				if (_bounds != value)
 				{
 					_bounds = value;
+					SetupBorder();
 					RepositionObjects();
 				}
 			}
@@ -54,6 +57,7 @@ namespace Game1
 		{
 			_bounds = bounds;
 			_readyDisableOnEscape = readyDisableOnEscape;
+			_hasBorder = hasBorder;
 			_delayInputCycles = 0;
 			_mouseover = false;
 
@@ -61,12 +65,7 @@ namespace Game1
 			if (!String.IsNullOrWhiteSpace(background))
 				_background = new ImageTexture($"{Game1.BackgroundRoot}/{background}", true) { Alignment = ImageAlignment.Centered };
 
-			if (hasBorder)
-			{
-				_border = Util.GenerateBorderTexture(this.Bounds.Width, this.Bounds.Height, this.BorderThickness, this.BorderColor, true);
-				_border.Alignment = ImageAlignment.Centered;
-			}
-
+			SetupBorder();
 			RepositionObjects();
 		}
 
@@ -183,10 +182,24 @@ namespace Game1
 		protected virtual void RepositionObjects()
 		{
 			if (_background != null)
+			{
 				_background.Position = this.Bounds.CenterVector();
+				_background.SourceRect = this.Bounds;
+			}
 
 			if (_border != null)
 				_border.Position = this.Bounds.CenterVector();
+		}
+
+		private void SetupBorder()
+		{
+			if (_hasBorder && (this.Bounds != Rectangle.Empty))
+			{
+				_border?.UnloadContent();
+				_border = Util.GenerateBorderTexture(this.Bounds.Width, this.Bounds.Height, this.BorderThickness, this.BorderColor, true);
+				_border.Alignment = ImageAlignment.Centered;
+				_border.LoadContent();
+			}
 		}
 	}
 }

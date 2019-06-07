@@ -14,45 +14,75 @@ using Game1.Screens.Menu;
 
 namespace Game1.Interface.Windows
 {
-	public class Tooltip : Window
+	public class Tooltip : Component
 	{		
 		private int _timer;
+		private ImageText _text;
 
 		public object Owner { get; private set; }
-		public override string SpriteBatchName => "tooltip";
-		public override int TitleOffset => 5;
+		public int TextPadding => 5;
 
 		// Eventually we'll want prettier tooltips with more than just a line of text...
-		public Tooltip() : base(Rectangle.Empty, "black", "", null, false)
+		public Tooltip() : base(Rectangle.Empty)
 		{
+			this.Bounds = Rectangle.Empty;
 			_timer = -1;
-			_titleImage.Alignment = ImageAlignment.CenteredTop;
-			_titleImage.Scale = new Vector2(0.9f, 0.9f);
+			_text = new ImageText(null, true);
+			_text.Alignment = ImageAlignment.Centered;
+			_text.Scale = new Vector2(0.9f, 0.9f);
 		}
 
-		public override void Update(GameTime gameTime, bool processInput)
+		public override void LoadContent()
 		{
+			base.LoadContent();
+			_text.LoadContent();
+		}
+
+		public override void UnloadContent()
+		{
+			base.UnloadContent();
+			_text.UnloadContent();
+		}
+
+		public override void UpdateActive(GameTime gameTime)
+		{
+			base.UpdateActive(gameTime);
+			_text.Update(gameTime);
+
 			if (_timer == 0)
 			{
 				_timer = -1;
-				this.IsActive = true;
+				this.State |= ComponentState.Visible;
 			}
 			else if (_timer > 0)
 			{
 				_timer--;
 			}
+		}
 
-			base.Update(gameTime, processInput);
+		public override void DrawVisible(SpriteBatch spriteBatch)
+		{
+			base.DrawVisible(spriteBatch);
+			_text.Draw(spriteBatch);
 		}
 
 		public void Show(string text, Point position, int timer, object sender)
 		{			
+			// If this request is coming from a different object, reset the timer...otherwise let it continue where it is...
 			if (sender != this.Owner)
 				_timer = Math.Max(0, timer);
 
 			this.Owner = sender;
-			this.Title = text;
-			this.Bounds = new Rectangle(position.X, position.Y, (int)this.TitleSize.X + this.TitleOffset * 2, (int)this.TitleSize.Y + this.TitleOffset * 2);
+			_text.UpdateText(text);
+			var textSize = _text.Size;
+			this.Bounds = new Rectangle(position.X, position.Y, (int)textSize.X + this.TextPadding * 2, (int)textSize.Y + this.TextPadding * 2);
+		}
+
+		protected override void RepositionObjects()
+		{
+			base.RepositionObjects();
+			if (_text != null)
+				_text.Position = this.Bounds.CenterVector();
 		}
 
 		public void Reset(object sender)
@@ -62,7 +92,7 @@ namespace Game1.Interface.Windows
 
 			_timer = -1;
 			this.Owner = null;
-			this.IsActive = false;
+			this.State &= ~ComponentState.Visible;
 		}
 	}
 }
