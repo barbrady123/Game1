@@ -15,6 +15,8 @@ namespace Game1.Enum
 
 		TakingInput = 0x04,
 
-		DetectingMousePosition = 0x08
+		DetectingMousePosition = 0x08,
+
+		ActiveVisible = Visible | Active
 	}
 }

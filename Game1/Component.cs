@@ -47,7 +47,7 @@ namespace Game1
 		public event EventHandler<MouseEventArgs> OnMouseOut;
 
 		protected virtual Size ContentMargin => new Size(20, 20);
-		protected virtual int BorderWidth => 2;
+		protected virtual int BorderThickness => 2;
 		protected virtual Color BorderColor => Color.White;
 		
 		public Component(Rectangle bounds, bool readyDisableOnEscape = false, string background = "black", bool hasBorder = false)
@@ -63,7 +63,7 @@ namespace Game1
 
 			if (hasBorder)
 			{
-				_border = Util.GenerateBorderTexture(this.Bounds.Width, this.Bounds.Height, this.BorderWidth, this.BorderColor, true);
+				_border = Util.GenerateBorderTexture(this.Bounds.Width, this.Bounds.Height, this.BorderThickness, this.BorderColor, true);
 				_border.Alignment = ImageAlignment.Centered;
 			}
 

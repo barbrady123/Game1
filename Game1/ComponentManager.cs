@@ -28,6 +28,9 @@ namespace Game1
 
 		public void SetState(Component component, ComponentState state, bool clearOthers = false)
 		{
+			if (!_components.Contains(component))
+				return;
+
 			if (clearOthers)
 				_components.ForEach(x => x.State &= ~state);
 				

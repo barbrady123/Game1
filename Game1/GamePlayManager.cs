@@ -53,13 +53,15 @@ namespace Game1
 			_world.Initialize();
 
 			_gameViewBorder = GenerateGameViewBorder();
-			_gameViewBorder.LoadContent();	// Why is this here??? 
 
 			_camera = new GamePlayCamera(_world, _gameViewArea);
 			_physics = new PhysicsManager(_world);
 			_activation = new ActivationManager();
 			_activation.Add(this);
 			_activation.Activate(this);
+
+			// May need to self-register here....
+			_components = new ComponentManager();
 
 			_activation.Add(_characterWindow = new CharacterWindow(_bounds.CenteredRegion(870, 575), _world.Character));
 			_characterWindow.OnReadyDisable += _characterWindow_OnReadyDisable;
@@ -71,12 +73,28 @@ namespace Game1
 			_hotbarView.OnMouseClick += _hotbarView_OnMouseClick;
 
 			_tooltip = new Dialog(null, DialogButton.None, Rectangle.Empty, null);
-			_barHealth = new StatBar(GamePlayManager.StatBarSize, _bounds.TopRightVector(-GamePlayManager.StatBarSize-GamePlayManager.ContentMargin, GamePlayManager.ContentMargin), Color.Red, _world.Character, "CurrentHP", "MaxHP");
-			_barMana = new StatBar(GamePlayManager.StatBarSize, _bounds.TopRightVector(-GamePlayManager.StatBarSize-GamePlayManager.ContentMargin, GamePlayManager.ContentMargin * 3), Color.Blue, _world.Character, "CurrentMana", "MaxMana");
+			_components.Register(_barHealth = new StatBar(
+				GamePlayManager.StatBarSize, 
+				_bounds.TopRightVector((-GamePlayManager.StatBarSize / 2) - GamePlayManager.ContentMargin, GamePlayManager.ContentMargin + StatBar.Height / 2),
+				Color.Red,
+				_world.Character,
+				"CurrentHP",
+				"MaxHP"
+			));
+			_components.SetState(_barHealth, ComponentState.ActiveVisible);
+			_components.Register(_barMana = new StatBar(
+				GamePlayManager.StatBarSize,
+				_bounds.TopRightVector((-GamePlayManager.StatBarSize / 2) - GamePlayManager.ContentMargin, GamePlayManager.ContentMargin * 3 + StatBar.Height / 2),
+				Color.Blue,
+				_world.Character,
+				"CurrentMana",
+				"MaxMana"
+			));
+			_components.SetState(_barMana, ComponentState.ActiveVisible);
 
+			// Eventually make ImageText(ure) consistent with the components so we can register them also (or create containers for basic images/text)...
 			_defense = new ImageText("", true) { Position = _bounds.TopRightVector(-100-GamePlayManager.ContentMargin, GamePlayManager.ContentMargin * 6) };
 
-			_components = new ComponentManager();
 		}
 
 		public void LoadContent()
@@ -86,6 +104,7 @@ namespace Game1
 			_camera.TerrainTileSheetName = _world.CurrentMap.TileSheet;
 			_camera.TerrainLayerData  = _world.CurrentMap.Layers;
 			_camera.LoadContent();
+			_gameViewBorder.LoadContent();
 			_physics.CalculateParameters();
 			_characterWindow.LoadContent();
 			_inventoryWindow.LoadContent();
