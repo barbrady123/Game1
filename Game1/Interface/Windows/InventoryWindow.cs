@@ -65,14 +65,14 @@ namespace Game1.Interface.Windows
 			DisableSplitWindow();
 		}
 
-		public override void UpdateReady(GameTime gameTime, bool processInput)
+		public override void UpdateReady(GameTime gameTime)
 		{
-			base.UpdateReady(gameTime, processInput);
-			_splitWindow?.Update(gameTime, processInput);
-			_contextMenu?.Update(gameTime, processInput);	// Check first since it's "on top" and might need to kill a click-through if it's over another clickable item...
-			_containerViewBackpack.Update(gameTime);
-			_containerViewHotbar.Update(gameTime);
-			_tooltip.Update(gameTime, processInput);
+			_splitWindow?.Update(gameTime, true);
+			_contextMenu?.Update(gameTime, _splitWindow == null);
+			base.UpdateReady(gameTime);
+			_containerViewBackpack.Update(gameTime, (_contextMenu == null) && (_splitWindow == null));
+			_containerViewHotbar.Update(gameTime, (_contextMenu == null) && (_splitWindow == null));
+			_tooltip.Update(gameTime, true);			
 		}
 
 		public override void DrawInternal(SpriteBatch spriteBatch)
@@ -89,7 +89,6 @@ namespace Game1.Interface.Windows
 			}
 			if (_splitWindow != null)
 			{
-				// Why the fuck is this changing the scissorwindow for the modal batch????
 				batchData.ScissorWindow = _splitWindow.Bounds;
 				_splitWindow.Draw(batchData.SpriteBatch);
 			}
@@ -147,9 +146,30 @@ namespace Game1.Interface.Windows
 					var startPosition = InputManager.MousePosition.Offset(-10, -10);
 					_splitWindow = new SplitWindow(new Rectangle(startPosition.X, startPosition.Y, 200, 200), container[(int)args.SourceIndex]) { IsActive = true };
 					_splitWindow.LoadContent();
+					_splitWindow.OnButtonClick += _splitWindow_OnButtonClick;
+					_splitWindow.OnReadyDisable += _splitWindow_OnReadyDisable;
 					break;
 			}
 			DisableContextMenu();
+		}
+
+		private void _splitWindow_OnReadyDisable(object sender, EventArgs e)
+		{
+			DisableSplitWindow();
+		}
+
+		private void _splitWindow_OnButtonClick(object sender, EventArgs e)
+		{
+			var args = (ScreenEventArgs)e;
+			switch (args.Item)
+			{
+				case "ok" : 
+					break;					
+				case "cancel" :
+					break;
+			}
+
+			DisableSplitWindow();
 		}
 
 		private void _contextMenu_OnMouseOut(object sender, EventArgs e)

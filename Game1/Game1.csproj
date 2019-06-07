@@ -43,6 +43,9 @@
   <ItemGroup>
     <Compile Include="ActivationManager.cs" />
     <Compile Include="Character.cs" />
+    <Compile Include="Component.cs" />
+    <Compile Include="ComponentEventArgs.cs" />
+    <Compile Include="ComponentManager.cs" />
     <Compile Include="Effect\EffectEventArgs.cs" />
     <Compile Include="Effect\FadeCycleEffect.cs" />
     <Compile Include="Effect\FadeInEffect.cs" />
@@ -52,6 +55,7 @@
     <Compile Include="Enum\ArmorSlotEnum.cs" />
     <Compile Include="Enum\CharacterAttributeEnum.cs" />
     <Compile Include="Enum\CharacterSexEnum.cs" />
+    <Compile Include="Enum\ComponentStateEnum.cs" />
     <Compile Include="Enum\DialogButtonEnum.cs" />
     <Compile Include="Enum\CardinalEnum.cs" />
     <Compile Include="Enum\IntersectionTypeEnum.cs" />
@@ -83,6 +87,7 @@
     <Compile Include="Interface\InventoryItemView.cs" />
     <Compile Include="Interface\StatBar.cs" />
     <Compile Include="Interface\TextInput.cs" />
+    <Compile Include="Interface\TextInputEventArgs.cs" />
     <Compile Include="Interface\Windows\CharacterWindow.cs" />
     <Compile Include="Interface\Windows\Dialog.cs" />
     <Compile Include="Interface\Windows\InventoryWindow.cs" />

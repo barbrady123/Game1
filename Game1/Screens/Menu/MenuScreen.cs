@@ -31,7 +31,7 @@ namespace Game1.Screens.Menu
 		private static readonly Color SelectedItemColor = new Color(240, 240, 240);
 		private static readonly Color UnselectedItemColor = new Color(100, 100, 100);
 
-		protected string EventSource { get; set; } = typeof(MenuScreen).Name;
+		protected string EventSource { get; set; }
 		protected int? EventSourceIndex { get; set; } = null;
 		protected int _currentIndex;
 		protected List<MenuItem> _items;
@@ -101,6 +101,7 @@ namespace Game1.Screens.Menu
 						  string background = "brick",
 						  bool escapeToDisable = false): base(bounds, background)
 		{
+			this.EventSource = this.GetType().Name;
 			_currentIndex = -1;
 			_items = new List<MenuItem>();
 			_layout = layout;

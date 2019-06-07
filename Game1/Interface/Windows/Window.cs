@@ -103,6 +103,9 @@ namespace Game1.Interface.Windows
 			_titleImage.UnloadContent();
 		}
 
+		/// <summary>
+		/// Main update method...
+		/// </summary>
 		public override void Update(GameTime gameTime, bool processInput)
 		{
 			if (!this.IsActive)
@@ -124,6 +127,9 @@ namespace Game1.Interface.Windows
 			UpdateActive(gameTime, processInput);
 		}
 
+		/// <summary>
+		/// Called if IsActive and Duration timer passed...
+		/// </summary>
 		public virtual void UpdateActive(GameTime gameTime, bool processInput)
 		{
 			base.Update(gameTime, processInput);
@@ -134,10 +140,16 @@ namespace Game1.Interface.Windows
 				return;
 			}
 
-			UpdateReady(gameTime, processInput);
+			if (!processInput)
+				return;
+
+			UpdateReady(gameTime);
 		}
 
-		public virtual void UpdateReady(GameTime gameTime, bool processInput)
+		/// <summary>
+		/// Called after input delay expired, if processInput is true...
+		/// </summary>
+		public virtual void UpdateReady(GameTime gameTime)
 		{
 			if (_readyDisableOnEscape)
 			{

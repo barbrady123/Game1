@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
 using Game1.Enum;
+using TextInputEventArgs = Game1.Interface.TextInputEventArgs;
 
 namespace Game1.Interface
 {
@@ -51,7 +52,14 @@ namespace Game1.Interface
 		public string Text
 		{
 			get { return _text; }
-			set { _text = value ?? ""; }
+			set {
+				value = value ?? "";
+				if (_text != value)
+				{
+					_text = value;
+					CalculateVisibleText(TextInputAction.Add);
+				}
+			}
 		}
 		
 		public bool IsActive
@@ -76,6 +84,7 @@ namespace Game1.Interface
 		}
 
 		public event EventHandler OnReadyDisable;
+		public event EventHandler OnBeforeTextUpdate;
 
 		public TextInput(int width, string text = null, int maxLength = 100, bool isActive = false)
 		{
@@ -88,7 +97,7 @@ namespace Game1.Interface
 			_firstVisibleCharIndex = 0;
 			_visibleText = "";
 			_delayInputCycles = 0;
-			this.Text = text;
+			_text = text ?? "";
 			this.MaxLength = maxLength;
 			this.Position = Vector2.Zero;
 			this.IsActive = isActive;
@@ -157,10 +166,12 @@ namespace Game1.Interface
 			if (!this.IsActive)
 				return;
 
+			string currentText = this.Text;
 			var newText = new StringBuilder(this.Text);
 			int cursorMove = 0;
 			bool updateText = true;
 			bool finalizeText = false;
+			bool textAdded = false;
 			TextInputAction action = TextInputAction.None;
 
 			foreach (var key in InputManager.GetPressedKeys())
@@ -172,6 +183,7 @@ namespace Game1.Interface
 						finalizeText = true;
 						continue;
 					case (Keys.Escape) :
+						InputManager.BlockKey(Keys.Escape);
 						OnReadyDisable?.Invoke(this, new TextInputEventArgs('\0', key));
 						updateText = false;
 						finalizeText = true;
@@ -224,20 +236,32 @@ namespace Game1.Interface
 					newText.Insert(this.CurrentPositionIndex, newChar);
 					cursorMove++;
 					action = TextInputAction.Add;
+					textAdded = true;
 				}
 			}
 
-			if (updateText)
-				this.Text = newText.ToString();
+			string updatedText = newText.ToString();
+
 			if (finalizeText)
 			{
-				this.Text = this.Text.Trim();
+				updatedText = updatedText.Trim();
 				cursorMove = 0;
 				action = TextInputAction.Left;
 			}
 
+			if (updateText && (updatedText != _text))
+			{
+				var eventArgs = new TextInputEventArgs('\0', Keys.None, _text, updatedText);
+				if (textAdded)
+					OnBeforeTextUpdate?.Invoke(this, eventArgs);
+				if (!eventArgs.Cancel)
+					_text = updatedText;
+			}
+
 			this.CurrentPositionIndex += cursorMove;
-			CalculateVisibleText(action);
+
+			if ((_text != currentText) || (cursorMove != 0))
+				CalculateVisibleText(action);
 		}
 
 		private void CalculateVisibleText(TextInputAction action)

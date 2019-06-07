@@ -91,9 +91,14 @@ namespace Game1
 
 			bool result = KeyPressed(new[] { key });
 			if (result && clearAfterMatch)
-				excludedKeys.Add(key);
+				BlockKey(key);
 
 			return result;
+		}
+
+		public static void BlockKey(Keys key)
+		{
+			excludedKeys.Add(key);
 		}
 
 		public static bool KeyPressed(Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyDown(k) && _prevKeyState.IsKeyUp(k));

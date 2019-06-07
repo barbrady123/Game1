@@ -70,9 +70,9 @@ namespace Game1
 		public void StartScreen()
 		{
 			//TransitionScreens(new SplashScreen(_bounds));
+			//TransitionScreens(new MainMenu(_bounds));
 			//TransitionScreens(new CharacterCreateScreen(_bounds));
 			TransitionScreens(new GameScreen(_bounds));
-			//TransitionScreens(new MainMenu(_bounds));
 		}
 
 		private void TransitionScreens(Screens.Screen newScreen)

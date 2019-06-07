@@ -11,6 +11,7 @@ using Game1.Enum;
 using Game1.Items;
 using Game1.Screens;
 using Game1.Screens.Menu;
+using TextInputEventArgs = Game1.Interface.TextInputEventArgs;
 
 namespace Game1.Interface.Windows
 {
@@ -21,6 +22,8 @@ namespace Game1.Interface.Windows
 		private TextInput _input;
 		private Button _halfButton;
 
+		public override string SpriteBatchName => "context";
+
 		public SplitWindow(Rectangle bounds, InventoryItem item) : base(bounds, "black", null, null, true)
 		{
 			_item = item;
@@ -28,13 +31,17 @@ namespace Game1.Interface.Windows
 			this.IsActive = false;
 			var bottomCenter = bounds.BottomCenterVector();
 			// This arbitrary sizing sucks...TODO: Read the comment on the MenuScreen class...menus should be able to auto-size themselves given a Top-Left position...
-			_menu = new OkCancelMenu(new Rectangle((int)bottomCenter.X, (int)bottomCenter.Y - 50, bounds.Width, 30)) { IsActive = true };
+			_menu = new OkCancelMenu(new Rectangle((int)bottomCenter.X - 90, (int)bottomCenter.Y - 50, bounds.Width, 30)) { IsActive = true };
 			_menu.OnItemSelect += _menu_OnItemSelect;
 			
-			_input = new TextInput(50, "1", 2, true) { Position = new Vector2((bounds.Width - 50) / 2, bounds.Y + 10) };
+			_input = new TextInput(50, "", 2, true) { 
+				Position = new Vector2(bounds.X + (bounds.Width - 50) / 2, bounds.Y + 20), 
+				AllowedCharacters = "0123456789"
+			};
 			_input.OnReadyDisable += _input_OnReadyDisable;
+			_input.OnBeforeTextUpdate += _input_OnBeforeTextUpdate;
 
-			_halfButton = new Button(bounds.CenteredRegion(80, 40), "Half");
+			_halfButton = new Button(bounds.CenteredRegion(80, 40), "Half") { IsActive = true };
 			_halfButton.OnClick += _halfButton_OnClick;
 		}
 
@@ -54,9 +61,9 @@ namespace Game1.Interface.Windows
 		}
 
 
-		public override void UpdateReady(GameTime gameTime, bool processInput)
+		public override void UpdateReady(GameTime gameTime)
 		{
-			base.UpdateReady(gameTime, processInput);
+			base.UpdateReady(gameTime);
 			_menu.Update(gameTime, this.IsActive);
 			_input.Update(gameTime, this.IsActive);
 			_halfButton.Update(gameTime);
@@ -77,12 +84,26 @@ namespace Game1.Interface.Windows
 
 		private void _menu_OnItemSelect(object sender, EventArgs e)
 		{
-
+			ButtonClick((MenuEventArgs)e);
 		}
 
 		private void _input_OnReadyDisable(object sender, EventArgs e)
 		{
+			var args = (TextInputEventArgs)e;
 
+			if (args.Key == Keys.Enter)
+			{
+				int value = Int32.Parse(_input.Text ?? "0");
+				_input.Text = Util.Clamp(value, 1, _item.Quantity).ToString();
+			}
+		}
+
+		private void _input_OnBeforeTextUpdate(object sender, EventArgs e)
+		{
+			var args = (TextInputEventArgs)e;
+			int newValue = Int32.Parse(args.ResultText);
+			if (newValue > _item.Quantity)
+				args.Cancel = true;
 		}
 	}
 }

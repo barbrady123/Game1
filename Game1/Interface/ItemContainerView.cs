@@ -61,9 +61,9 @@ namespace Game1.Interface
 				item.UnloadContent();
 		}
 
-		public void Update(GameTime gameTime)
+		public void Update(GameTime gameTime, bool processInput)
 		{
-			UpdateItems(gameTime);
+			UpdateItems(gameTime, processInput);
 		}
 
 		public void Draw(SpriteBatch spriteBatch)
@@ -89,13 +89,13 @@ namespace Game1.Interface
 			return new Vector2(xPos, yPos);
 		}
 
-		private void UpdateItems(GameTime gameTime)
+		private void UpdateItems(GameTime gameTime, bool processInput)
 		{
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
 				_itemViews[i].Item = this.Container[i];
-				_itemViews[i].Highlight = this.HightlightActiveItem && (this.Container.ActiveItemIndex == i);
-				_itemViews[i].Update(gameTime);
+				_itemViews[i].Highlight = processInput && this.HightlightActiveItem && (this.Container.ActiveItemIndex == i);
+				_itemViews[i].Update(gameTime, processInput);
 			}
 		}
 

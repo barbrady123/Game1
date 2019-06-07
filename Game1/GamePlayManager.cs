@@ -111,7 +111,7 @@ namespace Game1
 		{
 			_characterWindow.Update(gameTime, true);
 			_inventoryWindow.Update(gameTime, true);
-			_hotbarView.Update(gameTime);
+			_hotbarView.Update(gameTime, true);
 			_tooltip.Update(gameTime, false);
 			_barHealth.Update(gameTime);
 			_barMana.Update(gameTime);

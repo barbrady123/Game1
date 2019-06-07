@@ -47,9 +47,9 @@ namespace Game1.Interface.Windows
 		}
 
 
-		public override void UpdateReady(GameTime gameTime, bool processInput)
+		public override void UpdateReady(GameTime gameTime)
 		{
-			base.UpdateReady(gameTime, processInput);
+			base.UpdateReady(gameTime);
 			_buttonMenu?.Update(gameTime, this.IsActive);
 		}
 

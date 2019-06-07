@@ -90,15 +90,18 @@ namespace Game1.Interface
 			_empty?.UnloadContent();
 		}
 
-		public void Update(GameTime gameTime)
+		public void Update(GameTime gameTime, bool processInput)
 		{
 			bool previousMouseOver = _mouseover;
-			_highlight.IsActive = this.Highlight;
-			_mouseover = InputManager.MouseOver(_bounds);
+			_highlight.IsActive = processInput && this.Highlight;
+			_mouseover = processInput && InputManager.MouseOver(_bounds);
 			if (_empty != null)
 				_empty.IsActive = (this.Item?.Item == null);
 			if (this.Item?.Item != null)
 				_quantity.UpdateText((this.Item.Item.MaxStackSize > 1) ? this.Item.Quantity.ToString() : "");
+
+			if (!processInput)
+				return;
 
 			if (InputManager.LeftMouseClick(_bounds))
 				OnMouseClick?.Invoke(this, new MouseEventArgs(MouseButton.Left, _containerIndex));

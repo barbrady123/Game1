@@ -70,17 +70,17 @@ namespace Game1.Interface.Windows
 				stat.UnloadContent();
 		}
 
-		public override void UpdateReady(GameTime gameTime, bool processInput)
+		public override void UpdateReady(GameTime gameTime)
 		{
-			base.UpdateReady(gameTime, processInput);
-			_tooltip.Update(gameTime, processInput);
+			base.UpdateReady(gameTime);
+			_tooltip.Update(gameTime, true);
 			UpdateArmorViews();
 			foreach (var armorView in _armorItemView)
-				armorView.Update(gameTime);
+				armorView.Update(gameTime, _contextMenu == null);
 			UpdateCharacterStats();
 			foreach (var stat in _characterStat)
 				stat.Update(gameTime);
-			_contextMenu?.Update(gameTime, processInput);
+			_contextMenu?.Update(gameTime, true);
 		}
 
 		public override void DrawInternal(SpriteBatch spriteBatch)
