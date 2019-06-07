@@ -39,6 +39,8 @@ namespace Game1
 		private readonly StatBar  _barMana;
 		private readonly ImageText _defense;
 
+		private readonly ComponentManager _components;
+
 		private ImageTexture _gameViewBorder;
 
 		public bool IsActive { get; set; }
@@ -51,7 +53,7 @@ namespace Game1
 			_world.Initialize();
 
 			_gameViewBorder = GenerateGameViewBorder();
-			_gameViewBorder.LoadContent();
+			_gameViewBorder.LoadContent();	// Why is this here??? 
 
 			_camera = new GamePlayCamera(_world, _gameViewArea);
 			_physics = new PhysicsManager(_world);
@@ -73,6 +75,8 @@ namespace Game1
 			_barMana = new StatBar(GamePlayManager.StatBarSize, _bounds.TopRightVector(-GamePlayManager.StatBarSize-GamePlayManager.ContentMargin, GamePlayManager.ContentMargin * 3), Color.Blue, _world.Character, "CurrentMana", "MaxMana");
 
 			_defense = new ImageText("", true) { Position = _bounds.TopRightVector(-100-GamePlayManager.ContentMargin, GamePlayManager.ContentMargin * 6) };
+
+			_components = new ComponentManager();
 		}
 
 		public void LoadContent()

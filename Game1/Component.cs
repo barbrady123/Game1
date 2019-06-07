@@ -8,42 +8,82 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
+using Game1.Interface;
+using Game1.Interface.Windows;
 using Game1.Items;
+using Game1.Screens;
+using Game1.Screens.Menu;
 
 namespace Game1
 {
 	public class Component
 	{
 		private int _delayInputCycles;
+		private ImageTexture _background;
+		private ImageTexture _border;
+		private bool _mouseover;
+		private bool _readyDisableOnEscape;
+		private Rectangle _bounds;
 
 		public ComponentState State { get; set; }
 		public int? Duration { get; set; }
 
-		public event EventHandler<ComponentEventArgs> OnReadyDisable;
-		public event EventHandler OnMouseOver;
-		public event EventHandler OnMouseIn;
-		public event EventHandler OnMouseOut;
+		public Rectangle Bounds
+		{ 
+			get { return _bounds; }
+			set
+			{
+				if (_bounds != value)
+				{
+					_bounds = value;
+					RepositionObjects();
+				}
+			}
+		}
 
-		public Component()
+		public event EventHandler<ComponentEventArgs> OnReadyDisable;
+		public event EventHandler<MouseEventArgs> OnMouseOver;
+		public event EventHandler<MouseEventArgs> OnMouseIn;
+		public event EventHandler<MouseEventArgs> OnMouseOut;
+
+		protected virtual Size ContentMargin => new Size(20, 20);
+		protected virtual int BorderWidth => 2;
+		protected virtual Color BorderColor => Color.White;
+		
+		public Component(Rectangle bounds, bool readyDisableOnEscape = false, string background = "black", bool hasBorder = false)
 		{
+			_bounds = bounds;
+			_readyDisableOnEscape = readyDisableOnEscape;
 			_delayInputCycles = 0;
+			_mouseover = false;
+
+			// TODO: This should add support for the Util.GenerateSolidBackgroundTexture method for solid colors...
+			if (!String.IsNullOrWhiteSpace(background))
+				_background = new ImageTexture($"{Game1.BackgroundRoot}/{background}", true) { Alignment = ImageAlignment.Centered };
+
+			if (hasBorder)
+			{
+				_border = Util.GenerateBorderTexture(this.Bounds.Width, this.Bounds.Height, this.BorderWidth, this.BorderColor, true);
+				_border.Alignment = ImageAlignment.Centered;
+			}
+
+			RepositionObjects();
 		}
 
 		public virtual void LoadContent()
 		{
+			_background?.LoadContent();
+			_border?.LoadContent();
 		}
 
 		public virtual void UnloadContent()
 		{
+			_background?.UnloadContent();
+			_border?.UnloadContent();
 		}
 
 		public virtual void Update(GameTime gameTime)
 		{
-			// State:
-			//    Visible
-			//    Active: Effects running, Menu item alpha @ 1.0 vs less, Highlights?? (could just be a part of mouse position detection)
-			//    TakingInput
-			//    DetectingMousePosition (in/out/over) - or this can always happen and the flag just indicates whether to fire the events or not
 			if (this.State.HasFlag(ComponentState.Active))
 				UpdateDuration(gameTime);
 		}
@@ -69,7 +109,8 @@ namespace Game1
 
 		public virtual void UpdateActive(GameTime gameTime)
 		{
-			// Active code here that isn't related to input....
+			_background?.Update(gameTime);
+			_border?.Update(gameTime);
 			UpdateDelayInput(gameTime);
 		}
 
@@ -89,22 +130,41 @@ namespace Game1
 
 		public virtual void UpdateMousePosition(GameTime gameTime)
 		{
+			var mouseover = InputManager.MouseOver(this.Bounds);
+			if (mouseover)
+			{
+				if (!_mouseover)
+					MouseIn(new MouseEventArgs());
+				MouseOver(new MouseEventArgs());
+			}
+			else if (_mouseover)
+			{
+				MouseOut(new MouseEventArgs());
+			}
+
+			_mouseover = mouseover;
 		}
 
 		public virtual void UpdateInput(GameTime gameTime)
 		{
+			if (!_readyDisableOnEscape)
+				return;
 
+			if (InputManager.KeyPressed(Keys.Escape, true))
+				ReadyDisable(new ComponentEventArgs("escape", this.GetType().Name, null));
 		}
 
 		public virtual void Draw(SpriteBatch spriteBatch)
 		{
-			// Do we still need to wrap this call to DrawInternal?  Be better to make this "dumb" to the concept and use the manager to get the spritebatches for these calls....
+			// Do we still need to wrap this call to DrawInternal?  Or, better to make this "dumb" to the concept and use the manager to get the spritebatches for these calls..?
 			if (this.State.HasFlag(ComponentState.Visible))
 				DrawVisible(spriteBatch);
 		}
 
 		public virtual void DrawVisible(SpriteBatch spriteBatch)
 		{
+			_background?.Draw(spriteBatch);
+			_border?.Draw(spriteBatch);
 		}
 
 		public void DelayInput(int delayCycles)
@@ -114,10 +174,19 @@ namespace Game1
 
 		protected virtual void ReadyDisable(ComponentEventArgs e) => OnReadyDisable?.Invoke(this, e);
 
-		protected virtual void MouseOver(EventArgs e)  => OnMouseOver?.Invoke(this, e);
+		protected virtual void MouseOver(MouseEventArgs e)  => OnMouseOver?.Invoke(this, e);
 
-		protected virtual void MouseIn(EventArgs e) => OnMouseIn?.Invoke(this, e);
+		protected virtual void MouseIn(MouseEventArgs e) => OnMouseIn?.Invoke(this, e);
 
-		protected virtual void MouseOut(EventArgs e) => OnMouseOut?.Invoke(this, e);
+		protected virtual void MouseOut(MouseEventArgs e) => OnMouseOut?.Invoke(this, e);
+
+		protected virtual void RepositionObjects()
+		{
+			if (_background != null)
+				_background.Position = this.Bounds.CenterVector();
+
+			if (_border != null)
+				_border.Position = this.Bounds.CenterVector();
+		}
 	}
 }
