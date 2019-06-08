@@ -16,18 +16,30 @@ using Game1.Screens.Menu;
 
 namespace Game1
 {
-	// Do we want to make screens components?  
-	public class Component
+	public abstract class Component
 	{
 		private int _delayInputCycles;
-		private ImageTexture _background;
-		private ImageTexture _border;
-		private bool _mouseover;
+		protected ImageTexture _background;
+		protected ImageTexture _border;
 		private bool _readyDisableOnEscape;
 		private Rectangle _bounds;
 		private bool _hasBorder;
+		private ComponentState _state;
 
-		public ComponentState State { get; set; }
+		public ComponentState State
+		{
+			get { return _state; }
+			set {
+				if (_state != value)
+				{
+					_state = value;
+					StateChange();
+				}
+			}
+		}
+
+		protected virtual void StateChange() { }
+
 		public int? Duration { get; set; }
 
 		public Rectangle Bounds
@@ -48,7 +60,9 @@ namespace Game1
 		public event EventHandler<MouseEventArgs> OnMouseOver;
 		public event EventHandler<MouseEventArgs> OnMouseIn;
 		public event EventHandler<MouseEventArgs> OnMouseOut;
+		public event EventHandler<MenuEventArgs> OnMenuItemSelect;
 
+		protected bool _mouseover;
 		protected virtual Size ContentMargin => new Size(20, 20);
 		protected virtual int BorderThickness => 2;
 		protected virtual Color BorderColor => Color.White;
@@ -94,7 +108,6 @@ namespace Game1
 				if (this.Duration <= 0)
 				{
 					ReadyDisable(new ComponentEventArgs("timer", this.GetType().Name, null));
-					// Should we auto-disable here?
 					this.Duration = null;
 				}
 				else
@@ -171,13 +184,21 @@ namespace Game1
 			_delayInputCycles = Math.Max(0, delayCycles);
 		}
 
-		protected virtual void ReadyDisable(ComponentEventArgs e) => OnReadyDisable?.Invoke(this, e);
+		protected virtual void ReadyDisable(EventArgs e)
+		{
+			if (e is ComponentEventArgs args)
+				OnReadyDisable?.Invoke(this, args);
+			else
+				OnReadyDisable?.Invoke(this, new ComponentEventArgs(e.GetType().Name, this.GetType().Name, null, e));
+		}
 
 		protected virtual void MouseOver(MouseEventArgs e)  => OnMouseOver?.Invoke(this, e);
 
 		protected virtual void MouseIn(MouseEventArgs e) => OnMouseIn?.Invoke(this, e);
 
 		protected virtual void MouseOut(MouseEventArgs e) => OnMouseOut?.Invoke(this, e);
+
+		protected virtual void MenuItemSelect(MenuEventArgs e) => OnMenuItemSelect?.Invoke(this, e);
 
 		protected virtual void RepositionObjects()
 		{

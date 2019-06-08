@@ -11,53 +11,49 @@ using Game1.Effect;
 
 namespace Game1.Screens
 {
-	public class SplashScreen : Screen
+	public class SplashScreen : Component
 	{
-		private Image _titleText;
+		private ImageText _title;
 
-		public SplashScreen(Rectangle bounds): base(bounds, "maze")
+		public SplashScreen(Rectangle bounds): base(bounds, true, "maze")
 		{
-			_titleText = new ImageText("Labyrinth", true);
-			_titleText.Position = this.Bounds.CenterVector();
-			_titleText.AddEffect(new ZoomCycleEffect(true));
+			_title = new ImageText("Labyrinth", true) { Position = this.Bounds.CenterVector() };
+			_title.AddEffect(new ZoomCycleEffect(true));
 		}
 
 		public override void LoadContent()
 		{
 			base.LoadContent();
-			_titleText.LoadContent();
+			_title.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-			_titleText.UnloadContent();
+			_title.UnloadContent();
 		}
 
-		public override void Update(GameTime gameTime, bool processInput)
+		public override void UpdateActive(GameTime gameTime)
 		{
-			if (processInput)
-			{
-				if (InputManager.KeyPressed(Keys.Enter))
-				{
-					_titleText.IsActive = false;
-					ReadyScreenUnload(this, new ScreenEventArgs("continue", this.GetType().Name, null));
-				}
-				else if (InputManager.KeyPressed(Keys.Escape))
-				{
-					_titleText.IsActive = false;
-					ReadyScreenUnload(this, new ScreenEventArgs("exit", this.GetType().Name, null));
-				}
-			}
-
-			base.Update(gameTime, processInput);
-			_titleText.Update(gameTime);
+			base.UpdateActive(gameTime);
+			_title.Update(gameTime);
 		}
 
-		public override void Draw(SpriteBatch spriteBatch)
+		public override void UpdateInput(GameTime gameTime)
+		{
+			base.UpdateInput(gameTime);
+
+			if (InputManager.KeyPressed(Keys.Enter))
+			{
+				_title.IsActive = false;
+				ReadyDisable(new ComponentEventArgs("continue", this.GetType().Name, null));
+			}
+		}
+
+		public override void DrawVisible(SpriteBatch spriteBatch)
 		{	
-			base.Draw(spriteBatch);
-			_titleText.Draw(spriteBatch);
+			base.DrawVisible(spriteBatch);
+			_title.Draw(spriteBatch);
 		}
 	}
 }

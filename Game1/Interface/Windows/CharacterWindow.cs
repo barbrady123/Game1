@@ -84,7 +84,8 @@ namespace Game1.Interface.Windows
 			UpdateCharacterStats();
 			foreach (var stat in _characterStat)
 				stat.Update(gameTime);
-			_contextMenu?.Update(gameTime, true);
+			// Need to fix this...probably bad now 
+			_contextMenu?.Update(gameTime);
 		}
 
 		public override void DrawInternal(SpriteBatch spriteBatch)
@@ -114,7 +115,8 @@ namespace Game1.Interface.Windows
 			var args = (MouseEventArgs)e;
 			if ((args.Button == MouseButton.Right) && (_armorItemView[args.SourceIndex]?.Item != null))
 			{
-				_contextMenu = new InventoryContextMenu(sender, "armorview", args.SourceIndex,  InputManager.MousePosition.Offset(-10, -10), _armorItemView[args.SourceIndex].Item, true) { IsActive = true };
+				// This should use the manager not set the state here...
+				_contextMenu = new InventoryContextMenu(sender, "armorview", args.SourceIndex,  InputManager.MousePosition.Offset(-10, -10), _armorItemView[args.SourceIndex].Item, true) { State = ComponentState.All };
 				_contextMenu.LoadContent();
 				_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;

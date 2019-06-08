@@ -15,19 +15,21 @@ using Game1.Items;
 
 namespace Game1.Screens
 {
-	public class GameScreen : Screen
+	public class GameScreen : Component
 	{
+		private ComponentManager _components;
 		private GamePlayManager _gameplay;
 		private readonly Dialog _dialog;
-		private readonly ActivationManager _activation;
 
-		public GameScreen(Rectangle bounds): base(bounds, "rock")
+		public GameScreen(Rectangle bounds): base(bounds, background: "rock")
 		{
-			_activation = new ActivationManager();
-			_activation.Add(_gameplay = new GamePlayManager(bounds) { IsActive = true });
+			_components = new ComponentManager();
+
+			// Need to roll GamePlayManager over to Component...
+			_gameplay = new GamePlayManager(bounds) { IsActive = true };
 			// Dialog
-			_activation.Add(_dialog = new Dialog("Paused", DialogButton.Ok, bounds.CenteredRegion(400, 200), null));
-			_dialog.OnButtonClick += _dialogBox_OnButtonClick;
+			_dialog = new Dialog("Paused", DialogButton.Ok, bounds.CenteredRegion(400, 200), null);
+			_dialog.OnMenuItemSelect += _dialogBox_OnButtonClick;
 			_dialog.OnReadyDisable += _dialogBox_OnButtonClick;
 		}
 
@@ -45,14 +47,16 @@ namespace Game1.Screens
 			_dialog.UnloadContent();
 		}
 
-		public override void Update(GameTime gameTime, bool processInput)
+		public override void Update(GameTime gameTime)
 		{
-			base.Update(gameTime, processInput);
-			_gameplay.Update(gameTime);
-			_dialog.Update(gameTime, processInput);
+			base.Update(gameTime);
+			_dialog.Update(gameTime);
+		}
 
-			if (InputManager.KeyPressed(Keys.Escape))
-				_activation.Activate(_dialog);
+		public override void UpdateActive(GameTime gameTime)
+		{
+			base.UpdateActive(gameTime);
+			_gameplay.Update(gameTime);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch)
@@ -64,7 +68,13 @@ namespace Game1.Screens
 
 		private void _dialogBox_OnButtonClick(object sender, EventArgs e)
 		{
-			_activation.Activate(_gameplay);
+			_gameplay.IsActive = true;
+		}
+
+		protected override void ReadyDisable(EventArgs e)
+		{			
+			// use the manager...
+			_dialog.State = ComponentState.All;
 		}
 	}
 }

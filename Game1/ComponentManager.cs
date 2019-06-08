@@ -36,5 +36,10 @@ namespace Game1
 				
 			component.State |= state;
 		}
+
+		public void SetStateAll(ComponentState state, bool exclusive = false)
+		{
+			_components.ForEach(x => x.State = (exclusive ? state : x.State | state));
+		}
 	}
 }

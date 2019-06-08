@@ -43,6 +43,7 @@ namespace Game1.Interface.Windows
 					{
 						this.Duration = null;
 						if (_resetMouseOnInactive)
+							// This was never safe....this can just kill whatever we had in hand...
 							InputManager.ResetMouseCursor();
 					}
 				}

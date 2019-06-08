@@ -71,8 +71,9 @@ namespace Game1.Interface.Windows
 
 		public override void UpdateReady(GameTime gameTime)
 		{
-			_splitWindow?.Update(gameTime, true);
-			_contextMenu?.Update(gameTime, _splitWindow == null);
+			// We removed a bunch of conditional input checks here...need to add these elsewhere (with the ComponentManager)....
+			_splitWindow?.Update(gameTime);
+			_contextMenu?.Update(gameTime);
 			base.UpdateReady(gameTime);
 			_containerViewBackpack.Update(gameTime, (_contextMenu == null) && (_splitWindow == null));
 			_containerViewHotbar.Update(gameTime, (_contextMenu == null) && (_splitWindow == null));
@@ -134,8 +135,8 @@ namespace Game1.Interface.Windows
 			}
 			else if ((args.Button == MouseButton.Right) && (clickedItem != null))
 			{
-				// We need to know which container....
-				_contextMenu = new InventoryContextMenu(sender, (clickedContainer == _containerBackpack) ? "backpack" : "hotbar", args.SourceIndex,  InputManager.MousePosition.Offset(-10, -10), clickedItem, false) { IsActive = true };
+				// Is it safe for all these subcomponents to get State.All ??
+				_contextMenu = new InventoryContextMenu(sender, (clickedContainer == _containerBackpack) ? "backpack" : "hotbar", args.SourceIndex,  InputManager.MousePosition.Offset(-10, -10), clickedItem, false) { State = ComponentState.All };
 				_contextMenu.LoadContent();
 				_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
@@ -155,7 +156,7 @@ namespace Game1.Interface.Windows
 					break;
 				case "split"	:
 					var startPosition = InputManager.MousePosition.Offset(-10, -10);
-					_splitWindow = new SplitWindow(new Rectangle(startPosition.X, startPosition.Y, 200, 200), container[(int)args.SourceIndex]) { IsActive = true };
+					_splitWindow = new SplitWindow(new Rectangle(startPosition.X, startPosition.Y, 200, 200), container[(int)args.SourceIndex]) { State = ComponentState.All };
 					_splitWindow.LoadContent();
 					_splitWindow.OnButtonClick += _splitWindow_OnButtonClick;
 					_splitWindow.OnReadyDisable += _splitWindow_OnReadyDisable;

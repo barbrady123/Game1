@@ -15,9 +15,8 @@ using Game1.Screens.Menu;
 
 namespace Game1.Screens
 {
-	public class CharacterCreateScreen : Screen
+	public class CharacterCreateScreen : Component
 	{
-		private ActivationManager _activation = new ActivationManager();
 		private Character _newChar;
 		private Vector2 _characterViewPosition = new Vector2(450.0f, 400.0f);
 		private readonly Dialog _dialog;
@@ -29,7 +28,7 @@ namespace Game1.Screens
 
 		private string CharacterPreviewImage(CharacterSex sex) => $"Character/Preview/{sex.ToString("g")}";
 
-		public CharacterCreateScreen(Rectangle bounds): base(bounds, "brick")
+		public CharacterCreateScreen(Rectangle bounds): base(bounds, background: "brick")
 		{
 			_newChar = new Character();
 
@@ -52,17 +51,17 @@ namespace Game1.Screens
 			};
 
 			// Menu
-			_activation.Add(_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200)));
+			_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200));
 			_menuCharacter.OnSexItemChange += _menuCharacter_OnSexItemChange;
 			_menuCharacter.OnReadyDisable += _menuCharacter_OnReadyDisable;
 			_menuCharacter.OnUserNotify += _menuCharacter_OnUserNotify;
 
 			// Dialog
-			_activation.Add(_dialog = new Dialog(null, DialogButton.Ok, new Rectangle(600, 500, 400, 200), null));
-			_dialog.OnButtonClick += _dialogBox_OnButtonClick;
+			_dialog = new Dialog(null, DialogButton.Ok, new Rectangle(600, 500, 400, 200), null);
+			_dialog.OnMenuItemSelect += _dialogBox_OnButtonClick;
 			_dialog.OnReadyDisable += _dialogBox_OnButtonClick;
 
-			_activation.Activate(_menuCharacter);
+			_menuCharacter.IsActive = true;
 		}
 
 		public override void LoadContent()
@@ -85,12 +84,12 @@ namespace Game1.Screens
 			_dialog.UnloadContent();
 		}
 
-		public override void Update(GameTime gameTime, bool processInput)
+		public override void Update(GameTime gameTime)
 		{
-			base.Update(gameTime, processInput);
+			base.Update(gameTime);
 			_characterView.Update(gameTime);
-			_menuCharacter.Update(gameTime, processInput);
-			_dialog.Update(gameTime, processInput);
+			_menuCharacter.UpdateActive(gameTime);
+			_dialog.Update(gameTime);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch)
@@ -130,10 +129,10 @@ namespace Game1.Screens
 					_newChar.Position = new Vector2(Game1.TileSize / 2, Game1.TileSize / 2);
 					IOManager.ObjectToFile(Game1.PlayerFile, _newChar);
 					// TODO: Eventually we need to handle some kind of identifier of this new player to the parent, when we have multiple player/world files...
-					ReadyScreenUnload(this, new ScreenEventArgs("game", this.GetType().Name, null));
+					ReadyDisable(new ComponentEventArgs("game", this.GetType().Name, null));
 					break;
 				case "back" :
-					ReadyScreenUnload(this, new ScreenEventArgs("back", this.GetType().Name, null));
+					ReadyDisable(new ComponentEventArgs("back", this.GetType().Name, null));
 					break;
 			}
 		}
@@ -141,14 +140,16 @@ namespace Game1.Screens
 		private void _menuCharacter_OnUserNotify(object sender, EventArgs e)
 		{
 			var args = (UserNotifyArgs)e;
-			_dialog.Title = args.Text;
+			_dialog.Text = args.Text;
 			_dialog.Duration = 300;
-			_activation.Activate(_dialog);
+			// Use manager...
+			_dialog.State |= ComponentState.All;
 		}
 
 		private void _dialogBox_OnButtonClick(object sender, EventArgs e)
 		{
-			_activation.Deactivate(_dialog);
+			// Use manager...
+			_dialog.State &= ~ComponentState.All;
 		}
 	}
 }

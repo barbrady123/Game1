@@ -15,27 +15,26 @@ using TextInputEventArgs = Game1.Interface.TextInputEventArgs;
 
 namespace Game1.Interface.Windows
 {
-	public class SplitWindow : Window
+	public class SplitWindow : Component
 	{
 		private InventoryItem _item;
 		private OkCancelMenu _menu;
 		private TextInput _input;
 		private Button _halfButton;
 
-		public override string SpriteBatchName => "context";
+		public event EventHandler<MenuEventArgs> OnButtonClick;
 
-		public SplitWindow(Rectangle bounds, InventoryItem item) : base(bounds, "black", null, null, true)
+		public SplitWindow(Rectangle bounds, InventoryItem item) : base(bounds, true, "black")
 		{
 			_item = item;
 
-			this.IsActive = false;
 			var bottomCenter = bounds.BottomCenterVector();
 			// This arbitrary sizing sucks...TODO: Read the comment on the MenuScreen class...menus should be able to auto-size themselves given a Top-Left position...
-			_menu = new OkCancelMenu(new Rectangle((int)bottomCenter.X - 90, (int)bottomCenter.Y - 50, bounds.Width, 30)) { IsActive = true };
+			// Is it ssafe for all these subitems to get State.All ?
+			_menu = new OkCancelMenu(new Rectangle((int)bottomCenter.X - 90, (int)bottomCenter.Y - 50, bounds.Width, 30)) { State = ComponentState.All };
 			_menu.OnItemSelect += _menu_OnItemSelect;
 			
-			_input = new TextInput(50, "", 2, true) { 
-				Position = new Vector2(bounds.X + (bounds.Width - 50) / 2, bounds.Y + 20), 
+			_input = new TextInput(50, new Vector2(bounds.X + (bounds.Width - 50) / 2, bounds.Y + 20), "", 2) { 
 				AllowedCharacters = "0123456789"
 			};
 			_input.OnReadyDisable += _input_OnReadyDisable;
@@ -61,17 +60,17 @@ namespace Game1.Interface.Windows
 		}
 
 
-		public override void UpdateReady(GameTime gameTime)
+		public override void UpdateActive(GameTime gameTime)
 		{
-			base.UpdateReady(gameTime);
-			_menu.Update(gameTime, this.IsActive);
-			_input.Update(gameTime, this.IsActive);
+			base.UpdateActive(gameTime);
+			_menu.Update(gameTime);
+			_input.Update(gameTime);
 			_halfButton.Update(gameTime);
 		}
 
-		public override void DrawInternal(SpriteBatch spriteBatch)
+		public override void DrawVisible(SpriteBatch spriteBatch)
 		{
-			base.DrawInternal(spriteBatch);
+			base.DrawVisible(spriteBatch);
 			_menu.Draw(spriteBatch);
 			_input.Draw(spriteBatch);
 			_halfButton.Draw(spriteBatch);
@@ -84,7 +83,7 @@ namespace Game1.Interface.Windows
 
 		private void _menu_OnItemSelect(object sender, EventArgs e)
 		{
-			ButtonClick((MenuEventArgs)e);
+			OnButtonClick?.Invoke(this, (MenuEventArgs)e);
 		}
 
 		private void _input_OnReadyDisable(object sender, EventArgs e)

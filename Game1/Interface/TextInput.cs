@@ -13,38 +13,35 @@ using TextInputEventArgs = Game1.Interface.TextInputEventArgs;
 
 namespace Game1.Interface
 {
-	public class TextInput : IActivatable
+	public class TextInput : Component
 	{
+		private const int Height = 32;
+		private const int FontHeight = 24;
+		private static readonly Size TextPadding = new Size(4, 2);
+		private const float ActiveTextAlpha = 1.0f;
+		private const float InactiveTextAlpha = 0.7f;
+
 		private readonly int _width;
-		private readonly int _height;
-		private readonly int _borderWidth;
-		private readonly int _fontHeight;
 		private readonly int _maxVisibleLength;
 
-		private Vector2 _padding;
-		private ImageTexture _background;
-		private ImageTexture _border;
 		private ImageTexture _cursor;
 		private ImageText _textImage;
 		private int _currentPositionIndex;
 		private int _firstVisibleCharIndex;		
 		private string _visibleText;
-		private bool _isActive;
 		private string _text;
-		
+
+		protected override Color BorderColor => Color.Gray;
+
 		private int CurrentPositionIndex
 		{
 			get { return _currentPositionIndex; }
 			set { _currentPositionIndex = Util.Clamp(value, 0, this.Text.Length); }
 		}
 
-		private Vector2 TextPosition => this.Position
-										+ new Vector2(_borderWidth, _borderWidth)
-										+ _padding;
-
+		private Vector2 TextPosition => this.Bounds.TopLeftVector(this.BorderThickness + TextInput.TextPadding.Width, this.BorderThickness + TextInput.TextPadding.Height);
 		private int CursorPositionX => (int)(this.TextPosition.X + _textImage.SubstringSize(0, this.CurrentPositionIndex - _firstVisibleCharIndex).X);
 
-		public Vector2 Position { get; set; }
 		public string AllowedCharacters { get; set; }
 		public string BlockedCharacters { get; set; }
 		public int MaxLength { get; set; }
@@ -61,111 +58,79 @@ namespace Game1.Interface
 				}
 			}
 		}
-		
-		public bool IsActive
-		{ 
-			get { return _isActive; }
-			set {
-				if (_isActive != value)
-				{
-					_isActive = value;
-					this.CurrentPositionIndex = 0;
-					if (_isActive)
-						DelayInput(1);
-				}
-			}
-		}
 
-		private int _delayInputCycles;
-
-		public void DelayInput(int delayCycles)
+		protected override void StateChange()
 		{
-			_delayInputCycles = Math.Max(0, delayCycles);
+			this.CurrentPositionIndex = 0;
+			if (this.State.HasFlag(ComponentState.Active))
+				DelayInput(1);
 		}
 
-		public event EventHandler OnReadyDisable;
 		public event EventHandler OnBeforeTextUpdate;
 
-		public TextInput(int width, string text = null, int maxLength = 100, bool isActive = false)
+		public TextInput(int width, Vector2 position, string text = null, int maxLength = 100) : base(position.ExpandToRectangleCentered(width / 2, TextInput.Height / 2), true, hasBorder: true)
 		{
 			_width = width;
-			_borderWidth = 2;
-			_height = 32;
-			_padding = new Vector2(4.0f, 2.0f);
-			_fontHeight = 24;
-			_maxVisibleLength = _width - (_borderWidth * 2) - ((int)_padding.X * 2);
+			_maxVisibleLength = _width - (this.BorderThickness * 2) - (TextInput.TextPadding.Width * 2);
 			_firstVisibleCharIndex = 0;
 			_visibleText = "";
-			_delayInputCycles = 0;
 			_text = text ?? "";
 			this.MaxLength = maxLength;
-			this.Position = Vector2.Zero;
-			this.IsActive = isActive;
 			this.AllowedCharacters = "";
 			this.BlockedCharacters = "";
 			this.CurrentPositionIndex = this.Text.Length;
 		}
 
-		public void LoadContent()
+		public override void LoadContent()
 		{
-			_background = Util.GenerateSolidBackground(_width, _height, Color.Black);
-			_background.Position = this.Position;
-			_background.LoadContent();
-			_border = Util.GenerateBorderTexture(_width, _height, _borderWidth, Color.Gray);
-			_border.Position = this.Position;
-			_border.LoadContent();
+			base.LoadContent();
 			_textImage = new ImageText(this.Text, true) { 
-				Position = this.TextPosition + new Vector2(0.0f, _fontHeight),
+				Position = this.TextPosition + new Vector2(0.0f, TextInput.FontHeight),
 				Alignment = ImageAlignment.LeftBottom,
 				Scale = new Vector2(1.1f, 1.1f)
 			};
 			_textImage.LoadContent();
-			_cursor = new ImageTexture("Interface/cursor", this.IsActive) { Position = new Vector2(this.CursorPositionX, this.TextPosition.Y) };
+			_cursor = new ImageTexture("Interface/cursor", true) { Position = new Vector2(this.CursorPositionX, this.TextPosition.Y) };
 			_cursor.AddEffect(new FadeCycleEffect(true) { Speed = 5.0f });
 			_cursor.LoadContent();
 			CalculateVisibleText(TextInputAction.Right);
 		}
 
-		public void UnloadContent()
+		public override void UnloadContent()
 		{
-			_background.UnloadContent();
-			_border.UnloadContent();
+			base.UnloadContent();
 			_cursor.UnloadContent();
 			_textImage.UnloadContent();
 		}
 
-		public void Update(GameTime gameTime, bool processInput)
+		public override void Update(GameTime gameTime)
 		{
-			if (processInput && (_delayInputCycles == 0))
-				ProcessInput();
-			_delayInputCycles = Math.Max(0, _delayInputCycles - 1);
-
-			_border.Update(gameTime);
+			_background.IsActive = this.State.HasFlag(ComponentState.Active);
+			_border.IsActive = this.State.HasFlag(ComponentState.Active);
+			_cursor.IsActive = this.State.HasFlag(ComponentState.TakingInput);
+			_textImage.Alpha = this.State.HasFlag(ComponentState.Active) ? TextInput.ActiveTextAlpha : TextInput.InactiveTextAlpha;
 			_textImage.UpdateText(_visibleText);
 			_textImage.Update(gameTime);
-			_cursor.IsActive = this.IsActive;
-			_cursor.Position = new Vector2(this.CursorPositionX, _cursor.Position.Y);
-			_cursor.Update(gameTime);
+			base.Update(gameTime);
 		}
 
-		public void Draw(SpriteBatch spriteBatch)
+		public override void UpdateInput(GameTime gameTime)
 		{
-			if (this.IsActive)
-			{				
-				_background.Draw(spriteBatch);
-				_border.Draw(spriteBatch);
-				_cursor.Draw(spriteBatch);
-			}
+			_cursor.Position = new Vector2(this.CursorPositionX, _cursor.Position.Y);
+			_cursor.Update(gameTime);
+			ProcessInput();
+			base.UpdateInput(gameTime);
+		}
 
-			_textImage.Alpha = (this.IsActive) ? 1.0f : 0.7f;			
+		public override void DrawVisible(SpriteBatch spriteBatch)
+		{
+			base.DrawVisible(spriteBatch);
+			_cursor.Draw(spriteBatch);
 			_textImage.Draw(spriteBatch);
 		}
 
 		private void ProcessInput()
 		{
-			if (!this.IsActive)
-				return;
-
 			string currentText = this.Text;
 			var newText = new StringBuilder(this.Text);
 			int cursorMove = 0;
@@ -179,12 +144,12 @@ namespace Game1.Interface
 				switch (key)
 				{
 					case (Keys.Enter) :		
-						OnReadyDisable?.Invoke(this, new TextInputEventArgs('\0', key));
+						ReadyDisable(new TextInputEventArgs('\0', key));
 						finalizeText = true;
 						continue;
 					case (Keys.Escape) :
 						InputManager.BlockKey(Keys.Escape);
-						OnReadyDisable?.Invoke(this, new TextInputEventArgs('\0', key));
+						ReadyDisable(new TextInputEventArgs('\0', key));
 						updateText = false;
 						finalizeText = true;
 						continue;

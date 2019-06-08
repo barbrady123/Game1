@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Enum;
 using Game1.Effect;
 using Game1.Screens;
 using Game1.Screens.Menu;
@@ -17,8 +18,8 @@ namespace Game1
 	public class ScreenManager
 	{
 		private ContentManager _content;
-		private Screen _currentScreen;
-		private Screen _newScreen;
+		private Component _currentScreen;
+		private Component _newScreen;
 		private bool _isTransitioning;
 
 		private ImageTexture _transitionImage;
@@ -47,15 +48,22 @@ namespace Game1
 
 		public void UnloadContent()
 		{
-			if (_content != null)
-				_content.Unload();
+			_content?.Unload();
 			_transitionImage.UnloadContent();
 			_currentScreen?.UnloadContent();
 		}
 
 		public void Update(GameTime gameTime)
 		{
-			_currentScreen?.Update(gameTime, !_isTransitioning);
+			if (_currentScreen != null)
+			{
+				if (_isTransitioning)
+					_currentScreen.State &= ~ComponentState.AllInput;
+				else
+					_currentScreen.State |= ComponentState.AllInput;
+				_currentScreen.Update(gameTime);
+			}
+
 			if (_isTransitioning)
 				_transitionImage.Update(gameTime);
 		}
@@ -71,11 +79,11 @@ namespace Game1
 		{
 			//TransitionScreens(new SplashScreen(_bounds));
 			//TransitionScreens(new MainMenu(_bounds));
-			//TransitionScreens(new CharacterCreateScreen(_bounds));
-			TransitionScreens(new GameScreen(_bounds));
+			TransitionScreens(new CharacterCreateScreen(_bounds));
+			//TransitionScreens(new GameScreen(_bounds));
 		}
 
-		private void TransitionScreens(Screens.Screen newScreen)
+		private void TransitionScreens(Component newScreen)
 		{
 			if (_isTransitioning)
 				return;
@@ -104,15 +112,12 @@ namespace Game1
 			_currentScreen?.UnloadContent();
 			_currentScreen = _newScreen;
 			_newScreen = null;
-			_currentScreen.OnReadyScreenUnload += _currentScreen_OnReadyScreenUnload;
+			_currentScreen.OnReadyDisable += _currentScreen_OnReadyDisable;
 			if (_currentScreen is MenuScreen menuScreen)
-			{				
 				menuScreen.OnItemSelect += MenuScreen_OnItemSelect;
-				menuScreen.OnReadyDisable += MenuScreen_OnReadyDisable;
-				menuScreen.IsActive = true;
-			}
 
 			_currentScreen.LoadContent();
+			_currentScreen.State = ComponentState.ActiveVisible;
 		}
 
 		private void _fadeInEffect_OnActiveChange(object sender, EventArgs e)
@@ -159,16 +164,16 @@ namespace Game1
 			}
 		}
 
-		private void _currentScreen_OnReadyScreenUnload(object sender, EventArgs e)
+		private void _currentScreen_OnReadyDisable(object sender, EventArgs e)
 		{
-			var args = (ScreenEventArgs)e;
+			var args = (ComponentEventArgs)e;
 
 			switch (args.Source)
 			{
 				case "SplashScreen": switch (args.Type)
 				{
 					case "continue":	TransitionScreens(new MainMenu(_bounds));	break;
-					case "exit" :		Game1.Instance.Exit();						break;
+					case "escape" :		Game1.Instance.Exit();						break;
 				}
 				break;
 				case "CharacterCreateScreen": switch (args.Type)
