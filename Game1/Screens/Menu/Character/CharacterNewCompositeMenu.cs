@@ -14,10 +14,9 @@ using TextInputEventArgs = Game1.Interface.TextInputEventArgs;
 
 namespace Game1.Screens.Menu.Character
 {
-	public class CharacterNewCompositeMenu
+	public class CharacterNewCompositeMenu : Component
 	{
 		private readonly ComponentManager _components;
-		private readonly Rectangle _bounds;
 		private readonly CharacterNewMenu _menuCharacter;
 		private readonly TextInput _nameEdit;
 		private readonly SexMenu _menuSex;
@@ -26,19 +25,15 @@ namespace Game1.Screens.Menu.Character
 		public string CharacterName { get; set; }
 		public CharacterSex CharacterSex { get; set; }
 
-		public event EventHandler OnReadyDisable;
 		public event EventHandler OnSexItemChange;
 		public event EventHandler OnUserNotify;
 
-		public bool IsActive { get; set; }
-
-		public CharacterNewCompositeMenu(Rectangle bounds)
+		public CharacterNewCompositeMenu(Rectangle bounds) : base(bounds, true, "brick")
 		{
-			_bounds = bounds;
 			_components = new ComponentManager();
 			
 			// Main menu...
-			_components.Register(_menuCharacter = new CharacterNewMenu(new Rectangle(_bounds.Left, _bounds.Top, 200, 200)));
+			_components.Register(_menuCharacter = new CharacterNewMenu(new Rectangle(this.Bounds.Left, this.Bounds.Top, 200, 200)));
 			_menuCharacter.OnItemSelect += _menuCharacter_OnItemSelect;
 			_menuCharacter.OnMouseIn += _menuCharacter_OnMouseIn;
 
@@ -61,11 +56,12 @@ namespace Game1.Screens.Menu.Character
 
 			
 			_components.SetStateAll(ComponentState.Visible, true);
-			_components.SetState(_menuCharacter, ComponentState.ActiveAllInput);
+			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput);
 		}
 
-		public void LoadContent()
+		public override void LoadContent()
 		{
+			base.LoadContent();
 			_menuCharacter.LoadContent();
 			_nameEdit.LoadContent();
 			_menuSex.LoadContent();
@@ -74,78 +70,73 @@ namespace Game1.Screens.Menu.Character
 			_menuStart.ClearSelection();
 		}
 
-		public void UnloadContent()
+		public override void UnloadContent()
 		{
+			base.UnloadContent();
 			_menuCharacter.UnloadContent();
 			_nameEdit.UnloadContent();
 			_menuSex.UnloadContent();
 			_menuStart.UnloadContent();
 		}
 
-		public void UpdateActive(GameTime gameTime)
+		public override void UpdateActive(GameTime gameTime)
 		{
 			_menuCharacter.Update(gameTime);
 			_nameEdit.Update(gameTime);
 			_menuSex.Update(gameTime);
 			_menuStart.Update(gameTime);
-
-			if (InputManager.KeyPressed(Keys.Escape))
-				OnReadyDisable?.Invoke(this, new MenuEventArgs("back", this.GetType().Name, null, null));
+			base.UpdateActive(gameTime);
 		}
 
-		public void Draw(SpriteBatch spriteBatch)
+		public override void Draw(SpriteBatch spriteBatch)
 		{
+			base.Draw(spriteBatch);
 			_menuCharacter.Draw(spriteBatch);
 			_nameEdit.Draw(spriteBatch);
 			_menuSex.Draw(spriteBatch);
 			_menuStart.Draw(spriteBatch);
 		}
 
-		private void _menuCharacter_OnItemSelect(object sender, EventArgs e)
+		private void _menuCharacter_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var args = (MenuEventArgs)e;
-
-			switch (args.Item)
+			switch (e.Item)
 			{
-				case "name":	_components.SetState(_nameEdit, ComponentState.ActiveAllInput, true);	break;
-				case "sex":		_components.SetState(_menuSex, ComponentState.ActiveAllInput, true);	break;
+				case "name":	_components.AddState(_nameEdit, ComponentState.ActiveAllInput, true);	break;
+				case "sex":		_components.AddState(_menuSex, ComponentState.ActiveAllInput, true);	break;
 			}
 		}
 
 		private void _nameEdit_OnReadyDisable(object sender, EventArgs e)
 		{
 			var args = (ComponentEventArgs)e;
-			var textArgs = ((TextInputEventArgs)args.Root);
 
-			if (textArgs.Key == Keys.Enter)
+			if (args.Key == Keys.Enter)
 			{
 				this.CharacterName = _nameEdit.Text;
 			}
-			else if (textArgs.Key == Keys.Escape)
+			else if (args.Key == Keys.Escape)
 			{
 				_nameEdit.Text = this.CharacterName;
 			}
 
-			_components.SetState(_menuCharacter, ComponentState.ActiveAllInput, true);
+			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
 		}
 
-		private void _menuSex_OnCurrentItemChange(object sender, EventArgs e)
+		private void _menuSex_OnCurrentItemChange(object sender, ComponentEventArgs e)
 		{
 			OnSexItemChange?.Invoke(this, e);
 		}
 
-		private void _menuSex_OnItemSelect(object sender, EventArgs e)
+		private void _menuSex_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var args = (MenuEventArgs)e;
-
-			switch (args.Item)
+			switch (e.Item)
 			{
 				case "female" : this.CharacterSex = CharacterSex.Female;	break;
 				case "male" :	this.CharacterSex = CharacterSex.Male;		break;
 			}
 
 			OnSexItemChange?.Invoke(this, e);
-			_components.SetState(_menuCharacter, ComponentState.ActiveAllInput, true);
+			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
 		}
 
 		private void _menuSex_OnReadyDisable(object sender, EventArgs e)
@@ -153,23 +144,21 @@ namespace Game1.Screens.Menu.Character
 			int index = _menuSex.CurrentIndex;
 			_menuSex.SetById(this.CharacterSex.ToString("g").ToLower());
 			if (index != _menuSex.CurrentIndex)
-				OnSexItemChange?.Invoke(this, new MenuEventArgs("change", this.GetType().Name, null, this.CharacterSex.ToString("g").ToLower()));
-			_components.SetState(_menuCharacter, ComponentState.ActiveAllInput, true);
+				OnSexItemChange?.Invoke(this, new ComponentEventArgs("change", this.GetType().Name, null, this.CharacterSex.ToString("g").ToLower()));
+			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
 		}
 
-		private void _menuStart_OnItemSelect(object sender, EventArgs e)
+		private void _menuStart_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var args = (MenuEventArgs)e;
-
-			switch (args.Item)
+			switch (e.Item)
 			{
 				case "startgame" :
 					if (!ValidateInput())
 						break;
-					OnReadyDisable?.Invoke(this, new MenuEventArgs("continue", this.GetType().Name, null, null));
+					ReadyDisable(new ComponentEventArgs("continue", this.GetType().Name));
 					break;
 				case "cancel" :
-					OnReadyDisable?.Invoke(this, new MenuEventArgs("back", this.GetType().Name, null, null));
+					ReadyDisable(new ComponentEventArgs("back", this.GetType().Name));
 					break;
 			}
 		}
@@ -178,23 +167,23 @@ namespace Game1.Screens.Menu.Character
 		{
 			if (String.IsNullOrWhiteSpace(this.CharacterName))
 			{
-				OnUserNotify?.Invoke(this, new UserNotifyArgs { Text = "Enter a name for the character" });
+				OnUserNotify?.Invoke(this, new ComponentEventArgs { Text = "Enter a name for the character" });
 				return false;
 			}
 
 			return true;
 		}
 
-		private void _menuCharacter_OnMouseIn(object sender, EventArgs e)
+		private void _menuCharacter_OnMouseIn(object sender, ComponentEventArgs e)
 		{			
 			if (_menuStart.State.HasFlag(ComponentState.Active))
-				_components.SetState(_menuCharacter, ComponentState.ActiveAllInput, true);
+				_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
 		}
 
 		private void _menuStart_OnMouseIn(object sender, EventArgs e)
 		{
 			if (_menuCharacter.State.HasFlag(ComponentState.Active))
-				_components.SetState(_menuStart, ComponentState.ActiveAllInput, true);
+				_components.AddState(_menuStart, ComponentState.ActiveAllInput, true);
 		}
 	}
 }

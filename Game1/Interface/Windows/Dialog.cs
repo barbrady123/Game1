@@ -48,7 +48,10 @@ namespace Game1.Interface.Windows
 					break;
 			}
 
-			_textImage = new ImageText(text, true);
+			_textImage = new ImageText(text, true) {
+				Alignment = ImageAlignment.Centered,
+				Position = this.Bounds.TopCenterVector(yOffset: 30)
+			};
 		}
 
 		public override void LoadContent()
@@ -78,9 +81,9 @@ namespace Game1.Interface.Windows
 			_textImage.Draw(spriteBatch);
 		}
 
-		private void _buttonMenu_OnItemSelect(object sender, EventArgs e)
+		private void _buttonMenu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			MenuItemSelect(e as MenuEventArgs);
+			MenuItemSelect(e);
 		}
 	}
 }

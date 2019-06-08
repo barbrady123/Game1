@@ -81,7 +81,7 @@ namespace Game1
 				"CurrentHP",
 				"MaxHP"
 			));
-			_components.SetState(_barHealth, ComponentState.ActiveVisible);
+			_components.SetState(_barHealth, ComponentState.ActiveVisible, null);
 			_components.Register(_barMana = new StatBar(
 				GamePlayManager.StatBarSize,
 				_bounds.TopRightVector((-GamePlayManager.StatBarSize / 2) - GamePlayManager.ContentMargin, GamePlayManager.ContentMargin * 3 + StatBar.Height / 2),
@@ -90,7 +90,7 @@ namespace Game1
 				"CurrentMana",
 				"MaxMana"
 			));
-			_components.SetState(_barMana, ComponentState.ActiveVisible);
+			_components.SetState(_barMana, ComponentState.ActiveVisible, null);
 
 			// Eventually make ImageText(ure) consistent with the components so we can register them also (or create containers for basic images/text)...
 			_defense = new ImageText("", true) { Position = _bounds.TopRightVector(-100-GamePlayManager.ContentMargin, GamePlayManager.ContentMargin * 6) };

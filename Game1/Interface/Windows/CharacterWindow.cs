@@ -49,7 +49,7 @@ namespace Game1.Interface.Windows
 
 			_components = new ComponentManager();
 			_components.Register(_tooltip = new Tooltip());
-			_components.SetState(_tooltip, ComponentState.Active);
+			_components.SetState(_tooltip, ComponentState.Active, null);
 
 			_contextMenu = null;
 		}

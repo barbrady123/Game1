@@ -9,6 +9,8 @@ namespace Game1.Enum
 	[Flags]
 	public enum ComponentState
 	{
+		None = 0x00,
+
 		Visible = 0x01,
 
 		Active = 0x02,

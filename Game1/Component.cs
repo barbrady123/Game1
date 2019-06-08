@@ -57,10 +57,10 @@ namespace Game1
 		}
 
 		public event EventHandler<ComponentEventArgs> OnReadyDisable;
-		public event EventHandler<MouseEventArgs> OnMouseOver;
-		public event EventHandler<MouseEventArgs> OnMouseIn;
-		public event EventHandler<MouseEventArgs> OnMouseOut;
-		public event EventHandler<MenuEventArgs> OnMenuItemSelect;
+		public event EventHandler<ComponentEventArgs> OnMouseOver;
+		public event EventHandler<ComponentEventArgs> OnMouseIn;
+		public event EventHandler<ComponentEventArgs> OnMouseOut;
+		public event EventHandler<ComponentEventArgs> OnMenuItemSelect;
 
 		protected bool _mouseover;
 		protected virtual Size ContentMargin => new Size(20, 20);
@@ -146,12 +146,12 @@ namespace Game1
 			if (mouseover)
 			{
 				if (!_mouseover)
-					MouseIn(new MouseEventArgs());
-				MouseOver(new MouseEventArgs());
+					MouseIn(new ComponentEventArgs("mousein", this.GetType().Name));
+				MouseOver(new ComponentEventArgs("mouseover", this.GetType().Name));
 			}
 			else if (_mouseover)
 			{
-				MouseOut(new MouseEventArgs());
+				MouseOut(new ComponentEventArgs("mouseout", this.GetType().Name));
 			}
 
 			_mouseover = mouseover;
@@ -163,7 +163,7 @@ namespace Game1
 				return;
 
 			if (InputManager.KeyPressed(Keys.Escape, true))
-				ReadyDisable(new ComponentEventArgs("escape", this.GetType().Name, null));
+				ReadyDisable(new ComponentEventArgs("escape", this.GetType().Name));
 		}
 
 		public virtual void Draw(SpriteBatch spriteBatch)
@@ -184,21 +184,15 @@ namespace Game1
 			_delayInputCycles = Math.Max(0, delayCycles);
 		}
 
-		protected virtual void ReadyDisable(EventArgs e)
-		{
-			if (e is ComponentEventArgs args)
-				OnReadyDisable?.Invoke(this, args);
-			else
-				OnReadyDisable?.Invoke(this, new ComponentEventArgs(e.GetType().Name, this.GetType().Name, null, e));
-		}
+		protected virtual void ReadyDisable(ComponentEventArgs e) => OnReadyDisable?.Invoke(this, e);
 
-		protected virtual void MouseOver(MouseEventArgs e)  => OnMouseOver?.Invoke(this, e);
+		protected virtual void MouseOver(ComponentEventArgs e)  => OnMouseOver?.Invoke(this, e);
 
-		protected virtual void MouseIn(MouseEventArgs e) => OnMouseIn?.Invoke(this, e);
+		protected virtual void MouseIn(ComponentEventArgs e) => OnMouseIn?.Invoke(this, e);
 
-		protected virtual void MouseOut(MouseEventArgs e) => OnMouseOut?.Invoke(this, e);
+		protected virtual void MouseOut(ComponentEventArgs e) => OnMouseOut?.Invoke(this, e);
 
-		protected virtual void MenuItemSelect(MenuEventArgs e) => OnMenuItemSelect?.Invoke(this, e);
+		protected virtual void MenuItemSelect(ComponentEventArgs e) => OnMenuItemSelect?.Invoke(this, e);
 
 		protected virtual void RepositionObjects()
 		{

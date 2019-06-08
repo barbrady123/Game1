@@ -71,7 +71,7 @@ namespace Game1.Screens
 			_gameplay.IsActive = true;
 		}
 
-		protected override void ReadyDisable(EventArgs e)
+		protected override void ReadyDisable(ComponentEventArgs e)
 		{			
 			// use the manager...
 			_dialog.State = ComponentState.All;

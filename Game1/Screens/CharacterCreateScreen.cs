@@ -17,6 +17,7 @@ namespace Game1.Screens
 {
 	public class CharacterCreateScreen : Component
 	{
+		private readonly ComponentManager _components;
 		private Character _newChar;
 		private Vector2 _characterViewPosition = new Vector2(450.0f, 400.0f);
 		private readonly Dialog _dialog;
@@ -30,6 +31,7 @@ namespace Game1.Screens
 
 		public CharacterCreateScreen(Rectangle bounds): base(bounds, background: "brick")
 		{
+			_components = new ComponentManager();
 			_newChar = new Character();
 
 			// Title...
@@ -51,17 +53,17 @@ namespace Game1.Screens
 			};
 
 			// Menu
-			_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200));
+			_components.Register(_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200)));
 			_menuCharacter.OnSexItemChange += _menuCharacter_OnSexItemChange;
 			_menuCharacter.OnReadyDisable += _menuCharacter_OnReadyDisable;
 			_menuCharacter.OnUserNotify += _menuCharacter_OnUserNotify;
 
 			// Dialog
-			_dialog = new Dialog(null, DialogButton.Ok, new Rectangle(600, 500, 400, 200), null);
+			_components.Register(_dialog = new Dialog(null, DialogButton.Ok, new Rectangle(600, 500, 400, 200), null));
 			_dialog.OnMenuItemSelect += _dialogBox_OnButtonClick;
 			_dialog.OnReadyDisable += _dialogBox_OnButtonClick;
 
-			_menuCharacter.IsActive = true;
+			_components.SetState(_menuCharacter, ComponentState.All, null);
 		}
 
 		public override void LoadContent()
@@ -88,7 +90,7 @@ namespace Game1.Screens
 		{
 			base.Update(gameTime);
 			_characterView.Update(gameTime);
-			_menuCharacter.UpdateActive(gameTime);
+			_menuCharacter.Update(gameTime);
 			_dialog.Update(gameTime);
 		}
 
@@ -104,7 +106,7 @@ namespace Game1.Screens
 
 		private void _menuCharacter_OnSexItemChange(object sender, EventArgs e)
 		{
-			var args = (MenuEventArgs)e;
+			var args = (ComponentEventArgs)e;
 
 			switch (args.Item)
 			{
@@ -119,7 +121,7 @@ namespace Game1.Screens
 
 		private void _menuCharacter_OnReadyDisable(object sender, EventArgs e)
 		{
-			var args = (MenuEventArgs)e;
+			var args = (ComponentEventArgs)e;
 
 			switch (args.Type)
 			{
@@ -132,6 +134,7 @@ namespace Game1.Screens
 					ReadyDisable(new ComponentEventArgs("game", this.GetType().Name, null));
 					break;
 				case "back" :
+				case "escape" :
 					ReadyDisable(new ComponentEventArgs("back", this.GetType().Name, null));
 					break;
 			}
@@ -139,17 +142,16 @@ namespace Game1.Screens
 
 		private void _menuCharacter_OnUserNotify(object sender, EventArgs e)
 		{
-			var args = (UserNotifyArgs)e;
+			var args = (ComponentEventArgs)e;
+
 			_dialog.Text = args.Text;
 			_dialog.Duration = 300;
-			// Use manager...
-			_dialog.State |= ComponentState.All;
+			_components.SetState(_dialog, ComponentState.All, ComponentState.Visible);
 		}
 
-		private void _dialogBox_OnButtonClick(object sender, EventArgs e)
+		private void _dialogBox_OnButtonClick(object sender, ComponentEventArgs e)
 		{
-			// Use manager...
-			_dialog.State &= ~ComponentState.All;
+			_components.SetState(_menuCharacter, ComponentState.All, ComponentState.None);
 		}
 	}
 }

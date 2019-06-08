@@ -139,15 +139,13 @@ namespace Game1
 			}
 		}
 
-		private void MenuScreen_OnItemSelect(object sender, EventArgs e)
+		private void MenuScreen_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var args = (MenuEventArgs)e;
-
-			if (args.Type == "select")
+			if (e.Type == "select")
 			{
-				switch (args.Source)
+				switch (e.Source)
 				{
-					case "MainMenu" : switch (args.Item)
+					case "MainMenu" : switch (e.Item)
 					{
 						case "startnewgame":	TransitionScreens(new CharacterCreateScreen(_bounds));	break;
 						case "options":			TransitionScreens(new OptionsMenu(_bounds));			break;
@@ -155,7 +153,7 @@ namespace Game1
 						default: break;
 					}
 					break;
-					case "OptionsMenu" : switch (args.Item)
+					case "OptionsMenu" : switch (e.Item)
 					{
 						case "back":	TransitionScreens(new MainMenu(_bounds));	break;
 					}
@@ -164,19 +162,17 @@ namespace Game1
 			}
 		}
 
-		private void _currentScreen_OnReadyDisable(object sender, EventArgs e)
+		private void _currentScreen_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
-			var args = (ComponentEventArgs)e;
-
-			switch (args.Source)
+			switch (e.Source)
 			{
-				case "SplashScreen": switch (args.Type)
+				case "SplashScreen": switch (e.Type)
 				{
 					case "continue":	TransitionScreens(new MainMenu(_bounds));	break;
 					case "escape" :		Game1.Instance.Exit();						break;
 				}
 				break;
-				case "CharacterCreateScreen": switch (args.Type)
+				case "CharacterCreateScreen": switch (e.Type)
 				{
 					case "back" : TransitionScreens(new MainMenu(_bounds));		break;
 					// This should NOT go directly to game screen...we need a "loading" transition screen with a call back (probably just part of the ScreenManager)....

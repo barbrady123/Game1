@@ -26,7 +26,7 @@ namespace Game1
 			_components.Add(component);
 		}
 
-		public void SetState(Component component, ComponentState state, bool clearOthers = false)
+		public void AddState(Component component, ComponentState state, bool clearOthers = false)
 		{
 			if (!_components.Contains(component))
 				return;
@@ -35,6 +35,20 @@ namespace Game1
 				_components.ForEach(x => x.State &= ~state);
 				
 			component.State |= state;
+		}
+
+		public void SetState(Component component, ComponentState state, ComponentState? otherState)
+		{
+			if (!_components.Contains(component))
+				return;
+
+			foreach (var c in _components)
+			{
+				if (c == component)
+					c.State = state;
+				else if (otherState != null)
+					c.State = (ComponentState)otherState;
+			}
 		}
 
 		public void SetStateAll(ComponentState state, bool exclusive = false)

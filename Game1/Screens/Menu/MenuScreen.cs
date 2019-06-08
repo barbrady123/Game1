@@ -37,8 +37,8 @@ namespace Game1.Screens.Menu
 		protected List<MenuItem> _items;
 		protected MenuLayout _layout; 
 
-		public event EventHandler<MenuEventArgs> OnCurrentItemChange;
-		public event EventHandler<MenuEventArgs> OnItemSelect;
+		public event EventHandler<ComponentEventArgs> OnCurrentItemChange;
+		public event EventHandler<ComponentEventArgs> OnItemSelect;
 
 		public int ItemCount => _items?.Count ?? 0;
 
@@ -139,7 +139,7 @@ namespace Game1.Screens.Menu
 		public override void Update(GameTime gameTime)
 		{
 			// We need to check mouse position even if we're inactive, in case the menu is configured to activate on mouseover...
-			UpdateMousePosition(gameTime);
+			base.UpdateMousePosition(gameTime);
 
 			if (!this.State.HasFlag(ComponentState.Active))
 			{
@@ -162,7 +162,7 @@ namespace Game1.Screens.Menu
 			base.UpdateActive(gameTime);
 		}
 
-		public override void UpdateInput(GameTime gameTime)
+		public override void UpdateMousePosition(GameTime gameTime)
 		{
 			bool mouseOverItem = false;
 
@@ -176,15 +176,21 @@ namespace Game1.Screens.Menu
 				if (this.CurrentIndex != i)
 				{
 					this.CurrentIndex = i;
-					OnCurrentItemChange?.Invoke(this, new MenuEventArgs("currentChange", this.EventSource, this.EventSourceIndex, _items[_currentIndex].Id));
+					OnCurrentItemChange?.Invoke(this, new ComponentEventArgs("currentChange", this.EventSource, this.EventSourceIndex, _items[_currentIndex].Id));
 				}
-
-				if (InputManager.LeftMouseClick())
-					OnItemSelect?.Invoke(this, new MenuEventArgs("select", this.EventSource, this.EventSourceIndex, _items[_currentIndex].Id));
 			}
 
 			if (!mouseOverItem)
 				this.CurrentIndex = -1;
+		}
+
+		public override void UpdateInput(GameTime gameTime)
+		{
+			for (int i = 0; i < _items.Count; i++)
+			{
+				if (InputManager.LeftMouseClick(_items[i].Bounds))
+					OnItemSelect?.Invoke(this, new ComponentEventArgs("select", this.EventSource, this.EventSourceIndex, _items[_currentIndex].Id));
+			}
 
 			base.UpdateInput(gameTime);
 		}	
