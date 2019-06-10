@@ -15,8 +15,7 @@ namespace Game1.Interface
 {
 	public class TextInput : Component
 	{
-		private const int Height = 32;
-		private const int FontHeight = 24;
+		public const int Height = 32;
 		private static readonly Size TextPadding = new Size(4, 2);
 		private const float ActiveTextAlpha = 1.0f;
 		private const float InactiveTextAlpha = 0.7f;
@@ -85,7 +84,7 @@ namespace Game1.Interface
 		{
 			base.LoadContent();
 			_textImage = new ImageText(this.Text, true) { 
-				Position = this.TextPosition + new Vector2(0.0f, TextInput.FontHeight),
+				Position = this.TextPosition + new Vector2(0.0f, FontManager.FontHeight),
 				Alignment = ImageAlignment.LeftBottom,
 				Scale = new Vector2(1.1f, 1.1f)
 			};

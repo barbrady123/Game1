@@ -27,16 +27,11 @@ namespace Game1.Screens.Menu
 
 		public void Initialize(InventoryItemView owner, Point position, bool isEquipped)
 		{
+			UnloadContent();
+
 			this.Owner = owner;
 			this.Bounds = InventoryContextMenu.CalculateItemMenuBounds(position, owner?.Item, isEquipped);
 			_isEquipped = isEquipped;
-
-			UnloadContent();
-
-			// Setup Component stuff (background/border)
-			SetupBackground();
-			SetupBorder();
-			RepositionObjects();
 
 			// Setup MenuScreen stuff (items)
 			_items = GetItemData();
@@ -53,6 +48,7 @@ namespace Game1.Screens.Menu
 			_border = null;
 			_items.ForEach(x => x.Image.UnloadContent());
 			_items.Clear();
+			_mouseover = false;
 		}
 
 		protected override List<MenuItem> GetItemData()

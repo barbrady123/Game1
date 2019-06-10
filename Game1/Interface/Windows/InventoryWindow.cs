@@ -239,6 +239,3 @@ namespace Game1.Interface.Windows
 		}
 	}
 }
-// Found the isseu...on the next cycle the ContextMenu (after closing due to "Split" selection) picks up the MouseOut detection and runs the event...we can
-// block this of course, by clearning out the _mouseover value, but....why is that context menu component even running mouse detection with it's already
-// supposed to disabled...(shouldn't status be None at that point???)...might be an issue in the base Component class ???

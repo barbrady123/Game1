@@ -17,6 +17,7 @@ namespace Game1.Interface.Windows
 {
 	public class SplitWindow : Component
 	{
+		private const int TextInputWidth = 50;
 
 		private OkCancelMenu _menu;
 		private TextInput _input;
@@ -33,15 +34,9 @@ namespace Game1.Interface.Windows
 
 		public void Initialize(InventoryItemView owner, Rectangle bounds)
 		{
+			UnloadContent();
 			this.Owner = owner;
 			this.Bounds = bounds;
-
-			UnloadContent();
-
-			// Setup Component stuff (background/border)
-			SetupBackground();
-			SetupBorder();
-			RepositionObjects();
 
 			var bottomCenter = bounds.BottomCenterVector();
 			// This arbitrary sizing sucks...TODO: Read the comment on the MenuScreen class...menus should be able to auto-size themselves given a Top-Left position...
@@ -49,7 +44,8 @@ namespace Game1.Interface.Windows
 			_menu = new OkCancelMenu(new Rectangle((int)bottomCenter.X - 90, (int)bottomCenter.Y - 50, bounds.Width, 30)) { State = ComponentState.All };
 			_menu.OnItemSelect += _menu_OnItemSelect;
 			
-			_input = new TextInput(50, new Vector2(bounds.X + (bounds.Width - 50) / 2, bounds.Y + 20), "", 2) { 
+			_input = new TextInput(SplitWindow.TextInputWidth, new Vector2(bounds.Center.X, bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2)), "", 2) {
+				State = ComponentState.All,
 				AllowedCharacters = "0123456789"
 			};
 			_input.OnReadyDisable += _input_OnReadyDisable;
@@ -71,6 +67,7 @@ namespace Game1.Interface.Windows
 			_menu?.UnloadContent();
 			_input?.UnloadContent();
 			_halfButton?.UnloadContent();
+			_mouseover = false;
 		}
 
 		public override void LoadContent()
