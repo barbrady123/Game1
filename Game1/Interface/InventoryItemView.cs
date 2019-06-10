@@ -69,9 +69,9 @@ namespace Game1.Interface
 		public override void Update(GameTime gameTime)
 		{
 			if (_emptyIcon != null)
-				_emptyIcon.IsActive = (this.Item?.Item == null);
+				_emptyIcon.IsActive = (this.Item == null);
 
-			if (this.Item?.Item != null)
+			if (this.Item != null)
 				_quantity.UpdateText((this.Item.Item.MaxStackSize > 1) ? this.Item.Quantity.ToString() : "");
 
 			_highlightBorder.IsActive = this.Highlight;
@@ -106,7 +106,7 @@ namespace Game1.Interface
 			base.DrawVisible(spriteBatch);
 			_highlightBorder.Draw(spriteBatch);
 			_emptyIcon?.Draw(spriteBatch);
-			if (this.Item?.Item?.Icon != null)
+			if (this.Item != null)
 			{
 				this.Item.Item.Icon.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
 				this.Item.Item.Icon.Draw(spriteBatch, null, this.Bounds.CenterVector());

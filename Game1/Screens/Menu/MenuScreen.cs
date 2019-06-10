@@ -79,15 +79,19 @@ namespace Game1.Screens.Menu
 						  bool escapeToDisable = false): base(bounds, escapeToDisable, background)
 		{
 			_currentIndex = -1;
-			_items = new List<MenuItem>();
 			_layout = layout;
+			_items = GetItemData();
 		}
 
 		public override void LoadContent()
 		{			
 			base.LoadContent();
-			_items = GetItemData();
+			if (_items.Any())
+				LoadItemContent();
+		}
 
+		protected virtual void LoadItemContent()
+		{
 			int menuSize = 0;
 
 			foreach (var item in _items)

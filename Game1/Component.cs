@@ -20,6 +20,7 @@ namespace Game1
 	{
 		private int _delayInputCycles;
 		protected ImageTexture _background;
+		private string _backgroundName;
 		protected ImageTexture _border;
 		private bool _readyDisableOnEscape;
 		private Rectangle _bounds;
@@ -78,11 +79,9 @@ namespace Game1
 			_hasBorder = hasBorder;
 			_delayInputCycles = 0;
 			_mouseover = false;
+			_backgroundName = background;
 
-			// TODO: This should add support for the Util.GenerateSolidBackgroundTexture method for solid colors...
-			if (!String.IsNullOrWhiteSpace(background))
-				_background = new ImageTexture($"{Game1.BackgroundRoot}/{background}", true) { Alignment = ImageAlignment.Centered };
-
+			SetupBackground();
 			SetupBorder();
 			RepositionObjects();
 		}
@@ -210,7 +209,14 @@ namespace Game1
 				_border.Position = this.Bounds.CenterVector();
 		}
 
-		private void SetupBorder()
+		protected void SetupBackground()
+		{
+			// TODO: This should add support for the Util.GenerateSolidBackgroundTexture method for solid colors...
+			if ((!String.IsNullOrWhiteSpace(_backgroundName)) && (this.Bounds != Rectangle.Empty))
+				_background = new ImageTexture($"{Game1.BackgroundRoot}/{_backgroundName}", true) { Alignment = ImageAlignment.Centered };
+		}
+
+		protected void SetupBorder()
 		{
 			if (_hasBorder && (this.Bounds != Rectangle.Empty))
 			{

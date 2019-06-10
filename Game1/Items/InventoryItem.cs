@@ -1,4 +1,6 @@
-﻿namespace Game1.Items
+﻿using System;
+
+namespace Game1.Items
 {
 	public class InventoryItem
 	{
@@ -8,7 +10,7 @@
 
 		public InventoryItem(Item item, int quantity)
 		{
-			this.Item = item;
+			this.Item = item ?? throw new ArgumentNullException(nameof(item));
 			this.Quantity = quantity;
 		}
 	}

@@ -58,13 +58,12 @@ namespace Game1.Interface.Windows
 			_containerViewHotbar.OnMouseClick += _containerView_OnMouseClick;
 			_components.SetState(_containerViewHotbar, ComponentState.All, null);
 
-			// This is kinda dumb since tooltip state doesn't really affect anything else on the window...we need ALL the stuff registered...
 			_components.Register(_tooltip = new Tooltip());
 			_components.SetState(_tooltip, ComponentState.Active, null);
 
+			_components.Register(_contextMenu = new InventoryContextMenu(null, Util.PointInvalid, false));
 			// These need to be instanciatable early, their parameters need to be run-time adjustable
 			// so we can easily register them here....
-			_contextMenu = null;
 			_splitWindow = null;
 		}
 
@@ -82,6 +81,7 @@ namespace Game1.Interface.Windows
 			_containerViewBackpack.UnloadContent();
 			_containerViewHotbar.UnloadContent();
 			_tooltip.UnloadContent();
+			_contextMenu.UnloadContent();
 			DisableContextMenu();
 			DisableSplitWindow();
 		}
@@ -90,7 +90,7 @@ namespace Game1.Interface.Windows
 		{
 			// We removed a bunch of conditional input checks here...need to add these elsewhere (with the ComponentManager)....
 			_splitWindow?.Update(gameTime);
-			_contextMenu?.Update(gameTime);
+			_contextMenu.Update(gameTime);
 			_containerViewBackpack.Update(gameTime);
 			_containerViewHotbar.Update(gameTime);
 			_tooltip.Update(gameTime);			
@@ -112,11 +112,8 @@ namespace Game1.Interface.Windows
 				_tooltip.Draw(batchData.SpriteBatch);
 			}
 			batchData = SpriteBatchManager.Get("context");
-			if (_contextMenu != null)
-			{
-				batchData.ScissorWindow = _contextMenu.Bounds;
-				_contextMenu.Draw(batchData.SpriteBatch);
-			}
+			batchData.ScissorWindow = _contextMenu.Bounds;
+			_contextMenu.Draw(batchData.SpriteBatch);
 			if (_splitWindow != null)
 			{
 				batchData.ScissorWindow = _splitWindow.Bounds;
@@ -146,11 +143,10 @@ namespace Game1.Interface.Windows
 			}
 			else if ((e.Button == MouseButton.Right) && (clickedItemView.Item != null))
 			{
-				// Use the ComponentManager!!
-				_contextMenu = new InventoryContextMenu(clickedItemView, InputManager.MousePosition.Offset(-10, -10), clickedItemView.Item, false) { State = ComponentState.All };
-				_contextMenu.LoadContent();
+				_contextMenu.Initialize(clickedItemView, InputManager.MousePosition.Offset(-10, -10), false);
 				_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
+				_components.SetState(_contextMenu, ComponentState.All, null);
 			}
 		}
 
@@ -216,11 +212,8 @@ namespace Game1.Interface.Windows
 
 		private void DisableContextMenu()
 		{
-			if (_contextMenu != null)
-			{
-				_contextMenu.UnloadContent();
-				_contextMenu = null;
-			}
+			_components.SetState(_contextMenu, ComponentState.None, null);
+			_contextMenu.Clear();
 		}
 
 		private void DisableSplitWindow()

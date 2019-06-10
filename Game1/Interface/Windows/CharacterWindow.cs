@@ -125,7 +125,7 @@ namespace Game1.Interface.Windows
 			if ((e.Button == MouseButton.Right) && (itemView?.Item != null))
 			{
 				// This should use the manager not set the state here...
-				_contextMenu = new InventoryContextMenu(itemView, InputManager.MousePosition.Offset(-10, -10), itemView.Item, true) { State = ComponentState.All };
+				_contextMenu = new InventoryContextMenu(itemView, InputManager.MousePosition.Offset(-10, -10), true) { State = ComponentState.All };
 				_contextMenu.LoadContent();
 				_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;

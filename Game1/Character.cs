@@ -76,7 +76,7 @@ namespace Game1
 				if (_heldItem != value)
 				{
 					_heldItem = value;
-					InputManager.SetMouseCursor(_heldItem?.Item?.Icon?.Texture);
+					InputManager.SetMouseCursor(_heldItem?.Item.Icon.Texture);
 				}
 			}
 		}
