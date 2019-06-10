@@ -12,121 +12,104 @@ using Game1.Items;
 
 namespace Game1.Interface
 {
-	public class InventoryItemView
+	public class InventoryItemView : Component
 	{
 		public const int Size = Game1.IconSize + ((InventoryItemView.BorderWidth + InventoryItemView.ImagePadding) * 2);
 		public const int BorderWidth = 2;
 		public const int ImagePadding = 2;
+		public static readonly Color HighlightColor = Color.Red;
+		public static readonly Vector2 MouseOverScale = new Vector2(1.1f, 1.1f);
 
-		private Rectangle _bounds;
-		private ImageTexture _background;
-		private ImageTexture _border;
-		private ImageTexture _highlight;
-		private ImageTexture _empty;
+		protected override int BorderThickness => InventoryItemView.BorderWidth;
+
+		private ImageTexture _highlightBorder;
+		private ImageTexture _emptyIcon;
 		private ImageText _quantity;
-		private Vector2 _position;
-		private bool _mouseover;
-		private int _containerIndex;
 		private string _emptyImageName;
 
+		public ItemContainerView ContainingView { get; set; }
 		public InventoryItem Item { get; set; }
-
-		public Vector2 CenterPosition { get; set; }
+		public int Index { get; set; }
 
 		public bool Highlight { get; set; }
 
-		public event EventHandler OnMouseClick;
-		public event EventHandler OnMouseOver;
-		public event EventHandler OnMouseOut;
+		public event EventHandler<ComponentEventArgs> OnMouseClick;
 		
-		public Vector2 Position
-		{ 
-			get { return _position; }
-			set {
-				_position = value;
-				// Precalculate this so I we don't have to run this on every update for every item...
-				this.CenterPosition = _bounds.CenterVector();
-			}
-		}
-
-		public InventoryItemView(Rectangle bounds, int containerIndex, string emptyImage)
+		public InventoryItemView(Rectangle bounds, int index, string emptyImage, ItemContainerView containingView = null) : base(bounds, background: "black", hasBorder: true)
 		{
-			_bounds = bounds;
-			_containerIndex = containerIndex;
-			this.Position = bounds.TopLeftVector();
+			this.Index = index;
+			this.ContainingView = containingView;
 			_emptyImageName = emptyImage;
 			if (!String.IsNullOrWhiteSpace(_emptyImageName))
-				_empty = new ImageTexture($"{Game1.IconRoot}\\Empty\\{_emptyImageName}") { Position = this.CenterPosition, Alignment = ImageAlignment.Centered };
-		}
-
-		public void LoadContent()
-		{
+				_emptyIcon = new ImageTexture($"{Game1.IconRoot}\\Empty\\{_emptyImageName}") { Position = this.Bounds.CenterVector(), Alignment = ImageAlignment.Centered };
 			this.Highlight = false;
-			_background = Util.GenerateSolidBackground(_bounds.Width, _bounds.Height, Color.Black);
-			_background.Alignment = ImageAlignment.Centered;
-			_background.Position = this.CenterPosition;
-			_background.LoadContent();
-			_border = Util.GenerateBorderTexture(_bounds.Width, _bounds.Height, InventoryItemView.BorderWidth, Color.Gray);
-			_border.Alignment = ImageAlignment.Centered;
-			_border.Position = this.CenterPosition;
-			_border.LoadContent();
-			_highlight = Util.GenerateBorderTexture(_bounds.Width + 8, _bounds.Height + 8, InventoryItemView.BorderWidth + 2, Color.Red, false);
-			_highlight.Alignment = ImageAlignment.Centered;
-			_highlight.Position = this.CenterPosition;
-			_highlight.LoadContent();
-			_border.LoadContent();
+		}
+
+		public override void LoadContent()
+		{
+			base.LoadContent();
+			_highlightBorder = Util.GenerateBorderTexture(this.Bounds.Width + 8, this.Bounds.Height + 8, this.BorderThickness + 2, InventoryItemView.HighlightColor, false);
+			_highlightBorder.Alignment = ImageAlignment.Centered;
+			_highlightBorder.Position = this.Bounds.CenterVector();
+			_highlightBorder.LoadContent();
 			_quantity = new ImageText("", true) { Alignment = ImageAlignment.RightBottom };
-			_quantity.Position = _bounds.BottomRightVector(-InventoryItemView.ImagePadding, -InventoryItemView.ImagePadding);
+			_quantity.Position = this.Bounds.BottomRightVector(-InventoryItemView.ImagePadding, -InventoryItemView.ImagePadding);
 			_quantity.LoadContent();
-			_empty?.LoadContent();
+			_emptyIcon?.LoadContent();
 		}
 
-		public void UnloadContent()
+		public override void UnloadContent()
 		{
-			_background.UnloadContent();
-			_border.UnloadContent();
-			_highlight.UnloadContent();
+			base.UnloadContent();
+			_highlightBorder.UnloadContent();
 			_quantity.UnloadContent();
-			_empty?.UnloadContent();
+			_emptyIcon?.UnloadContent();
 		}
 
-		public void Update(GameTime gameTime, bool processInput)
+		public override void Update(GameTime gameTime)
 		{
-			bool previousMouseOver = _mouseover;
-			_highlight.IsActive = processInput && this.Highlight;
-			_mouseover = processInput && InputManager.MouseOver(_bounds);
-			if (_empty != null)
-				_empty.IsActive = (this.Item?.Item == null);
+			if (_emptyIcon != null)
+				_emptyIcon.IsActive = (this.Item?.Item == null);
+
 			if (this.Item?.Item != null)
 				_quantity.UpdateText((this.Item.Item.MaxStackSize > 1) ? this.Item.Quantity.ToString() : "");
 
-			if (!processInput)
-				return;
+			_highlightBorder.IsActive = this.Highlight;
 
-			if (InputManager.LeftMouseClick(_bounds))
-				OnMouseClick?.Invoke(this, new MouseEventArgs(MouseButton.Left, _containerIndex));
-			if (InputManager.RightMouseClick(_bounds))
-				OnMouseClick?.Invoke(this, new MouseEventArgs(MouseButton.Right, _containerIndex));
-
-			if (_mouseover)
-				OnMouseOver?.Invoke(this, new MouseEventArgs(MouseButton.None, _containerIndex));
-			else if (previousMouseOver)
-				OnMouseOut?.Invoke(this, new MouseEventArgs(MouseButton.None, _containerIndex));
+			base.Update(gameTime);
 		}
 
-		public void Draw(SpriteBatch spriteBatch)
+		public override void UpdateActive(GameTime gameTime)
 		{
-			_background.Scale = (_mouseover ? new Vector2(1.1f, 1.1f) : Vector2.One);
-			_background.Draw(spriteBatch);
-			_border.Scale = (_mouseover ? new Vector2(1.1f, 1.1f) : Vector2.One);
-			_border.Draw(spriteBatch);
-			_highlight.Draw(spriteBatch);
-			_empty?.Draw(spriteBatch);
+			base.UpdateActive(gameTime);
+		}
+
+		public override void UpdateInput(GameTime gameTime)
+		{
+			if (InputManager.LeftMouseClick(this.Bounds))
+				OnMouseClick?.Invoke(this, new MouseEventArgs(MouseButton.Left));
+			if (InputManager.RightMouseClick(this.Bounds))
+				OnMouseClick?.Invoke(this, new MouseEventArgs(MouseButton.Right));
+
+			base.UpdateInput(gameTime);
+		}
+
+		public override void UpdateMousePosition(GameTime gameTime)
+		{
+			base.UpdateMousePosition(gameTime);
+			_background.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
+			_border.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
+		}
+
+		public override void DrawVisible(SpriteBatch spriteBatch)
+		{
+			base.DrawVisible(spriteBatch);
+			_highlightBorder.Draw(spriteBatch);
+			_emptyIcon?.Draw(spriteBatch);
 			if (this.Item?.Item?.Icon != null)
 			{
-				this.Item.Item.Icon.Scale = (_mouseover ? new Vector2(1.1f, 1.1f) : Vector2.One);
-				this.Item.Item.Icon.Alpha = (this.Item.InTransition ? 0.3f : 1.0f);
-				this.Item.Item.Icon.Draw(spriteBatch, null, this.CenterPosition);
+				this.Item.Item.Icon.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
+				this.Item.Item.Icon.Draw(spriteBatch, null, this.Bounds.CenterVector());
 				_quantity.Draw(spriteBatch);
 			}
 		}

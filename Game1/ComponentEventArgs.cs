@@ -10,22 +10,26 @@ namespace Game1
 {
 	/// <summary>
 	/// This just makes handling nested events and such WAAAAAY easier...even though it's kinda lame to have so many properties for one event arg type...
+	/// We should maybe derive child classes that correspond better to the actions but still have all of the fields (just constructors basically)...
 	/// </summary>
 	public class ComponentEventArgs : EventArgs
 	{
-		public string Type { get; set; }
+		public object Sender { get; set; }
 
-		public string Source { get; set; }
+		// We may not need this and Sender...
+		public object Source { get; set; }
+
+		public string Type { get; set; }
 
 		public string Item { get; set; }
 
 		public MouseButton Button { get; set; }
 
-		public int SourceIndex { get; set; }
+		//public int? SourceIndex { get; set; }
 
-		public char Character { get; }
+		public char Character { get; set; }
 
-		public Keys Key { get; }
+		public Keys Key { get; set; }
 
 		public string CurrentText { get; set; }
 
@@ -35,8 +39,11 @@ namespace Game1
 
 		public string Text { get; set; }
 
+		public ComponentEventArgs InnerEventArgs { get; set; }
+
 		public ComponentEventArgs() { }
 
+		// ScreenEventArgs
 		public ComponentEventArgs(string type, string source = null, string item = null)
 		{
 			this.Type = type;
@@ -44,27 +51,10 @@ namespace Game1
 			this.Item = item;
 		}
 
-		public ComponentEventArgs(MouseButton button, int sourceIndex = -1)
+		public ComponentEventArgs(ComponentEventArgs innerEventArgs, object sender)
 		{
-			this.Button = button;
-			this.SourceIndex = sourceIndex;
-		}
-	
-		public ComponentEventArgs(char character, Keys key = Keys.None, string currentText = null, string resultText = null)
-		{
-			this.Character = character;
-			this.Key = key;
-			this.CurrentText = currentText;
-			this.ResultText = resultText;
-			this.Cancel = false;
-		}
-
-		public ComponentEventArgs(string type, string source, int? sourceIndex, string item)
-		{
-			this.Type = type;
-			this.Source = source;
-			this.SourceIndex = sourceIndex ?? -1;
-			this.Item = item;
+			this.InnerEventArgs = innerEventArgs;
+			this.Sender = sender;
 		}
 	}
 }

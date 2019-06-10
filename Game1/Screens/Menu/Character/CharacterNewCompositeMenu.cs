@@ -25,8 +25,8 @@ namespace Game1.Screens.Menu.Character
 		public string CharacterName { get; set; }
 		public CharacterSex CharacterSex { get; set; }
 
-		public event EventHandler OnSexItemChange;
-		public event EventHandler OnUserNotify;
+		public event EventHandler<ComponentEventArgs> OnSexItemChange;
+		public event EventHandler<ComponentEventArgs> OnUserNotify;
 
 		public CharacterNewCompositeMenu(Rectangle bounds) : base(bounds, true, "brick")
 		{
@@ -141,10 +141,8 @@ namespace Game1.Screens.Menu.Character
 
 		private void _menuSex_OnReadyDisable(object sender, EventArgs e)
 		{
-			int index = _menuSex.CurrentIndex;
 			_menuSex.SetById(this.CharacterSex.ToString("g").ToLower());
-			if (index != _menuSex.CurrentIndex)
-				OnSexItemChange?.Invoke(this, new ComponentEventArgs("change", this.GetType().Name, null, this.CharacterSex.ToString("g").ToLower()));
+			OnSexItemChange?.Invoke(this, new MenuEventArgs("change", null) { Item = this.CharacterSex.ToString("g").ToLower() });
 			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
 		}
 

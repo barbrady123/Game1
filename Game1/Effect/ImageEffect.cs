@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Game1.Effect
 {
-	public abstract class ImageEffect : IActivatable
+	public abstract class ImageEffect
 	{
 		protected Image _image;
 		private bool _isActive;

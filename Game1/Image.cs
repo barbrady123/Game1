@@ -12,7 +12,7 @@ using Game1.Enum;
 
 namespace Game1
 {
-	public abstract class Image : IActivatable
+	public abstract class Image
 	{		
 		protected List<ImageEffect> _effects;
 		protected ContentManager _content;

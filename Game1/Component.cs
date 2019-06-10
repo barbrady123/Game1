@@ -60,12 +60,16 @@ namespace Game1
 		public event EventHandler<ComponentEventArgs> OnMouseOver;
 		public event EventHandler<ComponentEventArgs> OnMouseIn;
 		public event EventHandler<ComponentEventArgs> OnMouseOut;
-		public event EventHandler<ComponentEventArgs> OnMenuItemSelect;
 
 		protected bool _mouseover;
 		protected virtual Size ContentMargin => new Size(20, 20);
 		protected virtual int BorderThickness => 2;
 		protected virtual Color BorderColor => Color.White;
+
+		/// <summary>
+		/// For non-visual components....
+		/// </summary>
+		public Component() { }
 		
 		public Component(Rectangle bounds, bool readyDisableOnEscape = false, string background = "black", bool hasBorder = false)
 		{
@@ -146,12 +150,12 @@ namespace Game1
 			if (mouseover)
 			{
 				if (!_mouseover)
-					MouseIn(new ComponentEventArgs("mousein", this.GetType().Name));
-				MouseOver(new ComponentEventArgs("mouseover", this.GetType().Name));
+					MouseIn(new ComponentEventArgs());
+				MouseOver(new ComponentEventArgs());
 			}
 			else if (_mouseover)
 			{
-				MouseOut(new ComponentEventArgs("mouseout", this.GetType().Name));
+				MouseOut(new ComponentEventArgs());
 			}
 
 			_mouseover = mouseover;
@@ -192,7 +196,7 @@ namespace Game1
 
 		protected virtual void MouseOut(ComponentEventArgs e) => OnMouseOut?.Invoke(this, e);
 
-		protected virtual void MenuItemSelect(ComponentEventArgs e) => OnMenuItemSelect?.Invoke(this, e);
+		//protected virtual void MenuItemSelect(ComponentEventArgs e) => OnMenuItemSelect?.Invoke(this, e);
 
 		protected virtual void RepositionObjects()
 		{

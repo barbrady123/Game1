@@ -75,6 +75,7 @@ namespace Game1
 		{
 			excludedKeys.Clear();
 			_blockMouseButtons = false;
+			_blockAllInput = false;
 			_prevKeyState = _currentKeyState;
 			_currentKeyState = Keyboard.GetState();
 			_prevMouseState = _currentMouseState;
@@ -83,9 +84,13 @@ namespace Game1
 
 		private static List<Keys> excludedKeys = new List<Keys>();
 		private static bool _blockMouseButtons;
+		private static bool _blockAllInput;
 
 		public static bool KeyPressed(Keys key, bool clearAfterMatch = false)
 		{
+			if (_blockAllInput)
+				return false;
+
 			if (excludedKeys.Contains(key))
 				return false;
 
@@ -101,21 +106,24 @@ namespace Game1
 			excludedKeys.Add(key);
 		}
 
-		public static bool KeyPressed(Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyDown(k) && _prevKeyState.IsKeyUp(k));
+		public static bool KeyPressed(Keys[] keys) => (!_blockAllInput) &&  keys.Any(k => _currentKeyState.IsKeyDown(k) && _prevKeyState.IsKeyUp(k));
 
 		public static bool KeyReleased(Keys key) => KeyReleased(new[] { key });
 
-		public static bool KeyReleased(Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyUp(k) && _prevKeyState.IsKeyDown(k));
+		public static bool KeyReleased(Keys[] keys) => (!_blockAllInput) && keys.Any(k => _currentKeyState.IsKeyUp(k) && _prevKeyState.IsKeyDown(k));
 
 		public static bool KeyDown(Keys key) => KeyDown(new[] { key });
 
-		public static bool KeyDown(Keys[] keys) => keys.Any(k => _currentKeyState.IsKeyDown(k));	
+		public static bool KeyDown(Keys[] keys) => (!_blockAllInput) && keys.Any(k => _currentKeyState.IsKeyDown(k));	
 
 		public static bool CapsLock => _currentKeyState.CapsLock;
 
 		public static List<Keys> GetPressedKeys()
 		{
 			List<Keys> keysPressed = new List<Keys>();
+			if (_blockAllInput)
+				return keysPressed;
+
 			foreach (var key in _currentKeyState.GetPressedKeys().Where(k => !excludedKeys.Contains(k)))
 				if (_prevKeyState.IsKeyUp(key))
 					keysPressed.Add(key);
@@ -131,26 +139,50 @@ namespace Game1
 			return (isUpper ? values.upper : values.lower);
 		}
 
-		public static Point MousePosition => _currentMouseState.Position;
+		public static Point MousePosition => _blockAllInput ? new Point(-1, -1) : _currentMouseState.Position;
 
-		public static bool MouseOver(Rectangle bounds) => bounds.Contains(_currentMouseState.Position);
+		public static bool MouseOver(Rectangle bounds) => (!_blockAllInput) && bounds.Contains(_currentMouseState.Position);
 
-		public static bool LeftMouseClick() => (!_blockMouseButtons) &&  (_currentMouseState.LeftButton == ButtonState.Pressed) && (_prevMouseState.LeftButton == ButtonState.Released);
+		public static bool LeftMouseClick() => (!(_blockMouseButtons || _blockAllInput)) && (_currentMouseState.LeftButton == ButtonState.Pressed) && (_prevMouseState.LeftButton == ButtonState.Released);
 
 		public static bool LeftMouseClick(Rectangle bounds) => MouseOver(bounds) && LeftMouseClick();
 
-		public static bool RightMouseClick() => (!_blockMouseButtons) &&  (_currentMouseState.RightButton == ButtonState.Pressed) && (_prevMouseState.RightButton == ButtonState.Released);
+		public static bool RightMouseClick() => (!(_blockMouseButtons || _blockAllInput)) &&  (_currentMouseState.RightButton == ButtonState.Pressed) && (_prevMouseState.RightButton == ButtonState.Released);
 
 		public static bool RightMouseClick(Rectangle bounds) => MouseOver(bounds) && RightMouseClick();
 
-		public static int MouseScrollAmount => _currentMouseState.ScrollWheelValue - _prevMouseState.ScrollWheelValue;
+		public static int MouseScrollAmount => (_blockAllInput ? 0 : _currentMouseState.ScrollWheelValue - _prevMouseState.ScrollWheelValue);
 
 		public static void SetMouseCursor(Texture2D texture)
 		{
-			Mouse.SetCursor(MouseCursor.FromTexture2D(texture, texture.Bounds.Center.X, texture.Bounds.Center.Y));
+			if (texture == null)
+			{
+				ResetMouseCursor();
+				return;
+			}
+
+			var mouseTexture = RBReversedChannel(texture);
+			Mouse.SetCursor(MouseCursor.FromTexture2D(mouseTexture, mouseTexture.Bounds.Center.X, mouseTexture.Bounds.Center.Y));
 		}
 
-		public static void ResetMouseCursor()
+		private static Texture2D RBReversedChannel(Texture2D textureOriginal)
+		{
+			var data = new Color[textureOriginal.Width * textureOriginal.Height];
+			textureOriginal.GetData(data);
+
+			for (int i = 0; i < data.Length; i++)
+			{
+				byte red = data[i].R;
+				data[i].R = data[i].B;
+				data[i].B = red;
+			}
+
+			var reversedTexture = new Texture2D(Game1.Graphics, textureOriginal.Width, textureOriginal.Height);
+			reversedTexture.SetData(data);
+			return reversedTexture;
+		}
+
+		private static void ResetMouseCursor()
 		{
 			Mouse.SetCursor(MouseCursor.Arrow);
 		}
@@ -158,6 +190,11 @@ namespace Game1
 		public static void BlockButtonClicks()
 		{
 			_blockMouseButtons = true;
+		}
+
+		public static void BlockAllInput()
+		{
+			_blockAllInput = true;
 		}
 	}
 }

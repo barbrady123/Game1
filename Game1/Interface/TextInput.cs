@@ -144,12 +144,12 @@ namespace Game1.Interface
 				switch (key)
 				{
 					case (Keys.Enter) :		
-						ReadyDisable(new ComponentEventArgs('\0', key));
+						ReadyDisable(new TextInputEventArgs('\0', key));
 						finalizeText = true;
 						continue;
 					case (Keys.Escape) :
 						InputManager.BlockKey(Keys.Escape);
-						ReadyDisable(new ComponentEventArgs('\0', key));
+						ReadyDisable(new TextInputEventArgs('\0', key));
 						updateText = false;
 						finalizeText = true;
 						continue;

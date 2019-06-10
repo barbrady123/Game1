@@ -55,5 +55,13 @@ namespace Game1
 		{
 			_components.ForEach(x => x.State = (exclusive ? state : x.State | state));
 		}
+
+		public void ClearState(Component component, ComponentState state)
+		{
+			if (!_components.Contains(component))
+				return;
+
+			component.State &= ~state;
+		}
 	}
 }

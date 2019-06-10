@@ -20,18 +20,14 @@ namespace Game1.Screens.Menu
 		private readonly InventoryItem _item;
 		private readonly bool _isEquipped;
 
-		public InventoryContextMenu(object sender, 
-									string eventSource,
-									int? eventSourceIndex,
+		public InventoryContextMenu(object owner, 
 									Point position,
 									InventoryItem item,
 									bool isEquipped) : base(InventoryContextMenu.CalculateItemMenuBounds(position, item, isEquipped), background: "black")
 		{
-			this.Owner = sender;
+			this.Owner = owner;
 			_item = item;
 			_isEquipped = isEquipped;
-			this.EventSource = eventSource ?? this.EventSource;
-			this.EventSourceIndex = eventSourceIndex ?? this.EventSourceIndex;
 		}
 
 		protected override List<MenuItem> GetItemData()
@@ -66,6 +62,18 @@ namespace Game1.Screens.Menu
 		{
 			var size = MenuScreen.CalculateMenuSize(MenuScreen.MENU_PADDING, MenuScreen.MENU_PADDING, InventoryContextMenu.GetItemMenuOptions(item, isEquipped), MenuLayout.Vertical);
 			return new Rectangle(position.X, position.Y, size.Width, size.Height);
+		}
+
+		protected override void CurrentItemChange(ComponentEventArgs e)
+		{
+			e.Sender = this.Owner;
+			base.CurrentItemChange(e);
+		}
+
+		protected override void ItemSelect(ComponentEventArgs e)
+		{
+			e.Sender = this.Owner;
+			base.ItemSelect(e);
 		}
 	}
 }

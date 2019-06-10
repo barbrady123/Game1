@@ -25,12 +25,13 @@ namespace Game1.Screens
 		{
 			_components = new ComponentManager();
 
-			// Need to roll GamePlayManager over to Component...
-			_gameplay = new GamePlayManager(bounds) { IsActive = true };
-			// Dialog
-			_dialog = new Dialog("Paused", DialogButton.Ok, bounds.CenteredRegion(400, 200), null);
-			_dialog.OnMenuItemSelect += _dialogBox_OnButtonClick;
-			_dialog.OnReadyDisable += _dialogBox_OnButtonClick;
+			_components.Register(_gameplay = new GamePlayManager(bounds));
+			_gameplay.OnReadyDisable += _gameplay_OnReadyDisable;
+			_components.Register(_dialog = new Dialog("Paused", DialogButton.Ok, bounds.CenteredRegion(400, 200), null));
+			_dialog.OnItemSelect += _dialog_OnItemSelect;
+			_dialog.OnReadyDisable += _dialog_OnReadyDisable; ;
+
+			_components.SetState(_gameplay, ComponentState.All, ComponentState.None);
 		}
 
 		public override void LoadContent()
@@ -49,32 +50,39 @@ namespace Game1.Screens
 
 		public override void Update(GameTime gameTime)
 		{
-			base.Update(gameTime);
 			_dialog.Update(gameTime);
+			base.Update(gameTime);
 		}
 
 		public override void UpdateActive(GameTime gameTime)
 		{
-			base.UpdateActive(gameTime);
 			_gameplay.Update(gameTime);
+			base.UpdateActive(gameTime);
 		}
 
-		public override void Draw(SpriteBatch spriteBatch)
+		public override void DrawVisible(SpriteBatch spriteBatch)
 		{	
-			base.Draw(spriteBatch);
+			var batchData = SpriteBatchManager.Get("modal");
+			batchData.ScissorWindow = _dialog.Bounds;
+			_dialog.Draw(batchData.SpriteBatch);
+			base.DrawVisible(spriteBatch);
 			_gameplay.Draw(spriteBatch);
-			_dialog.Draw(spriteBatch);
 		}
 
-		private void _dialogBox_OnButtonClick(object sender, EventArgs e)
+		private void _dialog_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			_gameplay.IsActive = true;
+			// Eventually we will care what got clicked here...
+			_components.SetState(_gameplay, ComponentState.All, ComponentState.None);
 		}
 
-		protected override void ReadyDisable(ComponentEventArgs e)
-		{			
-			// use the manager...
-			_dialog.State = ComponentState.All;
+		private void _dialog_OnReadyDisable(object sender, ComponentEventArgs e)
+		{
+			_components.SetState(_gameplay, ComponentState.All, ComponentState.None);
+		}
+
+		private void _gameplay_OnReadyDisable(object sender, ComponentEventArgs e)
+		{
+			_components.SetState(_dialog, ComponentState.All, ComponentState.Visible);
 		}
 	}
 }

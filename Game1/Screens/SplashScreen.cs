@@ -46,7 +46,7 @@ namespace Game1.Screens
 			if (InputManager.KeyPressed(Keys.Enter))
 			{
 				_title.IsActive = false;
-				ReadyDisable(new ComponentEventArgs("continue", this.GetType().Name, null));
+				ReadyDisable(new ScreenEventArgs("continue", this.GetType().Name, null));
 			}
 		}
 

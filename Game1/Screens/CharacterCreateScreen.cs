@@ -60,7 +60,7 @@ namespace Game1.Screens
 
 			// Dialog
 			_components.Register(_dialog = new Dialog(null, DialogButton.Ok, new Rectangle(600, 500, 400, 200), null));
-			_dialog.OnMenuItemSelect += _dialogBox_OnButtonClick;
+			_dialog.OnItemSelect += _dialog_OnItemSelect;
 			_dialog.OnReadyDisable += _dialogBox_OnButtonClick;
 
 			_components.SetState(_menuCharacter, ComponentState.All, null);
@@ -104,11 +104,9 @@ namespace Game1.Screens
 			_dialog.Draw(spriteBatch);
 		}
 
-		private void _menuCharacter_OnSexItemChange(object sender, EventArgs e)
+		private void _menuCharacter_OnSexItemChange(object sender, ComponentEventArgs e)
 		{
-			var args = (ComponentEventArgs)e;
-
-			switch (args.Item)
+			switch (e.Item)
 			{
 				case "female" :
 					_characterView.SwapTexture(this.CharacterPreviewImage(CharacterSex.Female));
@@ -119,11 +117,9 @@ namespace Game1.Screens
 			}
 		}
 
-		private void _menuCharacter_OnReadyDisable(object sender, EventArgs e)
+		private void _menuCharacter_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
-			var args = (ComponentEventArgs)e;
-
-			switch (args.Type)
+			switch (e.Type)
 			{
 				case "continue" :
 					_newChar.Name = _menuCharacter.CharacterName;
@@ -131,26 +127,30 @@ namespace Game1.Screens
 					_newChar.Position = new Vector2(Game1.TileSize / 2, Game1.TileSize / 2);
 					IOManager.ObjectToFile(Game1.PlayerFile, _newChar);
 					// TODO: Eventually we need to handle some kind of identifier of this new player to the parent, when we have multiple player/world files...
-					ReadyDisable(new ComponentEventArgs("game", this.GetType().Name, null));
+					ReadyDisable(new ScreenEventArgs("game", this.GetType().Name, null));
 					break;
 				case "back" :
 				case "escape" :
-					ReadyDisable(new ComponentEventArgs("back", this.GetType().Name, null));
+					ReadyDisable(new ScreenEventArgs("back", this.GetType().Name, null));
 					break;
 			}
 		}
 
-		private void _menuCharacter_OnUserNotify(object sender, EventArgs e)
+		private void _menuCharacter_OnUserNotify(object sender, ComponentEventArgs e)
 		{
-			var args = (ComponentEventArgs)e;
-
-			_dialog.Text = args.Text;
+			_dialog.Text = e.Text;
 			_dialog.Duration = 300;
 			_components.SetState(_dialog, ComponentState.All, ComponentState.Visible);
 		}
 
 		private void _dialogBox_OnButtonClick(object sender, ComponentEventArgs e)
 		{
+			_components.SetState(_menuCharacter, ComponentState.All, ComponentState.None);
+		}
+
+		private void _dialog_OnItemSelect(object sender, ComponentEventArgs e)
+		{
+			// Eventually we need to figure out what they clicked here...
 			_components.SetState(_menuCharacter, ComponentState.All, ComponentState.None);
 		}
 	}

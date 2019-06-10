@@ -33,6 +33,8 @@ namespace Game1.Interface.Windows
 				}
 			}
 		}
+
+		public event EventHandler<ComponentEventArgs> OnItemSelect;
 		
 		public Dialog(string text, DialogButton buttons, Rectangle bounds, int? duration) : base(bounds, true, "black")
 		{
@@ -83,7 +85,7 @@ namespace Game1.Interface.Windows
 
 		private void _buttonMenu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			MenuItemSelect(e);
+			OnItemSelect?.Invoke(this, new ComponentEventArgs(e, sender));
 		}
 	}
 }

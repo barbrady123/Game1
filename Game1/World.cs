@@ -12,13 +12,20 @@ using Game1.Items;
 
 namespace Game1
 {
-	public class World
+	public class World : Component
 	{
+		private readonly PhysicsManager _physics;
+
 		public List<NPC> NPCs { get; set; }
 		public Character Character { get; set; }
 		public Map CurrentMap { get; set; }
 
 		public List<Character> AllCharacters => new List<Character>((this.NPCs?.Count ?? 0) + 1) { this.Character }.Concat(this.NPCs).ToList();
+
+		public World()
+		{
+			_physics = new PhysicsManager(this);
+		}
 
 		public void Initialize()
 		{
@@ -45,8 +52,9 @@ namespace Game1
 			};
 		}
 
-		public void LoadContent()
+		public override void LoadContent()
 		{
+			// Obviously none of this crap should be here...
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
@@ -59,24 +67,20 @@ namespace Game1
 			//this.Character.EquippedArmorChest = ItemManager.GetItem();
 			//this.Character.EquippedArmorLegs = ItemManager.GetItem();
 			//this.Character.EquippedArmorFeet = ItemManager.GetItem();
+
+			// This will need to be redone if the map changes....
+			_physics.CalculateParameters();
 		}
 
-		public void UnloadContent()
-		{
-
-		}
-
-		public void Update(GameTime gameTime)
+		public override void UpdateActive(GameTime gameTime)
 		{
 			this.CurrentMap.Update(gameTime);
 			this.Character.Update(gameTime);
 			foreach (var npc in this.NPCs)
 				npc.Update(gameTime);
+			_physics.Update(gameTime);
 		}
 
-		public void Draw(SpriteBatch spriteBatch)
-		{
-
-		}
+		public override void Draw(SpriteBatch spriteBatch) { }
 	}
 }

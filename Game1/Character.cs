@@ -21,6 +21,7 @@ namespace Game1
 		private ItemContainer _backpack;
 		private int _currentHP;
 		private int _currentMana;
+		private InventoryItem _heldItem;
 		//private int _itemDefense;
 		//private int _baseDefense;
 
@@ -66,7 +67,19 @@ namespace Game1
 
 		public ItemContainer HotBar => _hotbar;
 		public ItemContainer Backpack => _backpack;
-		public InventoryItem HeldItem { get; set; }
+		
+		public InventoryItem HeldItem
+		{ 
+			get { return _heldItem; }
+			set
+			{
+				if (_heldItem != value)
+				{
+					_heldItem = value;
+					InputManager.SetMouseCursor(_heldItem?.Item?.Icon?.Texture);
+				}
+			}
+		}
 
 		public InventoryItem EquippedArmorHead	{ get; set; }
 		public InventoryItem EquippedArmorChest { get; set; }

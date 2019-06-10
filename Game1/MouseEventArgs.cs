@@ -12,16 +12,11 @@ using Game1.Enum;
 namespace Game1
 {
 	// TODO: May eventually need multi-button support
-	public class MouseEventArgs : EventArgs
+	public class MouseEventArgs : ComponentEventArgs
 	{
-		public MouseButton Button { get; set; }
-
-		public int SourceIndex { get; set; }
-
-		public MouseEventArgs(MouseButton button = MouseButton.None, int sourceIndex = -1)
+		public MouseEventArgs(MouseButton button = MouseButton.None)
 		{
 			this.Button = button;
-			this.SourceIndex = sourceIndex;
 		}
 	}
 }

@@ -15,22 +15,27 @@ using Game1.Screens.Menu;
 
 namespace Game1.Interface.Windows
 {
-	public class CharacterWindow : Window
+	public class CharacterWindow : Component
 	{
-		public override Size ContentMargin => new Size(50, this.Title == null ? 20 : 60);
+		private readonly ComponentManager _components;
 		private Character _character;
 		private InventoryItemView[] _armorItemView;
+		private ImageText _characterName;
 		private ImageText[] _characterStat;
 		private InventoryContextMenu _contextMenu;
-		private readonly ComponentManager _components;
 
 		private Tooltip _tooltip;
 
-		public CharacterWindow(Rectangle bounds, Character character) : base(bounds, "brick", character.Name, null, true, true)
+		public CharacterWindow(Rectangle bounds, Character character) : base(bounds, true, "brick")
 		{
-			var viewPosition = bounds.TopLeftPoint(this.ContentMargin.Width, this.ContentMargin.Height);
 			_character = character;
 			_armorItemView = new InventoryItemView[System.Enum.GetNames(typeof(ArmorSlot)).Length];
+
+			_characterName = new ImageText(_character.Name, true) {
+				Alignment = ImageAlignment.Centered,
+				Position = this.Bounds.TopCenterVector(yOffset: this.ContentMargin.Height + (FontManager.FontHeight / 2))
+			};
+
 			for (int i = 0; i < _armorItemView.Length; i++)
 			{
 				var position = this.Bounds.TopRightVector(-100, this.ContentMargin.Height + InventoryItemView.Size / 2 + (100 * i)).ExpandToRectangleCentered(InventoryItemView.Size / 2, InventoryItemView.Size / 2);
@@ -43,7 +48,7 @@ namespace Game1.Interface.Windows
 			_characterStat = new ImageText[System.Enum.GetNames(typeof(CharacterAttribute)).Length];
 			for (int i = 0; i < _characterStat.Length; i++)
 			{
-				var position = this.Bounds.TopLeftVector(this.ContentMargin.Width, this.ContentMargin.Height + 20 + (this.ContentMargin.Height / 2 * i));
+				var position = this.Bounds.TopLeftVector(this.ContentMargin.Width, this.ContentMargin.Height + 20 + (this.ContentMargin.Height * 2 * i));
 				_characterStat[i] = new ImageText(null, true) { Position = position, Alignment = ImageAlignment.LeftCentered };
 			}
 
@@ -57,6 +62,7 @@ namespace Game1.Interface.Windows
 		public override void LoadContent()
 		{
 			base.LoadContent();
+			_characterName.LoadContent();
 			_tooltip.LoadContent();
 			foreach (var armorView in _armorItemView)
 				armorView.LoadContent();
@@ -67,6 +73,7 @@ namespace Game1.Interface.Windows
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
+			_characterName.UnloadContent();
 			_tooltip.UnloadContent();
 			foreach (var armorView in _armorItemView)
 				armorView.UnloadContent();
@@ -74,49 +81,51 @@ namespace Game1.Interface.Windows
 				stat.UnloadContent();
 		}
 
-		public override void UpdateReady(GameTime gameTime)
+		public override void UpdateActive(GameTime gameTime)
 		{
-			base.UpdateReady(gameTime);
+			base.UpdateActive(gameTime);
+			_characterName.Update(gameTime);
 			_tooltip.Update(gameTime);
 			UpdateArmorViews();
 			foreach (var armorView in _armorItemView)
-				armorView.Update(gameTime, _contextMenu == null);
+				armorView.Update(gameTime);
 			UpdateCharacterStats();
 			foreach (var stat in _characterStat)
 				stat.Update(gameTime);
 			// Need to fix this...probably bad now 
 			_contextMenu?.Update(gameTime);
+			InputManager.BlockAllInput();
 		}
 
-		public override void DrawInternal(SpriteBatch spriteBatch)
+		public override void DrawVisible(SpriteBatch spriteBatch)
 		{
-			base.DrawInternal(spriteBatch);
-			var batchData = SpriteBatchManager.Get("tooltip");
-			_tooltip.Draw(batchData.SpriteBatch);
+			// Refactor this spritebatch stuff...
+			base.DrawVisible(spriteBatch);
+			_characterName.Draw(spriteBatch);
 			foreach (var armorView in _armorItemView)
 				armorView.Draw(spriteBatch);
 			foreach (var stat in _characterStat)
 				stat.Draw(spriteBatch);
+
 			if (_contextMenu != null)
 			{
-				batchData = SpriteBatchManager.Get("context");
-				batchData.ScissorWindow = _contextMenu.Bounds;
-				_contextMenu?.Draw(batchData.SpriteBatch);
+				var contextBatch = SpriteBatchManager.Get("context");
+				contextBatch.ScissorWindow = _contextMenu.Bounds;
+				_contextMenu?.Draw(contextBatch.SpriteBatch);
 			}
+
+			var tooltipBatch = SpriteBatchManager.Get("tooltip");
+			_tooltip.Draw(tooltipBatch.SpriteBatch);
 		}
 
-		protected override void BeforeReadyDisable(ScreenEventArgs args)
+		private void ArmorItemView_OnMouseClick(object sender, ComponentEventArgs e)
 		{
-			base.BeforeReadyDisable(args);
-		}
+			var itemView = (InventoryItemView)sender;
 
-		private void ArmorItemView_OnMouseClick(object sender, EventArgs e)
-		{
-			var args = (MouseEventArgs)e;
-			if ((args.Button == MouseButton.Right) && (_armorItemView[args.SourceIndex]?.Item != null))
+			if ((e.Button == MouseButton.Right) && (itemView?.Item != null))
 			{
 				// This should use the manager not set the state here...
-				_contextMenu = new InventoryContextMenu(sender, "armorview", args.SourceIndex,  InputManager.MousePosition.Offset(-10, -10), _armorItemView[args.SourceIndex].Item, true) { State = ComponentState.All };
+				_contextMenu = new InventoryContextMenu(itemView, InputManager.MousePosition.Offset(-10, -10), itemView.Item, true) { State = ComponentState.All };
 				_contextMenu.LoadContent();
 				_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
@@ -127,7 +136,6 @@ namespace Game1.Interface.Windows
 		{
 			var args = (MouseEventArgs)e;
 			var overItem = (sender as InventoryItemView).Item;
-			int overIndex = args.SourceIndex;
 
 			if ((overItem != null) && (_contextMenu?.Owner != sender))
 				_tooltip.Show(overItem.Item.DisplayName, InputManager.MousePosition.Offset(10, 10), 15, sender);
@@ -158,13 +166,14 @@ namespace Game1.Interface.Windows
 			}
 		}
 
-		private void _contextMenu_OnItemSelect(object sender, EventArgs e)
+		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var args = (MenuEventArgs)e;
-			switch (args.Item)
+			var itemView = (InventoryItemView)e.Sender;
+
+			switch (e.Item)
 			{
 				case "unequip"	:	
-					_character.UnequipArmor((ArmorSlot)args.SourceIndex);
+					_character.UnequipArmor((ArmorSlot)itemView.Index);
 					_character.PutItem(_character.Backpack);
 					break;
 				case "split"	:
@@ -175,7 +184,7 @@ namespace Game1.Interface.Windows
 			_contextMenu = null;
 		}
 
-		private void _contextMenu_OnMouseOut(object sender, EventArgs e)
+		private void _contextMenu_OnMouseOut(object sender, ComponentEventArgs e)
 		{
 			_contextMenu = null;
 		}

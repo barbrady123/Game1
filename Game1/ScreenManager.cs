@@ -77,9 +77,9 @@ namespace Game1
 
 		public void StartScreen()
 		{
-			//TransitionScreens(new SplashScreen(_bounds));
+			TransitionScreens(new SplashScreen(_bounds));
 			//TransitionScreens(new MainMenu(_bounds));
-			TransitionScreens(new CharacterCreateScreen(_bounds));
+			//TransitionScreens(new CharacterCreateScreen(_bounds));
 			//TransitionScreens(new GameScreen(_bounds));
 		}
 
@@ -177,25 +177,6 @@ namespace Game1
 					case "back" : TransitionScreens(new MainMenu(_bounds));		break;
 					// This should NOT go directly to game screen...we need a "loading" transition screen with a call back (probably just part of the ScreenManager)....
 					case "game" : TransitionScreens(new GameScreen(_bounds));	break;
-				}
-				break;
-			}
-		}
-
-		private void MenuScreen_OnReadyDisable(object sender, EventArgs e)
-		{
-			var args = (MenuEventArgs)e;
-
-			switch (args.Source)
-			{
-				case "MainMenu": switch (args.Type)
-				{
-					case "escape":	Game1.Instance.Exit();	break;
-				}
-				break;
-				case "OptionsMenu" : switch (args.Type)
-				{
-					case "escape": TransitionScreens(new MainMenu(_bounds)); break;
 				}
 				break;
 			}

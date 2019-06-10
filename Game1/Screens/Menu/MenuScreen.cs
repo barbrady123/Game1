@@ -31,8 +31,6 @@ namespace Game1.Screens.Menu
 		private static readonly Color SelectedItemColor = new Color(240, 240, 240);
 		private static readonly Color UnselectedItemColor = new Color(100, 100, 100);
 
-		protected string EventSource { get; set; }
-		protected int? EventSourceIndex { get; set; } = null;
 		protected int _currentIndex;
 		protected List<MenuItem> _items;
 		protected MenuLayout _layout; 
@@ -80,7 +78,6 @@ namespace Game1.Screens.Menu
 						  string background = "brick",
 						  bool escapeToDisable = false): base(bounds, escapeToDisable, background)
 		{
-			this.EventSource = this.GetType().Name;
 			_currentIndex = -1;
 			_items = new List<MenuItem>();
 			_layout = layout;
@@ -176,7 +173,7 @@ namespace Game1.Screens.Menu
 				if (this.CurrentIndex != i)
 				{
 					this.CurrentIndex = i;
-					OnCurrentItemChange?.Invoke(this, new ComponentEventArgs("currentChange", this.EventSource, this.EventSourceIndex, _items[_currentIndex].Id));
+					CurrentItemChange(new MenuEventArgs("currentChange", _items[_currentIndex]));
 				}
 			}
 
@@ -189,11 +186,11 @@ namespace Game1.Screens.Menu
 			for (int i = 0; i < _items.Count; i++)
 			{
 				if (InputManager.LeftMouseClick(_items[i].Bounds))
-					OnItemSelect?.Invoke(this, new ComponentEventArgs("select", this.EventSource, this.EventSourceIndex, _items[_currentIndex].Id));
+					ItemSelect(new MenuEventArgs("select", _items[_currentIndex]));
 			}
 
 			base.UpdateInput(gameTime);
-		}	
+		}
 
 		public override void DrawVisible(SpriteBatch spriteBatch)
 		{
@@ -261,5 +258,16 @@ namespace Game1.Screens.Menu
 
 			return new Size((int)width + paddingWidth, (int)height + paddingHeight);
 		}
+		
+		protected virtual void CurrentItemChange(ComponentEventArgs args)
+		{
+			OnCurrentItemChange?.Invoke(this, args);
+		}
+
+		protected virtual void ItemSelect(ComponentEventArgs args)
+		{
+			OnItemSelect?.Invoke(this, args);
+		}
+
 	}
 }

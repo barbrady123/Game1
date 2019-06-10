@@ -29,6 +29,7 @@ namespace Game1
 			if (String.IsNullOrWhiteSpace(id))
 				id = Guid.NewGuid().ToString();
 
+			batch.Name = id;
 			_batches.Add(new SpriteBatchData { SpriteBatch = batch, RasterizeState = rasterizeState, Index = index, Id = id, ScissorWindow = Rectangle.Empty });
 			return id;
 		}
