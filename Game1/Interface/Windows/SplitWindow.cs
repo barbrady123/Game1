@@ -68,26 +68,25 @@ namespace Game1.Interface.Windows
 			UnloadContent();
 			_background = null;
 			_border = null;
-			_menu.UnloadContent();
-			_input.UnloadContent();
-			_halfButton.UnloadContent();
+			_menu?.UnloadContent();
+			_input?.UnloadContent();
+			_halfButton?.UnloadContent();
 		}
 
 		public override void LoadContent()
 		{
 			base.LoadContent();
-			_menu.LoadContent();
-			_input.LoadContent();
-			_halfButton.LoadContent();
+			_menu?.LoadContent();
+			_input?.LoadContent();
+			_halfButton?.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
-			_menu.UnloadContent();
-			_input.UnloadContent();
-			_halfButton.UnloadContent();
+			_menu?.UnloadContent();
+			_input?.UnloadContent();
+			_halfButton?.UnloadContent();
 		}
-
 
 		public override void UpdateActive(GameTime gameTime)
 		{
@@ -100,9 +99,9 @@ namespace Game1.Interface.Windows
 		public override void DrawVisible(SpriteBatch spriteBatch)
 		{
 			base.DrawVisible(spriteBatch);
-			_menu.Draw(spriteBatch);
-			_input.Draw(spriteBatch);
-			_halfButton.Draw(spriteBatch);
+			_menu?.Draw(spriteBatch);
+			_input?.Draw(spriteBatch);
+			_halfButton?.Draw(spriteBatch);
 		}
 
 		private void _halfButton_OnClick(object sender, EventArgs e)

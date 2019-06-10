@@ -12,6 +12,7 @@ namespace Game1
 	/// This just makes handling nested events and such WAAAAAY easier...even though it's kinda lame to have so many properties for one event arg type...
 	/// We should maybe derive child classes that correspond better to the actions but still have all of the fields (just constructors basically)...
 	/// </summary>
+	[System.Diagnostics.DebuggerStepThrough]
 	public class ComponentEventArgs : EventArgs
 	{
 		public object Sender { get; set; }

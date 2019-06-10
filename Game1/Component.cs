@@ -27,7 +27,7 @@ namespace Game1
 		private bool _hasBorder;
 		private ComponentState _state;
 
-		public ComponentState State
+		public virtual ComponentState State
 		{
 			get { return _state; }
 			set {
@@ -51,6 +51,7 @@ namespace Game1
 				if (_bounds != value)
 				{
 					_bounds = value;
+					SetupBackground();
 					SetupBorder();
 					RepositionObjects();
 				}
@@ -194,8 +195,6 @@ namespace Game1
 
 		protected virtual void MouseOut(ComponentEventArgs e) => OnMouseOut?.Invoke(this, e);
 
-		//protected virtual void MenuItemSelect(ComponentEventArgs e) => OnMenuItemSelect?.Invoke(this, e);
-
 		protected virtual void RepositionObjects()
 		{
 			if (_background != null)
@@ -210,6 +209,7 @@ namespace Game1
 
 		protected void SetupBackground()
 		{
+			_background?.UnloadContent();
 			// TODO: This should add support for the Util.GenerateSolidBackgroundTexture method for solid colors...
 			if ((!String.IsNullOrWhiteSpace(_backgroundName)) && (this.Bounds != Rectangle.Empty))
 				_background = new ImageTexture($"{Game1.BackgroundRoot}/{_backgroundName}", true) { Alignment = ImageAlignment.Centered };
@@ -222,7 +222,6 @@ namespace Game1
 				_border?.UnloadContent();
 				_border = Util.GenerateBorderTexture(this.Bounds.Width, this.Bounds.Height, this.BorderThickness, this.BorderColor, true);
 				_border.Alignment = ImageAlignment.Centered;
-				_border.LoadContent();
 			}
 		}
 	}

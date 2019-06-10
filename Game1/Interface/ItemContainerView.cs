@@ -36,7 +36,7 @@ namespace Game1.Interface
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
 				var position = CalculateItemViewPosition(i);
-				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(InventoryItemView.Size, InventoryItemView.Size), i, null);
+				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(InventoryItemView.Size, InventoryItemView.Size), i, null, this);
 				_itemViews[i].OnMouseClick += ItemContainerView_OnMouseClick;
 				_itemViews[i].OnMouseOver += ItemContainerView_OnMouseOver;
 				_itemViews[i].OnMouseOut += ItemContainerView_OnMouseOut;
@@ -62,6 +62,12 @@ namespace Game1.Interface
 		{
 			UpdateItems(gameTime);
 			base.UpdateActive(gameTime);
+		}
+
+		public override void UpdateMousePosition(GameTime gameTime)
+		{
+			// We don't want events fired for the container view itself...
+			_mouseover = InputManager.MouseOver(this.Bounds);
 		}
 
 		public override void DrawVisible(SpriteBatch spriteBatch)

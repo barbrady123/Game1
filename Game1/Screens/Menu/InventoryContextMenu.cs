@@ -79,6 +79,7 @@ namespace Game1.Screens.Menu
 		{
 			e.Sender = this.Owner;
 			base.ItemSelect(e);
+			InputManager.BlockAllInput();
 		}
 
 		private static List<string> GetItemMenuOptions(InventoryItem item, bool isEquipped)

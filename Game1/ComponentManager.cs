@@ -37,6 +37,15 @@ namespace Game1
 			component.State |= state;
 		}
 
+		public void AddState(IEnumerable<Component> components, ComponentState state, bool clearOthers = false)
+		{
+			if (clearOthers)
+				_components.ForEach(x => x.State &= ~state);
+
+			foreach (var c in components)
+				AddState(c, state, false);
+		}
+
 		public void SetState(Component component, ComponentState state, ComponentState? otherState)
 		{
 			if (!_components.Contains(component))
@@ -62,6 +71,12 @@ namespace Game1
 				return;
 
 			component.State &= ~state;
+		}
+
+		public void ClearState(IEnumerable<Component> components, ComponentState state)
+		{
+			foreach (var c in components)
+				ClearState(c, state);
 		}
 	}
 }

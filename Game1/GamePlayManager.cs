@@ -57,8 +57,9 @@ namespace Game1
 			_components.Register(_inventoryWindow = new InventoryWindow(this.Bounds.CenteredRegion(870, 575),  _world.Character, "Backpack"));
 			_inventoryWindow.OnReadyDisable += _inventoryView_OnReadyDisable;
 
-			_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(this.ContentMargin.Width, _gameViewArea.Bottom + this.ContentMargin.Height), true);
+			_components.Register(_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(this.ContentMargin.Width, _gameViewArea.Bottom + this.ContentMargin.Height), true));
 			_hotbarView.OnMouseClick += _hotbarView_OnMouseClick;
+			_components.SetState(_hotbarView, ComponentState.All, null);
 
 			_tooltip = new Dialog(null, DialogButton.None, Rectangle.Empty, null);
 			_components.Register(_barHealth = new StatBar(
@@ -239,7 +240,7 @@ namespace Game1
 			if (!this.State.HasFlag(ComponentState.Active))
 				return; 
 
-			var itemClicked = (InventoryItemView)e.InnerEventArgs.Sender;
+			var itemClicked = (InventoryItemView)e.Sender;
 			if (itemClicked != null)
 				_hotbarView.Container.ActiveItemIndex = itemClicked.Index;
 		}

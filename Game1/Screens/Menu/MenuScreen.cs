@@ -272,6 +272,5 @@ namespace Game1.Screens.Menu
 		{
 			OnItemSelect?.Invoke(this, args);
 		}
-
 	}
 }

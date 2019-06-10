@@ -22,6 +22,12 @@ namespace Game1.Interface
 
 		protected override int BorderThickness => InventoryItemView.BorderWidth;
 
+		public override ComponentState State
+		{ 
+			get => this.ContainingView != null ? this.ContainingView.State : base.State;
+			set => base.State = value;
+		}
+
 		private ImageTexture _highlightBorder;
 		private ImageTexture _emptyIcon;
 		private ImageText _quantity;

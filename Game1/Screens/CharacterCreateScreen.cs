@@ -106,7 +106,8 @@ namespace Game1.Screens
 
 		private void _menuCharacter_OnSexItemChange(object sender, ComponentEventArgs e)
 		{
-			switch (e.Item)
+			var source = (e.Source is MenuItem menuItem ? menuItem.Id : e.Item);
+			switch (source)
 			{
 				case "female" :
 					_characterView.SwapTexture(this.CharacterPreviewImage(CharacterSex.Female));
@@ -119,7 +120,8 @@ namespace Game1.Screens
 
 		private void _menuCharacter_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
-			switch (e.Type)
+			var source = (e.Source is MenuItem menuItem ? menuItem.Id : e.Type);
+			switch (source)
 			{
 				case "continue" :
 					_newChar.Name = _menuCharacter.CharacterName;

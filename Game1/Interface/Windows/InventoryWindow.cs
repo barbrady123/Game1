@@ -41,7 +41,7 @@ namespace Game1.Interface.Windows
 			};
 
 			// Eventually, we want to make ItemContainerView a component (and InventoryItemView)....
-			_components.Register(_containerViewBackpack = ItemContainerView.New<ItemContainerView>(_containerBackpack, viewPosition, false));
+			_components.Register(_containerViewBackpack = ItemContainerView.New<ItemContainerView>(_containerBackpack, viewPosition.Offset(0, this.ContentMargin.Height * 3), false));
 			_containerViewBackpack.OnMouseClick += _containerView_OnMouseClick;
 			_containerViewBackpack.OnMouseOver += _containerView_OnMouseOver;
 			_containerViewBackpack.OnMouseOut += _containerView_OnMouseOut;
@@ -52,7 +52,7 @@ namespace Game1.Interface.Windows
 			_components.Register(
 				_containerViewHotbar = ItemContainerView.New<ItemContainerView>(
 					_containerHotbar,
-					new Point(viewPosition.X, viewPosition.Y + _containerViewBackpack.Bounds.Size.Y + this.ContentMargin.Height),
+					new Point(viewPosition.X, _containerViewBackpack.Bounds.Bottom + (this.ContentMargin.Height * 2)),
 					false
 				));
 			_containerViewHotbar.OnMouseClick += _containerView_OnMouseClick;
@@ -62,12 +62,18 @@ namespace Game1.Interface.Windows
 			_components.SetState(_tooltip, ComponentState.Active, null);
 
 			_components.Register(_contextMenu = new InventoryContextMenu());
+			_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
+			_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
+
 			_components.Register(_splitWindow = new SplitWindow());
+			_splitWindow.OnButtonClick += _splitWindow_OnButtonClick;
+			_splitWindow.OnReadyDisable += _splitWindow_OnReadyDisable;
 		}
 
 		public override void LoadContent()
 		{
 			base.LoadContent();
+			_containerName.LoadContent();
 			_containerViewBackpack.LoadContent();
 			_containerViewHotbar.LoadContent();
 			_tooltip.LoadContent();
@@ -76,6 +82,7 @@ namespace Game1.Interface.Windows
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
+			_containerName.UnloadContent();
 			_containerViewBackpack.UnloadContent();
 			_containerViewHotbar.UnloadContent();
 			_tooltip.UnloadContent();
@@ -87,12 +94,11 @@ namespace Game1.Interface.Windows
 
 		public override void UpdateActive(GameTime gameTime)
 		{
-			// Need to make sure the modals block input below...
 			_contextMenu.Update(gameTime);
 			_splitWindow.Update(gameTime);
+			_tooltip.Update(gameTime);
 			_containerViewBackpack.Update(gameTime);
 			_containerViewHotbar.Update(gameTime);
-			_tooltip.Update(gameTime);			
 			base.UpdateActive(gameTime);
 			InputManager.BlockAllInput();
 		}
@@ -100,6 +106,7 @@ namespace Game1.Interface.Windows
 		public override void DrawVisible(SpriteBatch spriteBatch)
 		{
 			base.DrawVisible(spriteBatch);
+			_containerName.Draw(spriteBatch);
 			_containerViewBackpack.Draw(spriteBatch);
 			_containerViewHotbar.Draw(spriteBatch);
 			// This whole mechanism should be cleaned up also....
@@ -129,38 +136,33 @@ namespace Game1.Interface.Windows
 
 		private void _containerView_OnMouseClick(object sender, ComponentEventArgs e)
 		{
+			var clickedItemView = (InventoryItemView)e.Sender;
 			var clickedContainer = ((ItemContainerView)sender).Container;
-			var clickedItemView = (InventoryItemView)e.InnerEventArgs.Sender;
+			var button = e.InnerEventArgs.Button;
 
-			if (e.Button == MouseButton.Left)
+			if (button == MouseButton.Left)
 			{
 				_character.PutItem(clickedContainer, clickedItemView.Index);
 			}
-			else if ((e.Button == MouseButton.Right) && (clickedItemView.Item != null))
+			else if ((button == MouseButton.Right) && (clickedItemView.Item != null))
 			{
-				_contextMenu.Initialize(clickedItemView, InputManager.MousePosition.Offset(-10, -10), false);
-				_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
-				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
-				_components.SetState(_contextMenu, ComponentState.All, null);
+				EnableContextMenu(clickedItemView);
 			}
 		}
 
 		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
 			var itemView = (InventoryItemView)((InventoryContextMenu)sender).Owner;
+			var source = (MenuItem)e.Source;
 
-			switch (e.Item)
+			switch (source.Id)
 			{
 				case "equip"	:	
 					_character.EquipArmor(itemView.ContainingView.Container, itemView.Index);
 					_character.PutItem(_character.Backpack);
 					break;
 				case "split"	:
-					var startPosition = InputManager.MousePosition.Offset(-10, -10);
-					_splitWindow.Initialize(itemView, new Rectangle(startPosition.X, startPosition.Y, 200, 200));
-					_splitWindow.OnButtonClick += _splitWindow_OnButtonClick;
-					_splitWindow.OnReadyDisable += _splitWindow_OnReadyDisable;
-					_components.SetState(_splitWindow, ComponentState.All, null);
+					EnableSplitWindow(itemView);
 					break;
 			}
 			DisableContextMenu();
@@ -192,9 +194,9 @@ namespace Game1.Interface.Windows
 
 		private void _containerView_OnMouseOver(object sender, ComponentEventArgs e)
 		{
-			var overItemView = (InventoryItemView)e.InnerEventArgs.Sender;
+			var overItemView = (InventoryItemView)e.Sender;
 
-			if ((_contextMenu?.Owner != overItemView) || (overItemView.Item == null))
+			if ((_contextMenu?.Owner != overItemView) && (overItemView.Item != null))
 				_tooltip.Show(overItemView.Item.Item.DisplayName, InputManager.MousePosition.Offset(10, 10), 15, overItemView);
 			else
 				_tooltip.Reset(sender);
@@ -202,17 +204,36 @@ namespace Game1.Interface.Windows
 
 		private void _containerView_OnMouseOut(object sender, ComponentEventArgs e)
 		{
-			_tooltip.Reset(sender);
+			_tooltip.Reset((InventoryItemView)e.Sender);
+		}
+
+		private void EnableContextMenu(InventoryItemView clickedItemView)
+		{
+			_contextMenu.Initialize(clickedItemView, InputManager.MousePosition.Offset(-10, -10), false);
+			_components.SetState(_contextMenu, ComponentState.All, null);
+			_components.ClearState(new[] {_containerViewBackpack, _containerViewHotbar}, ComponentState.AllInput);
+			_tooltip.Reset();
 		}
 
 		private void DisableContextMenu()
 		{
+			_components.AddState(new[] {_containerViewBackpack, _containerViewHotbar}, ComponentState.AllInput);
 			_components.SetState(_contextMenu, ComponentState.None, null);
 			_contextMenu.Clear();
 		}
 
+		private void EnableSplitWindow(InventoryItemView itemView)
+		{
+			var startPosition = InputManager.MousePosition.Offset(-10, -10);
+			_splitWindow.Initialize(itemView, new Rectangle(startPosition.X, startPosition.Y, 200, 200));
+			_components.SetState(_splitWindow, ComponentState.All, null);
+			_components.ClearState(new[] {_containerViewBackpack, _containerViewHotbar}, ComponentState.AllInput);
+			_tooltip.Reset();
+		}
+
 		private void DisableSplitWindow()
 		{
+			_components.AddState(new[] {_containerViewBackpack, _containerViewHotbar}, ComponentState.AllInput);
 			_components.SetState(_splitWindow, ComponentState.None, null);
 			_splitWindow.Clear();
 		}

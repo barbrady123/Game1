@@ -99,7 +99,7 @@ namespace Game1.Screens.Menu.Character
 
 		private void _menuCharacter_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			switch (e.Item)
+			switch (((MenuItem)e.Source).Id)
 			{
 				case "name":	_components.AddState(_nameEdit, ComponentState.ActiveAllInput, true);	break;
 				case "sex":		_components.AddState(_menuSex, ComponentState.ActiveAllInput, true);	break;
@@ -129,7 +129,8 @@ namespace Game1.Screens.Menu.Character
 
 		private void _menuSex_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			switch (e.Item)
+			var source = (e.Source is MenuItem menuItem) ? menuItem.Id : e.Type;
+			switch (source)
 			{
 				case "female" : this.CharacterSex = CharacterSex.Female;	break;
 				case "male" :	this.CharacterSex = CharacterSex.Male;		break;
@@ -148,7 +149,8 @@ namespace Game1.Screens.Menu.Character
 
 		private void _menuStart_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			switch (e.Item)
+			var source = (e.Source is MenuItem menuItem) ? menuItem.Id : e.Type;
+			switch (source)
 			{
 				case "startgame" :
 					if (!ValidateInput())

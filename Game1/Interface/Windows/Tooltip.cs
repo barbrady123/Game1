@@ -23,9 +23,8 @@ namespace Game1.Interface.Windows
 		public int TextPadding => 5;
 
 		// Eventually we'll want prettier tooltips with more than just a line of text...
-		public Tooltip() : base(Rectangle.Empty)
-		{
-			this.Bounds = Rectangle.Empty;
+		public Tooltip() : base(Rectangle.Empty, background: "black")
+		{			
 			_timer = -1;
 			_text = new ImageText(null, true);
 			_text.Alignment = ImageAlignment.Centered;
@@ -70,12 +69,17 @@ namespace Game1.Interface.Windows
 		{			
 			// If this request is coming from a different object, reset the timer...otherwise let it continue where it is...
 			if (sender != this.Owner)
+			{
 				_timer = Math.Max(0, timer);
+				UnloadContent();
+			}
 
 			this.Owner = sender;
 			_text.UpdateText(text);
 			var textSize = _text.Size;
 			this.Bounds = new Rectangle(position.X, position.Y, (int)textSize.X + this.TextPadding * 2, (int)textSize.Y + this.TextPadding * 2);
+
+			LoadContent();
 		}
 
 		protected override void RepositionObjects()
@@ -85,9 +89,9 @@ namespace Game1.Interface.Windows
 				_text.Position = this.Bounds.CenterVector();
 		}
 
-		public void Reset(object sender)
+		public void Reset(object sender = null)
 		{
-			if (sender != this.Owner)
+			if ((sender != null) && (sender != this.Owner))
 				return;
 
 			_timer = -1;
