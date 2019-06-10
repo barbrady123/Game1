@@ -60,6 +60,17 @@ namespace Game1
 			}
 		}
 
+		public void SetState(IEnumerable<Component> components, ComponentState state, ComponentState? otherState)
+		{
+			foreach (var c in _components)
+			{
+				if (components.Contains(c))
+					SetState(c, state, null);
+				else if (otherState != null)
+					SetState(c, (ComponentState)otherState, null);
+			}
+		}
+
 		public void SetStateAll(ComponentState state, bool exclusive = false)
 		{
 			_components.ForEach(x => x.State = (exclusive ? state : x.State | state));

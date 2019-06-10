@@ -28,6 +28,8 @@ namespace Game1.Interface.Windows
 
 		public CharacterWindow(Rectangle bounds, Character character) : base(bounds, true, "brick")
 		{
+			_components = new ComponentManager();
+
 			_character = character;
 			_armorItemView = new InventoryItemView[System.Enum.GetNames(typeof(ArmorSlot)).Length];
 
@@ -39,11 +41,12 @@ namespace Game1.Interface.Windows
 			for (int i = 0; i < _armorItemView.Length; i++)
 			{
 				var position = this.Bounds.TopRightVector(-100, this.ContentMargin.Height + InventoryItemView.Size / 2 + (100 * i)).ExpandToRectangleCentered(InventoryItemView.Size / 2, InventoryItemView.Size / 2);
-				_armorItemView[i] = new InventoryItemView(position, i, ((ArmorSlot)i).ToString("g"));
+				_components.Register(_armorItemView[i] = new InventoryItemView(position, i, ((ArmorSlot)i).ToString("g")));
 				_armorItemView[i].OnMouseClick += ArmorItemView_OnMouseClick;
 				_armorItemView[i].OnMouseOver += ArmorItemView_OnMouseOver;
 				_armorItemView[i].OnMouseOut += ArmorItemView_OnMouseOut;
 			}
+			_components.SetState(_armorItemView, ComponentState.All, null);
 			
 			_characterStat = new ImageText[System.Enum.GetNames(typeof(CharacterAttribute)).Length];
 			for (int i = 0; i < _characterStat.Length; i++)
@@ -52,11 +55,12 @@ namespace Game1.Interface.Windows
 				_characterStat[i] = new ImageText(null, true) { Position = position, Alignment = ImageAlignment.LeftCentered };
 			}
 
-			_components = new ComponentManager();
 			_components.Register(_tooltip = new Tooltip());
 			_components.SetState(_tooltip, ComponentState.Active, null);
 
 			_components.Register(_contextMenu = new InventoryContextMenu());
+			_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
+			_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
 		}
 
 		public override void LoadContent()
@@ -84,7 +88,7 @@ namespace Game1.Interface.Windows
 
 		public override void UpdateActive(GameTime gameTime)
 		{
-			base.UpdateActive(gameTime);
+			_contextMenu.Update(gameTime);
 			_characterName.Update(gameTime);
 			_tooltip.Update(gameTime);
 			UpdateArmorViews();
@@ -93,8 +97,7 @@ namespace Game1.Interface.Windows
 			UpdateCharacterStats();
 			foreach (var stat in _characterStat)
 				stat.Update(gameTime);
-			// Need to fix this...probably bad now 
-			_contextMenu.Update(gameTime);
+			base.UpdateActive(gameTime);
 			InputManager.BlockAllInput();
 		}
 
@@ -108,12 +111,16 @@ namespace Game1.Interface.Windows
 			foreach (var stat in _characterStat)
 				stat.Draw(spriteBatch);
 
-			var contextBatch = SpriteBatchManager.Get("context");
-			contextBatch.ScissorWindow = _contextMenu.Bounds;
-			_contextMenu.Draw(contextBatch.SpriteBatch);
-
-			var tooltipBatch = SpriteBatchManager.Get("tooltip");
-			_tooltip.Draw(tooltipBatch.SpriteBatch);
+			SpriteBatchData batchData = null;
+			if (_tooltip.State.HasFlag(ComponentState.Visible))
+			{
+				batchData = SpriteBatchManager.Get("tooltip");
+				batchData.ScissorWindow = _tooltip.Bounds;	// one reason why it was good to have the components self-aware of the batch andwrap the call...
+				_tooltip.Draw(batchData.SpriteBatch);
+			}
+			batchData = SpriteBatchManager.Get("context");
+			batchData.ScissorWindow = _contextMenu?.Bounds ?? Rectangle.Empty;
+			_contextMenu.Draw(batchData.SpriteBatch);
 		}
 
 		private void ArmorItemView_OnMouseClick(object sender, ComponentEventArgs e)
@@ -121,18 +128,11 @@ namespace Game1.Interface.Windows
 			var itemView = (InventoryItemView)sender;
 
 			if ((e.Button == MouseButton.Right) && (itemView?.Item != null))
-			{
-				// This should use the manager not set the state here...
-				_contextMenu.Initialize(itemView, InputManager.MousePosition.Offset(-10, -10), true);
-				_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
-				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
-				_components.SetState(_contextMenu, ComponentState.All, null);
-			}
+				EnableContextMenu(itemView);
 		}
 
 		private void ArmorItemView_OnMouseOver(object sender, EventArgs e)
 		{
-			var args = (MouseEventArgs)e;
 			var overItem = (sender as InventoryItemView).Item;
 
 			if ((overItem != null) && (_contextMenu.Owner != sender))
@@ -167,8 +167,9 @@ namespace Game1.Interface.Windows
 		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
 			var itemView = (InventoryItemView)e.Sender;
+			var source = (MenuItem)e.Source;
 
-			switch (e.Item)
+			switch (source.Id)
 			{
 				case "unequip"	:	
 					_character.UnequipArmor((ArmorSlot)itemView.Index);
@@ -187,8 +188,17 @@ namespace Game1.Interface.Windows
 			DisableContextMenu();
 		}
 
+		private void EnableContextMenu(InventoryItemView clickedItemView)
+		{
+			_contextMenu.Initialize(clickedItemView, InputManager.MousePosition.Offset(-10, -10), true);
+			_components.SetState(_contextMenu, ComponentState.All, null);
+			_components.ClearState(_armorItemView, ComponentState.AllInput);
+			_tooltip.Reset();
+		}
+
 		private void DisableContextMenu()
 		{
+			_components.AddState(_armorItemView, ComponentState.AllInput);
 			_components.SetState(_contextMenu, ComponentState.None, null);
 			_contextMenu.Clear();
 		}
