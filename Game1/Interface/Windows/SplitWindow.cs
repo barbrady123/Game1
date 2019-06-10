@@ -17,16 +17,31 @@ namespace Game1.Interface.Windows
 {
 	public class SplitWindow : Component
 	{
-		private InventoryItem _item;
+
 		private OkCancelMenu _menu;
 		private TextInput _input;
 		private Button _halfButton;
 
-		public event EventHandler<MenuEventArgs> OnButtonClick;
+		public event EventHandler<ComponentEventArgs> OnButtonClick;
 
-		public SplitWindow(Rectangle bounds, InventoryItem item) : base(bounds, true, "black")
+		public InventoryItemView Owner { get; private set; }
+
+		public SplitWindow() : base(Rectangle.Empty, background: "black")
 		{
-			_item = item;
+			// We allow empty instanciation so the object can be registered with a ComponentManager if necessary...
+		}
+
+		public void Initialize(InventoryItemView owner, Rectangle bounds)
+		{
+			this.Owner = owner;
+			this.Bounds = bounds;
+
+			UnloadContent();
+
+			// Setup Component stuff (background/border)
+			SetupBackground();
+			SetupBorder();
+			RepositionObjects();
 
 			var bottomCenter = bounds.BottomCenterVector();
 			// This arbitrary sizing sucks...TODO: Read the comment on the MenuScreen class...menus should be able to auto-size themselves given a Top-Left position...
@@ -42,6 +57,20 @@ namespace Game1.Interface.Windows
 
 			_halfButton = new Button(bounds.CenteredRegion(80, 40), "Half") { IsActive = true };
 			_halfButton.OnClick += _halfButton_OnClick;
+
+			LoadContent();
+		}
+
+		public void Clear()
+		{
+			this.Owner = null;
+			this.Bounds = Rectangle.Empty;
+			UnloadContent();
+			_background = null;
+			_border = null;
+			_menu.UnloadContent();
+			_input.UnloadContent();
+			_halfButton.UnloadContent();
 		}
 
 		public override void LoadContent()
@@ -78,31 +107,37 @@ namespace Game1.Interface.Windows
 
 		private void _halfButton_OnClick(object sender, EventArgs e)
 		{
-			_input.Text = (_item.Quantity / 2).ToString();
+			if (this.Owner?.Item == null)
+				return;
+
+			_input.Text = (this.Owner.Item.Quantity / 2).ToString();
 		}
 
-		private void _menu_OnItemSelect(object sender, EventArgs e)
+		private void _menu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			OnButtonClick?.Invoke(this, (MenuEventArgs)e);
+			OnButtonClick?.Invoke(this, new ComponentEventArgs(e, sender));
 		}
 
-		private void _input_OnReadyDisable(object sender, EventArgs e)
+		private void _input_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
-			var args = (TextInputEventArgs)e;
+			if (this.Owner?.Item == null)
+				return;
 
-			if (args.Key == Keys.Enter)
+			if (e.Key == Keys.Enter)
 			{
 				int value = Int32.Parse(_input.Text ?? "0");
-				_input.Text = Util.Clamp(value, 1, _item.Quantity).ToString();
+				_input.Text = Util.Clamp(value, 1, this.Owner.Item.Quantity).ToString();
 			}
 		}
 
-		private void _input_OnBeforeTextUpdate(object sender, EventArgs e)
+		private void _input_OnBeforeTextUpdate(object sender, ComponentEventArgs e)
 		{
-			var args = (TextInputEventArgs)e;
-			int newValue = Int32.Parse(args.ResultText);
-			if (newValue > _item.Quantity)
-				args.Cancel = true;
+			if (this.Owner?.Item == null)
+				return;
+
+			int newValue = Int32.Parse(e.ResultText);
+			if (newValue > this.Owner.Item.Quantity)
+				e.Cancel = true;
 		}
 	}
 }

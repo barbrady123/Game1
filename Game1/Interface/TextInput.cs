@@ -66,7 +66,7 @@ namespace Game1.Interface
 				DelayInput(1);
 		}
 
-		public event EventHandler OnBeforeTextUpdate;
+		public event EventHandler<ComponentEventArgs> OnBeforeTextUpdate;
 
 		public TextInput(int width, Vector2 position, string text = null, int maxLength = 100) : base(position.ExpandToRectangleCentered(width / 2, TextInput.Height / 2), true, hasBorder: true)
 		{

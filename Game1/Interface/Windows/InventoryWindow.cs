@@ -61,10 +61,8 @@ namespace Game1.Interface.Windows
 			_components.Register(_tooltip = new Tooltip());
 			_components.SetState(_tooltip, ComponentState.Active, null);
 
-			_components.Register(_contextMenu = new InventoryContextMenu(null, Util.PointInvalid, false));
-			// These need to be instanciatable early, their parameters need to be run-time adjustable
-			// so we can easily register them here....
-			_splitWindow = null;
+			_components.Register(_contextMenu = new InventoryContextMenu());
+			_components.Register(_splitWindow = new SplitWindow());
 		}
 
 		public override void LoadContent()
@@ -82,15 +80,16 @@ namespace Game1.Interface.Windows
 			_containerViewHotbar.UnloadContent();
 			_tooltip.UnloadContent();
 			_contextMenu.UnloadContent();
+			_splitWindow.UnloadContent();
 			DisableContextMenu();
 			DisableSplitWindow();
 		}
 
 		public override void UpdateActive(GameTime gameTime)
 		{
-			// We removed a bunch of conditional input checks here...need to add these elsewhere (with the ComponentManager)....
-			_splitWindow?.Update(gameTime);
+			// Need to make sure the modals block input below...
 			_contextMenu.Update(gameTime);
+			_splitWindow.Update(gameTime);
 			_containerViewBackpack.Update(gameTime);
 			_containerViewHotbar.Update(gameTime);
 			_tooltip.Update(gameTime);			
@@ -112,13 +111,9 @@ namespace Game1.Interface.Windows
 				_tooltip.Draw(batchData.SpriteBatch);
 			}
 			batchData = SpriteBatchManager.Get("context");
-			batchData.ScissorWindow = _contextMenu.Bounds;
+			batchData.ScissorWindow = _contextMenu?.Bounds ?? (_splitWindow?.Bounds ?? Rectangle.Empty);
 			_contextMenu.Draw(batchData.SpriteBatch);
-			if (_splitWindow != null)
-			{
-				batchData.ScissorWindow = _splitWindow.Bounds;
-				_splitWindow.Draw(batchData.SpriteBatch);
-			}
+			_splitWindow.Draw(batchData.SpriteBatch);
 		}
 
 		protected override void ReadyDisable(ComponentEventArgs args)
@@ -162,10 +157,10 @@ namespace Game1.Interface.Windows
 					break;
 				case "split"	:
 					var startPosition = InputManager.MousePosition.Offset(-10, -10);
-					_splitWindow = new SplitWindow(new Rectangle(startPosition.X, startPosition.Y, 200, 200), itemView.Item) { State = ComponentState.All };
-					_splitWindow.LoadContent();
+					_splitWindow.Initialize(itemView, new Rectangle(startPosition.X, startPosition.Y, 200, 200));
 					_splitWindow.OnButtonClick += _splitWindow_OnButtonClick;
 					_splitWindow.OnReadyDisable += _splitWindow_OnReadyDisable;
+					_components.SetState(_splitWindow, ComponentState.All, null);
 					break;
 			}
 			DisableContextMenu();
@@ -218,11 +213,8 @@ namespace Game1.Interface.Windows
 
 		private void DisableSplitWindow()
 		{
-			if (_splitWindow != null)
-			{
-				_splitWindow.UnloadContent();
-				_splitWindow = null;
-			}
+			_components.SetState(_splitWindow, ComponentState.None, null);
+			_splitWindow.Clear();
 		}
 	}
 }

@@ -56,7 +56,7 @@ namespace Game1.Interface.Windows
 			_components.Register(_tooltip = new Tooltip());
 			_components.SetState(_tooltip, ComponentState.Active, null);
 
-			_contextMenu = null;
+			_components.Register(_contextMenu = new InventoryContextMenu());
 		}
 
 		public override void LoadContent()
@@ -75,6 +75,7 @@ namespace Game1.Interface.Windows
 			base.UnloadContent();
 			_characterName.UnloadContent();
 			_tooltip.UnloadContent();
+			_contextMenu.UnloadContent();
 			foreach (var armorView in _armorItemView)
 				armorView.UnloadContent();
 			foreach (var stat in _characterStat)
@@ -93,7 +94,7 @@ namespace Game1.Interface.Windows
 			foreach (var stat in _characterStat)
 				stat.Update(gameTime);
 			// Need to fix this...probably bad now 
-			_contextMenu?.Update(gameTime);
+			_contextMenu.Update(gameTime);
 			InputManager.BlockAllInput();
 		}
 
@@ -107,12 +108,9 @@ namespace Game1.Interface.Windows
 			foreach (var stat in _characterStat)
 				stat.Draw(spriteBatch);
 
-			if (_contextMenu != null)
-			{
-				var contextBatch = SpriteBatchManager.Get("context");
-				contextBatch.ScissorWindow = _contextMenu.Bounds;
-				_contextMenu?.Draw(contextBatch.SpriteBatch);
-			}
+			var contextBatch = SpriteBatchManager.Get("context");
+			contextBatch.ScissorWindow = _contextMenu.Bounds;
+			_contextMenu.Draw(contextBatch.SpriteBatch);
 
 			var tooltipBatch = SpriteBatchManager.Get("tooltip");
 			_tooltip.Draw(tooltipBatch.SpriteBatch);
@@ -125,10 +123,10 @@ namespace Game1.Interface.Windows
 			if ((e.Button == MouseButton.Right) && (itemView?.Item != null))
 			{
 				// This should use the manager not set the state here...
-				_contextMenu = new InventoryContextMenu(itemView, InputManager.MousePosition.Offset(-10, -10), true) { State = ComponentState.All };
-				_contextMenu.LoadContent();
+				_contextMenu.Initialize(itemView, InputManager.MousePosition.Offset(-10, -10), true);
 				_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
+				_components.SetState(_contextMenu, ComponentState.All, null);
 			}
 		}
 
@@ -137,7 +135,7 @@ namespace Game1.Interface.Windows
 			var args = (MouseEventArgs)e;
 			var overItem = (sender as InventoryItemView).Item;
 
-			if ((overItem != null) && (_contextMenu?.Owner != sender))
+			if ((overItem != null) && (_contextMenu.Owner != sender))
 				_tooltip.Show(overItem.Item.DisplayName, InputManager.MousePosition.Offset(10, 10), 15, sender);
 			else
 				_tooltip.Reset(sender);
@@ -181,12 +179,18 @@ namespace Game1.Interface.Windows
 					// Need a "split" popup screen....
 					break;
 			}
-			_contextMenu = null;
+			DisableContextMenu();
 		}
 
 		private void _contextMenu_OnMouseOut(object sender, ComponentEventArgs e)
 		{
-			_contextMenu = null;
+			DisableContextMenu();
+		}
+
+		private void DisableContextMenu()
+		{
+			_components.SetState(_contextMenu, ComponentState.None, null);
+			_contextMenu.Clear();
 		}
 	}
 }

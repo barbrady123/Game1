@@ -20,12 +20,9 @@ namespace Game1.Screens.Menu
 
 		private bool _isEquipped;
 
-		public InventoryContextMenu(InventoryItemView owner, 
-									Point position,
-									bool isEquipped) : base(InventoryContextMenu.CalculateItemMenuBounds(position, owner?.Item, isEquipped), background: "black")
+		public InventoryContextMenu() : base(Rectangle.Empty, background: "black")
 		{
-			this.Owner = owner;
-			_isEquipped = isEquipped;
+			// We allow empty instanciation so the object can be registered with a ComponentManager if necessary...
 		}
 
 		public void Initialize(InventoryItemView owner, Point position, bool isEquipped)
@@ -43,8 +40,8 @@ namespace Game1.Screens.Menu
 
 			// Setup MenuScreen stuff (items)
 			_items = GetItemData();
-			if (_items.Any())
-				LoadItemContent();
+
+			LoadContent();
 		}
 
 		public void Clear()

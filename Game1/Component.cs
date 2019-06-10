@@ -171,7 +171,6 @@ namespace Game1
 
 		public virtual void Draw(SpriteBatch spriteBatch)
 		{
-			// Do we still need to wrap this call to DrawInternal?  Or, better to make this "dumb" to the concept and use the manager to get the spritebatches for these calls..?
 			if (this.State.HasFlag(ComponentState.Visible))
 				DrawVisible(spriteBatch);
 		}
