@@ -58,11 +58,8 @@ namespace Game1
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
-			this.Character.Backpack.AddItem(ItemManager.GetItem());
-			this.Character.Backpack.AddItem(ItemManager.GetItem());
-			this.Character.Backpack.AddItem(ItemManager.GetItem());
-			this.Character.Backpack.AddItem(ItemManager.GetItem());
-			this.Character.Backpack.AddItem(ItemManager.GetItem());
+			for (int i = 0; i < 15; i++)
+				this.Character.Backpack.AddItem(ItemManager.GetItem());
 			//this.Character.EquippedArmorHead = ItemManager.GetItem();
 			//this.Character.EquippedArmorChest = ItemManager.GetItem();
 			//this.Character.EquippedArmorLegs = ItemManager.GetItem();

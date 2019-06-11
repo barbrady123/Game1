@@ -196,6 +196,15 @@ namespace Game1.Screens.Menu
 			base.UpdateInput(gameTime);
 		}
 
+		public void SelectItem(int index)
+		{
+			if (!Util.InRange(index, 0, _items.Count))
+				return;
+
+			this.CurrentIndex = index;
+			ItemSelect(new MenuEventArgs("select", _items[_currentIndex]));
+		}
+
 		public override void DrawVisible(SpriteBatch spriteBatch)
 		{
 			base.DrawVisible(spriteBatch);

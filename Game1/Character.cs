@@ -213,7 +213,7 @@ namespace Game1
 
 			if ((this.HeldItem == prevHeldItem) && (prevQuantity != (this.HeldItem?.Quantity ?? 0)))
 				// Weird scenario we're covering here, probably should be refactored:
-				// If, due to AddItem(), the non-null HeldItem quantity changes, the mouse cursor update won't trigger
+				// If, due to AddItem(), only the non-null HeldItem quantity changes, the mouse cursor update won't trigger
 				// automatically (because technically this.HeldItem didn't "change")...so we call it manually
 				// here if it's the same item as before but the quantity has changed (due to an item merge with leftover)...
 				UpdateMouseCursor();

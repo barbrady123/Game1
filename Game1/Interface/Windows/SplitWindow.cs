@@ -126,6 +126,7 @@ namespace Game1.Interface.Windows
 			{
 				int value = Int32.Parse(_input.Text ?? "0");
 				_input.Text = Util.Clamp(value, 1, this.Owner.Item.Quantity).ToString();
+				_menu.SelectItem(0);
 			}
 		}
 

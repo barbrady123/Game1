@@ -38,6 +38,26 @@ namespace Game1.Items
 		/// </summary>
 		public int? AddItem(InventoryItem item)
 		{
+			if (item == null)
+				return null;
+
+			// First see if we can stack
+			if (item.Item.MaxStackSize > 1)
+			{
+				for (int i = 0; i < _items.Length; i++)
+				{
+					if	((_items[i] == null) || (_items[i].Item != item.Item))
+						continue;
+
+					int spaceLeft = _items[i].Item.MaxStackSize - _items[i].Quantity;
+					int transferAmount = Math.Min(spaceLeft, item.Quantity);
+					_items[i].Quantity += transferAmount;
+					item.Quantity -= transferAmount;
+					if (item.Quantity == 0)
+						return i;
+				}
+			}
+
 			int? position = NextEmptyPosition(0);
 			if (position != null)
 				_items[(int)position] = item;
