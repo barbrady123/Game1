@@ -148,6 +148,8 @@ namespace Game1.Interface.Windows
 			{
 				EnableContextMenu(clickedItemView);
 			}
+
+			_tooltip.Reset(clickedItemView);
 		}
 
 		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e)
@@ -168,23 +170,44 @@ namespace Game1.Interface.Windows
 			}
 		}
 
-		private void _splitWindow_OnReadyDisable(object sender, EventArgs e)
+		private void _splitWindow_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
 			DisableSplitWindow();
 		}
 
-		private void _splitWindow_OnButtonClick(object sender, EventArgs e)
+		// This functionality needs to be sharable somehow....move elsewhere...
+		private void _splitWindow_OnButtonClick(object sender, ComponentEventArgs e)
 		{
-			var args = (ComponentEventArgs)e;
-			switch (args.Item)
+			// This seems convoluted...need to redo how some of these events are propogated...
+			switch (((MenuItem)e.InnerEventArgs.Source).Id)
 			{
-				case "ok" : 
-					break;					
+				case "ok" :
+					var window = (SplitWindow)sender;
+					SplitItem(window.Owner, window.Quantity);
+					break;
 				case "cancel" :
 					break;
 			}
 
 			DisableSplitWindow();
+		}
+
+		// This functionality needs to be sharable somehow....move elsewhere...
+		private void SplitItem(InventoryItemView itemView, int quantity)
+		{
+			if ((itemView.Item == null) || (quantity < 1))
+				return;
+
+			quantity = Math.Min(quantity, itemView.Item.Quantity);
+
+			if (quantity == itemView.Item.Quantity)
+			{
+				_character.PutItem(itemView.ContainingView.Container, itemView.Index);
+			}
+			else
+			{
+				_character.GetItem(itemView.ContainingView.Container, itemView.Index, quantity);
+			}
 		}
 
 		private void _contextMenu_OnMouseOut(object sender, ComponentEventArgs e)

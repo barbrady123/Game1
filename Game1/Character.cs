@@ -76,9 +76,22 @@ namespace Game1
 				if (_heldItem != value)
 				{
 					_heldItem = value;
-					InputManager.SetMouseCursor(_heldItem?.Item.Icon.Texture);
+					UpdateMouseCursor();
 				}
 			}
+		}
+
+		// Ok this makes a weird dependency in the Character class to the InputManager...needs to be fixed...
+		public void UpdateMouseCursor()
+		{
+			if (_heldItem == null)
+			{
+				InputManager.SetMouseCursor(null);
+				return;
+			}
+
+			int? quantity = _heldItem.Quantity > 1 ? _heldItem.Quantity : (int?)null;
+			InputManager.SetMouseCursor(_heldItem?.Item.Icon.Texture, quantity);
 		}
 
 		public InventoryItem EquippedArmorHead	{ get; set; }
@@ -154,6 +167,30 @@ namespace Game1
 			this.Motion = motion;
 		}
 
+		public void GetItem(ItemContainer container, int index, int? quantity = null)
+		{
+			var item = container[index];
+			if (item == null)
+				return;
+
+			quantity = Math.Min(quantity ?? Int32.MaxValue, item.Quantity);
+			
+			if (quantity == item.Quantity) 
+			{
+				PutItem(container, index);
+			}
+			else
+			{
+				PutItem(container);
+				// This means there's no room in the backpack to drop the held item, exit for now...
+				if (this.HeldItem != null)
+					return;
+
+				this.HeldItem = ItemManager.FromItem(item, quantity);
+				item.Quantity -= (int)quantity;
+			}
+		}
+
 		public void PutItem(ItemContainer container, int? index = null)
 		{			
 			if (index == null)
@@ -170,7 +207,16 @@ namespace Game1
 				return;
 			}
 
+			var prevHeldItem = this.HeldItem;
+			int prevQuantity = prevHeldItem?.Quantity ?? 0;
 			this.HeldItem = container.AddItem(this.HeldItem, (int)index);
+
+			if ((this.HeldItem == prevHeldItem) && (prevQuantity != (this.HeldItem?.Quantity ?? 0)))
+				// Weird scenario we're covering here, probably should be refactored:
+				// If, due to AddItem(), the non-null HeldItem quantity changes, the mouse cursor update won't trigger
+				// automatically (because technically this.HeldItem didn't "change")...so we call it manually
+				// here if it's the same item as before but the quantity has changed (due to an item merge with leftover)...
+				UpdateMouseCursor();
 		}
 
 		// Maybe we should move armor slots to indexed (by enum value) array, to make these types of methods easier 

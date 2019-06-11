@@ -52,10 +52,21 @@ namespace Game1.Items
 		{
 			if (!Util.InRange(position, 0, _items.Length - 1))
 				throw new IndexOutOfRangeException($"Position {position} invalid for item container");
+			
+			var currentItem = _items[(int)position];
 
-			var removedItem = _items[(int)position];
+			if ((item != null) && (currentItem != null) && (item.Item == currentItem.Item) && (currentItem.Quantity < currentItem.Item.MaxStackSize))
+			{
+				// Try to combine...
+				int spaceLeft = currentItem.Item.MaxStackSize - currentItem.Quantity;
+				int transferAmount = Math.Min(spaceLeft, item.Quantity);
+				currentItem.Quantity += transferAmount;
+				item.Quantity -= transferAmount;
+				return (item.Quantity > 0) ? item : null;
+			}
+
 			_items[(int)position] = item;
-			return removedItem;
+			return currentItem;
 		}
 
 		public InventoryItem RemoveItem(int position)

@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Interface;
 
 namespace Game1
 {
@@ -153,7 +154,7 @@ namespace Game1
 
 		public static int MouseScrollAmount => (_blockAllInput ? 0 : _currentMouseState.ScrollWheelValue - _prevMouseState.ScrollWheelValue);
 
-		public static void SetMouseCursor(Texture2D texture)
+		public static void SetMouseCursor(Texture2D texture, int? quantity = null)
 		{
 			if (texture == null)
 			{
@@ -162,7 +163,25 @@ namespace Game1
 			}
 
 			var mouseTexture = RBReversedChannel(texture);
+			if (quantity != null)
+				mouseTexture = AddText(mouseTexture, quantity.ToString());
+
 			Mouse.SetCursor(MouseCursor.FromTexture2D(mouseTexture, mouseTexture.Bounds.Center.X, mouseTexture.Bounds.Center.Y));
+		}
+
+		private static Texture2D AddText(Texture2D texture, string text)
+		{
+			var renderTarget = new RenderTarget2D(Game1.Graphics, texture.Bounds.Width, texture.Bounds.Height);
+			Game1.Graphics.SetRenderTarget(renderTarget);
+			Game1.Graphics.Clear(Color.Transparent);
+			var spriteBatch = new SpriteBatch(Game1.Graphics);
+			spriteBatch.Begin();
+			spriteBatch.Draw(texture, Vector2.Zero, Color.White);
+			spriteBatch.DrawString(FontManager.Get(), text, new Vector2(Game1.IconSize - 25, Game1.IconSize - 20), Color.White);
+			spriteBatch.End();
+			var newTexture = renderTarget;
+			Game1.Graphics.SetRenderTarget(null);
+			return newTexture;
 		}
 
 		private static Texture2D RBReversedChannel(Texture2D textureOriginal)

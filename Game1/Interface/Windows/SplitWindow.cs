@@ -23,6 +23,8 @@ namespace Game1.Interface.Windows
 		private TextInput _input;
 		private Button _halfButton;
 
+		public int Quantity => Int32.TryParse(_input?.Text, out int quantity) ? quantity : 0;
+
 		public event EventHandler<ComponentEventArgs> OnButtonClick;
 
 		public InventoryItemView Owner { get; private set; }
@@ -91,6 +93,7 @@ namespace Game1.Interface.Windows
 			_menu.Update(gameTime);
 			_input.Update(gameTime);
 			_halfButton.Update(gameTime);
+			InputManager.BlockAllInput();
 		}
 
 		public override void DrawVisible(SpriteBatch spriteBatch)
