@@ -41,7 +41,6 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ActivationManager.cs" />
     <Compile Include="Character.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="ComponentEventArgs.cs" />
@@ -75,7 +74,6 @@
     <Compile Include="GamePlayCamera.cs" />
     <Compile Include="GamePlayManager.cs" />
     <Compile Include="GameRandom.cs" />
-    <Compile Include="IActivatable.cs" />
     <Compile Include="ImageAlignment.cs" />
     <Compile Include="Image.cs" />
     <Compile Include="ImageText.cs" />
@@ -93,7 +91,6 @@
     <Compile Include="Interface\Windows\InventoryWindow.cs" />
     <Compile Include="Interface\Windows\SplitWindow.cs" />
     <Compile Include="Interface\Windows\Tooltip.cs" />
-    <Compile Include="Interface\Windows\Window.cs" />
     <Compile Include="Items\InventoryItem.cs" />
     <Compile Include="IOManager.cs" />
     <Compile Include="Items\Item.cs" />
@@ -121,7 +118,6 @@
     <Compile Include="ScreenManager.cs" />
     <Compile Include="Screens\CharacterCreateScreen.cs" />
     <Compile Include="Screens\Menu\OkCancelMenu.cs" />
-    <Compile Include="Screens\Screen.cs" />
     <Compile Include="Screens\Menu\Character\CharacterNewMenu.cs" />
     <Compile Include="Screens\Menu\Character\CharacterNewCompositeMenu.cs" />
     <Compile Include="Screens\Menu\Character\SexMenu.cs" />
@@ -130,7 +126,6 @@
     <Compile Include="Screens\Menu\OptionsMenu.cs" />
     <Compile Include="Screens\ScreenEventArgs.cs" />
     <Compile Include="Screens\SplashScreen.cs" />
-    <Compile Include="Screens\UserNotifyArgs.cs" />
     <Compile Include="SpriteBatchManager.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="Util.cs" />

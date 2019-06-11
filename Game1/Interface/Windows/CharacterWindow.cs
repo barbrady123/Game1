@@ -15,44 +15,58 @@ using Game1.Screens.Menu;
 
 namespace Game1.Interface.Windows
 {
-	public class CharacterWindow : Window
+	public class CharacterWindow : Component
 	{
-		public override Size ContentMargin => new Size(50, this.Title == null ? 20 : 60);
+		private readonly ComponentManager _components;
 		private Character _character;
 		private InventoryItemView[] _armorItemView;
+		private ImageText _characterName;
 		private ImageText[] _characterStat;
 		private InventoryContextMenu _contextMenu;
 
 		private Tooltip _tooltip;
 
-		public CharacterWindow(Rectangle bounds, Character character) : base(bounds, "brick", character.Name, null, true, true)
+		public CharacterWindow(Rectangle bounds, Character character) : base(bounds, true, "brick")
 		{
-			var viewPosition = bounds.TopLeftPoint(this.ContentMargin.Width, this.ContentMargin.Height);
+			_components = new ComponentManager();
+
 			_character = character;
 			_armorItemView = new InventoryItemView[System.Enum.GetNames(typeof(ArmorSlot)).Length];
+
+			_characterName = new ImageText(_character.Name, true) {
+				Alignment = ImageAlignment.Centered,
+				Position = this.Bounds.TopCenterVector(yOffset: this.ContentMargin.Height + (FontManager.FontHeight / 2))
+			};
+
 			for (int i = 0; i < _armorItemView.Length; i++)
 			{
 				var position = this.Bounds.TopRightVector(-100, this.ContentMargin.Height + InventoryItemView.Size / 2 + (100 * i)).ExpandToRectangleCentered(InventoryItemView.Size / 2, InventoryItemView.Size / 2);
-				_armorItemView[i] = new InventoryItemView(position, i, ((ArmorSlot)i).ToString("g"));
+				_components.Register(_armorItemView[i] = new InventoryItemView(position, i, ((ArmorSlot)i).ToString("g")));
 				_armorItemView[i].OnMouseClick += ArmorItemView_OnMouseClick;
 				_armorItemView[i].OnMouseOver += ArmorItemView_OnMouseOver;
 				_armorItemView[i].OnMouseOut += ArmorItemView_OnMouseOut;
 			}
+			_components.SetState(_armorItemView, ComponentState.All, null);
 			
 			_characterStat = new ImageText[System.Enum.GetNames(typeof(CharacterAttribute)).Length];
 			for (int i = 0; i < _characterStat.Length; i++)
 			{
-				var position = this.Bounds.TopLeftVector(this.ContentMargin.Width, this.ContentMargin.Height + 20 + (this.ContentMargin.Height / 2 * i));
+				var position = this.Bounds.TopLeftVector(this.ContentMargin.Width, this.ContentMargin.Height + 20 + (this.ContentMargin.Height * 2 * i));
 				_characterStat[i] = new ImageText(null, true) { Position = position, Alignment = ImageAlignment.LeftCentered };
 			}
 
-			_tooltip = new Tooltip();
-			_contextMenu = null;
+			_components.Register(_tooltip = new Tooltip());
+			_components.SetState(_tooltip, ComponentState.Active, null);
+
+			_components.Register(_contextMenu = new InventoryContextMenu());
+			_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
+			_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
 		}
 
 		public override void LoadContent()
 		{
 			base.LoadContent();
+			_characterName.LoadContent();
 			_tooltip.LoadContent();
 			foreach (var armorView in _armorItemView)
 				armorView.LoadContent();
@@ -63,66 +77,65 @@ namespace Game1.Interface.Windows
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
+			_characterName.UnloadContent();
 			_tooltip.UnloadContent();
+			_contextMenu.UnloadContent();
 			foreach (var armorView in _armorItemView)
 				armorView.UnloadContent();
 			foreach (var stat in _characterStat)
 				stat.UnloadContent();
 		}
 
-		public override void UpdateReady(GameTime gameTime)
+		public override void UpdateActive(GameTime gameTime)
 		{
-			base.UpdateReady(gameTime);
-			_tooltip.Update(gameTime, true);
+			_contextMenu.Update(gameTime);
+			_characterName.Update(gameTime);
+			_tooltip.Update(gameTime);
 			UpdateArmorViews();
 			foreach (var armorView in _armorItemView)
-				armorView.Update(gameTime, _contextMenu == null);
+				armorView.Update(gameTime);
 			UpdateCharacterStats();
 			foreach (var stat in _characterStat)
 				stat.Update(gameTime);
-			_contextMenu?.Update(gameTime, true);
+			base.UpdateActive(gameTime);
+			InputManager.BlockAllInput();
 		}
 
-		public override void DrawInternal(SpriteBatch spriteBatch)
+		public override void DrawVisible(SpriteBatch spriteBatch)
 		{
-			base.DrawInternal(spriteBatch);
-			_tooltip.Draw(spriteBatch);
+			// Refactor this spritebatch stuff...
+			base.DrawVisible(spriteBatch);
+			_characterName.Draw(spriteBatch);
 			foreach (var armorView in _armorItemView)
 				armorView.Draw(spriteBatch);
 			foreach (var stat in _characterStat)
 				stat.Draw(spriteBatch);
-			if (_contextMenu != null)
+
+			SpriteBatchData batchData = null;
+			if (_tooltip.State.HasFlag(ComponentState.Visible))
 			{
-				var batchData = SpriteBatchManager.Get("context");
-				batchData.ScissorWindow = _contextMenu.Bounds;
-				_contextMenu?.Draw(batchData.SpriteBatch);
+				batchData = SpriteBatchManager.Get("tooltip");
+				batchData.ScissorWindow = _tooltip.Bounds;	// one reason why it was good to have the components self-aware of the batch andwrap the call...
+				_tooltip.Draw(batchData.SpriteBatch);
 			}
+			batchData = SpriteBatchManager.Get("context");
+			batchData.ScissorWindow = _contextMenu?.Bounds ?? Rectangle.Empty;
+			_contextMenu.Draw(batchData.SpriteBatch);
 		}
 
-		protected override void BeforeReadyDisable(ScreenEventArgs args)
+		private void ArmorItemView_OnMouseClick(object sender, ComponentEventArgs e)
 		{
-			base.BeforeReadyDisable(args);
-		}
+			var itemView = (InventoryItemView)sender;
 
-		private void ArmorItemView_OnMouseClick(object sender, EventArgs e)
-		{
-			var args = (MouseEventArgs)e;
-			if ((args.Button == MouseButton.Right) && (_armorItemView[args.SourceIndex]?.Item != null))
-			{
-				_contextMenu = new InventoryContextMenu(sender, "armorview", args.SourceIndex,  InputManager.MousePosition.Offset(-10, -10), _armorItemView[args.SourceIndex].Item, true) { IsActive = true };
-				_contextMenu.LoadContent();
-				_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
-				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
-			}
+			if ((e.Button == MouseButton.Right) && (itemView?.Item != null))
+				EnableContextMenu(itemView);
 		}
 
 		private void ArmorItemView_OnMouseOver(object sender, EventArgs e)
 		{
-			var args = (MouseEventArgs)e;
 			var overItem = (sender as InventoryItemView).Item;
-			int overIndex = args.SourceIndex;
 
-			if ((overItem != null) && (_contextMenu?.Owner != sender))
+			if ((overItem != null) && (_contextMenu.Owner != sender))
 				_tooltip.Show(overItem.Item.DisplayName, InputManager.MousePosition.Offset(10, 10), 15, sender);
 			else
 				_tooltip.Reset(sender);
@@ -151,13 +164,15 @@ namespace Game1.Interface.Windows
 			}
 		}
 
-		private void _contextMenu_OnItemSelect(object sender, EventArgs e)
+		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var args = (MenuEventArgs)e;
-			switch (args.Item)
+			var itemView = (InventoryItemView)e.Sender;
+			var source = (MenuItem)e.Source;
+
+			switch (source.Id)
 			{
 				case "unequip"	:	
-					_character.UnequipArmor((ArmorSlot)args.SourceIndex);
+					_character.UnequipArmor((ArmorSlot)itemView.Index);
 					_character.PutItem(_character.Backpack);
 					break;
 				case "split"	:
@@ -165,12 +180,27 @@ namespace Game1.Interface.Windows
 					// Need a "split" popup screen....
 					break;
 			}
-			_contextMenu = null;
+			DisableContextMenu();
 		}
 
-		private void _contextMenu_OnMouseOut(object sender, EventArgs e)
+		private void _contextMenu_OnMouseOut(object sender, ComponentEventArgs e)
 		{
-			_contextMenu = null;
+			DisableContextMenu();
+		}
+
+		private void EnableContextMenu(InventoryItemView clickedItemView)
+		{
+			_contextMenu.Initialize(clickedItemView, InputManager.MousePosition.Offset(-10, -10), true);
+			_components.SetState(_contextMenu, ComponentState.All, null);
+			_components.ClearState(_armorItemView, ComponentState.AllInput);
+			_tooltip.Reset();
+		}
+
+		private void DisableContextMenu()
+		{
+			_components.AddState(_armorItemView, ComponentState.AllInput);
+			_components.SetState(_contextMenu, ComponentState.None, null);
+			_contextMenu.Clear();
 		}
 	}
 }

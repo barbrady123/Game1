@@ -13,17 +13,14 @@ using Game1.Enum;
 
 namespace Game1.Interface
 {
-	public class StatBar 
+	public class StatBar : Component
 	{
-		private readonly int _width;
-		private readonly int _height;
-		private readonly int _borderWidth;
-		private readonly Color _color;
+		public const int Height = 24;
 
-		private Vector2 _padding;
-		private ImageTexture _background;
+		protected override Color BorderColor => Color.Gray;
+		private readonly Color _barColor;
+
 		private ImageTexture _fill;
-		private ImageTexture _border;
 		private ImageText _textImage;		
 
 		private object _source;
@@ -37,53 +34,39 @@ namespace Game1.Interface
 
 		private string Text => $"{CurrentValue} / {MaxValue}";
 
-		public Vector2 Position { get; set; }
-
-		public StatBar(int width, Vector2 position, Color color, object source, string currentProperty, string maxProperty)
+		public StatBar(int width, Vector2 position, Color color, object source, string currentProperty, string maxProperty) : base(position.ExpandToRectangleCentered(width / 2, StatBar.Height / 2), hasBorder: true)
 		{
-			_width = width;
-			_borderWidth = 2;
-			_height = 24;
-			_padding = new Vector2(4.0f, 2.0f);
-			this.Position = position;
 			_source = source;
 			_currentProperty = currentProperty;
 			_maxProperty = maxProperty;
-			_color = color;
-			_previousCurrent = 0;
-			_previousMax = 0;
+			_barColor = color;
+			_previousCurrent = -1;
+			_previousMax = -1;
 		}
 
-		public void LoadContent()
+		public override void LoadContent()
 		{
-			_background = Util.GenerateSolidBackground(_width, _height, Color.Black);
-			_background.Position = this.Position;
-			_background.LoadContent();
-			_border = Util.GenerateBorderTexture(_width, _height, _borderWidth, Color.Gray);
-			_border.Position = this.Position;
-			_border.LoadContent();
+			base.LoadContent();
 			_textImage = new ImageText(this.Text, true) { 
-				Position = this.Position.Offset(_width / 2, _height / 2 + 2),
+				Position = this.Bounds.CenterVector(yOffset: 2),
 				Alignment = ImageAlignment.Centered
 			};
 			_textImage.LoadContent();
-			SetFill();
 		}
 
-		public void UnloadContent()
+		public override void UnloadContent()
 		{
-			_background.UnloadContent();
-			_border.UnloadContent();
+			base.UnloadContent();
 			_textImage.UnloadContent();
 			_fill.UnloadContent();
 		}
 
-		public void Update(GameTime gameTime)
+		public override void UpdateActive(GameTime gameTime)
 		{
-			_border.Update(gameTime);
+			base.UpdateActive(gameTime);
 			_textImage.UpdateText(this.Text);
 			_textImage.Update(gameTime);
-			_fill.Update(gameTime);
+			_fill?.Update(gameTime);
 
 			int current = this.CurrentValue;
 			int max = this.MaxValue;
@@ -92,11 +75,10 @@ namespace Game1.Interface
 				SetFill(current, max);
 		}
 
-		public void Draw(SpriteBatch spriteBatch)
+		public override void DrawVisible(SpriteBatch spriteBatch)
 		{
-			_background.Draw(spriteBatch);
+			base.DrawVisible(spriteBatch);
 			_fill.Draw(spriteBatch);
-			_border.Draw(spriteBatch);			
 			_textImage.Draw(spriteBatch);
 		}
 
@@ -105,11 +87,12 @@ namespace Game1.Interface
 			int currentVal = current ?? this.CurrentValue;
 			int maxVal = max ?? this.MaxValue;
 
-			if (_fill != null)
-				_fill.UnloadContent();
-				
-			_fill = Util.GenerateSolidBackground((int)(_width * (maxVal > 0 ? (float)currentVal / (float)maxVal : 0.0f)), _height, _color);
-			_fill.Position = this.Position;
+			var fillBarBounds = this.Bounds.CenteredRegion(this.Bounds.Width - (2 * this.BorderThickness), this.Bounds.Height - (2 * this.BorderThickness));
+
+			_fill?.UnloadContent();
+			_fill = Util.GenerateSolidBackground((int)(fillBarBounds.Width * (maxVal > 0 ? (float)currentVal / (float)maxVal : 0.0f)), fillBarBounds.Height, _barColor);
+			_fill.Alignment = ImageAlignment.LeftTop;
+			_fill.Position = fillBarBounds.TopLeftVector();
 			_fill.LoadContent();
 
 			_previousCurrent = currentVal;

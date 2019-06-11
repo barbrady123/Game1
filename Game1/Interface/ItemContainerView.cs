@@ -14,7 +14,7 @@ using Game1.Screens.Menu;
 
 namespace Game1.Interface
 {
-	public class ItemContainerView
+	public class ItemContainerView : Component
 	{
 		private const int ItemsPerRow = 10;
 		private const int ItemViewPadding = 10;
@@ -23,50 +23,54 @@ namespace Game1.Interface
 		
 		public ItemContainer Container { get; private set; }
 
-		private static readonly Size ContentMargin = new Size(10, 10);
-
-		public Rectangle Bounds { get; set; }		
+		protected override Size ContentMargin => new Size(10, 10);
 
 		public bool HightlightActiveItem { get; set; }
 
-		public event EventHandler OnMouseClick;
-		public event EventHandler OnMouseOver;
-		public event EventHandler OnMouseOut;
+		public event EventHandler<ComponentEventArgs> OnMouseClick;
 
-		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem)
+		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem) : base(bounds)
 		{
-			this.Bounds = bounds;
 			this.Container = container;
 			_itemViews = new InventoryItemView[this.Container.Size];
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
 				var position = CalculateItemViewPosition(i);
-				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(InventoryItemView.Size, InventoryItemView.Size), i, null);
+				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(InventoryItemView.Size, InventoryItemView.Size), i, null, this);
 				_itemViews[i].OnMouseClick += ItemContainerView_OnMouseClick;
 				_itemViews[i].OnMouseOver += ItemContainerView_OnMouseOver;
 				_itemViews[i].OnMouseOut += ItemContainerView_OnMouseOut;
+				// use manager!!
+				_itemViews[i].State = ComponentState.All;
 			}
 			this.HightlightActiveItem = highlightActiveItem;
 		}
 
-		public void LoadContent()
+		public override void LoadContent()
 		{
 			foreach (var item in _itemViews)
 				item.LoadContent();
 		}
 
-		public void UnloadContent()
+		public override void UnloadContent()
 		{
 			foreach (var item in _itemViews)
 				item.UnloadContent();
 		}
 
-		public void Update(GameTime gameTime, bool processInput)
+		public override void UpdateActive(GameTime gameTime)
 		{
-			UpdateItems(gameTime, processInput);
+			UpdateItems(gameTime);
+			base.UpdateActive(gameTime);
 		}
 
-		public void Draw(SpriteBatch spriteBatch)
+		public override void UpdateMousePosition(GameTime gameTime)
+		{
+			// We don't want events fired for the container view itself...
+			_mouseover = InputManager.MouseOver(this.Bounds);
+		}
+
+		public override void DrawVisible(SpriteBatch spriteBatch)
 		{
 			foreach (var item in _itemViews)
 				item.Draw(spriteBatch);
@@ -78,32 +82,33 @@ namespace Game1.Interface
 			int col = index % ItemContainerView.ItemsPerRow;
 
 			int xPos = this.Bounds.X
-						+ ItemContainerView.ContentMargin.Width
+						+ this.ContentMargin.Width
 						+ (InventoryItemView.Size * col)
 						+ (ItemContainerView.ItemViewPadding * col);
 			int yPos = this.Bounds.Y
-						+ ItemContainerView.ContentMargin.Height
+						+ this.ContentMargin.Height
 						+ (InventoryItemView.Size * row)
 						+ (ItemContainerView.ItemViewPadding * row);
 
 			return new Vector2(xPos, yPos);
 		}
 
-		private void UpdateItems(GameTime gameTime, bool processInput)
+		private void UpdateItems(GameTime gameTime)
 		{
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
 				_itemViews[i].Item = this.Container[i];
-				_itemViews[i].Highlight = processInput && this.HightlightActiveItem && (this.Container.ActiveItemIndex == i);
-				_itemViews[i].Update(gameTime, processInput);
+				_itemViews[i].Highlight = this.HightlightActiveItem && (this.Container.ActiveItemIndex == i);
+				_itemViews[i].Update(gameTime);
 			}
 		}
 
 		public static Size RequiredViewSize(int numItems)
 		{
-			int width = (InventoryItemView.Size * ItemsPerRow) + (ItemViewPadding * (ItemsPerRow - 1)) + (ContentMargin.Width * 2);
+			// This no longer includes the containing window padding (20,20)....
+			int width = (InventoryItemView.Size * ItemsPerRow) + (ItemViewPadding * (ItemsPerRow - 1)) + (ItemViewPadding * 2);
 			int numRows = (numItems / ItemsPerRow) + ((numItems % ItemsPerRow) > 0 ? 1 : 0);
-			int height = (InventoryItemView.Size * numRows) + (ItemViewPadding * (numRows - 1)) + (ContentMargin.Height * 2);
+			int height = (InventoryItemView.Size * numRows) + (ItemViewPadding * (numRows - 1)) + (ItemViewPadding* 2);
 			return new Size(width, height);
 		}
 
@@ -113,19 +118,19 @@ namespace Game1.Interface
 			return (T)Activator.CreateInstance(typeof(T), container, new Rectangle(position.X, position.Y, requiredSize.Width, requiredSize.Height), hightlightActiveItem);
 		}
 
-		private void ItemContainerView_OnMouseClick(object sender, EventArgs e)
+		private void ItemContainerView_OnMouseClick(object sender, ComponentEventArgs e)
 		{
-			OnMouseClick?.Invoke(this, e);
+			OnMouseClick?.Invoke(this, new ComponentEventArgs(e, sender));
 		}
 
-		private void ItemContainerView_OnMouseOver(object sender, EventArgs e)
+		private void ItemContainerView_OnMouseOver(object sender, ComponentEventArgs e)
 		{
-			OnMouseOver?.Invoke(this, e);
+			MouseOver(new ComponentEventArgs(e, sender));
 		}
 
-		private void ItemContainerView_OnMouseOut(object sender, EventArgs e)
+		private void ItemContainerView_OnMouseOut(object sender, ComponentEventArgs e)
 		{
-			OnMouseOut?.Invoke(this, e);
+			MouseOut(new ComponentEventArgs(e, sender));
 		}
 	}
 }

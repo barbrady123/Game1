@@ -9,12 +9,22 @@ namespace Game1.Enum
 	[Flags]
 	public enum ComponentState
 	{
+		None = 0x00,
+
 		Visible = 0x01,
 
 		Active = 0x02,
 
 		TakingInput = 0x04,
 
-		DetectingMousePosition = 0x08
+		DetectingMousePosition = 0x08,
+
+		ActiveVisible = Visible | Active,
+
+		AllInput = TakingInput | DetectingMousePosition,
+
+		ActiveAllInput = Active | AllInput,
+
+		All = Visible | Active | TakingInput | DetectingMousePosition
 	}
 }

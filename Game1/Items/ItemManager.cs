@@ -23,6 +23,9 @@ namespace Game1.Items
 		private static Dictionary<string, ImageTexture> _icons;
 		private static ContentManager _content;
 
+		// Temp...
+		private static List<Item> _items;
+
 		static ItemManager()
 		{
 			_icons = new Dictionary<string, ImageTexture>();	
@@ -37,6 +40,16 @@ namespace Game1.Items
 				_icons[fileName] = new ImageTexture(Path.Combine(Game1.IconRoot, fileName), true) { Alignment = ImageAlignment.Centered };
 				_icons[fileName].LoadContent();
 			}
+
+			_items = new List<Item> {
+				new ItemGeneral {	DisplayName = "Heart",			Icon = _icons["heart"],		Id = 0,	MaxStackSize = 99,	Weight = 0.4f },
+				new ItemGeneral {	DisplayName = "Ruby",			Icon = _icons["gemRed"],	Id = 1,	MaxStackSize = 99,	Weight = 0.2f },
+				new ItemGeneral {	DisplayName = "Health Potion",	Icon = _icons["potionRed"],	Id = 2,	MaxStackSize = 99,	Weight = 0.1f },
+				// Things like metal type, etc. should be modifiers to a base type...
+				new ItemArmor {		DisplayName = "Chain Helm",		Icon = _icons["helmet"],	Id = 3,	MaxStackSize = 1,	Weight = 3.2f,	Slot = ArmorSlot.Head,	Defense = 2	},
+				new ItemArmor {		DisplayName = "Iron Armor",		Icon = _icons["armor"],		Id = 4,	MaxStackSize = 1,	Weight = 7.4f,	Slot = ArmorSlot.Chest, Defense = 5	},
+				new ItemArmor {		DisplayName = "Gold Armor",		Icon = _icons["upg_armor"],	Id = 5,	MaxStackSize = 1,	Weight = 5.5f,	Slot = ArmorSlot.Chest, Defense = 8	}
+			};
 		}
 
 		public static void UnloadContent()
@@ -49,20 +62,12 @@ namespace Game1.Items
 		public static InventoryItem GetItem()
 		{
 			int val = GameRandom.Next(0, 5);
-			Item newItem = null;
+			return new InventoryItem(_items[val], GameRandom.Next(1, _items[val].MaxStackSize));
+		}
 
-			switch (val)
-			{
-				case 0 : newItem = new ItemGeneral {	DisplayName = "Heart",			Icon = _icons["heart"],		Id = val,	MaxStackSize = 99,	Weight = 0.4f };	break;
-				case 1 : newItem = new ItemGeneral {	DisplayName = "Ruby",			Icon = _icons["gemRed"],	Id = val,	MaxStackSize = 99,	Weight = 0.2f };	break;
-				case 2 : newItem = new ItemGeneral {	DisplayName = "Health Potion",	Icon = _icons["potionRed"],	Id = val,	MaxStackSize = 99,	Weight = 0.1f };	break;
-				// Things like metal type, etc. should be modifiers to a base type...
-				case 3 : newItem = new ItemArmor {		DisplayName = "Chain Helm",		Icon = _icons["helmet"],	Id = val,	MaxStackSize = 1,	Weight = 3.2f,	Slot = ArmorSlot.Head,	Defense = 2	};	break;
-				case 4 : newItem = new ItemArmor {		DisplayName = "Iron Armor",		Icon = _icons["armor"],		Id = val,	MaxStackSize = 1,	Weight = 7.4f,	Slot = ArmorSlot.Chest, Defense = 5	};	break;
-				case 5 : newItem = new ItemArmor {		DisplayName = "Gold Armor",		Icon = _icons["upg_armor"],	Id = val,	MaxStackSize = 1,	Weight = 5.5f,	Slot = ArmorSlot.Chest, Defense = 8	};	break;
-			}
-
-			return new InventoryItem(newItem, GameRandom.Next(1, newItem.MaxStackSize));
+		public static InventoryItem FromItem(InventoryItem item, int? quantity)
+		{
+			return new InventoryItem(item, quantity);
 		}
 	}
 }

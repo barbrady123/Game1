@@ -87,7 +87,7 @@ namespace Game1
 			// Gameplay camera drawing...
 			var gameplayBatch = new SpriteBatch(GraphicsDevice);
 			gameplayBatch.GraphicsDevice.ScissorRectangle = new Rectangle(28, 28, 960, 960);
-			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), new RasterizerState { ScissorTestEnable = true }, 200, "gameplay");
+			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), new RasterizerState { ScissorTestEnable = true }, 200, "gameplay");			
 			// Modals...
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice),  new RasterizerState { ScissorTestEnable = true }, 300, "modal");
 			// Tooltips

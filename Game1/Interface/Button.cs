@@ -14,7 +14,7 @@ using Game1.Screens.Menu;
 
 namespace Game1.Interface
 {
-	public class Button : IActivatable
+	public class Button
 	{
 		private static readonly Vector2 MouseOverScale = new Vector2(1.1f, 1.1f);
 

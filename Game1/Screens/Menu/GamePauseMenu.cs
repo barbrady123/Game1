@@ -15,7 +15,7 @@ namespace Game1.Screens.Menu
 	{
 		public GamePauseMenu(Rectangle bounds) : base(bounds, background: null) { }
 
-		protected override List<MenuItem> LoadItemData()
+		protected override List<MenuItem> GetItemData()
 		{
 			return new List<MenuItem> { 
 				new MenuItem() { Id = "back", Text = "Return To Game" },

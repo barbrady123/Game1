@@ -2,25 +2,13 @@
 
 namespace Game1.Screens.Menu
 {
-	public class MenuEventArgs : EventArgs
+	public class MenuEventArgs : ComponentEventArgs
 	{
-		// TODO: Maybe make this an enum...
-		public string Type { get; set; }
-
-		public string Source { get; set; }
-
-		public int? SourceIndex { get; set; }
-
-		public string Item { get; set; }		
-
-		public MenuEventArgs() { }
-
-		public MenuEventArgs(string type, string source, int? sourceIndex, string item)
+		public MenuEventArgs(string type, object source)
 		{
+			// Do we really even need the type here?
 			this.Type = type;
 			this.Source = source;
-			this.SourceIndex = sourceIndex;
-			this.Item = item;
 		}
 	}
 }

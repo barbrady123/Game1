@@ -14,8 +14,13 @@ namespace Game1
 {
 	// Eventually this will handle multiple fonts, etc...
 	public static class FontManager
-	{
+	{		
 		public const string DefaultFontName = "Orbitron";
+
+		/// <summary>
+		/// At game start, we should load up the font and measure a sample string to get this value "for real"...
+		/// </summary>
+		public static int FontHeight = 24;
 
 		private static ContentManager _content;
 		private static Dictionary<string, SpriteFont> _fonts;

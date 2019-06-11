@@ -15,20 +15,23 @@ using Game1.Items;
 
 namespace Game1.Screens
 {
-	public class GameScreen : Screen
+	public class GameScreen : Component
 	{
+		private ComponentManager _components;
 		private GamePlayManager _gameplay;
 		private readonly Dialog _dialog;
-		private readonly ActivationManager _activation;
 
-		public GameScreen(Rectangle bounds): base(bounds, "rock")
+		public GameScreen(Rectangle bounds): base(bounds, background: "rock")
 		{
-			_activation = new ActivationManager();
-			_activation.Add(_gameplay = new GamePlayManager(bounds) { IsActive = true });
-			// Dialog
-			_activation.Add(_dialog = new Dialog("Paused", DialogButton.Ok, bounds.CenteredRegion(400, 200), null));
-			_dialog.OnButtonClick += _dialogBox_OnButtonClick;
-			_dialog.OnReadyDisable += _dialogBox_OnButtonClick;
+			_components = new ComponentManager();
+
+			_components.Register(_gameplay = new GamePlayManager(bounds));
+			_gameplay.OnReadyDisable += _gameplay_OnReadyDisable;
+			_components.Register(_dialog = new Dialog("Paused", DialogButton.Ok, bounds.CenteredRegion(400, 200), null));
+			_dialog.OnItemSelect += _dialog_OnItemSelect;
+			_dialog.OnReadyDisable += _dialog_OnReadyDisable;
+
+			_components.SetState(_gameplay, ComponentState.All, ComponentState.None);
 		}
 
 		public override void LoadContent()
@@ -45,26 +48,41 @@ namespace Game1.Screens
 			_dialog.UnloadContent();
 		}
 
-		public override void Update(GameTime gameTime, bool processInput)
+		public override void Update(GameTime gameTime)
 		{
-			base.Update(gameTime, processInput);
+			_dialog.Update(gameTime);
+			base.Update(gameTime);
+		}
+
+		public override void UpdateActive(GameTime gameTime)
+		{
 			_gameplay.Update(gameTime);
-			_dialog.Update(gameTime, processInput);
-
-			if (InputManager.KeyPressed(Keys.Escape))
-				_activation.Activate(_dialog);
+			base.UpdateActive(gameTime);
 		}
 
-		public override void Draw(SpriteBatch spriteBatch)
+		public override void DrawVisible(SpriteBatch spriteBatch)
 		{	
-			base.Draw(spriteBatch);
+			var batchData = SpriteBatchManager.Get("modal");
+			batchData.ScissorWindow = _dialog.Bounds;
+			_dialog.Draw(batchData.SpriteBatch);
+			base.DrawVisible(spriteBatch);
 			_gameplay.Draw(spriteBatch);
-			_dialog.Draw(spriteBatch);
 		}
 
-		private void _dialogBox_OnButtonClick(object sender, EventArgs e)
+		private void _dialog_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			_activation.Activate(_gameplay);
+			// Eventually we will care what got clicked here...
+			_components.SetState(_gameplay, ComponentState.All, ComponentState.None);
+		}
+
+		private void _dialog_OnReadyDisable(object sender, ComponentEventArgs e)
+		{
+			_components.SetState(_gameplay, ComponentState.All, ComponentState.None);
+		}
+
+		private void _gameplay_OnReadyDisable(object sender, ComponentEventArgs e)
+		{
+			_components.SetState(_dialog, ComponentState.All, ComponentState.Visible);
 		}
 	}
 }

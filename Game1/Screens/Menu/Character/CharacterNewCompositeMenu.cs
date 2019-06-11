@@ -14,10 +14,9 @@ using TextInputEventArgs = Game1.Interface.TextInputEventArgs;
 
 namespace Game1.Screens.Menu.Character
 {
-	public class CharacterNewCompositeMenu : IActivatable
+	public class CharacterNewCompositeMenu : Component
 	{
-		private readonly ActivationManager _activation = new ActivationManager();
-		private readonly Rectangle _bounds;
+		private readonly ComponentManager _components;
 		private readonly CharacterNewMenu _menuCharacter;
 		private readonly TextInput _nameEdit;
 		private readonly SexMenu _menuSex;
@@ -26,43 +25,43 @@ namespace Game1.Screens.Menu.Character
 		public string CharacterName { get; set; }
 		public CharacterSex CharacterSex { get; set; }
 
-		public event EventHandler OnReadyDisable;
-		public event EventHandler OnSexItemChange;
-		public event EventHandler OnUserNotify;
+		public event EventHandler<ComponentEventArgs> OnSexItemChange;
+		public event EventHandler<ComponentEventArgs> OnUserNotify;
 
-		public bool IsActive { get; set; }
-
-		public CharacterNewCompositeMenu(Rectangle bounds)
+		public CharacterNewCompositeMenu(Rectangle bounds) : base(bounds, true, "brick")
 		{
-			_bounds = bounds;
+			_components = new ComponentManager();
 			
 			// Main menu...
-			_activation.Add(_menuCharacter = new CharacterNewMenu(new Rectangle(_bounds.Left, _bounds.Top, 200, 200)));
+			_components.Register(_menuCharacter = new CharacterNewMenu(new Rectangle(this.Bounds.Left, this.Bounds.Top, 200, 200)));
 			_menuCharacter.OnItemSelect += _menuCharacter_OnItemSelect;
 			_menuCharacter.OnMouseIn += _menuCharacter_OnMouseIn;
 
+			var basePosition = _menuCharacter.Bounds.TopLeftPoint();
+
 			// Name edit box...
-			_activation.Add(_nameEdit = new TextInput(275, this.CharacterName, 12, false) {
-				Position = new Vector2(_menuCharacter.Bounds.Left + 170,  _menuCharacter.Bounds.Top + 62)
-			});
+			_components.Register(_nameEdit = new TextInput(275, _menuCharacter.Bounds.TopLeftVector(300, 80), this.CharacterName, 12));
 			_nameEdit.OnReadyDisable += _nameEdit_OnReadyDisable;
 
 			// Sex menu...
-			_activation.Add(_menuSex = new SexMenu(new Rectangle(_menuCharacter.Bounds.Left + 90, _menuCharacter.Bounds.Top + 60, 300, 120)) { IsActive = false });
+			_components.Register(_menuSex = new SexMenu(new Rectangle(basePosition.X + 90, basePosition.Y + 60, 300, 120)));
 			_menuSex.OnCurrentItemChange += _menuSex_OnCurrentItemChange;
 			_menuSex.OnItemSelect += _menuSex_OnItemSelect;
 			_menuSex.OnReadyDisable += _menuSex_OnReadyDisable;
 
 			// Start/Cancel menu...
-			_activation.Add(_menuStart = new StartCancelMenu(new Rectangle(_menuCharacter.Bounds.Left + 50, _menuCharacter.Bounds.Top + 300, 300, 50)) { IsActive = false });
+			_components.Register(_menuStart = new StartCancelMenu(new Rectangle(basePosition.X + 50, basePosition.Y + 300, 300, 50)));
 			_menuStart.OnItemSelect += _menuStart_OnItemSelect;
 			_menuStart.OnMouseIn += _menuStart_OnMouseIn;
 
-			_activation.Activate(_menuCharacter);
+			
+			_components.SetStateAll(ComponentState.Visible, true);
+			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput);
 		}
 
-		public void LoadContent()
+		public override void LoadContent()
 		{
+			base.LoadContent();
 			_menuCharacter.LoadContent();
 			_nameEdit.LoadContent();
 			_menuSex.LoadContent();
@@ -71,103 +70,95 @@ namespace Game1.Screens.Menu.Character
 			_menuStart.ClearSelection();
 		}
 
-		public void UnloadContent()
+		public override void UnloadContent()
 		{
+			base.UnloadContent();
 			_menuCharacter.UnloadContent();
 			_nameEdit.UnloadContent();
 			_menuSex.UnloadContent();
 			_menuStart.UnloadContent();
 		}
 
-		public void Update(GameTime gameTime, bool processInput)
+		public override void UpdateActive(GameTime gameTime)
 		{
-			if (!this.IsActive)
-				return;
-
-			_menuCharacter.Update(gameTime, processInput);
-			_nameEdit.Update(gameTime, processInput);
-			_menuSex.Update(gameTime, processInput);
-			_menuStart.Update(gameTime, processInput);
-
-			if (InputManager.KeyPressed(Keys.Escape))
-				OnReadyDisable?.Invoke(this, new MenuEventArgs("back", this.GetType().Name, null, null));
+			_menuCharacter.Update(gameTime);
+			_nameEdit.Update(gameTime);
+			_menuSex.Update(gameTime);
+			_menuStart.Update(gameTime);
+			base.UpdateActive(gameTime);
 		}
 
-		public void Draw(SpriteBatch spriteBatch)
+		public override void Draw(SpriteBatch spriteBatch)
 		{
+			base.Draw(spriteBatch);
 			_menuCharacter.Draw(spriteBatch);
 			_nameEdit.Draw(spriteBatch);
 			_menuSex.Draw(spriteBatch);
 			_menuStart.Draw(spriteBatch);
 		}
 
-		private void _menuCharacter_OnItemSelect(object sender, EventArgs e)
+		private void _menuCharacter_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var args = (MenuEventArgs)e;
-
-			switch (args.Item)
+			switch (((MenuItem)e.Source).Id)
 			{
-				case "name":	_activation.Activate(_nameEdit);	break;
-				case "sex":		_activation.Activate(_menuSex);		break;
+				case "name":	_components.AddState(_nameEdit, ComponentState.ActiveAllInput, true);	break;
+				case "sex":		_components.AddState(_menuSex, ComponentState.ActiveAllInput, true);	break;
 			}
 		}
 
 		private void _nameEdit_OnReadyDisable(object sender, EventArgs e)
 		{
-			var key = ((TextInputEventArgs)e).Key;
-			if (key == Keys.Enter)
+			var args = (ComponentEventArgs)e;
+
+			if (args.Key == Keys.Enter)
 			{
 				this.CharacterName = _nameEdit.Text;
 			}
-			else if (key == Keys.Escape)
+			else if (args.Key == Keys.Escape)
 			{
 				_nameEdit.Text = this.CharacterName;
 			}
 
-			_activation.Activate(_menuCharacter);
+			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
 		}
 
-		private void _menuSex_OnCurrentItemChange(object sender, EventArgs e)
+		private void _menuSex_OnCurrentItemChange(object sender, ComponentEventArgs e)
 		{
 			OnSexItemChange?.Invoke(this, e);
 		}
 
-		private void _menuSex_OnItemSelect(object sender, EventArgs e)
+		private void _menuSex_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var args = (MenuEventArgs)e;
-
-			switch (args.Item)
+			var source = (e.Source is MenuItem menuItem) ? menuItem.Id : e.Type;
+			switch (source)
 			{
 				case "female" : this.CharacterSex = CharacterSex.Female;	break;
 				case "male" :	this.CharacterSex = CharacterSex.Male;		break;
 			}
 
 			OnSexItemChange?.Invoke(this, e);
-			_activation.Activate(_menuCharacter);
+			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
 		}
 
 		private void _menuSex_OnReadyDisable(object sender, EventArgs e)
 		{
-			int index = _menuSex.CurrentIndex;
 			_menuSex.SetById(this.CharacterSex.ToString("g").ToLower());
-			if (index != _menuSex.CurrentIndex)
-				OnSexItemChange?.Invoke(this, new MenuEventArgs("change", this.GetType().Name, null, this.CharacterSex.ToString("g").ToLower()));
-			_activation.Activate(_menuCharacter);
+			OnSexItemChange?.Invoke(this, new MenuEventArgs("change", null) { Item = this.CharacterSex.ToString("g").ToLower() });
+			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
 		}
 
-		private void _menuStart_OnItemSelect(object sender, EventArgs e)
+		private void _menuStart_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var args = (MenuEventArgs)e;
-
-			switch (args.Item)
+			var source = (e.Source is MenuItem menuItem) ? menuItem.Id : e.Type;
+			switch (source)
 			{
 				case "startgame" :
 					if (!ValidateInput())
 						break;
-					OnReadyDisable?.Invoke(this, new MenuEventArgs("continue", this.GetType().Name, null, null));
+					ReadyDisable(new ComponentEventArgs("continue", this.GetType().Name));
 					break;
 				case "cancel" :
-					OnReadyDisable?.Invoke(this, new MenuEventArgs("back", this.GetType().Name, null, null));
+					ReadyDisable(new ComponentEventArgs("back", this.GetType().Name));
 					break;
 			}
 		}
@@ -176,23 +167,23 @@ namespace Game1.Screens.Menu.Character
 		{
 			if (String.IsNullOrWhiteSpace(this.CharacterName))
 			{
-				OnUserNotify?.Invoke(this, new UserNotifyArgs { Text = "Enter a name for the character" });
+				OnUserNotify?.Invoke(this, new ComponentEventArgs { Text = "Enter a name for the character" });
 				return false;
 			}
 
 			return true;
 		}
 
-		private void _menuCharacter_OnMouseIn(object sender, EventArgs e)
-		{
-			if (_activation.IsActive(_menuStart))
-				_activation.Activate(_menuCharacter);
+		private void _menuCharacter_OnMouseIn(object sender, ComponentEventArgs e)
+		{			
+			if (_menuStart.State.HasFlag(ComponentState.Active))
+				_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
 		}
 
 		private void _menuStart_OnMouseIn(object sender, EventArgs e)
 		{
-			if (_activation.IsActive(_menuCharacter))
-				_activation.Activate(_menuStart);
+			if (_menuCharacter.State.HasFlag(ComponentState.Active))
+				_components.AddState(_menuStart, ComponentState.ActiveAllInput, true);
 		}
 	}
 }

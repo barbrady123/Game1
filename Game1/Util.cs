@@ -8,6 +8,8 @@ namespace Game1
 {
 	public static class Util
 	{
+		public static readonly Point PointInvalid = new Point(-1, -1);
+
 		public static BindingFlags GetPropertyFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty;
 
 		public static int Clamp(int input, int min, int max) => Math.Min(Math.Max(input, min), max);

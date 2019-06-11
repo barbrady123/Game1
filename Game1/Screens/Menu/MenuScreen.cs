@@ -20,7 +20,7 @@ namespace Game1.Screens.Menu
 	/// This would greatly simplify other parts of the code where the items are dynamic, etc....and we don't have arbitrary
 	/// menu sizes, such as "the entire screen", etc...
 	/// </summary>
-	public class MenuScreen : Screen, IActivatable
+	public class MenuScreen : Component
 	{
 		public const int MENU_PADDING = 20;
 		private const float ENABLED_MENU_ALPHA = 1.0f;
@@ -31,49 +31,26 @@ namespace Game1.Screens.Menu
 		private static readonly Color SelectedItemColor = new Color(240, 240, 240);
 		private static readonly Color UnselectedItemColor = new Color(100, 100, 100);
 
-		protected string EventSource { get; set; }
-		protected int? EventSourceIndex { get; set; } = null;
 		protected int _currentIndex;
 		protected List<MenuItem> _items;
 		protected MenuLayout _layout; 
 
-		private bool _isActive;
-		private bool _escapeToDisable;
-
-		public event EventHandler OnReadyDisable;
-		public event EventHandler OnCurrentItemChange;
-		public event EventHandler OnItemSelect;
-		public event EventHandler OnMouseIn;
-		public event EventHandler OnMouseOut;
-
-		private bool _mouseOverMenu;
-
-		private int _delayInputCycles;
-
-		public void DelayInput(int delayCycles)
-		{
-			_delayInputCycles = Math.Max(0, delayCycles);
-		}
+		public event EventHandler<ComponentEventArgs> OnCurrentItemChange;
+		public event EventHandler<ComponentEventArgs> OnItemSelect;
 
 		public int ItemCount => _items?.Count ?? 0;
 
-		public bool IsActive
+		protected override void StateChange()
 		{
-			get { return _isActive; }
-			set {
-				if (value != _isActive)
-				{
-					_isActive = value;
-					if (_isActive)
-					{
-						SetCurrentItemEffects(true);
-						DelayInput(1);
-					}
-					else
-					{
-						SetCurrentItemEffects(false);
-					}
-				}
+			base.StateChange();
+			if (this.State.HasFlag(ComponentState.Active))
+			{
+				SetCurrentItemEffects(true);
+				DelayInput(1);
+			}
+			else
+			{
+				SetCurrentItemEffects(false);
 			}
 		}
 
@@ -99,23 +76,22 @@ namespace Game1.Screens.Menu
 		public MenuScreen(Rectangle bounds,
 						  MenuLayout layout = MenuLayout.Vertical,
 						  string background = "brick",
-						  bool escapeToDisable = false): base(bounds, background)
+						  bool escapeToDisable = false): base(bounds, escapeToDisable, background)
 		{
-			this.EventSource = this.GetType().Name;
 			_currentIndex = -1;
-			_items = new List<MenuItem>();
 			_layout = layout;
-			_escapeToDisable = escapeToDisable;
-			_delayInputCycles = 0;
-			_mouseOverMenu = false;
-			this.IsActive = false;
+			_items = GetItemData();
 		}
 
 		public override void LoadContent()
 		{			
 			base.LoadContent();
-			_items = LoadItemData();
+			if (_items.Any())
+				LoadItemContent();
+		}
 
+		protected virtual void LoadItemContent()
+		{
 			int menuSize = 0;
 
 			foreach (var item in _items)
@@ -161,46 +137,33 @@ namespace Game1.Screens.Menu
 				item.Image.UnloadContent();
 		}
 
-		public override void Update(GameTime gameTime, bool processInput)
+		public override void Update(GameTime gameTime)
 		{
-			base.Update(gameTime, processInput);
+			// We need to check mouse position even if we're inactive, in case the menu is configured to activate on mouseover...
+			base.UpdateMousePosition(gameTime);
 
-			// Need to check this even if menu is inactive, in case this triggers the container to activate it...
-			bool mouseOverMenu = InputManager.MouseOver(this.Bounds);
-			if (mouseOverMenu != _mouseOverMenu)
-			{
-				if (mouseOverMenu)
-					OnMouseIn?.Invoke(this, new MouseEventArgs());
-				else
-					OnMouseOut?.Invoke(this, new MouseEventArgs());
-			}
-
-			_mouseOverMenu = mouseOverMenu;
-
-			if (!this.IsActive)
+			if (!this.State.HasFlag(ComponentState.Active))
 			{
 				for (int x = 0; x < _items.Count; x++)
 					_items[x].Image.Color = (x == _currentIndex) ? MenuScreen.SelectedItemColor : MenuScreen.UnselectedItemColor;
 				return;
 			}
 
-			UpdateActive(gameTime, processInput);
+			base.Update(gameTime);
 		}
 
-		public virtual void UpdateActive(GameTime gameTime, bool processInput)
+		public override void UpdateActive(GameTime gameTime)
 		{
 			for (int x = 0; x < _items.Count; x++)
 				_items[x].Image.Color = MenuScreen.ActiveItemColor;
 
-			if (processInput && (_delayInputCycles == 0))
-				UpdateInput(gameTime);
-			_delayInputCycles = Math.Max(0, _delayInputCycles - 1);
-
 			foreach (var item in _items)
 				item.Image.Update(gameTime);
+
+			base.UpdateActive(gameTime);
 		}
 
-		public virtual void UpdateInput(GameTime gameTime)
+		public override void UpdateMousePosition(GameTime gameTime)
 		{
 			bool mouseOverItem = false;
 
@@ -214,30 +177,40 @@ namespace Game1.Screens.Menu
 				if (this.CurrentIndex != i)
 				{
 					this.CurrentIndex = i;
-					OnCurrentItemChange?.Invoke(this, new MenuEventArgs("currentChange", this.EventSource, this.EventSourceIndex, _items[_currentIndex].Id));
+					CurrentItemChange(new MenuEventArgs("currentChange", _items[_currentIndex]));
 				}
-
-				if (InputManager.LeftMouseClick())
-					OnItemSelect?.Invoke(this, new MenuEventArgs("select", this.EventSource, this.EventSourceIndex, _items[_currentIndex].Id));				}
+			}
 
 			if (!mouseOverItem)
 				this.CurrentIndex = -1;
+		}
 
-			if (_escapeToDisable && InputManager.KeyPressed(Keys.Escape, true))
+		public override void UpdateInput(GameTime gameTime)
+		{
+			for (int i = 0; i < _items.Count; i++)
 			{
-				OnReadyDisable?.Invoke(this, new MenuEventArgs("escape", this.EventSource, this.EventSourceIndex, null));
+				if (InputManager.LeftMouseClick(_items[i].Bounds))
+					ItemSelect(new MenuEventArgs("select", _items[_currentIndex]));
 			}
 
-			if (_mouseOverMenu)
-				InputManager.BlockButtonClicks();
-		}	
+			base.UpdateInput(gameTime);
+		}
 
-		public override void Draw(SpriteBatch spriteBatch)
+		public void SelectItem(int index)
 		{
-			base.Draw(spriteBatch);
+			if (!Util.InRange(index, 0, _items.Count))
+				return;
+
+			this.CurrentIndex = index;
+			ItemSelect(new MenuEventArgs("select", _items[_currentIndex]));
+		}
+
+		public override void DrawVisible(SpriteBatch spriteBatch)
+		{
+			base.DrawVisible(spriteBatch);
 
 			foreach (var item in _items)
-				item.Image.Draw(spriteBatch, this.IsActive ? MenuScreen.ENABLED_MENU_ALPHA : MenuScreen.DISABLED_MENU_ALPHA);
+				item.Image.Draw(spriteBatch, this.State.HasFlag(ComponentState.Active) ? MenuScreen.ENABLED_MENU_ALPHA : MenuScreen.DISABLED_MENU_ALPHA);
 		}
 
 		public int SetById(string id)
@@ -252,7 +225,7 @@ namespace Game1.Screens.Menu
 			return -1;
 		}
 
-		protected virtual List<MenuItem> LoadItemData()
+		protected virtual List<MenuItem> GetItemData()
 		{
 			using (var reader = new StreamReader($"Load\\Menu\\{this.GetType().Name}.json"))
 			{
@@ -298,10 +271,15 @@ namespace Game1.Screens.Menu
 
 			return new Size((int)width + paddingWidth, (int)height + paddingHeight);
 		}
-
-		protected virtual void ReadyDisable(object sender, MenuEventArgs e)
+		
+		protected virtual void CurrentItemChange(ComponentEventArgs args)
 		{
-			OnReadyDisable?.Invoke(sender, e);
+			OnCurrentItemChange?.Invoke(this, args);
+		}
+
+		protected virtual void ItemSelect(ComponentEventArgs args)
+		{
+			OnItemSelect?.Invoke(this, args);
 		}
 	}
 }
