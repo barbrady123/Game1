@@ -29,7 +29,7 @@ namespace Game1.Screens
 			_gameplay.OnReadyDisable += _gameplay_OnReadyDisable;
 			_components.Register(_dialog = new Dialog("Paused", DialogButton.Ok, bounds.CenteredRegion(400, 200), null));
 			_dialog.OnItemSelect += _dialog_OnItemSelect;
-			_dialog.OnReadyDisable += _dialog_OnReadyDisable; ;
+			_dialog.OnReadyDisable += _dialog_OnReadyDisable;
 
 			_components.SetState(_gameplay, ComponentState.All, ComponentState.None);
 		}

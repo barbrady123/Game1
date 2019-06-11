@@ -26,8 +26,6 @@ namespace Game1
 
 		public MouseButton Button { get; set; }
 
-		//public int? SourceIndex { get; set; }
-
 		public char Character { get; set; }
 
 		public Keys Key { get; set; }
