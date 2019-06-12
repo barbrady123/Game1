@@ -158,12 +158,6 @@ namespace Game1.Screens.Menu
 
 		public override void UpdateInput(GameTime gameTime)
 		{
-			for (int i = 0; i < _items.Count; i++)
-			{
-				if (InputManager.LeftMouseClick(_items[i].Bounds))
-					ItemSelect(new ComponentEventArgs { Value = _items[_currentIndex]?.Id });
-			}
-
 			bool mouseOverItem = false;
 
 			for (int i = 0; i < _items.Count; i++)
@@ -178,6 +172,9 @@ namespace Game1.Screens.Menu
 					this.CurrentIndex = i;
 					CurrentItemChange(new ComponentEventArgs { Value = _items[_currentIndex]?.Id });
 				}
+
+				if (InputManager.LeftMouseClick())
+					ItemSelect(new ComponentEventArgs { Value = _items[_currentIndex]?.Id });
 			}
 
 			if (!mouseOverItem)
