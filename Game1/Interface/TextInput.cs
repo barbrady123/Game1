@@ -9,7 +9,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
 using Game1.Enum;
-using TextInputEventArgs = Game1.Interface.TextInputEventArgs;
 
 namespace Game1.Interface
 {

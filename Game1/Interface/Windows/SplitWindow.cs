@@ -11,7 +11,6 @@ using Game1.Enum;
 using Game1.Items;
 using Game1.Screens;
 using Game1.Screens.Menu;
-using TextInputEventArgs = Game1.Interface.TextInputEventArgs;
 
 namespace Game1.Interface.Windows
 {
@@ -29,7 +28,7 @@ namespace Game1.Interface.Windows
 
 		public InventoryItemView Owner { get; private set; }
 
-		public SplitWindow() : base(Rectangle.Empty, background: "black")
+		public SplitWindow(SpriteBatchData spriteBatchData) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData)
 		{
 			// We allow empty instanciation so the object can be registered with a ComponentManager if necessary...
 		}
@@ -135,7 +134,7 @@ namespace Game1.Interface.Windows
 			if (this.Owner?.Item == null)
 				return;
 
-			int newValue = Int32.Parse(e.ResultText);
+			int newValue = Int32.Parse(e.Text);
 			if (newValue > this.Owner.Item.Quantity)
 				e.Cancel = true;
 		}

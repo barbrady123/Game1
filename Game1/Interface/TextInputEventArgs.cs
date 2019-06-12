@@ -15,7 +15,7 @@ namespace Game1.Interface
 			this.Character = character;
 			this.Key = key;
 			this.CurrentText = currentText;
-			this.ResultText = resultText;
+			this.Text = resultText;
 			this.Cancel = false;
 		}
 	}

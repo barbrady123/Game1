@@ -61,11 +61,12 @@ namespace Game1.Interface.Windows
 			_components.Register(_tooltip = new Tooltip(SpriteBatchManager.Get("tooltip")));
 			_components.SetState(_tooltip, ComponentState.Active, null);
 
-			_components.Register(_contextMenu = new InventoryContextMenu(SpriteBatchManager.Get("context")));
+			var contextBatchData = SpriteBatchManager.Get("context");
+			_components.Register(_contextMenu = new InventoryContextMenu(contextBatchData));
 			_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 			_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
 
-			_components.Register(_splitWindow = new SplitWindow());
+			_components.Register(_splitWindow = new SplitWindow(contextBatchData));
 			_splitWindow.OnButtonClick += _splitWindow_OnButtonClick;
 			_splitWindow.OnReadyDisable += _splitWindow_OnReadyDisable;
 		}

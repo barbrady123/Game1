@@ -10,7 +10,6 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Interface;
 using Game1.Screens.Menu;
-using TextInputEventArgs = Game1.Interface.TextInputEventArgs;
 
 namespace Game1.Screens.Menu.Character
 {
