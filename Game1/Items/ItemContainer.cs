@@ -68,12 +68,20 @@ namespace Game1.Items
 			if (item == null)
 				return null;
 
+			int? openPosition = null;
+
 			// First see if we can stack
 			if (item.Item.MaxStackSize > 1)
 			{
 				for (int i = 0; i < _items.Length; i++)
 				{
-					if	((_items[i] == null) || (_items[i].Item != item.Item))
+					if (_items[i] == null)
+					{
+						openPosition = openPosition ?? i;
+						continue;
+					}
+
+					if	(_items[i].Item != item.Item)
 						continue;
 
 					int spaceLeft = _items[i].Item.MaxStackSize - _items[i].Quantity;
@@ -85,7 +93,7 @@ namespace Game1.Items
 				}
 			}
 
-			int? position = NextEmptyPosition(0);
+			int? position = openPosition ?? NextEmptyPosition(0);
 			if (position != null)
 				_items[(int)position] = item;
 
