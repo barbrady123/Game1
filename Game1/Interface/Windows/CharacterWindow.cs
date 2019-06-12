@@ -161,12 +161,8 @@ namespace Game1.Interface.Windows
 			switch (e.Value)
 			{
 				case "unequip"	:	
-					_character.UnequipArmor((ArmorSlot)itemView.Index);
-					_character.PutItem(_character.Backpack);
-					break;
-				case "split"	:
-					// TODO: Need to implement this...(also need to display stack size on Held item)...
-					// Need a "split" popup screen....
+					var previous = _character.UnequipArmor((ArmorSlot)itemView.Index);
+					_character.AddItem(previous);
 					break;
 			}
 			DisableContextMenu();

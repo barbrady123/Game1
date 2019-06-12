@@ -117,10 +117,11 @@ namespace Game1.Interface.Windows
 
 		protected override void ReadyDisable(ComponentEventArgs args)
 		{
-			if (_character.HeldItem != null)
+			if (_character.IsItemHeld)
 			{
-				_character.PutItem(_containerViewBackpack.Container);
-				_character.HeldItem = null;
+				if (!_character.StoreHeld())
+					// TODO: This is temp...we should just allow the item to remain (when it's possible to drop stuff....)
+					_character.DestroyHeld();
 			}
 
 			base.ReadyDisable(args);
@@ -133,7 +134,7 @@ namespace Game1.Interface.Windows
 
 			if (e.Button == MouseButton.Left)
 			{
-				_character.PutItem(clickedContainer, clickedItemView.Index);
+				_character.SwapHeld(clickedContainer, clickedItemView.Index);
 			}
 			else if ((e.Button == MouseButton.Right) && (clickedItemView.Item != null))
 			{
@@ -152,7 +153,6 @@ namespace Game1.Interface.Windows
 			{
 				case "equip"	:	
 					_character.EquipArmor(itemView.ContainingView.Container, itemView.Index);
-					_character.PutItem(_character.Backpack);
 					break;
 				case "split"	:
 					EnableSplitWindow(itemView);
@@ -168,7 +168,6 @@ namespace Game1.Interface.Windows
 		// This functionality needs to be sharable somehow....move elsewhere...
 		private void _splitWindow_OnButtonClick(object sender, ComponentEventArgs e)
 		{
-			// This seems convoluted...need to redo how some of these events are propogated...
 			switch (e.Value)
 			{
 				case "ok" :
@@ -185,18 +184,9 @@ namespace Game1.Interface.Windows
 		// This functionality needs to be sharable somehow....move elsewhere...
 		private void SplitItem(InventoryItemView itemView, int quantity)
 		{
-			if ((itemView.Item == null) || (quantity < 1))
-				return;
-
-			quantity = Math.Min(quantity, itemView.Item.Quantity);
-
-			if (quantity == itemView.Item.Quantity)
+			if (!_character.HoldItemQuantity(itemView.ContainingView.Container, itemView.Index, quantity))
 			{
-				_character.PutItem(itemView.ContainingView.Container, itemView.Index);
-			}
-			else
-			{
-				_character.GetItem(itemView.ContainingView.Container, itemView.Index, quantity);
+				// Need to tell user this failed...
 			}
 		}
 
