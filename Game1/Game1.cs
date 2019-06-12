@@ -13,6 +13,7 @@ namespace Game1
 	/// </summary>
 	public class Game1 : Game
 	{
+		// Using as a center location for now, but all of this stuff needs to move/be configurable...
 		public static readonly string GameName = typeof(Game1).Name;
 		public static readonly string GameStorageRoot = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\{Game1.GameName}";
 		public static readonly string PlayerFile = $"{Game1.GameStorageRoot}\\player";

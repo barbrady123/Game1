@@ -52,6 +52,7 @@ namespace Game1
 				PreviousPosition = -Vector2.One
 			};
 			_renderData = new Dictionary<Character, CharacterRenderData>();
+			// This needs to be realtime pulled every cycle...we can't just run this once in the constructor...
 			foreach (var npc in _world.NPCs)
 			{
 				_renderData[npc] = new CharacterRenderData {
