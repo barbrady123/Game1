@@ -56,7 +56,7 @@ namespace Game1.Screens.Menu.Character
 
 			
 			_components.SetStateAll(ComponentState.Visible, true);
-			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput);
+			_components.AddState(_menuCharacter, ComponentState.ActiveInput);
 		}
 
 		public override void LoadContent()
@@ -99,10 +99,10 @@ namespace Game1.Screens.Menu.Character
 
 		private void _menuCharacter_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			switch (((MenuItem)e.Source).Id)
+			switch (e.Value)
 			{
-				case "name":	_components.AddState(_nameEdit, ComponentState.ActiveAllInput, true);	break;
-				case "sex":		_components.AddState(_menuSex, ComponentState.ActiveAllInput, true);	break;
+				case "name":	_components.AddState(_nameEdit, ComponentState.ActiveInput, true);	break;
+				case "sex":		_components.AddState(_menuSex, ComponentState.ActiveInput, true);	break;
 			}
 		}
 
@@ -119,7 +119,7 @@ namespace Game1.Screens.Menu.Character
 				_nameEdit.Text = this.CharacterName;
 			}
 
-			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
+			_components.AddState(_menuCharacter, ComponentState.ActiveInput, true);
 		}
 
 		private void _menuSex_OnCurrentItemChange(object sender, ComponentEventArgs e)
@@ -129,36 +129,34 @@ namespace Game1.Screens.Menu.Character
 
 		private void _menuSex_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var source = (e.Source is MenuItem menuItem) ? menuItem.Id : e.Type;
-			switch (source)
+			switch (e.Value)
 			{
 				case "female" : this.CharacterSex = CharacterSex.Female;	break;
 				case "male" :	this.CharacterSex = CharacterSex.Male;		break;
 			}
 
 			OnSexItemChange?.Invoke(this, e);
-			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
+			_components.AddState(_menuCharacter, ComponentState.ActiveInput, true);
 		}
 
 		private void _menuSex_OnReadyDisable(object sender, EventArgs e)
 		{
 			_menuSex.SetById(this.CharacterSex.ToString("g").ToLower());
-			OnSexItemChange?.Invoke(this, new MenuEventArgs("change", null) { Item = this.CharacterSex.ToString("g").ToLower() });
-			_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
+			OnSexItemChange?.Invoke(this, new ComponentEventArgs { Value = this.CharacterSex.ToString("g").ToLower() });
+			_components.AddState(_menuCharacter, ComponentState.ActiveInput, true);
 		}
 
 		private void _menuStart_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var source = (e.Source is MenuItem menuItem) ? menuItem.Id : e.Type;
-			switch (source)
+			switch (e.Value)
 			{
 				case "startgame" :
 					if (!ValidateInput())
 						break;
-					ReadyDisable(new ComponentEventArgs("continue", this.GetType().Name));
+					ReadyDisable(new ComponentEventArgs { Trigger = EventTrigger.MenuItemSelect, Value = e.Value });
 					break;
 				case "cancel" :
-					ReadyDisable(new ComponentEventArgs("back", this.GetType().Name));
+					ReadyDisable(new ComponentEventArgs { Trigger = EventTrigger.MenuItemSelect, Value = e.Value });
 					break;
 			}
 		}
@@ -177,13 +175,13 @@ namespace Game1.Screens.Menu.Character
 		private void _menuCharacter_OnMouseIn(object sender, ComponentEventArgs e)
 		{			
 			if (_menuStart.State.HasFlag(ComponentState.Active))
-				_components.AddState(_menuCharacter, ComponentState.ActiveAllInput, true);
+				_components.AddState(_menuCharacter, ComponentState.ActiveInput, true);
 		}
 
 		private void _menuStart_OnMouseIn(object sender, EventArgs e)
 		{
 			if (_menuCharacter.State.HasFlag(ComponentState.Active))
-				_components.AddState(_menuStart, ComponentState.ActiveAllInput, true);
+				_components.AddState(_menuStart, ComponentState.ActiveInput, true);
 		}
 	}
 }

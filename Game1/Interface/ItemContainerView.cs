@@ -29,7 +29,7 @@ namespace Game1.Interface
 
 		public event EventHandler<ComponentEventArgs> OnMouseClick;
 
-		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem) : base(bounds)
+		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem) : base(bounds, fireMouseEvents: false)
 		{
 			this.Container = container;
 			_itemViews = new InventoryItemView[this.Container.Size];
@@ -60,14 +60,8 @@ namespace Game1.Interface
 
 		public override void UpdateActive(GameTime gameTime)
 		{
-			UpdateItems(gameTime);
 			base.UpdateActive(gameTime);
-		}
-
-		public override void UpdateMousePosition(GameTime gameTime)
-		{
-			// We don't want events fired for the container view itself...
-			_mouseover = InputManager.MouseOver(this.Bounds);
+			UpdateItems(gameTime);
 		}
 
 		public override void DrawVisible(SpriteBatch spriteBatch)
@@ -120,17 +114,20 @@ namespace Game1.Interface
 
 		private void ItemContainerView_OnMouseClick(object sender, ComponentEventArgs e)
 		{
-			OnMouseClick?.Invoke(this, new ComponentEventArgs(e, sender));
+			e.Meta = sender;
+			OnMouseClick?.Invoke(this, e);
 		}
 
 		private void ItemContainerView_OnMouseOver(object sender, ComponentEventArgs e)
 		{
-			MouseOver(new ComponentEventArgs(e, sender));
+			e.Meta = sender;
+			MouseOver(e);
 		}
 
 		private void ItemContainerView_OnMouseOut(object sender, ComponentEventArgs e)
 		{
-			MouseOut(new ComponentEventArgs(e, sender));
+			e.Meta = sender;
+			MouseOut(e);
 		}
 	}
 }

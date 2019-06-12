@@ -49,12 +49,13 @@ namespace Game1
 				Game1.TileSize * Game1.GameViewAreaHeight);
 			_gameViewBorder = GenerateGameViewBorder();
 
-			_camera = new GamePlayCamera(_world, _gameViewArea);
+			_camera = new GamePlayCamera(_world, _gameViewArea, SpriteBatchManager.Get("gameplay"));
 
-			_components.Register(_characterWindow = new CharacterWindow(this.Bounds.CenteredRegion(870, 575), _world.Character));
+			var modalSpriteBatchData = SpriteBatchManager.Get("modal");
+			_components.Register(_characterWindow = new CharacterWindow(this.Bounds.CenteredRegion(870, 575), _world.Character, modalSpriteBatchData));
 			_characterWindow.OnReadyDisable += _characterWindow_OnReadyDisable;
 
-			_components.Register(_inventoryWindow = new InventoryWindow(this.Bounds.CenteredRegion(870, 575),  _world.Character, "Backpack"));
+			_components.Register(_inventoryWindow = new InventoryWindow(this.Bounds.CenteredRegion(870, 575),  _world.Character, "Backpack", modalSpriteBatchData));
 			_inventoryWindow.OnReadyDisable += _inventoryView_OnReadyDisable;
 
 			_components.Register(_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(this.ContentMargin.Width, _gameViewArea.Bottom + this.ContentMargin.Height), true));
@@ -124,20 +125,20 @@ namespace Game1
 
 		public override void Update(GameTime gameTime)
 		{
+			base.Update(gameTime);
+		}
+
+		public override void UpdateActive(GameTime gameTime)
+		{
+			// Modal windows go first, block all input after update...
 			_characterWindow.Update(gameTime);
 			_inventoryWindow.Update(gameTime);
-			// HotBarView should be a component...
 			_hotbarView.Update(gameTime);
 			_tooltip.Update(gameTime);
 			_barHealth.Update(gameTime);
 			_barMana.Update(gameTime);
 			UpdateVisibleStats();
 			_defense.Update(gameTime);
-			base.Update(gameTime);
-		}
-
-		public override void UpdateActive(GameTime gameTime)
-		{
 			_gameViewBorder.Update(gameTime);
 			_world.Update(gameTime);
 			_camera.Update(gameTime);		
@@ -146,44 +147,21 @@ namespace Game1
 
 		public override void UpdateInput(GameTime gameTime)
 		{
-			// TODO: Move this to a better location...
+			// TODO: Move this to a better location...should be it's own component with no UI, so it can be disabled correctly below
 			if (InputManager.KeyPressed(Keys.I))
 			{
-				// Techincally input shouldn't get this far if a window is open....resolve...
-				if (!_characterWindow.State.HasFlag(ComponentState.Visible))
-				{
-					_components.ClearState(_world, ComponentState.Active);
-					_components.SetState(_inventoryWindow, ComponentState.All, null);
-				}
+				_components.AddState(_inventoryWindow, ComponentState.All);
+				_components.ClearState(_world, ComponentState.ActiveInput);
+				_components.ClearState(_hotbarView, ComponentState.TakingInput);
 			}
 			else if (InputManager.KeyPressed(Keys.C))
 			{
-				if (!_inventoryWindow.State.HasFlag(ComponentState.Visible))
-				{
-					_components.ClearState(_world, ComponentState.Active);
-					_components.SetState(_characterWindow, ComponentState.All, null);
-				}
-			}
-
-			// Hot bar functionality...this code should be moved...
-			var hotbar = _world.Character.HotBar;
-			int hotbarIndex = hotbar.ActiveItemIndex;
-			if (InputManager.KeyPressed(Keys.Right) || (InputManager.MouseScrollAmount < 0))
-			{
-				hotbar.ActiveItemIndex = (hotbarIndex < hotbar.Size - 1) ? hotbarIndex + 1 : 0;
-			}
-			if (InputManager.KeyPressed(Keys.Left)  || (InputManager.MouseScrollAmount > 0))
-			{
-				hotbar.ActiveItemIndex = (hotbarIndex > 0 ) ? hotbarIndex - 1 : hotbar.Size - 1;
-			}
-			foreach (var key in InputManager.GetPressedKeys())
-			{
-				char newChar = InputManager.KeyToChar(key, false);
-				if (Int32.TryParse(newChar.ToString(), out int val))
-					hotbar.ActiveItemIndex = (val == 0 ? 10 : val) - 1;
+				_components.AddState(_characterWindow, ComponentState.All);
+				_components.ClearState(_world, ComponentState.ActiveInput);
+				_components.ClearState(_hotbarView, ComponentState.TakingInput);
 			}
 			// TEMP....
-			if (InputManager.KeyPressed(Keys.H))
+			else if (InputManager.KeyPressed(Keys.H))
 			{
 				_world.Character.CurrentHP += 3;
 				_world.Character.CurrentMana -= 1;
@@ -197,11 +175,8 @@ namespace Game1
 			base.DrawVisible(spriteBatch);
 			_gameViewBorder.Draw(spriteBatch);
 			_camera.Draw();
-			var batchData = SpriteBatchManager.Get("modal");
-			batchData.ScissorWindow = (_characterWindow.State.HasFlag(ComponentState.Visible) ? _characterWindow.Bounds : (_inventoryWindow.State.HasFlag(ComponentState.Visible) ? _inventoryWindow.Bounds : Rectangle.Empty));
-			_characterWindow.Draw(batchData.SpriteBatch);
-			_inventoryWindow.Draw(batchData.SpriteBatch);
-
+			_characterWindow.Draw(spriteBatch);
+			_inventoryWindow.Draw(spriteBatch);
 			_hotbarView.Draw(spriteBatch);
 			_tooltip.Draw(spriteBatch);
 			_barHealth.Draw(spriteBatch);
@@ -224,23 +199,20 @@ namespace Game1
 		private void _characterWindow_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
 			_components.SetState(_characterWindow, ComponentState.None, null);
-			_components.SetState(_world, ComponentState.Active, null);
+			_components.AddState(_world, ComponentState.ActiveInput);
+			_components.AddState(_hotbarView, ComponentState.TakingInput);
 		}
 
 		private void _inventoryView_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
 			_components.SetState(_inventoryWindow, ComponentState.None, null);
-			_components.SetState(_world, ComponentState.Active, null);
+			_components.AddState(_world, ComponentState.ActiveInput);
+			_components.AddState(_hotbarView, ComponentState.TakingInput);
 		}
 
 		private void _hotbarView_OnMouseClick(object sender, ComponentEventArgs e)
 		{
-			// Of course, this check shouldn't be necessary once the refactor is done,
-			// as an inactive GamePlayManager should not be processing mouse clicks on any child...
-			if (!this.State.HasFlag(ComponentState.Active))
-				return; 
-
-			var itemClicked = (InventoryItemView)e.Sender;
+			var itemClicked = (InventoryItemView)e.Meta;
 			if (itemClicked != null)
 				_hotbarView.Container.ActiveItemIndex = itemClicked.Index;
 		}

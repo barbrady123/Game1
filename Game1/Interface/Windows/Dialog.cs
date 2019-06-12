@@ -85,7 +85,7 @@ namespace Game1.Interface.Windows
 
 		private void _buttonMenu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			OnItemSelect?.Invoke(this, new ComponentEventArgs(e, sender));
+			OnItemSelect?.Invoke(this, e);
 		}
 	}
 }

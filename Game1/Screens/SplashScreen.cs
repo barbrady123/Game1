@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Enum;
 using Game1.Effect;
 
 namespace Game1.Screens
@@ -43,10 +44,10 @@ namespace Game1.Screens
 		{
 			base.UpdateInput(gameTime);
 
-			if (InputManager.KeyPressed(Keys.Enter))
+			if (InputManager.KeyPressed(Keys.Enter) || InputManager.LeftMouseClick())
 			{
 				_title.IsActive = false;
-				ReadyDisable(new ComponentEventArgs("continue"));
+				ReadyDisable(new ComponentEventArgs { Trigger = EventTrigger.KeyPressed });
 			}
 		}
 

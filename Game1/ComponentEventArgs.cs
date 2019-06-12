@@ -15,16 +15,27 @@ namespace Game1
 	[System.Diagnostics.DebuggerStepThrough]
 	public class ComponentEventArgs : EventArgs
 	{
-		public object Sender { get; set; }
+		public EventTrigger Trigger { get; set; }
 
-		// We may not need this and Sender...
-		public object Source { get; set; }
+		public string Value { get; set; }
 
-		public string Type { get; set; }
-
-		public string Item { get; set; }
+		public object Meta { get; set; }
 
 		public MouseButton Button { get; set; }
+
+
+
+		// Old stuff below here, only pull in what we need....
+
+
+		//public object Sender { get; set; }
+
+		// We may not need this and Sender...
+		//public object Source { get; set; }
+
+		//public string Type { get; set; }
+
+		//public string Item { get; set; }
 
 		public char Character { get; set; }
 
@@ -38,11 +49,12 @@ namespace Game1
 
 		public string Text { get; set; }
 
-		public ComponentEventArgs InnerEventArgs { get; set; }
+		//public ComponentEventArgs InnerEventArgs { get; set; }
 
 		public ComponentEventArgs() { }
 
 		// ScreenEventArgs
+		/*
 		public ComponentEventArgs(string type, string source = null, string item = null)
 		{
 			this.Type = type;
@@ -55,5 +67,6 @@ namespace Game1
 			this.InnerEventArgs = innerEventArgs;
 			this.Sender = sender;
 		}
+		*/
 	}
 }

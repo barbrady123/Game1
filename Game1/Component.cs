@@ -25,7 +25,10 @@ namespace Game1
 		private bool _readyDisableOnEscape;
 		private Rectangle _bounds;
 		private bool _hasBorder;
+		private bool _fireMouseEvents;
+		private bool _inactiveMouseEvents;
 		private ComponentState _state;
+		private readonly SpriteBatchData _spriteBatchData;
 
 		public virtual ComponentState State
 		{
@@ -71,16 +74,23 @@ namespace Game1
 		/// <summary>
 		/// For non-visual components....
 		/// </summary>
-		public Component() { }
-		
-		public Component(Rectangle bounds, bool readyDisableOnEscape = false, string background = "black", bool hasBorder = false)
+		public Component(Rectangle? bounds = null,
+						 bool readyDisableOnEscape = false,
+						 string background = "black",
+						 SpriteBatchData spriteBatchData = null,
+						 bool hasBorder = false,
+						 bool fireMouseEvents = true,
+						 bool inactiveMouseEvents = false)
 		{
-			_bounds = bounds;
+			_bounds = bounds ?? Rectangle.Empty;
 			_readyDisableOnEscape = readyDisableOnEscape;
+			_spriteBatchData = spriteBatchData;
 			_hasBorder = hasBorder;
 			_delayInputCycles = 0;
 			_mouseover = false;
 			_backgroundName = background;
+			_fireMouseEvents = fireMouseEvents;
+			_inactiveMouseEvents = inactiveMouseEvents;
 
 			SetupBackground();
 			SetupBorder();
@@ -101,6 +111,9 @@ namespace Game1
 
 		public virtual void Update(GameTime gameTime)
 		{
+			if (_inactiveMouseEvents && !this.State.HasFlag(ComponentState.Active))
+				CheckMouseEvents();
+
 			if (this.State.HasFlag(ComponentState.Active))
 				UpdateDuration(gameTime);
 		}
@@ -111,7 +124,7 @@ namespace Game1
 			{
 				if (this.Duration <= 0)
 				{
-					ReadyDisable(new ComponentEventArgs("timer", this.GetType().Name, null));
+					ReadyDisable(new ComponentEventArgs { Trigger = EventTrigger.Timer });
 					this.Duration = null;
 				}
 				else
@@ -138,15 +151,24 @@ namespace Game1
 				return;
 			}
 
-			if (this.State.HasFlag(ComponentState.DetectingMousePosition))
-				UpdateMousePosition(gameTime);
 			if (this.State.HasFlag(ComponentState.TakingInput))
 				UpdateInput(gameTime);
 		}
 
-		public virtual void UpdateMousePosition(GameTime gameTime)
+		public virtual void UpdateInput(GameTime gameTime)
+		{
+			_mouseover = CheckMouseEvents();
+
+			if (_readyDisableOnEscape && InputManager.KeyPressed(Keys.Escape, true))
+				ReadyDisable(new ComponentEventArgs { Trigger = EventTrigger.Escape, Value = "escape" });
+		}
+
+		public virtual bool CheckMouseEvents()
 		{
 			var mouseover = InputManager.MouseOver(this.Bounds);
+			if (!_fireMouseEvents)
+				return mouseover;
+
 			if (mouseover)
 			{
 				if (!_mouseover)
@@ -158,22 +180,18 @@ namespace Game1
 				MouseOut(new ComponentEventArgs());
 			}
 
-			_mouseover = mouseover;
-		}
-
-		public virtual void UpdateInput(GameTime gameTime)
-		{
-			if (!_readyDisableOnEscape)
-				return;
-
-			if (InputManager.KeyPressed(Keys.Escape, true))
-				ReadyDisable(new ComponentEventArgs("escape", this.GetType().Name));
+			return mouseover;
 		}
 
 		public virtual void Draw(SpriteBatch spriteBatch)
 		{
 			if (this.State.HasFlag(ComponentState.Visible))
-				DrawVisible(spriteBatch);
+			{
+				if (_spriteBatchData != null)
+					Util.WrappedDraw(DrawVisible, _spriteBatchData, _bounds);
+				else
+					DrawVisible(spriteBatch);
+			}
 		}
 
 		public virtual void DrawVisible(SpriteBatch spriteBatch)
@@ -189,7 +207,7 @@ namespace Game1
 
 		protected virtual void ReadyDisable(ComponentEventArgs e) => OnReadyDisable?.Invoke(this, e);
 
-		protected virtual void MouseOver(ComponentEventArgs e)  => OnMouseOver?.Invoke(this, e);
+		protected virtual void MouseOver(ComponentEventArgs e) => OnMouseOver?.Invoke(this, e);
 
 		protected virtual void MouseIn(ComponentEventArgs e) => OnMouseIn?.Invoke(this, e);
 

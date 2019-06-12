@@ -53,7 +53,7 @@ namespace Game1.Interface.Windows
 			_input.OnReadyDisable += _input_OnReadyDisable;
 			_input.OnBeforeTextUpdate += _input_OnBeforeTextUpdate;
 
-			_halfButton = new Button(bounds.CenteredRegion(80, 40), "Half") { IsActive = true };
+			_halfButton = new Button(bounds.CenteredRegion(80, 40), "Half") { State = ComponentState.All };
 			_halfButton.OnClick += _halfButton_OnClick;
 
 			LoadContent();
@@ -114,7 +114,7 @@ namespace Game1.Interface.Windows
 
 		private void _menu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			OnButtonClick?.Invoke(this, new ComponentEventArgs(e, sender));
+			OnButtonClick?.Invoke(this, e);
 		}
 
 		private void _input_OnReadyDisable(object sender, ComponentEventArgs e)

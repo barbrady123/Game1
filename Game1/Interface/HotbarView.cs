@@ -16,8 +16,28 @@ namespace Game1.Interface
 {
 	public class HotbarView : ItemContainerView
 	{
-		public HotbarView(ItemContainer container, Rectangle bounds, bool highlightActiveItem) : base(container, bounds, highlightActiveItem)
+		public HotbarView(ItemContainer container, Rectangle bounds, bool highlightActiveItem) : base(container, bounds, highlightActiveItem) { }
+
+		public override void UpdateActive(GameTime gameTime)
 		{
+			base.UpdateActive(gameTime);
+			var hotbar = this.Container;
+			int hotbarIndex = hotbar.ActiveItemIndex;
+			if (InputManager.KeyPressed(Keys.Right) || (InputManager.MouseScrollAmount < 0))
+			{
+				hotbar.ActiveItemIndex = (hotbarIndex < hotbar.Size - 1) ? hotbarIndex + 1 : 0;
+			}
+			if (InputManager.KeyPressed(Keys.Left)  || (InputManager.MouseScrollAmount > 0))
+			{
+				hotbar.ActiveItemIndex = (hotbarIndex > 0 ) ? hotbarIndex - 1 : hotbar.Size - 1;
+			}
+			foreach (var key in InputManager.GetPressedKeys())
+			{
+				char newChar = InputManager.KeyToChar(key, false);
+				if (Int32.TryParse(newChar.ToString(), out int val))
+					hotbar.ActiveItemIndex = (val == 0 ? 10 : val) - 1;
+			}
+
 		}
 	}
 }
