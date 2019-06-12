@@ -13,6 +13,7 @@ using Game1.Items;
 
 namespace Game1
 {
+	// Either we need a new base class, or this should be the base and some of this crap needs to be moved into a child class....
 	public class Character
 	{
 		private Vector2 _position;
@@ -82,6 +83,8 @@ namespace Game1
 		}
 
 		// Ok this makes a weird dependency in the Character class to the InputManager...needs to be fixed...
+		// I suppose Character could have an OnHeldItemChange event or something the input manager can
+		// subscribe to, or something similar....
 		public void UpdateMouseCursor()
 		{
 			if (_heldItem == null)

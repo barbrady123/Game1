@@ -201,6 +201,7 @@
     <Content Include="Content\Gameplay\Icon\x.png" />
     <Content Include="Content\Gameplay\TileSheet\ground.png" />
     <Content Include="Content\Interface\cursor.png" />
+    <Content Include="Content\Interface\pointer.png" />
     <Content Include="Icon.ico" />
     <None Include="Load\Map\map.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

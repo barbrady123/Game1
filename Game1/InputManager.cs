@@ -13,6 +13,9 @@ namespace Game1
 {
 	public static class InputManager
 	{
+		private static ContentManager _content;
+		private static Texture2D _pointer;
+
 		private readonly static Dictionary<Keys, (char, char)> KeyMap = new Dictionary<Keys, (char, char)>
 		{
 			{ Keys.A, ('a', 'A') },
@@ -71,6 +74,21 @@ namespace Game1
 		private static KeyboardState _prevKeyState;
 		private static MouseState _currentMouseState;
 		private static MouseState _prevMouseState;
+
+		static InputManager()
+		{
+			_content = new ContentManager(Game1.ServiceProvider, Game1.ContentRoot);
+		}
+
+		public static void LoadContent()
+		{
+			_pointer = _content.Load<Texture2D>("Interface/pointer");
+		}
+
+		public static void UnloadContent()
+		{
+			_content.Unload();
+		}
 
 		public static void Update()
 		{
@@ -162,14 +180,15 @@ namespace Game1
 				return;
 			}
 
-			var mouseTexture = RBReversedChannel(texture);
-			if (quantity != null)
-				mouseTexture = AddText(mouseTexture, quantity.ToString());
-
-			Mouse.SetCursor(MouseCursor.FromTexture2D(mouseTexture, mouseTexture.Bounds.Center.X, mouseTexture.Bounds.Center.Y));
+			Mouse.SetCursor(MouseCursor.FromTexture2D(GenerateMouseCursorTexture(texture, quantity), 0, 0));
 		}
 
-		private static Texture2D AddText(Texture2D texture, string text)
+		private static Texture2D GenerateMouseCursorTexture(Texture2D texture, int? quantity = null)
+		{
+			return AddTextAndPointer(RBSwappedTexture(texture), quantity);
+		}
+
+		private static Texture2D AddTextAndPointer(Texture2D texture, int? quantity)
 		{
 			var renderTarget = new RenderTarget2D(Game1.Graphics, texture.Bounds.Width, texture.Bounds.Height);
 			Game1.Graphics.SetRenderTarget(renderTarget);
@@ -177,18 +196,21 @@ namespace Game1
 			var spriteBatch = new SpriteBatch(Game1.Graphics);
 			spriteBatch.Begin();
 			spriteBatch.Draw(texture, Vector2.Zero, Color.White);
-			spriteBatch.DrawString(FontManager.Get(), text, new Vector2(Game1.IconSize - 25, Game1.IconSize - 20), Color.White);
+			spriteBatch.Draw(_pointer, Vector2.Zero, Color.White);
+			if (quantity != null)
+				spriteBatch.DrawString(FontManager.Get(), ((int)quantity).ToString(), new Vector2(Game1.IconSize - 25, Game1.IconSize - 20), Color.White);
 			spriteBatch.End();
 			var newTexture = renderTarget;
 			Game1.Graphics.SetRenderTarget(null);
 			return newTexture;
 		}
 
-		private static Texture2D RBReversedChannel(Texture2D textureOriginal)
+		private static Texture2D RBSwappedTexture(Texture2D textureOriginal)
 		{
 			var data = new Color[textureOriginal.Width * textureOriginal.Height];
 			textureOriginal.GetData(data);
 
+			// Due to bug in Monogame, we have to swap the red and blue channels when creating a texture for use as a mouse cursor....
 			for (int i = 0; i < data.Length; i++)
 			{
 				byte red = data[i].R;
