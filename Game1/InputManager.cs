@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Interface;
+using Game1.Items;
 
 namespace Game1
 {
@@ -171,6 +172,15 @@ namespace Game1
 		public static bool RightMouseClick(Rectangle bounds) => MouseOver(bounds) && RightMouseClick();
 
 		public static int MouseScrollAmount => (_blockAllInput ? 0 : _currentMouseState.ScrollWheelValue - _prevMouseState.ScrollWheelValue);
+
+		public static void HandleCursorChange(object sender, ComponentEventArgs e)
+		{
+			var heldItem = ((InventoryItem)e.Meta);
+			if (heldItem != null)
+				SetMouseCursor(heldItem.Item.Icon.Texture, (heldItem.Quantity > 1) ? heldItem.Quantity : (int?)null);
+			else
+				SetMouseCursor(null);
+		}
 
 		public static void SetMouseCursor(Texture2D texture, int? quantity = null)
 		{

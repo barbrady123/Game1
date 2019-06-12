@@ -65,9 +65,12 @@ namespace Game1.Items
 			return new InventoryItem(_items[val], GameRandom.Next(1, _items[val].MaxStackSize));
 		}
 
-		public static InventoryItem FromItem(InventoryItem item, int? quantity)
+		public static InventoryItem FromItem(InventoryItem item, int? quantity, bool removeItemQuantity = true)
 		{
-			return new InventoryItem(item, quantity);
+			int trueQuantity = Math.Min(quantity ?? Int32.MaxValue, item.Quantity);
+			if (removeItemQuantity)
+				item.Quantity -= trueQuantity;
+			return new InventoryItem(item, trueQuantity);
 		}
 	}
 }

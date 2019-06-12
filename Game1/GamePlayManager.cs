@@ -41,6 +41,7 @@ namespace Game1
 
 			_components.Register(_world = new World());
 			_world.Initialize();
+			_world.Character.OnHeldItemChanged += InputManager.HandleCursorChange;
 
 			_gameViewArea = new Rectangle(
 				this.ContentMargin.Width + GamePlayManager.ViewAreaBorderThickness,

@@ -34,6 +34,33 @@ namespace Game1.Items
 		public InventoryItem this[int key] => _items[key];
 
 		/// <summary>
+		/// Will return the item previously in the specified position...
+		/// </summary>
+		public InventoryItem SwapItem(int position, InventoryItem item)
+		{
+			if (!Util.InRange(position, 0, _items.Length - 1))
+				throw new IndexOutOfRangeException($"Position {position} invalid for item container");
+			
+			var currentItem = _items[position];
+
+			if ((item != null) && (currentItem != null) && (item.Item == currentItem.Item) && (currentItem.Quantity < currentItem.Item.MaxStackSize))
+			{
+				// Try to combine...
+				int spaceLeft = currentItem.Item.MaxStackSize - currentItem.Quantity;
+				if (spaceLeft > 0)
+				{
+					int transferAmount = Math.Min(spaceLeft, item.Quantity);
+					currentItem.Quantity += transferAmount;
+					item.Quantity -= transferAmount;
+					return (item.Quantity > 0) ? item : null;
+				}
+			}
+
+			_items[position] = item;
+			return currentItem;
+		}
+
+		/// <summary>
 		/// Returns new item position index (or null if it didn't fit)
 		/// </summary>
 		public int? AddItem(InventoryItem item)

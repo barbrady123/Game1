@@ -68,6 +68,8 @@ namespace Game1
 
 		public ItemContainer HotBar => _hotbar;
 		public ItemContainer Backpack => _backpack;
+
+		public event EventHandler<ComponentEventArgs> OnHeldItemChanged;
 		
 		public InventoryItem HeldItem
 		{ 
@@ -77,24 +79,9 @@ namespace Game1
 				if (_heldItem != value)
 				{
 					_heldItem = value;
-					UpdateMouseCursor();
+					OnHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = _heldItem });
 				}
 			}
-		}
-
-		// Ok this makes a weird dependency in the Character class to the InputManager...needs to be fixed...
-		// I suppose Character could have an OnHeldItemChange event or something the input manager can
-		// subscribe to, or something similar....
-		public void UpdateMouseCursor()
-		{
-			if (_heldItem == null)
-			{
-				InputManager.SetMouseCursor(null);
-				return;
-			}
-
-			int? quantity = _heldItem.Quantity > 1 ? _heldItem.Quantity : (int?)null;
-			InputManager.SetMouseCursor(_heldItem?.Item.Icon.Texture, quantity);
 		}
 
 		public InventoryItem EquippedArmorHead	{ get; set; }
@@ -170,28 +157,49 @@ namespace Game1
 			this.Motion = motion;
 		}
 
-		public void GetItem(ItemContainer container, int index, int? quantity = null)
+		public bool IsItemHeld => this.HeldItem != null;
+
+		public void SwapHeld(ItemContainer container, int index)
 		{
+			this.HeldItem = container.SwapItem(index, this.HeldItem);
+		}
+
+		public bool StoreHeld()
+		{
+			int? index = _hotbar.AddItem(this.HeldItem);
+			if (index == null)
+				index = _backpack.AddItem(this.HeldItem);
+			return index != null;
+		}
+
+		public bool HoldItemQuantity(ItemContainer container, int index, int? quantity = null)
+		{			
 			var item = container[index];
 			if (item == null)
-				return;
+				return true;
 
-			quantity = Math.Min(quantity ?? Int32.MaxValue, item.Quantity);
+			int trueQuantity = Math.Min(quantity ?? Int32.MaxValue, item.Quantity);
 			
-			if (quantity == item.Quantity) 
+			if (trueQuantity == item.Quantity) 
 			{
-				PutItem(container, index);
+				SwapHeld(container, index);
 			}
-			else
+			else if (trueQuantity == 0)
 			{
-				PutItem(container);
-				// This means there's no room in the backpack to drop the held item, exit for now...
-				if (this.HeldItem != null)
-					return;
+				return true;
+			}
+			else if (this.IsItemHeld && (this.HeldItem.Item == item.Item) && (this.HeldItem.Quantity + trueQuantity <= this.HeldItem.Item.MaxStackSize))
+			{
+				this.HeldItem.Quantity += trueQuantity;
+				item.Quantity -= trueQuantity;
+				return true;
+			}
 
-				this.HeldItem = ItemManager.FromItem(item, quantity);
-				item.Quantity -= (int)quantity;
-			}
+			if (!StoreHeld())
+				return false;
+
+			this.HeldItem = ItemManager.FromItem(item, trueQuantity);
+			return true;
 		}
 
 		public void PutItem(ItemContainer container, int? index = null)
@@ -219,7 +227,7 @@ namespace Game1
 				// If, due to AddItem(), only the non-null HeldItem quantity changes, the mouse cursor update won't trigger
 				// automatically (because technically this.HeldItem didn't "change")...so we call it manually
 				// here if it's the same item as before but the quantity has changed (due to an item merge with leftover)...
-				UpdateMouseCursor();
+				OnHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = _heldItem });
 		}
 
 		// Maybe we should move armor slots to indexed (by enum value) array, to make these types of methods easier 
