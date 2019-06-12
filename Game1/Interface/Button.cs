@@ -14,74 +14,52 @@ using Game1.Screens.Menu;
 
 namespace Game1.Interface
 {
-	// TODO: Why is this not a component???  RESOLVE!!
-	public class Button
+	public class Button : Component
 	{
 		private static readonly Vector2 MouseOverScale = new Vector2(1.1f, 1.1f);
 
-		private Rectangle _bounds;
-		private ImageTexture _background;
-		private ImageTexture _border;
 		private ImageText _text;
-
-		public bool IsActive { get; set; }
 
 		public event EventHandler OnClick;
 
-		public Button(Rectangle bounds, string text)
+		public Button(Rectangle bounds, string text) : base(bounds, hasBorder: true)
 		{
-			_bounds = bounds;
-			_background = Util.GenerateSolidBackground(bounds.Width, bounds.Height, Color.Black);
-			_background.Position = bounds.CenterVector();
-			_background.Alignment = ImageAlignment.Centered;
-			_border = Util.GenerateBorderTexture(bounds.Width, bounds.Height, 2, Color.White);
-			_border.Position = bounds.CenterVector();
-			_border.Alignment = ImageAlignment.Centered;
 			_text = new ImageText(text, true) { Position = bounds.CenterVector() };
 		}
 
-		public void LoadContent()
+		public override void LoadContent()
 		{
-			_background.LoadContent();
-			_border.LoadContent();
+			base.LoadContent();
 			_text.LoadContent();
 		}
 
-		public void UnloadContent()
+		public override void UnloadContent()
 		{
-			_background.UnloadContent();
-			_border.UnloadContent();
+			base.LoadContent();
 			_text.UnloadContent();
 		}
 
-		public void Update(GameTime gameTime)
+		public override void UpdateActive(GameTime gameTime)
 		{
-			if (this.IsActive)
-			{
-				bool mouseOver = InputManager.MouseOver(_bounds);
-
-				_background.Scale = mouseOver ? Button.MouseOverScale : Vector2.One;
-				_background.Update(gameTime);
-				_border.Scale = mouseOver ? Button.MouseOverScale : Vector2.One;
-				_border.Update(gameTime);
-				_text.Scale = mouseOver ? Button.MouseOverScale : Vector2.One;
-				_text.Update(gameTime);
-
-				if (mouseOver)
-				{
-					if (InputManager.LeftMouseClick())
-						OnClick?.Invoke(this, new MouseEventArgs(MouseButton.Left));
-					else if (InputManager.RightMouseClick())
-						OnClick?.Invoke(this, new MouseEventArgs(MouseButton.Right));
-					InputManager.BlockButtonClicks();
-				}
-			}
+			_background.Scale = _mouseover ? Button.MouseOverScale : Vector2.One;
+			_border.Scale = _mouseover ? Button.MouseOverScale : Vector2.One;
+			_text.Scale = _mouseover ? Button.MouseOverScale : Vector2.One;
+			_text.Update(gameTime);
+			base.UpdateActive(gameTime);
 		}
 
-		public void Draw(SpriteBatch spriteBatch)
+		public override void UpdateInput(GameTime gameTime)
 		{
-			_background.Draw(spriteBatch);
-			_border.Draw(spriteBatch);
+			if (InputManager.LeftMouseClick(this.Bounds))
+				OnClick?.Invoke(this, new MouseEventArgs(MouseButton.Left));
+			else if (InputManager.RightMouseClick(this.Bounds))
+				OnClick?.Invoke(this, new MouseEventArgs(MouseButton.Right));
+			InputManager.BlockButtonClicks();
+		}
+
+		public override void DrawVisible(SpriteBatch spriteBatch)
+		{
+			base.DrawVisible(spriteBatch);
 			_text.Draw(spriteBatch);
 		}
 	}

@@ -55,5 +55,11 @@ namespace Game1
 			func.Invoke(batchData.SpriteBatch);
 			return batchData.SpriteBatch;
 		}
+
+		public static void WrappedDraw(Action<SpriteBatch> func, SpriteBatchData spriteBatchData, Rectangle bounds)
+		{
+			spriteBatchData.ScissorWindow = bounds;
+			func.Invoke(spriteBatchData.SpriteBatch);
+		}
 	}
 }

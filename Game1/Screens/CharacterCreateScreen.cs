@@ -106,8 +106,7 @@ namespace Game1.Screens
 
 		private void _menuCharacter_OnSexItemChange(object sender, ComponentEventArgs e)
 		{
-			var source = (e.Source is MenuItem menuItem ? menuItem.Id : e.Item);
-			switch (source)
+			switch (e.Value)
 			{
 				case "female" :
 					_characterView.SwapTexture(this.CharacterPreviewImage(CharacterSex.Female));
@@ -120,20 +119,19 @@ namespace Game1.Screens
 
 		private void _menuCharacter_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
-			var source = (e.Source is MenuItem menuItem ? menuItem.Id : e.Type);
-			switch (source)
+			switch (e.Value)
 			{
-				case "continue" :
+				case "startgame" :
 					_newChar.Name = _menuCharacter.CharacterName;
 					_newChar.Sex = _menuCharacter.CharacterSex;
 					_newChar.Position = new Vector2(Game1.TileSize / 2, Game1.TileSize / 2);
 					IOManager.ObjectToFile(Game1.PlayerFile, _newChar);
 					// TODO: Eventually we need to handle some kind of identifier of this new player to the parent, when we have multiple player/world files...
-					ReadyDisable(new ScreenEventArgs("game", this.GetType().Name, null));
+					ReadyDisable(e);
 					break;
-				case "back" :
+				case "cancel" :
 				case "escape" :
-					ReadyDisable(new ScreenEventArgs("back", this.GetType().Name, null));
+					ReadyDisable(e);
 					break;
 			}
 		}

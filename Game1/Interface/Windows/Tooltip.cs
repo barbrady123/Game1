@@ -23,7 +23,7 @@ namespace Game1.Interface.Windows
 		public int TextPadding => 5;
 
 		// Eventually we'll want prettier tooltips with more than just a line of text...
-		public Tooltip() : base(Rectangle.Empty, background: "black")
+		public Tooltip(SpriteBatchData spriteBatchData = null) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData)
 		{			
 			_timer = -1;
 			_text = new ImageText(null, true);

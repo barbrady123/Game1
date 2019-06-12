@@ -51,6 +51,11 @@ namespace Game1.Screens.Menu
 			else
 			{
 				SetCurrentItemEffects(false);
+				for (int x = 0; x < _items.Count; x++)
+				{
+					if (_items[x].Image != null)
+						_items[x].Image.Color = (x == _currentIndex) ? MenuScreen.SelectedItemColor : MenuScreen.UnselectedItemColor;
+				}
 			}
 		}
 
@@ -76,7 +81,10 @@ namespace Game1.Screens.Menu
 		public MenuScreen(Rectangle bounds,
 						  MenuLayout layout = MenuLayout.Vertical,
 						  string background = "brick",
-						  bool escapeToDisable = false): base(bounds, escapeToDisable, background)
+						  SpriteBatchData spriteBatchData = null,
+						  bool escapeToDisable = false,
+						  bool fireMouseEvents = true,
+						  bool inactiveMouseEvents = false): base(bounds, escapeToDisable, background, spriteBatchData, false, fireMouseEvents, inactiveMouseEvents)
 		{
 			_currentIndex = -1;
 			_layout = layout;
@@ -137,21 +145,6 @@ namespace Game1.Screens.Menu
 				item.Image.UnloadContent();
 		}
 
-		public override void Update(GameTime gameTime)
-		{
-			// We need to check mouse position even if we're inactive, in case the menu is configured to activate on mouseover...
-			base.UpdateMousePosition(gameTime);
-
-			if (!this.State.HasFlag(ComponentState.Active))
-			{
-				for (int x = 0; x < _items.Count; x++)
-					_items[x].Image.Color = (x == _currentIndex) ? MenuScreen.SelectedItemColor : MenuScreen.UnselectedItemColor;
-				return;
-			}
-
-			base.Update(gameTime);
-		}
-
 		public override void UpdateActive(GameTime gameTime)
 		{
 			for (int x = 0; x < _items.Count; x++)
@@ -163,7 +156,7 @@ namespace Game1.Screens.Menu
 			base.UpdateActive(gameTime);
 		}
 
-		public override void UpdateMousePosition(GameTime gameTime)
+		public override void UpdateInput(GameTime gameTime)
 		{
 			bool mouseOverItem = false;
 
@@ -177,24 +170,19 @@ namespace Game1.Screens.Menu
 				if (this.CurrentIndex != i)
 				{
 					this.CurrentIndex = i;
-					CurrentItemChange(new MenuEventArgs("currentChange", _items[_currentIndex]));
+					CurrentItemChange(new ComponentEventArgs { Value = _items[_currentIndex]?.Id });
 				}
+
+				if (InputManager.LeftMouseClick())
+					ItemSelect(new ComponentEventArgs { Value = _items[_currentIndex]?.Id });
 			}
 
 			if (!mouseOverItem)
 				this.CurrentIndex = -1;
-		}
-
-		public override void UpdateInput(GameTime gameTime)
-		{
-			for (int i = 0; i < _items.Count; i++)
-			{
-				if (InputManager.LeftMouseClick(_items[i].Bounds))
-					ItemSelect(new MenuEventArgs("select", _items[_currentIndex]));
-			}
 
 			base.UpdateInput(gameTime);
 		}
+
 
 		public void SelectItem(int index)
 		{
@@ -202,7 +190,7 @@ namespace Game1.Screens.Menu
 				return;
 
 			this.CurrentIndex = index;
-			ItemSelect(new MenuEventArgs("select", _items[_currentIndex]));
+			ItemSelect(new ComponentEventArgs { Value = _items[_currentIndex]?.Id });
 		}
 
 		public override void DrawVisible(SpriteBatch spriteBatch)
@@ -235,7 +223,7 @@ namespace Game1.Screens.Menu
 
 		private void SetCurrentItemEffects(bool active)
 		{
-			if (_currentIndex < 0)
+			if ((_currentIndex < 0) || !_items.Any())
 				return;
 
 			if (active)
@@ -280,6 +268,7 @@ namespace Game1.Screens.Menu
 		protected virtual void ItemSelect(ComponentEventArgs args)
 		{
 			OnItemSelect?.Invoke(this, args);
+			InputManager.BlockAllInput();
 		}
 	}
 }

@@ -57,6 +57,7 @@
     <Compile Include="Enum\ComponentStateEnum.cs" />
     <Compile Include="Enum\DialogButtonEnum.cs" />
     <Compile Include="Enum\CardinalEnum.cs" />
+    <Compile Include="Enum\EventTriggerEnum.cs" />
     <Compile Include="Enum\IntersectionTypeEnum.cs" />
     <Compile Include="Enum\MenuLayoutEnum.cs" />
     <Compile Include="Enum\HorizontalAlignmentEnum.cs" />
@@ -122,9 +123,7 @@
     <Compile Include="Screens\Menu\Character\CharacterNewCompositeMenu.cs" />
     <Compile Include="Screens\Menu\Character\SexMenu.cs" />
     <Compile Include="Screens\Menu\MainMenu.cs" />
-    <Compile Include="Screens\Menu\MenuEventArgs.cs" />
     <Compile Include="Screens\Menu\OptionsMenu.cs" />
-    <Compile Include="Screens\ScreenEventArgs.cs" />
     <Compile Include="Screens\SplashScreen.cs" />
     <Compile Include="SpriteBatchManager.cs" />
     <Compile Include="Tile.cs" />
@@ -202,6 +201,7 @@
     <Content Include="Content\Gameplay\Icon\x.png" />
     <Content Include="Content\Gameplay\TileSheet\ground.png" />
     <Content Include="Content\Interface\cursor.png" />
+    <Content Include="Content\Interface\pointer.png" />
     <Content Include="Icon.ico" />
     <None Include="Load\Map\map.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

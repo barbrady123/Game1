@@ -27,7 +27,7 @@ namespace Game1.Interface.Windows
 		private Tooltip _tooltip;
 		private SplitWindow _splitWindow;
 
-		public InventoryWindow(Rectangle bounds, Character character, string text) : base(bounds, true, "brick")
+		public InventoryWindow(Rectangle bounds, Character character, string text,  SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData)
 		{
 			_components = new ComponentManager();
 
@@ -58,14 +58,15 @@ namespace Game1.Interface.Windows
 			_containerViewHotbar.OnMouseClick += _containerView_OnMouseClick;
 			_components.SetState(_containerViewHotbar, ComponentState.All, null);
 
-			_components.Register(_tooltip = new Tooltip());
+			_components.Register(_tooltip = new Tooltip(SpriteBatchManager.Get("tooltip")));
 			_components.SetState(_tooltip, ComponentState.Active, null);
 
-			_components.Register(_contextMenu = new InventoryContextMenu());
+			var contextBatchData = SpriteBatchManager.Get("context");
+			_components.Register(_contextMenu = new InventoryContextMenu(contextBatchData));
 			_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 			_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
 
-			_components.Register(_splitWindow = new SplitWindow());
+			_components.Register(_splitWindow = new SplitWindow(contextBatchData));
 			_splitWindow.OnButtonClick += _splitWindow_OnButtonClick;
 			_splitWindow.OnReadyDisable += _splitWindow_OnReadyDisable;
 		}
@@ -109,26 +110,18 @@ namespace Game1.Interface.Windows
 			_containerName.Draw(spriteBatch);
 			_containerViewBackpack.Draw(spriteBatch);
 			_containerViewHotbar.Draw(spriteBatch);
-			// This whole mechanism should be cleaned up also....
-			SpriteBatchData batchData = null;
-			if (_tooltip.State.HasFlag(ComponentState.Visible))
-			{
-				batchData = SpriteBatchManager.Get("tooltip");
-				batchData.ScissorWindow = _tooltip.Bounds;	// one reason why it was good to have the components self-aware of the batch andwrap the call...
-				_tooltip.Draw(batchData.SpriteBatch);
-			}
-			batchData = SpriteBatchManager.Get("context");
-			batchData.ScissorWindow = _contextMenu?.Bounds ?? (_splitWindow?.Bounds ?? Rectangle.Empty);
-			_contextMenu.Draw(batchData.SpriteBatch);
-			_splitWindow.Draw(batchData.SpriteBatch);
+			_tooltip.Draw(spriteBatch);
+			_contextMenu.Draw(spriteBatch);
+			_splitWindow.Draw(spriteBatch);
 		}
 
 		protected override void ReadyDisable(ComponentEventArgs args)
 		{
-			if (_character.HeldItem != null)
+			if (_character.IsItemHeld)
 			{
-				_character.PutItem(_containerViewBackpack.Container);
-				_character.HeldItem = null;
+				if (!_character.StoreHeld())
+					// TODO: This is temp...we should just allow the item to remain (when it's possible to drop stuff....)
+					_character.DestroyHeld();
 			}
 
 			base.ReadyDisable(args);
@@ -136,15 +129,14 @@ namespace Game1.Interface.Windows
 
 		private void _containerView_OnMouseClick(object sender, ComponentEventArgs e)
 		{
-			var clickedItemView = (InventoryItemView)e.Sender;
+			var clickedItemView = (InventoryItemView)e.Meta;
 			var clickedContainer = ((ItemContainerView)sender).Container;
-			var button = e.InnerEventArgs.Button;
 
-			if (button == MouseButton.Left)
+			if (e.Button == MouseButton.Left)
 			{
-				_character.PutItem(clickedContainer, clickedItemView.Index);
+				_character.SwapHeld(clickedContainer, clickedItemView.Index);
 			}
-			else if ((button == MouseButton.Right) && (clickedItemView.Item != null))
+			else if ((e.Button == MouseButton.Right) && (clickedItemView.Item != null))
 			{
 				EnableContextMenu(clickedItemView);
 			}
@@ -154,15 +146,13 @@ namespace Game1.Interface.Windows
 
 		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var itemView = (InventoryItemView)((InventoryContextMenu)sender).Owner;
-			var source = (MenuItem)e.Source;
+			var itemView = (InventoryItemView)e.Meta;
 			DisableContextMenu();
 
-			switch (source.Id)
+			switch (e.Value)
 			{
 				case "equip"	:	
 					_character.EquipArmor(itemView.ContainingView.Container, itemView.Index);
-					_character.PutItem(_character.Backpack);
 					break;
 				case "split"	:
 					EnableSplitWindow(itemView);
@@ -178,8 +168,7 @@ namespace Game1.Interface.Windows
 		// This functionality needs to be sharable somehow....move elsewhere...
 		private void _splitWindow_OnButtonClick(object sender, ComponentEventArgs e)
 		{
-			// This seems convoluted...need to redo how some of these events are propogated...
-			switch (((MenuItem)e.InnerEventArgs.Source).Id)
+			switch (e.Value)
 			{
 				case "ok" :
 					var window = (SplitWindow)sender;
@@ -195,18 +184,9 @@ namespace Game1.Interface.Windows
 		// This functionality needs to be sharable somehow....move elsewhere...
 		private void SplitItem(InventoryItemView itemView, int quantity)
 		{
-			if ((itemView.Item == null) || (quantity < 1))
-				return;
-
-			quantity = Math.Min(quantity, itemView.Item.Quantity);
-
-			if (quantity == itemView.Item.Quantity)
+			if (!_character.HoldItemQuantity(itemView.ContainingView.Container, itemView.Index, quantity))
 			{
-				_character.PutItem(itemView.ContainingView.Container, itemView.Index);
-			}
-			else
-			{
-				_character.GetItem(itemView.ContainingView.Container, itemView.Index, quantity);
+				// Need to tell user this failed...
 			}
 		}
 
@@ -217,7 +197,7 @@ namespace Game1.Interface.Windows
 
 		private void _containerView_OnMouseOver(object sender, ComponentEventArgs e)
 		{
-			var overItemView = (InventoryItemView)e.Sender;
+			var overItemView = (InventoryItemView)e.Meta;
 
 			if ((_contextMenu?.Owner != overItemView) && (overItemView.Item != null))
 				_tooltip.Show(overItemView.Item.Item.DisplayName, InputManager.MousePosition.Offset(10, 10), 15, overItemView);
@@ -227,20 +207,20 @@ namespace Game1.Interface.Windows
 
 		private void _containerView_OnMouseOut(object sender, ComponentEventArgs e)
 		{
-			_tooltip.Reset((InventoryItemView)e.Sender);
+			_tooltip.Reset(e.Meta);
 		}
 
 		private void EnableContextMenu(InventoryItemView clickedItemView)
 		{
 			_contextMenu.Initialize(clickedItemView, InputManager.MousePosition.Offset(-10, -10), false);
 			_components.SetState(_contextMenu, ComponentState.All, null);
-			_components.ClearState(new[] {_containerViewBackpack, _containerViewHotbar}, ComponentState.AllInput);
+			_components.ClearState(new[] {_containerViewBackpack, _containerViewHotbar}, ComponentState.TakingInput);
 			_tooltip.Reset();
 		}
 
 		private void DisableContextMenu()
 		{
-			_components.AddState(new[] {_containerViewBackpack, _containerViewHotbar}, ComponentState.AllInput);
+			_components.AddState(new[] {_containerViewBackpack, _containerViewHotbar}, ComponentState.TakingInput);
 			_components.SetState(_contextMenu, ComponentState.None, null);
 			_contextMenu.Clear();
 		}
@@ -250,13 +230,13 @@ namespace Game1.Interface.Windows
 			var startPosition = InputManager.MousePosition.Offset(-10, -10);
 			_splitWindow.Initialize(itemView, new Rectangle(startPosition.X, startPosition.Y, 200, 200));
 			_components.SetState(_splitWindow, ComponentState.All, null);
-			_components.ClearState(new[] {_containerViewBackpack, _containerViewHotbar}, ComponentState.AllInput);
+			_components.ClearState(new[] {_containerViewBackpack, _containerViewHotbar}, ComponentState.TakingInput);
 			_tooltip.Reset();
 		}
 
 		private void DisableSplitWindow()
 		{
-			_components.AddState(new[] {_containerViewBackpack, _containerViewHotbar}, ComponentState.AllInput);
+			_components.AddState(new[] {_containerViewBackpack, _containerViewHotbar}, ComponentState.TakingInput);
 			_components.SetState(_splitWindow, ComponentState.None, null);
 			_splitWindow.Clear();
 		}

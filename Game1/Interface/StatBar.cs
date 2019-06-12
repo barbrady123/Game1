@@ -58,7 +58,7 @@ namespace Game1.Interface
 		{
 			base.UnloadContent();
 			_textImage.UnloadContent();
-			_fill.UnloadContent();
+			_fill?.UnloadContent();
 		}
 
 		public override void UpdateActive(GameTime gameTime)
@@ -78,7 +78,7 @@ namespace Game1.Interface
 		public override void DrawVisible(SpriteBatch spriteBatch)
 		{
 			base.DrawVisible(spriteBatch);
-			_fill.Draw(spriteBatch);
+			_fill?.Draw(spriteBatch);
 			_textImage.Draw(spriteBatch);
 		}
 

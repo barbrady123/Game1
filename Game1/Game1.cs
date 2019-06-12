@@ -97,6 +97,7 @@ namespace Game1
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice),  new RasterizerState { ScissorTestEnable = true }, 500, "context");
 
 			FontManager.LoadContent();
+			InputManager.LoadContent();
 			_screenManager.LoadContent();
 			_screenManager.StartScreen();
 		}
@@ -108,6 +109,7 @@ namespace Game1
 		protected override void UnloadContent()
 		{
 			FontManager.UnloadContent();
+			InputManager.UnloadContent();
 			_screenManager.UnloadContent();
 		}
 

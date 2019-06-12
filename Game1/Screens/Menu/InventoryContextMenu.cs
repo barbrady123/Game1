@@ -20,7 +20,7 @@ namespace Game1.Screens.Menu
 
 		private bool _isEquipped;
 
-		public InventoryContextMenu() : base(Rectangle.Empty, background: "black")
+		public InventoryContextMenu(SpriteBatchData spriteBatchData = null) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData)
 		{
 			// We allow empty instanciation so the object can be registered with a ComponentManager if necessary...
 		}
@@ -65,17 +65,10 @@ namespace Game1.Screens.Menu
 			return new Rectangle(position.X, position.Y, size.Width, size.Height);
 		}
 
-		protected override void CurrentItemChange(ComponentEventArgs e)
-		{
-			e.Sender = this.Owner;
-			base.CurrentItemChange(e);
-		}
-
 		protected override void ItemSelect(ComponentEventArgs e)
 		{
-			e.Sender = this.Owner;
+			e.Meta = this.Owner;
 			base.ItemSelect(e);
-			InputManager.BlockAllInput();
 		}
 
 		private static List<string> GetItemMenuOptions(InventoryItem item, bool isEquipped)

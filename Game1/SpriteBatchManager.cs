@@ -22,7 +22,7 @@ namespace Game1
 
 	public static class SpriteBatchManager
 	{
-		private static readonly List<SpriteBatchData> _batches = new List<SpriteBatchData>();
+		private static readonly Dictionary<string, SpriteBatchData> _batches = new Dictionary<string, SpriteBatchData>();
 
 		public static string Add(SpriteBatch batch, RasterizerState rasterizeState, int index, string id)
 		{
@@ -30,18 +30,12 @@ namespace Game1
 				id = Guid.NewGuid().ToString();
 
 			batch.Name = id;
-			_batches.Add(new SpriteBatchData { SpriteBatch = batch, RasterizeState = rasterizeState, Index = index, Id = id, ScissorWindow = Rectangle.Empty });
+			_batches[id] = new SpriteBatchData { SpriteBatch = batch, RasterizeState = rasterizeState, Index = index, Id = id, ScissorWindow = Rectangle.Empty };
 			return id;
 		}
 
-		public static SpriteBatchData Get(string id)
-		{
-			return _batches.FirstOrDefault(b => b.Id == id);
-		}
+		public static SpriteBatchData Get(string id) => _batches[id];
 
-		public static SpriteBatchData[] GetAllSorted()
-		{
-			return _batches.OrderBy(b => b.Index).ToArray();
-		}
+		public static SpriteBatchData[] GetAllSorted() => _batches.Values.OrderBy(b => b.Index).ToArray();
 	}
 }

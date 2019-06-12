@@ -26,7 +26,7 @@ namespace Game1.Interface.Windows
 
 		private Tooltip _tooltip;
 
-		public CharacterWindow(Rectangle bounds, Character character) : base(bounds, true, "brick")
+		public CharacterWindow(Rectangle bounds, Character character, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData)
 		{
 			_components = new ComponentManager();
 
@@ -55,10 +55,10 @@ namespace Game1.Interface.Windows
 				_characterStat[i] = new ImageText(null, true) { Position = position, Alignment = ImageAlignment.LeftCentered };
 			}
 
-			_components.Register(_tooltip = new Tooltip());
+			_components.Register(_tooltip = new Tooltip(SpriteBatchManager.Get("tooltip")));
 			_components.SetState(_tooltip, ComponentState.Active, null);
 
-			_components.Register(_contextMenu = new InventoryContextMenu());
+			_components.Register(_contextMenu = new InventoryContextMenu(SpriteBatchManager.Get("context")));
 			_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 			_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
 		}
@@ -110,17 +110,8 @@ namespace Game1.Interface.Windows
 				armorView.Draw(spriteBatch);
 			foreach (var stat in _characterStat)
 				stat.Draw(spriteBatch);
-
-			SpriteBatchData batchData = null;
-			if (_tooltip.State.HasFlag(ComponentState.Visible))
-			{
-				batchData = SpriteBatchManager.Get("tooltip");
-				batchData.ScissorWindow = _tooltip.Bounds;	// one reason why it was good to have the components self-aware of the batch andwrap the call...
-				_tooltip.Draw(batchData.SpriteBatch);
-			}
-			batchData = SpriteBatchManager.Get("context");
-			batchData.ScissorWindow = _contextMenu?.Bounds ?? Rectangle.Empty;
-			_contextMenu.Draw(batchData.SpriteBatch);
+			_tooltip.Draw(spriteBatch);
+			_contextMenu.Draw(spriteBatch);
 		}
 
 		private void ArmorItemView_OnMouseClick(object sender, ComponentEventArgs e)
@@ -166,18 +157,12 @@ namespace Game1.Interface.Windows
 
 		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var itemView = (InventoryItemView)e.Sender;
-			var source = (MenuItem)e.Source;
-
-			switch (source.Id)
+			var itemView = (InventoryItemView)e.Meta;
+			switch (e.Value)
 			{
 				case "unequip"	:	
-					_character.UnequipArmor((ArmorSlot)itemView.Index);
-					_character.PutItem(_character.Backpack);
-					break;
-				case "split"	:
-					// TODO: Need to implement this...(also need to display stack size on Held item)...
-					// Need a "split" popup screen....
+					var previous = _character.UnequipArmor((ArmorSlot)itemView.Index);
+					_character.AddItem(previous);
 					break;
 			}
 			DisableContextMenu();
@@ -192,13 +177,13 @@ namespace Game1.Interface.Windows
 		{
 			_contextMenu.Initialize(clickedItemView, InputManager.MousePosition.Offset(-10, -10), true);
 			_components.SetState(_contextMenu, ComponentState.All, null);
-			_components.ClearState(_armorItemView, ComponentState.AllInput);
+			_components.ClearState(_armorItemView, ComponentState.TakingInput);	// Is this enough or do we need to kill Active also?
 			_tooltip.Reset();
 		}
 
 		private void DisableContextMenu()
 		{
-			_components.AddState(_armorItemView, ComponentState.AllInput);
+			_components.AddState(_armorItemView, ComponentState.TakingInput);
 			_components.SetState(_contextMenu, ComponentState.None, null);
 			_contextMenu.Clear();
 		}

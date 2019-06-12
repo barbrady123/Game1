@@ -14,7 +14,7 @@ namespace Game1.Screens.Menu
 {
 	public class OkCancelMenu : MenuScreen
 	{
-		public OkCancelMenu(Rectangle bounds) : base(bounds, MenuLayout.Horizontal, null, true) { }
+		public OkCancelMenu(Rectangle bounds) : base(bounds, MenuLayout.Horizontal, null, null, true) { }
 
 		protected override List<MenuItem> GetItemData()
 		{

@@ -92,19 +92,14 @@ namespace Game1.Interface
 
 		public override void UpdateInput(GameTime gameTime)
 		{
-			if (InputManager.LeftMouseClick(this.Bounds))
-				OnMouseClick?.Invoke(this, new MouseEventArgs(MouseButton.Left));
-			if (InputManager.RightMouseClick(this.Bounds))
-				OnMouseClick?.Invoke(this, new MouseEventArgs(MouseButton.Right));
-
 			base.UpdateInput(gameTime);
-		}
-
-		public override void UpdateMousePosition(GameTime gameTime)
-		{
-			base.UpdateMousePosition(gameTime);
 			_background.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
 			_border.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
+
+			if (InputManager.LeftMouseClick(this.Bounds))
+				OnMouseClick?.Invoke(this, new ComponentEventArgs { Button = MouseButton.Left });
+			if (InputManager.RightMouseClick(this.Bounds))
+				OnMouseClick?.Invoke(this, new ComponentEventArgs { Button = MouseButton.Right });
 		}
 
 		public override void DrawVisible(SpriteBatch spriteBatch)

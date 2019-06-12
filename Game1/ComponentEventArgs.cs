@@ -15,14 +15,11 @@ namespace Game1
 	[System.Diagnostics.DebuggerStepThrough]
 	public class ComponentEventArgs : EventArgs
 	{
-		public object Sender { get; set; }
+		public EventTrigger Trigger { get; set; }
 
-		// We may not need this and Sender...
-		public object Source { get; set; }
+		public string Value { get; set; }
 
-		public string Type { get; set; }
-
-		public string Item { get; set; }
+		public object Meta { get; set; }
 
 		public MouseButton Button { get; set; }
 
@@ -30,30 +27,10 @@ namespace Game1
 
 		public Keys Key { get; set; }
 
-		public string CurrentText { get; set; }
-
-		public string ResultText { get; set; }
-
 		public bool Cancel { get; set; }
 
+		public string CurrentText { get; set; }
+
 		public string Text { get; set; }
-
-		public ComponentEventArgs InnerEventArgs { get; set; }
-
-		public ComponentEventArgs() { }
-
-		// ScreenEventArgs
-		public ComponentEventArgs(string type, string source = null, string item = null)
-		{
-			this.Type = type;
-			this.Source = source;
-			this.Item = item;
-		}
-
-		public ComponentEventArgs(ComponentEventArgs innerEventArgs, object sender)
-		{
-			this.InnerEventArgs = innerEventArgs;
-			this.Sender = sender;
-		}
 	}
 }

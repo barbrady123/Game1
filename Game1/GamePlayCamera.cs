@@ -27,6 +27,7 @@ namespace Game1
 
 		private readonly World _world;
 		private readonly Rectangle _gameViewArea;
+		private readonly SpriteBatchData _spriteBatchData;
 		private ImageTexture _terrainTileSheet;
 		//private ImageTexture _playerSpriteSheet;
 		//private Vector2 _previousPlayerPosition;
@@ -39,10 +40,11 @@ namespace Game1
 		public string TerrainTileSheetName { get; set; }
 		public Layer[] TerrainLayerData{ get; set; }
 
-		public GamePlayCamera(World world, Rectangle gameViewArea)
+		public GamePlayCamera(World world, Rectangle gameViewArea, SpriteBatchData spriteBatchData)
 		{
 			_world = world;
 			_gameViewArea = gameViewArea;
+			_spriteBatchData = spriteBatchData;
 			_terrainSourceRect = Rectangle.Empty;
 			_playerRenderData = new CharacterRenderData {
 				Character = _world.Character,
@@ -133,7 +135,7 @@ namespace Game1
 
 		public void Draw()
 		{
-			Util.WrappedDraw(DrawInternal, "gameplay", _gameViewArea);
+			Util.WrappedDraw(DrawInternal, _spriteBatchData, _gameViewArea);
 		}
 
 		public void DrawInternal(SpriteBatch spriteBatch)

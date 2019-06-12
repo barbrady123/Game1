@@ -58,9 +58,9 @@ namespace Game1
 			if (_currentScreen != null)
 			{
 				if (_isTransitioning)
-					_currentScreen.State &= ~ComponentState.AllInput;
+					_currentScreen.State &= ~ComponentState.TakingInput;
 				else
-					_currentScreen.State |= ComponentState.AllInput;
+					_currentScreen.State |= ComponentState.TakingInput;
 				_currentScreen.Update(gameTime);
 			}
 
@@ -141,11 +141,9 @@ namespace Game1
 
 		private void MenuScreen_OnItemSelect(object sender, ComponentEventArgs e)
 		{
-			var source = (MenuItem)e.Source;
-
 			switch (sender)
 			{
-				case MainMenu _ : switch (source.Id)
+				case MainMenu _ : switch (e.Value)
 				{
 					case "startnewgame":	TransitionScreens(new CharacterCreateScreen(_bounds));	break;
 					case "options":			TransitionScreens(new OptionsMenu(_bounds));			break;
@@ -153,10 +151,9 @@ namespace Game1
 					default: break;
 				}
 				break;
-				case OptionsMenu _ : switch (source.Id)
+				case OptionsMenu _ : switch (e.Value)
 				{
 					case "back":	TransitionScreens(new MainMenu(_bounds));	break;
-
 				}
 				break;
 			}
@@ -164,21 +161,33 @@ namespace Game1
 
 		private void _currentScreen_OnReadyDisable(object sender, ComponentEventArgs e)
 		{	
-			var source = (e.Source is MenuItem menuItem) ? menuItem.Id : e.Type;
-
 			switch (sender)
 			{
-				case SplashScreen _ : switch (source)
+				case SplashScreen _ : switch (e.Trigger)
 				{
-					case "continue":	TransitionScreens(new MainMenu(_bounds));	break;
-					case "escape" :		Game1.Instance.Exit();						break;
+					case EventTrigger.KeyPressed :	TransitionScreens(new MainMenu(_bounds));	break;
+					case EventTrigger.Escape :		Game1.Instance.Exit();						break;
 				}
 				break;
-				case CharacterCreateScreen _ : switch (source)
+				case MainMenu _ : switch (e.Value)
 				{
-					case "back" : TransitionScreens(new MainMenu(_bounds));		break;
+					case "startnewgame":	TransitionScreens(new CharacterCreateScreen(_bounds));	break;
+					case "options":			TransitionScreens(new OptionsMenu(_bounds));			break;
+					case "exitgame":		Game1.Instance.Exit();									break;
+					default: break;
+				}
+				break;
+				case OptionsMenu _ : switch (e.Value)
+				{
+					case "back":	TransitionScreens(new MainMenu(_bounds));	break;
+				}
+				break;
+				case CharacterCreateScreen _ : switch (e.Value)
+				{
+					case "escape" :
+					case "cancel" : TransitionScreens(new MainMenu(_bounds));		break;
 					// This should NOT go directly to game screen...we need a "loading" transition screen with a call back (probably just part of the ScreenManager)....
-					case "game" : TransitionScreens(new GameScreen(_bounds));	break;
+					case "startgame" : TransitionScreens(new GameScreen(_bounds));	break;
 				}
 				break;
 			}
