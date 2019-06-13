@@ -18,7 +18,7 @@ namespace Game1.Interface.Windows
 	{
 		private readonly ComponentManager _components;
 		private ImageText _containerName;
-		private Character _character;
+		private World _world;
 		private ItemContainerView _containerViewBackpack;
 		private ItemContainerView _containerViewHotbar;
 		private ItemContainer _containerBackpack;
@@ -27,12 +27,12 @@ namespace Game1.Interface.Windows
 		private Tooltip _tooltip;
 		private SplitWindow _splitWindow;
 
-		public InventoryWindow(Rectangle bounds, Character character, string text,  SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData)
+		public InventoryWindow(Rectangle bounds, World world, string text,  SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData)
 		{
 			_components = new ComponentManager();
 
-			_character = character;
-			_containerBackpack = character.Backpack;
+			_world = world;
+			_containerBackpack = _world.Character.Backpack;
 			var viewPosition = bounds.TopLeftPoint(this.ContentMargin.Width, this.ContentMargin.Height);
 
 			_containerName = new ImageText(text, true) {
@@ -48,7 +48,7 @@ namespace Game1.Interface.Windows
 			_components.SetState(_containerViewBackpack, ComponentState.All, null);
 
 			// Eventually, we want to make ItemContainerView a component (and InventoryItemView)....
-			_containerHotbar = character.HotBar;
+			_containerHotbar = _world.Character.HotBar;
 			_components.Register(
 				_containerViewHotbar = ItemContainerView.New<ItemContainerView>(
 					_containerHotbar,
@@ -117,12 +117,13 @@ namespace Game1.Interface.Windows
 
 		protected override void ReadyDisable(ComponentEventArgs args)
 		{
-			if (_character.IsItemHeld)
+			if (_world.Character.IsItemHeld)
 			{
-				if (!_character.StoreHeld())
-					// TODO: This is temp...we should just allow the item to remain (when it's possible to drop stuff....)
-					_character.DestroyHeld();
-			}
+
+				//if (!_character.StoreHeld())
+				// TEMP: Testing dropping into world...
+				_world.AddItem(_world.Character.DropHeld(), pickup: false);
+		}
 
 			base.ReadyDisable(args);
 		}
@@ -134,7 +135,7 @@ namespace Game1.Interface.Windows
 
 			if (e.Button == MouseButton.Left)
 			{
-				_character.SwapHeld(clickedContainer, clickedItemView.Index);
+				_world.Character.SwapHeld(clickedContainer, clickedItemView.Index);
 			}
 			else if ((e.Button == MouseButton.Right) && (clickedItemView.Item != null))
 			{
@@ -152,7 +153,7 @@ namespace Game1.Interface.Windows
 			switch (e.Value)
 			{
 				case "equip"	:	
-					_character.EquipArmor(itemView.ContainingView.Container, itemView.Index);
+					_world.Character.EquipArmor(itemView.ContainingView.Container, itemView.Index);
 					break;
 				case "split"	:
 					EnableSplitWindow(itemView);
@@ -166,6 +167,8 @@ namespace Game1.Interface.Windows
 		}
 
 		// This functionality needs to be sharable somehow....move elsewhere...
+		// This could be SplitWindow functionality, but then we'd have to give the
+		// window access to the _world object...seems odd...
 		private void _splitWindow_OnButtonClick(object sender, ComponentEventArgs e)
 		{
 			switch (e.Value)
@@ -184,9 +187,11 @@ namespace Game1.Interface.Windows
 		// This functionality needs to be sharable somehow....move elsewhere...
 		private void SplitItem(InventoryItemView itemView, int quantity)
 		{
-			if (!_character.HoldItemQuantity(itemView.ContainingView.Container, itemView.Index, quantity))
+			if (!_world.Character.HoldItemQuantity(itemView.ContainingView.Container, itemView.Index, quantity))
 			{
-				// Need to tell user this failed...
+				// Need to tell user this failed...if we get here it means that we couldn't
+				// combine the quantity specified with the currently held item, and we also
+				// didn't have room to store the held item anywhere...
 			}
 		}
 

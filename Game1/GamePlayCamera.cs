@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
 using Game1.Enum;
+using Game1.Items;
 
 namespace Game1
 {
@@ -21,9 +22,18 @@ namespace Game1
 		public SpriteSheetEffect Animation { get; set; }
 	}
 
+	// TODO : Move this when complete...
+	public class ItemRenderData
+	{
+		public WorldItem Item { get; set; }
+		public Vector2 Position { get; set; }
+	}
+
 	public class GamePlayCamera
 	{
+		public static readonly Vector2 MapItemScale = new Vector2(0.7f, 0.7f);
 		private const float OverLayerAlpha = 0.7f;
+
 
 		private readonly World _world;
 		private readonly Rectangle _gameViewArea;
@@ -35,6 +45,7 @@ namespace Game1
 		//private SpriteSheetEffect _playerAnimation;
 		private List<ImageTexture> _terrainMaps;
 		private Dictionary<Character, CharacterRenderData> _renderData;
+		private List<ItemRenderData> _itemRenderData;
 		private CharacterRenderData _playerRenderData;
 		
 		public string TerrainTileSheetName { get; set; }
@@ -43,6 +54,7 @@ namespace Game1
 		public GamePlayCamera(World world, Rectangle gameViewArea, SpriteBatchData spriteBatchData)
 		{
 			_world = world;
+			_world.OnItemsChange += _world_OnItemsChange;
 			_gameViewArea = gameViewArea;
 			_spriteBatchData = spriteBatchData;
 			_terrainSourceRect = Rectangle.Empty;
@@ -71,6 +83,17 @@ namespace Game1
 			LoadCharacterSpriteSheet(_playerRenderData);
 			foreach (var data in _renderData.Values)
 				LoadCharacterSpriteSheet(data);
+
+			// This is temp, and has to be in LoadContent because ItemManager needs to have it's LoadContent called before we can access items...
+			_itemRenderData = new List<ItemRenderData>();
+			UpdateItemRenderData();
+		}
+
+		private void UpdateItemRenderData()
+		{
+			_itemRenderData.Clear();
+			foreach (var item in _world.Items)
+				_itemRenderData.Add(new ItemRenderData { Item = item });
 		}
 
 		public void UnloadContent()
@@ -121,6 +144,9 @@ namespace Game1
 			// Other Characters...
 			foreach (var data in _renderData)
 				UpdateCharacterRenderData(gameTime, data.Value);
+
+			// Items...
+			UpdateItemRenderData(gameTime);
 		}
 
 		private void UpdateCharacterRenderData(GameTime gameTime, CharacterRenderData renderData)
@@ -133,20 +159,40 @@ namespace Game1
 			renderData.PreviousPosition = character.Position;
 		}
 
+		private void UpdateItemRenderData(GameTime gameTime)
+		{	
+			foreach (var data in _itemRenderData)
+			{
+				data.Position = new Vector2(data.Item.Position.X - _terrainSourceRect.X + _gameViewArea.X, data.Item.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
+			}
+		}
+
 		public void Draw()
 		{
 			Util.WrappedDraw(DrawInternal, _spriteBatchData, _gameViewArea);
 		}
 
+		// Drawing a bit off the view for pixel-perfect clipping is fine...but this will potentially draw WAY off the visible map...need some logic to resolve this
+		// so we aren't drawing tons of entities that aren't anywhere near visible within the current camera view...
+		// Actually, I'm not sure what the performance hit here is, vs just drawing everything and letting it get clipped....TBD....
+		// Also...might need to eventually just sort everything by Y-axis and draw in a single loop...right now things draw based on Y position relative to player,
+		// but we also care about other objects on the map relative to each other (mobs, etc)....
 		public void DrawInternal(SpriteBatch spriteBatch)
 		{
+			// Terrain maps that are "below" the characters...
 			foreach (var map in _terrainMaps.OrderBy(m => m.Index).Where(m => m.Index <= Game1.PlayerDrawIndex))
 				map.Draw(spriteBatch);
+			// Draw characters that should be "behind" the player...when their Y coord is <= the player's...
 			foreach (var data in _renderData.Where(d => d.Value.Character.Position.Y <= _playerRenderData.Character.Position.Y).OrderBy(d => d.Value.Character.Position.Y))
 				data.Value.SpriteSheet.Draw(spriteBatch);
+			foreach (var item in _itemRenderData)
+				item.Item.Item.Item.Icon.Draw(spriteBatch, position: item.Position, scale: GamePlayCamera.MapItemScale);
+			// Draw the player...
 			_playerRenderData.SpriteSheet.Draw(spriteBatch);
+			// Draw characters that should be "in front" of the player...when their Y coor is > the player's...
 			foreach (var data in _renderData.Where(d => d.Value.Character.Position.Y > _playerRenderData.Character.Position.Y).OrderBy(d => d.Value.Character.Position.Y))
 				data.Value.SpriteSheet.Draw(spriteBatch);
+			// Terrain maps that are "above" the characters...
 			foreach (var map in _terrainMaps.OrderBy(m => m.Index).Where(m => m.Index > Game1.PlayerDrawIndex))
 			{
 				map.Alpha = GamePlayCamera.OverLayerAlpha;
@@ -223,6 +269,11 @@ namespace Game1
 			var texture = (Texture2D)renderTarget;
 			Game1.Graphics.SetRenderTarget(null);
 			return new ImageTexture(texture) { IsActive = true, Position = _gameViewArea.TopLeftVector() };
+		}
+
+		private void _world_OnItemsChange(object sender, ComponentEventArgs e)
+		{
+			UpdateItemRenderData();
 		}
 	}
 }

@@ -37,6 +37,7 @@ namespace Game1
 		public const int GameViewAreaWidth = 15;
 		public const int GameViewAreaHeight = 15;
 		public const int PlayerDrawIndex = 100;
+		public const int DefaultPickupRadius = 20;		
 
 		GraphicsDeviceManager _graphicsManager;
 		//SpriteBatch _spriteBatch;
@@ -85,9 +86,7 @@ namespace Game1
 			Game1.ServiceProvider = Content.ServiceProvider;
 			// General use...
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), null, 100, "general");
-			// Gameplay camera drawing...
-			var gameplayBatch = new SpriteBatch(GraphicsDevice);
-			gameplayBatch.GraphicsDevice.ScissorRectangle = new Rectangle(28, 28, 960, 960);
+			// Gameplay camera...
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), new RasterizerState { ScissorTestEnable = true }, 200, "gameplay");			
 			// Modals...
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice),  new RasterizerState { ScissorTestEnable = true }, 300, "modal");

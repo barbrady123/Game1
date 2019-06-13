@@ -56,7 +56,7 @@ namespace Game1
 			_components.Register(_characterWindow = new CharacterWindow(this.Bounds.CenteredRegion(870, 575), _world.Character, modalSpriteBatchData));
 			_characterWindow.OnReadyDisable += _characterWindow_OnReadyDisable;
 
-			_components.Register(_inventoryWindow = new InventoryWindow(this.Bounds.CenteredRegion(870, 575),  _world.Character, "Backpack", modalSpriteBatchData));
+			_components.Register(_inventoryWindow = new InventoryWindow(this.Bounds.CenteredRegion(870, 575),  _world, "Backpack", modalSpriteBatchData));
 			_inventoryWindow.OnReadyDisable += _inventoryView_OnReadyDisable;
 
 			_components.Register(_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(this.ContentMargin.Width, _gameViewArea.Bottom + this.ContentMargin.Height), true));

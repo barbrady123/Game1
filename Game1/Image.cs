@@ -86,13 +86,13 @@ namespace Game1
 			}
 		}
 
-		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null)
+		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null)
 		{
 			if (this.IsActive)
-				DrawActive(spriteBatch, alphaBlend, position);
+				DrawActive(spriteBatch, alphaBlend, position, scale);
 		}
 
-		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null);
+		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null);
 
 		protected virtual void SetOrigin()
 		{

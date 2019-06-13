@@ -17,7 +17,6 @@ namespace Game1
 	public class Character
 	{
 		private Vector2 _position;
-		private Vector2 _previousPosition;
 		private ItemContainer _hotbar;
 		private ItemContainer _backpack;
 		private int _currentHP;
@@ -95,7 +94,6 @@ namespace Game1
 			set {
 				if (_position != value)
 				{
-					_previousPosition = _position;
 					_position = value;
 				}
 			}
@@ -107,12 +105,6 @@ namespace Game1
 			this.Speed = 150.0f;
 			_hotbar = new ItemContainer(10);
 			_backpack = new ItemContainer(40);
-		}
-
-		public void RevertPosition()
-		{
-			if (_previousPosition != null)
-				this.Position = _previousPosition;
 		}
 
 		public virtual Vector2 UpdateMotion()
@@ -151,7 +143,6 @@ namespace Game1
 			{
 				motion.Normalize();
 				motion *= (this.Speed * (float)gameTime.ElapsedGameTime.TotalSeconds);
-				this.Position += motion;
 			}
 
 			this.Motion = motion;
@@ -177,7 +168,7 @@ namespace Game1
 			this.HeldItem = container.SwapItem(index, this.HeldItem);
 			if ((this.HeldItem == previousHeld) && (previousQuantity != (this.HeldItem?.Quantity ?? 0)))
 				// Weird scenario we're covering here, probably should be refactored:
-				// If, due to AddItem(), only the non-null HeldItem quantity changes, the mouse cursor update won't trigger
+				// If, due to SwapItem(), only the non-null HeldItem quantity changes, the mouse cursor update won't trigger
 				// automatically (because technically this.HeldItem didn't "change")...so we call it manually
 				// here if it's the same item as before but the quantity has changed (due to an item merge with leftover)...
 				OnHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = this.HeldItem });
@@ -192,7 +183,12 @@ namespace Game1
 			return true;
 		}
 
-		public void DestroyHeld() => this.HeldItem = null;
+		public InventoryItem DropHeld()
+		{
+			var heldItem = this.HeldItem;
+			this.HeldItem = null;
+			return heldItem;
+		}
 
 		public bool HoldItemQuantity(ItemContainer container, int index, int? quantity = null)
 		{			

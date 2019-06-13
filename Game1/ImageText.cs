@@ -48,9 +48,9 @@ namespace Game1
 			CalculateTextSize(false);
 		}
 
-		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend, Vector2? position)
+		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null)
 		{
-			spriteBatch.DrawString(_font, _text, position ?? this.Position, this.Color * this.Alpha * (alphaBlend ?? 1.0f), 0.0f, _origin, this.Scale, SpriteEffects.None, 0.0f);
+			spriteBatch.DrawString(_font, _text, position ?? this.Position, this.Color * this.Alpha * (alphaBlend ?? 1.0f), 0.0f, _origin, scale ?? this.Scale, SpriteEffects.None, 0.0f);
 		}
 
 		public void UpdateText(string text)
