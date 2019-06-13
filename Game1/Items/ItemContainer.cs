@@ -3,35 +3,36 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace Game1.Items
 {
 	public class ItemContainer
 	{
 		private readonly InventoryItem[] _items;
-		private int _activeItemIndex;
 		
 		public int Size { get; private set; }
-
 		
-		public InventoryItem ActiveItem => _items[this.ActiveItemIndex];
-
-		public int ActiveItemIndex
-		{
-			get { return _activeItemIndex; }
-			set { _activeItemIndex = Util.Clamp(value, 0, _items.Length - 1); }
-		}
-
 		public ItemContainer(int size)
 		{
 			this.Size = size;
 			_items = new InventoryItem[size];
-			this.ActiveItemIndex = 0;
 		}
 
 		public InventoryItem[] Items => _items;
 
 		public InventoryItem this[int key] => _items[key];
+
+		public event EventHandler<ComponentEventArgs> OnItemChanged;
+
+		public void Update(GameTime gameTime)
+		{
+			foreach (var item in _items)
+				item?.Update(gameTime);
+		}
 
 		/// <summary>
 		/// Will return the item previously in the specified position...
@@ -51,12 +52,14 @@ namespace Game1.Items
 				{
 					int transferAmount = Math.Min(spaceLeft, item.Quantity);
 					currentItem.Quantity += transferAmount;
+					ItemChanged(position);
 					item.Quantity -= transferAmount;
 					return (item.Quantity > 0) ? item : null;
 				}
 			}
 
 			_items[position] = item;
+			ItemChanged(position);
 			return currentItem;
 		}
 
@@ -87,6 +90,7 @@ namespace Game1.Items
 					int spaceLeft = _items[i].Item.MaxStackSize - _items[i].Quantity;
 					int transferAmount = Math.Min(spaceLeft, item.Quantity);
 					_items[i].Quantity += transferAmount;
+					ItemChanged(i);
 					item.Quantity -= transferAmount;
 					if (item.Quantity == 0)
 						return i;
@@ -95,7 +99,10 @@ namespace Game1.Items
 
 			int? position = openPosition ?? NextEmptyPosition(0);
 			if (position != null)
+			{
 				_items[(int)position] = item;
+				ItemChanged((int)position);
+			}
 
 			return position;
 		}
@@ -116,11 +123,13 @@ namespace Game1.Items
 				int spaceLeft = currentItem.Item.MaxStackSize - currentItem.Quantity;
 				int transferAmount = Math.Min(spaceLeft, item.Quantity);
 				currentItem.Quantity += transferAmount;
+				ItemChanged((int)position);
 				item.Quantity -= transferAmount;
 				return (item.Quantity > 0) ? item : null;
 			}
 
 			_items[(int)position] = item;
+			ItemChanged((int)position);
 			return currentItem;
 		}
 
@@ -128,6 +137,7 @@ namespace Game1.Items
 		{
 			var removedItem = _items[position];
 			_items[position] = null;
+			ItemChanged(position);
 			return removedItem;
 		}
 
@@ -138,6 +148,11 @@ namespace Game1.Items
 					return i;
 
 			return null;
+		}
+
+		private void ItemChanged(int index)
+		{
+			OnItemChanged?.Invoke(this, new ComponentEventArgs { Index = index, Meta = _items[index] });
 		}
 	}
 }

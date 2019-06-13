@@ -177,7 +177,7 @@ namespace Game1
 		{
 			var heldItem = ((InventoryItem)e.Meta);
 			if (heldItem != null)
-				SetMouseCursor(heldItem.Item.Icon.Texture, (heldItem.Quantity > 1) ? heldItem.Quantity : (int?)null);
+				SetMouseCursor(heldItem.Icon.Texture, (heldItem.Quantity > 1) ? heldItem.Quantity : (int?)null);
 			else
 				SetMouseCursor(null);
 		}

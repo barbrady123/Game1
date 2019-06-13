@@ -16,7 +16,7 @@ namespace Game1
 	{
 		private bool _inRange;
 
-		public bool InRange 
+		public bool InRange
 		{ 
 			get { return _inRange; }
 			set
@@ -41,7 +41,7 @@ namespace Game1
 
 		public void Update(GameTime gameTime)
 		{
-			// This will be needed later, for things like expiration, etc...
+			this.Item?.Update(gameTime);
 		}
 	}
 }

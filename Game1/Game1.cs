@@ -34,7 +34,7 @@ namespace Game1
 		public const int SpriteSheetWalkFrameCount = 9;
 		public const int SpriteSheetDefaultFrame = 0;
 		public const Cardinal SpriteSheetDefaultDirection = Cardinal.South;
-		public const int GameViewAreaWidth = 15;
+		public const int GameViewAreaWidth = 19;
 		public const int GameViewAreaHeight = 15;
 		public const int PlayerDrawIndex = 100;
 		public const int DefaultPickupRadius = 20;		

@@ -115,19 +115,6 @@ namespace Game1.Interface.Windows
 			_splitWindow.Draw(spriteBatch);
 		}
 
-		protected override void ReadyDisable(ComponentEventArgs args)
-		{
-			if (_world.Character.IsItemHeld)
-			{
-
-				//if (!_character.StoreHeld())
-				// TEMP: Testing dropping into world...
-				_world.AddItem(_world.Character.DropHeld(), pickup: false);
-		}
-
-			base.ReadyDisable(args);
-		}
-
 		private void _containerView_OnMouseClick(object sender, ComponentEventArgs e)
 		{
 			var clickedItemView = (InventoryItemView)e.Meta;
@@ -154,6 +141,10 @@ namespace Game1.Interface.Windows
 			{
 				case "equip"	:	
 					_world.Character.EquipArmor(itemView.ContainingView.Container, itemView.Index);
+					break;
+				case "drop"		:
+					var item = itemView.ContainingView.Container.RemoveItem(itemView.Index);
+					_world.AddItem(item, pickup: false);
 					break;
 				case "split"	:
 					EnableSplitWindow(itemView);

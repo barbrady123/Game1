@@ -26,6 +26,9 @@ namespace Game1
 		public float Alpha { get; set; }
 		public Color Color { get; set; }
 		public int Index { get; set; }
+		public float Rotation { get; set; }
+
+		public Vector2 OriginOffset { get; set; }
 
 		public Rectangle SourceRect
 		{ 
@@ -64,6 +67,7 @@ namespace Game1
 			this.Alignment = ImageAlignment.Centered;
 			this.Color = Color.White;
 			_origin = Vector2.Zero;
+			this.OriginOffset = Vector2.Zero;
 		}
 
 		public virtual void LoadContent()
@@ -86,13 +90,13 @@ namespace Game1
 			}
 		}
 
-		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null)
+		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null, SpriteEffects? spriteEffects = null)
 		{
 			if (this.IsActive)
-				DrawActive(spriteBatch, alphaBlend, position, scale);
+				DrawActive(spriteBatch, alphaBlend, position, scale, spriteEffects);
 		}
 
-		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null);
+		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null, SpriteEffects? spriteEffects = null);
 
 		protected virtual void SetOrigin()
 		{

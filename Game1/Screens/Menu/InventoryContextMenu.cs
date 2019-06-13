@@ -79,7 +79,6 @@ namespace Game1.Screens.Menu
 
 			switch (item.Item)
 			{
-				case ItemWeapon weapon:
 				case ItemArmor armor:
 					items.Add(isEquipped ? "Unequip" : "Equip");												
 					break;
@@ -91,6 +90,7 @@ namespace Game1.Screens.Menu
 			if (item.Quantity > 1)
 				items.Add("Split");
 
+			items.Add("Drop");
 			items.Add("Cancel");
 
 			return items;

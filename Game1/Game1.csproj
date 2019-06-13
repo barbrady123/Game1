@@ -49,6 +49,7 @@
     <Compile Include="Effect\FadeCycleEffect.cs" />
     <Compile Include="Effect\FadeInEffect.cs" />
     <Compile Include="Effect\FadeOutEffect.cs" />
+    <Compile Include="Effect\RotateEffect.cs" />
     <Compile Include="Effect\SpriteSheetEffect.cs" />
     <Compile Include="Effect\ZoomCycleEffect.cs" />
     <Compile Include="Enum\ArmorSlotEnum.cs" />

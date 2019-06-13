@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Effect;
 using Game1.Enum;
 using Game1.Interface;
 using Game1.Interface.Windows;
@@ -53,7 +54,7 @@ namespace Game1
 			_camera = new GamePlayCamera(_world, _gameViewArea, SpriteBatchManager.Get("gameplay"));
 
 			var modalSpriteBatchData = SpriteBatchManager.Get("modal");
-			_components.Register(_characterWindow = new CharacterWindow(this.Bounds.CenteredRegion(870, 575), _world.Character, modalSpriteBatchData));
+			_components.Register(_characterWindow = new CharacterWindow(this.Bounds.CenteredRegion(870, 575), _world, modalSpriteBatchData));
 			_characterWindow.OnReadyDisable += _characterWindow_OnReadyDisable;
 
 			_components.Register(_inventoryWindow = new InventoryWindow(this.Bounds.CenteredRegion(870, 575),  _world, "Backpack", modalSpriteBatchData));
@@ -61,6 +62,7 @@ namespace Game1
 
 			_components.Register(_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(this.ContentMargin.Width, _gameViewArea.Bottom + this.ContentMargin.Height), true));
 			_hotbarView.OnMouseClick += _hotbarView_OnMouseClick;
+			_hotbarView.OnActiveItemChange += _hotbarView_OnActiveItemChange;
 			_components.SetState(_hotbarView, ComponentState.All, null);
 
 			_tooltip = new Dialog(null, DialogButton.None, Rectangle.Empty, null);
@@ -102,6 +104,7 @@ namespace Game1
 			_characterWindow.LoadContent();
 			_inventoryWindow.LoadContent();
 			_hotbarView.LoadContent();
+			_hotbarView.ActiveItemChange();
 			_tooltip.LoadContent();
 			_barHealth.LoadContent();
 			_barMana.LoadContent();
@@ -168,6 +171,24 @@ namespace Game1
 				_world.Character.CurrentMana -= 1;
 			}
 
+			if (InputManager.LeftMouseClick(_gameViewArea))
+			{
+				if (_world.Character.IsItemHeld)
+				{
+					_world.AddItem(_world.Character.DropHeld(), pickup: false);
+				}
+				else if (_world.Character.ActiveItem?.Item is ItemWeapon weapon)
+				{
+					// TEMP...and this is messy...should jsut reuse the same effect...also probably shouldn't be here...
+					// also need to handle this better for all 4 directions...
+					_world.Character.ActiveItem.Icon.ClearEffects();
+					if ((_world.Character.Direction == Cardinal.North) || (_world.Character.Direction == Cardinal.West))
+					_world.Character.ActiveItem.Icon.AddEffect(new RotateEffect(-Convert.ToSingle(Math.PI / 2), true));
+					else
+					_world.Character.ActiveItem.Icon.AddEffect(new RotateEffect(Convert.ToSingle(Math.PI / 2), true));
+				}
+			}
+
 			base.UpdateInput(gameTime);
 		}
 
@@ -215,7 +236,7 @@ namespace Game1
 		{
 			var itemClicked = (InventoryItemView)e.Meta;
 			if (itemClicked != null)
-				_hotbarView.Container.ActiveItemIndex = itemClicked.Index;
+				_hotbarView.ActiveItemIndex = itemClicked.Index;
 		}
 
 		// Eventually we may want to encapsulate this in some kind of control that shows all these things and removes this from the GamePlayManager....
@@ -223,6 +244,11 @@ namespace Game1
 		{
 			// Currently the only stat is Defense...
 			_defense.UpdateText($"Defense: {_world.Character.Defense}");
+		}
+
+		private void _hotbarView_OnActiveItemChange(object sender, ComponentEventArgs e)
+		{
+			_world.Character.ActiveItem = (InventoryItem)e.Meta;
 		}
 	}
 }

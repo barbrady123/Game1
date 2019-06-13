@@ -19,6 +19,8 @@ namespace Game1
 
 		public string Value { get; set; }
 
+		public int Index { get; set; }
+
 		public object Meta { get; set; }
 
 		public MouseButton Button { get; set; }

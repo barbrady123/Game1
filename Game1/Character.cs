@@ -22,6 +22,7 @@ namespace Game1
 		private int _currentHP;
 		private int _currentMana;
 		private InventoryItem _heldItem;
+		private InventoryItem _activeItem;
 		//private int _itemDefense;
 		//private int _baseDefense;
 
@@ -69,6 +70,7 @@ namespace Game1
 		public ItemContainer Backpack => _backpack;
 
 		public event EventHandler<ComponentEventArgs> OnHeldItemChanged;
+		public event EventHandler<ComponentEventArgs> OnActiveItemChanged;
 		
 		public InventoryItem HeldItem
 		{ 
@@ -79,6 +81,20 @@ namespace Game1
 				{
 					_heldItem = value;
 					OnHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = _heldItem });
+				}
+			}
+		}
+
+		public InventoryItem ActiveItem
+		{ 
+			get { return _activeItem; }
+			set
+			{
+				if (_activeItem?.Id != value?.Id)
+				{
+					// We're making a copy here so effects can be applied to the in-game image without affecting the inventory image...
+					_activeItem = ItemManager.CopyItem(value);					
+					OnActiveItemChanged?.Invoke(this, new ComponentEventArgs { Meta = _activeItem });
 				}
 			}
 		}
@@ -112,25 +128,13 @@ namespace Game1
 			Vector2 motion = Vector2.Zero;
 
 			if (InputManager.KeyDown(Keys.W))
-			{
 				motion.Y = -1;
-				this.Direction = Cardinal.North;
-			}
 			if (InputManager.KeyDown(Keys.S))
-			{	
 				motion.Y = 1;
-				this.Direction = Cardinal.South;
-			}
 			if (InputManager.KeyDown(Keys.A))
-			{
 				motion.X = -1;
-				this.Direction = Cardinal.West;
-			}
 			if (InputManager.KeyDown(Keys.D))
-			{
 				motion.X = 1;
-				this.Direction = Cardinal.East;
-			}
 
 			return motion;
 		}
@@ -146,6 +150,16 @@ namespace Game1
 			}
 
 			this.Motion = motion;
+			this.Direction = Util.DirectionFromVector(motion, this.Direction);
+
+			this.Backpack.Update(gameTime);
+			this.HotBar.Update(gameTime);
+			this.EquippedArmorHead?.Update(gameTime);
+			this.EquippedArmorChest?.Update(gameTime);
+			this.EquippedArmorLegs?.Update(gameTime);
+			this.EquippedArmorFeet?.Update(gameTime);
+			this.HeldItem?.Update(gameTime);
+			this.ActiveItem?.Update(gameTime);
 		}
 
 		public bool IsItemHeld => this.HeldItem != null;
@@ -198,16 +212,30 @@ namespace Game1
 
 			int trueQuantity = Math.Min(quantity ?? Int32.MaxValue, item.Quantity);
 			
+			// If the quantity is the entire stack, just pick it up...
 			if (trueQuantity == item.Quantity) 
 			{
+				if (this.IsItemHeld && (this.HeldItem.Item == item.Item) && (this.HeldItem.Quantity + trueQuantity <= this.HeldItem.Item.MaxStackSize))
+				{
+					// If there's a held item that is the same as what you're picing up, and there's enough room to hold the requested quantity, combine them...
+					this.HeldItem.Quantity += trueQuantity;
+					// See comment above regarding this event firing...
+					OnHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = this.HeldItem });
+					container.RemoveItem(index);
+					return true;
+				}
+
 				SwapHeld(container, index);
+				return true;
 			}
 			else if (trueQuantity == 0)
 			{
+				// If the quantity was 0, don't do anything...
 				return true;
 			}
 			else if (this.IsItemHeld && (this.HeldItem.Item == item.Item) && (this.HeldItem.Quantity + trueQuantity <= this.HeldItem.Item.MaxStackSize))
 			{
+				// If there's a held item that is the same as what you're picing up, and there's enough room to hold the requested quantity, combine them...
 				this.HeldItem.Quantity += trueQuantity;
 				// See comment above regarding this event firing...
 				OnHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = this.HeldItem });
@@ -215,10 +243,14 @@ namespace Game1
 				return true;
 			}
 
+			// If nothing above was applicable, we have to store whatever we have held before we can pickup the new item/quantity...
 			if (!StoreHeld())
 				return false;
 
 			this.HeldItem = ItemManager.FromItem(item, trueQuantity);
+			if (this.HeldItem.Quantity == 0)
+				this.HeldItem = null;
+
 			return true;
 		}
 

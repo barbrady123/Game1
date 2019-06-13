@@ -18,7 +18,7 @@ namespace Game1.Interface.Windows
 	public class CharacterWindow : Component
 	{
 		private readonly ComponentManager _components;
-		private Character _character;
+		private World _world;
 		private InventoryItemView[] _armorItemView;
 		private ImageText _characterName;
 		private ImageText[] _characterStat;
@@ -26,14 +26,14 @@ namespace Game1.Interface.Windows
 
 		private Tooltip _tooltip;
 
-		public CharacterWindow(Rectangle bounds, Character character, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData)
+		public CharacterWindow(Rectangle bounds, World world, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData)
 		{
 			_components = new ComponentManager();
 
-			_character = character;
+			_world = world;
 			_armorItemView = new InventoryItemView[System.Enum.GetNames(typeof(ArmorSlot)).Length];
 
-			_characterName = new ImageText(_character.Name, true) {
+			_characterName = new ImageText(_world.Character.Name, true) {
 				Alignment = ImageAlignment.Centered,
 				Position = this.Bounds.TopCenterVector(yOffset: this.ContentMargin.Height + (FontManager.FontHeight / 2))
 			};
@@ -139,10 +139,10 @@ namespace Game1.Interface.Windows
 
 		private void UpdateArmorViews()
 		{
-			_armorItemView[(int)ArmorSlot.Head].Item = _character.EquippedArmorHead;
-			_armorItemView[(int)ArmorSlot.Chest].Item = _character.EquippedArmorChest;
-			_armorItemView[(int)ArmorSlot.Legs].Item = _character.EquippedArmorLegs;
-			_armorItemView[(int)ArmorSlot.Feet].Item = _character.EquippedArmorFeet;
+			_armorItemView[(int)ArmorSlot.Head].Item = _world.Character.EquippedArmorHead;
+			_armorItemView[(int)ArmorSlot.Chest].Item = _world.Character.EquippedArmorChest;
+			_armorItemView[(int)ArmorSlot.Legs].Item = _world.Character.EquippedArmorLegs;
+			_armorItemView[(int)ArmorSlot.Feet].Item = _world.Character.EquippedArmorFeet;
 		}
 
 		private void UpdateCharacterStats()
@@ -150,7 +150,7 @@ namespace Game1.Interface.Windows
 			for (int i = 0; i < _characterStat.Length; i++)
 			{
 				string statName = ((CharacterAttribute)i).ToString("g");
-				int currentVal = (int)typeof(Character).InvokeMember(statName, Util.GetPropertyFlags, Type.DefaultBinder, _character, null);
+				int currentVal = (int)typeof(Character).InvokeMember(statName, Util.GetPropertyFlags, Type.DefaultBinder, _world.Character, null);
 				_characterStat[i].UpdateText($"{statName}: {currentVal}");
 			}
 		}
@@ -161,8 +161,12 @@ namespace Game1.Interface.Windows
 			switch (e.Value)
 			{
 				case "unequip"	:	
-					var previous = _character.UnequipArmor((ArmorSlot)itemView.Index);
-					_character.AddItem(previous);
+					var previous = _world.Character.UnequipArmor((ArmorSlot)itemView.Index);
+					_world.Character.AddItem(previous);
+					break;
+				case "drop"		:
+					var item = _world.Character.UnequipArmor((ArmorSlot)itemView.Index);
+					_world.AddItem(item, pickup: false);
 					break;
 			}
 			DisableContextMenu();
