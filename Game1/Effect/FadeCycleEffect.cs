@@ -11,7 +11,12 @@ namespace Game1.Effect
 	{
 		public FadeCycleEffect(bool isActive = false) : base(isActive)
 		{
+			Initialize();
+		}
 
+		protected override void Initialize()
+		{
+			this.IsIncreasing = false;
 		}
 
 		public override void Update(GameTime gameTime)

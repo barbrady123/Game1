@@ -181,11 +181,10 @@ namespace Game1
 				{
 					// TEMP...and this is messy...should jsut reuse the same effect...also probably shouldn't be here...
 					// also need to handle this better for all 4 directions...
-					_world.Character.ActiveItem.Icon.ClearEffects();
 					if ((_world.Character.Direction == Cardinal.North) || (_world.Character.Direction == Cardinal.West))
-					_world.Character.ActiveItem.Icon.AddEffect(new RotateEffect(-Convert.ToSingle(Math.PI / 2), true));
+					_world.Character.ActiveItem.Icon.AddEffect<UseItemWestEffect>(true);
 					else
-					_world.Character.ActiveItem.Icon.AddEffect(new RotateEffect(Convert.ToSingle(Math.PI / 2), true));
+					_world.Character.ActiveItem.Icon.AddEffect<UseItemEastEffect>(true);
 				}
 			}
 

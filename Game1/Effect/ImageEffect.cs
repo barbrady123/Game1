@@ -42,7 +42,6 @@ namespace Game1.Effect
 		public ImageEffect(bool isActive = false)
 		{
 			this.IsActive = isActive;
-			this.IsIncreasing = false;
 			this.Speed = 1.0f;
 		}
 
@@ -60,5 +59,13 @@ namespace Game1.Effect
 		{
 
 		}
+
+		public void Start()
+		{
+			this.IsActive = true;
+			Initialize();
+		}
+
+		protected virtual void Initialize() { }
 	}
 }

@@ -39,11 +39,31 @@ namespace Game1
 			}
 		}
 
-		public T AddEffect<T>(T effect) where T: ImageEffect
+		public T AddEffect<T>(bool isActive) where T : ImageEffect
 		{
+			var currentEffect = _effects.FirstOrDefault(e => e.GetType() == typeof(T));
+			if ((currentEffect != null) && isActive)
+				currentEffect.Start();
+
+			var effect = (T)Activator.CreateInstance(typeof(T));
 			effect.Image = this;
+			effect.IsActive = isActive;
 			_effects.Add(effect);
 			return effect;
+		}
+
+		public void StartEffect(Type effectType)
+		{
+			foreach (var effect in _effects)
+				if (effect.GetType() == effectType)
+					effect.Start();
+		}
+
+		public void StopEffect(Type effectType)
+		{
+			foreach (var effect in _effects)
+				if (effect.GetType() == effectType)
+					effect.IsActive = false;
 		}
 
 		public void ClearEffects()

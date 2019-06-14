@@ -89,7 +89,8 @@ namespace Game1.Interface
 			};
 			_textImage.LoadContent();
 			_cursor = new ImageTexture("Interface/cursor", true) { Position = new Vector2(this.CursorPositionX, this.TextPosition.Y) };
-			_cursor.AddEffect(new FadeCycleEffect(true) { Speed = 5.0f });
+			var effect = _cursor.AddEffect<FadeCycleEffect>(true);
+			effect.Speed = 5.0f;	// Add dynamic params so we can include this in call above
 			_cursor.LoadContent();
 			CalculateVisibleText(TextInputAction.Right);
 		}

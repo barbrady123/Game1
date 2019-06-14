@@ -19,7 +19,7 @@ namespace Game1
 		public Character Character { get; set; }
 		public ImageTexture SpriteSheet { get; set; }	// TODO : Eventually these should  be a seperate collection and we point to an ID here, to prevent loading duplicate sprite sheets...
 		public Vector2 PreviousPosition { get; set; }
-		public SpriteSheetEffect Animation { get; set; }
+		//public SpriteSheetEffect Animation { get; set; }
 		public bool ShowActiveItem { get; set; }
 		public Vector2 ActiveItemPosition { get; set; }
 		public bool FlipActiveItem { get; set; }
@@ -64,7 +64,7 @@ namespace Game1
 			_terrainSourceRect = Rectangle.Empty;
 			_playerRenderData = new CharacterRenderData {
 				Character = _world.Character,
-				Animation = new SpriteSheetEffect(false),
+				//Animation = new SpriteSheetEffect(false),
 				PreviousPosition = -Vector2.One
 			};
 			_renderData = new Dictionary<Character, CharacterRenderData>();
@@ -73,7 +73,7 @@ namespace Game1
 			{
 				_renderData[npc] = new CharacterRenderData {
 					Character = npc,
-					Animation = new SpriteSheetEffect(false),
+					//Animation = new SpriteSheetEffect(false),
 					PreviousPosition = -Vector2.One
 				};
 			}
@@ -167,13 +167,11 @@ namespace Game1
 			foreach (var item in _itemRenderData)
 				item.Item.Item.Icon.Draw(spriteBatch, position: item.Position, scale: GamePlayCamera.MapItemScale);
 			// Draw the player...
+			if (!_playerRenderData.FlipActiveItem)
+				DrawActivItem(spriteBatch);
 			_playerRenderData.SpriteSheet.Draw(spriteBatch);
-			if (_playerRenderData.ShowActiveItem)
-				_playerRenderData.Character.ActiveItem.Icon.Draw(
-					spriteBatch,
-					position: _playerRenderData.ActiveItemPosition,
-					scale: GamePlayCamera.ActiveItemScale,
-					spriteEffects: _playerRenderData.FlipActiveItem ? SpriteEffects.FlipHorizontally : SpriteEffects.None);
+			if (_playerRenderData.FlipActiveItem)
+				DrawActivItem(spriteBatch);
 			// Draw characters that should be "in front" of the player...when their Y coor is > the player's...
 			foreach (var data in _renderData.Where(d => d.Value.Character.Position.Y > _playerRenderData.Character.Position.Y).OrderBy(d => d.Value.Character.Position.Y))
 				data.Value.SpriteSheet.Draw(spriteBatch);
@@ -183,6 +181,16 @@ namespace Game1
 				map.Alpha = GamePlayCamera.OverLayerAlpha;
 				map.Draw(spriteBatch);
 			}
+		}
+
+		private void DrawActivItem(SpriteBatch spriteBatch)
+		{
+			if (_playerRenderData.ShowActiveItem)
+				_playerRenderData.Character.ActiveItem.Icon.Draw(
+					spriteBatch,
+					position: _playerRenderData.ActiveItemPosition,
+					scale: GamePlayCamera.ActiveItemScale,
+					spriteEffects: _playerRenderData.FlipActiveItem ? SpriteEffects.FlipHorizontally : SpriteEffects.None);
 		}
 
 		private void UpdateItemRenderData()
@@ -195,7 +203,11 @@ namespace Game1
 		private void UpdateCharacterRenderData(GameTime gameTime, CharacterRenderData renderData)
 		{
 			var character = renderData.Character;
-			renderData.Animation.IsActive = (renderData.PreviousPosition != character.Position);
+			if (renderData.PreviousPosition != character.Position)
+				renderData.SpriteSheet.AddEffect<SpriteSheetEffect>(true);
+			else
+				renderData.SpriteSheet.StopEffect(typeof(SpriteSheetEffect));
+			
 			renderData.SpriteSheet.SourceRect = new Rectangle(renderData.SpriteSheet.SourceRect.X, (int)character.Direction * Game1.TileSize, Game1.TileSize, Game1.TileSize);
 			renderData.SpriteSheet.Update(gameTime);
 			renderData.SpriteSheet.Position = new Vector2(character.Position.X - _terrainSourceRect.X + _gameViewArea.X, character.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
@@ -205,15 +217,15 @@ namespace Game1
 			{
 				if ((character.Direction == Cardinal.North) || (character.Direction == Cardinal.West))
 				{
-					renderData.ActiveItemPosition = renderData.SpriteSheet.Position.Offset(-10, 10);
-					character.ActiveItem.Icon.OriginOffset = new Vector2(20, 20);
+					renderData.ActiveItemPosition = renderData.SpriteSheet.Position.Offset(character.Direction == Cardinal.North ? 10 : 2, 10);
+					character.ActiveItem.Icon.OriginOffset = new Vector2(20, 22);
 					renderData.FlipActiveItem = false;
 
 				}
 				else
 				{
-					renderData.ActiveItemPosition = renderData.SpriteSheet.Position.Offset(10, 10);
-					character.ActiveItem.Icon.OriginOffset = new Vector2(-20, 20);
+					renderData.ActiveItemPosition = renderData.SpriteSheet.Position.Offset(character.Direction == Cardinal.South ? -12 : -7, 12);
+					character.ActiveItem.Icon.OriginOffset = new Vector2(-20, 22);
 					renderData.FlipActiveItem = true;
 				}
 			}
@@ -235,7 +247,7 @@ namespace Game1
 				Alignment = ImageAlignment.Centered,
 			};
 			renderData.SpriteSheet.LoadContent();
-			renderData.SpriteSheet.AddEffect(renderData.Animation);
+			renderData.SpriteSheet.AddEffect<SpriteSheetEffect>(false);
 		}
 
 		private void LoadTerrainTileSheet()
