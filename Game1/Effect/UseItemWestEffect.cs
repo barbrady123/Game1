@@ -34,7 +34,7 @@ namespace Game1.Effect
 					if (_image.Rotation <= _maxRotation)
 					{
 						_image.Rotation = _maxRotation;
-						_movingForward = true;
+						_movingForward = false;
 					}
 				}
 				else

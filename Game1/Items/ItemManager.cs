@@ -33,14 +33,32 @@ namespace Game1.Items
 
 			// Just load some temp data for testing...
 			_items = new List<Item> {
-				new ItemGeneral {	DisplayName = "Heart",			IconName = "heart",		Id = 0,	MaxStackSize = 99,	Weight = 0.4f },
-				new ItemGeneral {	DisplayName = "Ruby",			IconName = "gemRed",	Id = 1,	MaxStackSize = 99,	Weight = 0.2f },
-				new ItemGeneral {	DisplayName = "Health Potion",	IconName = "potionRed",	Id = 2,	MaxStackSize = 99,	Weight = 0.1f },
+				new ItemGeneral {	DisplayName = "Heart",			IconName = "heart",			Id = 0,	MaxStackSize = 99,	Weight = 0.4f },
+				new ItemGeneral {	DisplayName = "Ruby",			IconName = "gemRed",		Id = 1,	MaxStackSize = 99,	Weight = 0.2f },
+				new ItemConsumable {
+					DisplayName = "Health Potion",
+					IconName = "potionRed",
+					Id = 2,
+					MaxStackSize = 99,
+					Weight = 0.1f,
+					Type = ConsumableType.Potion,
+					InstantEffect = CharacterInstantEffect.MinorHeal,
+					Duration = null
+				},
+				new ItemConsumable {
+					DisplayName = "Defense Potion",
+					IconName = "potionGreen",
+					Id = 3,
+					MaxStackSize = 99,
+					Weight = 0.1f,
+					Type = ConsumableType.Potion,
+					BuffEffect = CharacterBuffEffect.MinorDefense,
+				},
 				// Things like metal type, etc. should be modifiers to a base type...
-				new ItemArmor {		DisplayName = "Chain Helm",		IconName = "helmet",	Id = 3,	MaxStackSize = 1,	Weight = 3.2f,	Slot = ArmorSlot.Head,	Defense = 2	},
-				new ItemArmor {		DisplayName = "Iron Armor",		IconName = "armor",		Id = 4,	MaxStackSize = 1,	Weight = 6.4f,	Slot = ArmorSlot.Chest, Defense = 5	},
-				new ItemArmor {		DisplayName = "Gold Armor",		IconName = "upg_armor",	Id = 5,	MaxStackSize = 1,	Weight = 8.5f,	Slot = ArmorSlot.Chest, Defense = 8	},
-				new ItemWeapon {	DisplayName = "Iron Sword",		IconName = "sword",		Id = 6, MaxStackSize = 1,	Weight = 2.9f,	MaxDamage = 10 }
+				new ItemArmor {		DisplayName = "Chain Helm",		IconName = "helmet",	Id = 4,	MaxStackSize = 1,	Weight = 3.2f,	Slot = ArmorSlot.Head,	Defense = 2	},
+				new ItemArmor {		DisplayName = "Iron Armor",		IconName = "armor",		Id = 5,	MaxStackSize = 1,	Weight = 6.4f,	Slot = ArmorSlot.Chest, Defense = 5	},
+				new ItemArmor {		DisplayName = "Gold Armor",		IconName = "upg_armor",	Id = 6,	MaxStackSize = 1,	Weight = 8.5f,	Slot = ArmorSlot.Chest, Defense = 8	},
+				new ItemWeapon {	DisplayName = "Iron Sword",		IconName = "sword",		Id = 7, MaxStackSize = 1,	Weight = 2.9f,	MaxDamage = 10 }
 			};
 		}
 
@@ -61,7 +79,7 @@ namespace Game1.Items
 		// TODO: This is just a temp crap method so I don't pollute the main code with temp code....
 		public static InventoryItem GetItem(int? index = null)
 		{
-			int val = index ?? GameRandom.Next(0, 6);
+			int val = index ?? GameRandom.Next(0, _items.Count - 1);
 			return new InventoryItem(
 				_items[val],
 				new ImageTexture(_textures[_items[val].IconName], true) { Alignment = ImageAlignment.Centered },

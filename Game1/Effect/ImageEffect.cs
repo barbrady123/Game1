@@ -62,6 +62,9 @@ namespace Game1.Effect
 
 		public void Start()
 		{
+			if (this.IsActive)
+				return;
+
 			this.IsActive = true;
 			Initialize();
 		}

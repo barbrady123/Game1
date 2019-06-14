@@ -42,13 +42,20 @@ namespace Game1
 		public int Charisma { get; set; }
 		public int Constitution { get; set; }
 
+		public List<CharacterBuff> Buffs { get; set; }
+
 		// Again...if these were indexed array slots, this would be way easier!
 		public int Defense =>
 			(((ItemArmor)this.EquippedArmorHead?.Item)?.Defense ?? 0) +
 			(((ItemArmor)this.EquippedArmorChest?.Item)?.Defense ?? 0) +
 			(((ItemArmor)this.EquippedArmorLegs?.Item)?.Defense ?? 0) +
-			(((ItemArmor)this.EquippedArmorFeet?.Item)?.Defense ?? 0);
-			// TODO: Need other modifiers here eventually...(buffs/debuffs/etc)
+			(((ItemArmor)this.EquippedArmorFeet?.Item)?.Defense ?? 0) +
+			this.DefenseModifier();
+
+		public int DefenseModifier()
+		{
+			return this.Buffs.Where(b => b.Buff.AffectedAttribute == CharacterAttribute.Defense).Sum(b => b.Buff.EffectValue);
+		}
 
 		public int MaxHP { get; set; }
 		public int CurrentHP 
@@ -121,6 +128,7 @@ namespace Game1
 			this.Speed = 150.0f;
 			_hotbar = new ItemContainer(10);
 			_backpack = new ItemContainer(40);
+			this.Buffs = new List<CharacterBuff>();
 		}
 
 		public virtual Vector2 UpdateMotion()
@@ -160,6 +168,8 @@ namespace Game1
 			this.EquippedArmorFeet?.Update(gameTime);
 			this.HeldItem?.Update(gameTime);
 			this.ActiveItem?.Update(gameTime);
+			for (int i = this.Buffs.Count - 1; i >= 0; i--)
+				this.Buffs[i].Update(gameTime);
 		}
 
 		public bool IsItemHeld => this.HeldItem != null;
@@ -299,6 +309,33 @@ namespace Game1
 			}
 
 			return unequipped;
+		}
+
+		public void AddBuff(CharacterBuff buff)
+		{
+			buff.OnExpired += Buff_OnExpired;
+			this.Buffs.Add(buff);
+		}
+
+		private void Buff_OnExpired(object sender, ComponentEventArgs e)
+		{
+			this.Buffs.Remove((CharacterBuff)sender);
+		}
+
+		public void Consume(ItemContainer container, int index)
+		{
+			if (!(container[index]?.Item is ItemConsumable item))
+				return;
+
+			if (item.InstantEffect != null)
+				MetaManager.ApplyCharacterInstantEffect((CharacterInstantEffect)item.InstantEffect, this);
+
+			if (item.BuffEffect != null)
+				MetaManager.ApplyCharacterBuffEffect((CharacterBuffEffect)item.BuffEffect, this);
+
+			container[index].Quantity--;
+			if (container[index].Quantity <= 0)
+				container.Items[index] = null;
 		}
 	}
 }

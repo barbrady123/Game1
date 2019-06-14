@@ -164,12 +164,6 @@ namespace Game1
 				_components.ClearState(_world, ComponentState.ActiveInput);
 				_components.ClearState(_hotbarView, ComponentState.TakingInput);
 			}
-			// TEMP....
-			else if (InputManager.KeyPressed(Keys.H))
-			{
-				_world.Character.CurrentHP += 3;
-				_world.Character.CurrentMana -= 1;
-			}
 
 			if (InputManager.LeftMouseClick(_gameViewArea))
 			{
@@ -179,12 +173,11 @@ namespace Game1
 				}
 				else if (_world.Character.ActiveItem?.Item is ItemWeapon weapon)
 				{
-					// TEMP...and this is messy...should jsut reuse the same effect...also probably shouldn't be here...
-					// also need to handle this better for all 4 directions...
+					// TEMP...probably shouldn't be here...
 					if ((_world.Character.Direction == Cardinal.North) || (_world.Character.Direction == Cardinal.West))
-					_world.Character.ActiveItem.Icon.AddEffect<UseItemWestEffect>(true);
+						_world.Character.ActiveItem.Icon.AddEffect<UseItemWestEffect>(true);
 					else
-					_world.Character.ActiveItem.Icon.AddEffect<UseItemEastEffect>(true);
+						_world.Character.ActiveItem.Icon.AddEffect<UseItemEastEffect>(true);
 				}
 			}
 

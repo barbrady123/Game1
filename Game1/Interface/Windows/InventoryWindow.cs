@@ -142,6 +142,10 @@ namespace Game1.Interface.Windows
 				case "equip"	:	
 					_world.Character.EquipArmor(itemView.ContainingView.Container, itemView.Index);
 					break;
+				case "eat"		:
+				case "drink"	:
+					_world.Character.Consume(itemView.ContainingView.Container, itemView.Index);
+					break;
 				case "drop"		:
 					var item = itemView.ContainingView.Container.RemoveItem(itemView.Index);
 					_world.AddItem(item, pickup: false);

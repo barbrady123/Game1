@@ -97,6 +97,7 @@ namespace Game1
 
 			FontManager.LoadContent();
 			InputManager.LoadContent();
+			MetaManager.LoadContent();
 			_screenManager.LoadContent();
 			_screenManager.StartScreen();
 		}
@@ -109,6 +110,7 @@ namespace Game1
 		{
 			FontManager.UnloadContent();
 			InputManager.UnloadContent();
+			MetaManager.UnloadContent();
 			_screenManager.UnloadContent();
 		}
 

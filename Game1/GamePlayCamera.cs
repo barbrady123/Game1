@@ -166,7 +166,7 @@ namespace Game1
 				data.Value.SpriteSheet.Draw(spriteBatch);
 			foreach (var item in _itemRenderData)
 				item.Item.Item.Icon.Draw(spriteBatch, position: item.Position, scale: GamePlayCamera.MapItemScale);
-			// Draw the player...
+			// Draw the player...and the active item (if applicable) either "under" or "over" the player depending on direction
 			if (!_playerRenderData.FlipActiveItem)
 				DrawActivItem(spriteBatch);
 			_playerRenderData.SpriteSheet.Draw(spriteBatch);
@@ -224,7 +224,7 @@ namespace Game1
 				}
 				else
 				{
-					renderData.ActiveItemPosition = renderData.SpriteSheet.Position.Offset(character.Direction == Cardinal.South ? -12 : -7, 12);
+					renderData.ActiveItemPosition = renderData.SpriteSheet.Position.Offset(character.Direction == Cardinal.South ? -13 : -9, 12);
 					character.ActiveItem.Icon.OriginOffset = new Vector2(-20, 22);
 					renderData.FlipActiveItem = true;
 				}

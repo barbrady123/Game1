@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Xml.Serialization;
 using System.Threading.Tasks;
@@ -43,11 +45,13 @@ namespace Game1
 		{
 			var currentEffect = _effects.FirstOrDefault(e => e.GetType() == typeof(T));
 			if ((currentEffect != null) && isActive)
+			{
 				currentEffect.Start();
+				return (T)currentEffect;
+			}
 
-			var effect = (T)Activator.CreateInstance(typeof(T));
+			var effect = (T)Activator.CreateInstance(typeof(T), args:isActive);
 			effect.Image = this;
-			effect.IsActive = isActive;
 			_effects.Add(effect);
 			return effect;
 		}

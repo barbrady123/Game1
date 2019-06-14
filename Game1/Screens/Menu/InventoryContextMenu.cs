@@ -80,10 +80,14 @@ namespace Game1.Screens.Menu
 			switch (item.Item)
 			{
 				case ItemArmor armor:
-					items.Add(isEquipped ? "Unequip" : "Equip");												
+					items.Add(isEquipped ? "Unequip" : "Equip");			
 					break;
 				case ItemConsumable consumable:
-					items.Add("Eat");	// eventually we should have a ConsumableType so this can be eat or drink...
+					switch (consumable.Type)
+					{
+						case ConsumableType.Food : items.Add("Eat");		break;
+						case ConsumableType.Potion : items.Add("Drink");	break;
+					}
 					break;
 			}
 
