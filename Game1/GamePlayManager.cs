@@ -59,7 +59,6 @@ namespace Game1
 			_inventoryWindow.OnReadyDisable += _inventoryView_OnReadyDisable;
 
 			_activator.Register(_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(this.ContentMargin.Width, _gameViewArea.Bottom + this.ContentMargin.Height), true), true);
-			_hotbarView.OnMouseClick += _hotbarView_OnMouseClick;
 			_hotbarView.OnActiveItemChange += _hotbarView_OnActiveItemChange;
 
 			_activator.Register(_barHealth = new StatBar(
@@ -166,7 +165,7 @@ namespace Game1
 				}
 				else if (_world.Character.ActiveItem?.Item is ItemWeapon weapon)
 				{
-					// TEMP...probably shouldn't be here...
+					// TEMP...probably shouldn't be here...need like a Character.UseActiveItem() method or something...
 					if ((_world.Character.Direction == Cardinal.North) || (_world.Character.Direction == Cardinal.West))
 						_world.Character.ActiveItem.Icon.AddEffect<UseItemWestEffect>(true);
 					else
@@ -211,13 +210,6 @@ namespace Game1
 		private void _inventoryView_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
 			_activator.SetState(_world, true);
-		}
-
-		private void _hotbarView_OnMouseClick(object sender, ComponentEventArgs e)
-		{
-			var itemClicked = (InventoryItemView)e.Meta;
-			if (itemClicked != null)
-				_hotbarView.ActiveItemIndex = itemClicked.Index;
 		}
 
 		// Eventually we may want to encapsulate this in some kind of control that shows all these things and removes this from the GamePlayManager....

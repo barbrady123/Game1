@@ -12,7 +12,7 @@ using Game1.Items;
 
 namespace Game1.Interface
 {
-	public class InventoryItemView : Component
+	public class InventoryItemView : Component, ISupportsContextMenu
 	{
 		public const int Size = Game1.IconSize + ((InventoryItemView.BorderWidth + InventoryItemView.ImagePadding) * 2);
 		public const int BorderWidth = 2;
@@ -33,10 +33,9 @@ namespace Game1.Interface
 		public int Index { get; set; }
 
 		public bool Highlight { get; set; }
+		public bool IsEquippedSlot { get; set; }
 
-		public event EventHandler<ComponentEventArgs> OnMouseClick;
-		
-		public InventoryItemView(Rectangle bounds, int index, string emptyImage, ItemContainerView containingView = null) : base(bounds, background: "black", hasBorder: true)
+		public InventoryItemView(Rectangle bounds, int index, string emptyImage, bool isEquippedSlot, ItemContainerView containingView = null) : base(bounds, background: "black", hasBorder: true)
 		{
 			this.Index = index;
 			this.ContainingView = containingView;
@@ -44,6 +43,7 @@ namespace Game1.Interface
 			if (!String.IsNullOrWhiteSpace(_emptyImageName))
 				_emptyIcon = new ImageTexture($"{Game1.IconRoot}\\Empty\\{_emptyImageName}") { Position = this.Bounds.CenterVector(), Alignment = ImageAlignment.Centered };
 			this.Highlight = false;
+			this.IsEquippedSlot = isEquippedSlot;
 		}
 
 		public override void LoadContent()
@@ -91,11 +91,6 @@ namespace Game1.Interface
 			base.UpdateInput(gameTime);
 			_background.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
 			_border.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
-
-			if (InputManager.LeftMouseClick(this.Bounds))
-				OnMouseClick?.Invoke(this, new ComponentEventArgs { Button = MouseButton.Left });
-			if (InputManager.RightMouseClick(this.Bounds))
-				OnMouseClick?.Invoke(this, new ComponentEventArgs { Button = MouseButton.Right });
 		}
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)
@@ -109,6 +104,35 @@ namespace Game1.Interface
 				this.Item.Icon.Draw(spriteBatch, null, this.Bounds.CenterVector());
 				_quantity.Draw(spriteBatch);
 			}
+		}
+
+		public List<string> GetContextMenuOptions()
+		{
+			var items = new List<string>();
+			if (this.Item == null)
+				return items;
+
+			switch (this.Item.Item)
+			{
+				case ItemArmor armor:
+					items.Add(this.IsEquippedSlot ? "Unequip" : "Equip");			
+					break;
+				case ItemConsumable consumable:
+					switch (consumable.Type)
+					{
+						case ConsumableType.Food : items.Add("Eat");		break;
+						case ConsumableType.Potion : items.Add("Drink");	break;
+					}
+					break;
+			}
+
+			if (this.Item.Quantity > 1)
+				items.Add("Split");
+
+			items.Add("Drop");
+			items.Add("Cancel");
+
+			return items;
 		}
 	}
 }

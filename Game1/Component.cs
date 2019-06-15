@@ -35,8 +35,7 @@ namespace Game1
 		private bool _enabledTooltip;
 		protected Tooltip _tooltip;
 		private bool _enabledContextMenu;
-
-		// TODO: add context?
+		protected MenuScreen _contextMenu;
 
 		public virtual bool IsActive
 		{
@@ -73,6 +72,8 @@ namespace Game1
 		public event EventHandler<ComponentEventArgs> OnMouseOver;
 		public event EventHandler<ComponentEventArgs> OnMouseIn;
 		public event EventHandler<ComponentEventArgs> OnMouseOut;
+		public event EventHandler<ComponentEventArgs> OnMouseLeftClick;
+		public event EventHandler<ComponentEventArgs> OnMouseRightClick;
 
 		protected bool _mouseover;
 		protected virtual Size ContentMargin => new Size(20, 20);
@@ -89,7 +90,8 @@ namespace Game1
 						 bool inactiveMouseEvents = false,
 						 bool killFurtherInput = false,
 						 bool drawIfDisabled = true,
-						 bool enabledTooltip = false)
+						 bool enabledTooltip = false,
+						 bool enabledContextMenu = false)
 		{
 			_bounds = bounds ?? Rectangle.Empty;
 			_activator = new ActivationManager();
@@ -106,6 +108,11 @@ namespace Game1
 			_drawIfDisabled = drawIfDisabled;
 			if (_enabledTooltip = enabledTooltip)
 				_activator.Register(_tooltip = new Tooltip(this, SpriteBatchManager.Get("tooltip")), false, "popup");
+			if (_enabledContextMenu = enabledContextMenu)
+			{
+				_activator.Register(_contextMenu = new ContextMenu(this, SpriteBatchManager.Get("context")), false, "popup");
+				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
+			}
 
 			SetupBackground();
 			SetupBorder();
@@ -194,6 +201,10 @@ namespace Game1
 				if (!_mouseover)
 					MouseIn(new ComponentEventArgs());
 				MouseOver(new ComponentEventArgs());
+				if (InputManager.LeftMouseClick())
+					MouseLeftClick(new ComponentEventArgs { Button = MouseButton.Left });
+				if (InputManager.RightMouseClick())
+					MouseRightClick(new ComponentEventArgs { Button = MouseButton.Right });
 			}
 			else if (_mouseover)
 			{
@@ -233,6 +244,10 @@ namespace Game1
 		protected virtual void MouseIn(ComponentEventArgs e) => OnMouseIn?.Invoke(this, e);
 
 		protected virtual void MouseOut(ComponentEventArgs e) => OnMouseOut?.Invoke(this, e);
+
+		protected virtual void MouseLeftClick(ComponentEventArgs e) => OnMouseLeftClick?.Invoke(this, e);
+
+		protected virtual void MouseRightClick(ComponentEventArgs e) => OnMouseRightClick?.Invoke(this, e);
 
 		protected virtual void RepositionObjects(bool loadContent = false)
 		{
@@ -286,5 +301,12 @@ namespace Game1
 
 			return wasLoaded;
 		}
+
+		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e) => ContextMenuSelect(e);
+
+		/// <summary>
+		/// Handlers for the context menu selection goes here...
+		/// </summary>
+		protected virtual void ContextMenuSelect(ComponentEventArgs e) { }
 	}
 }

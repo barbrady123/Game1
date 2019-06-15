@@ -20,8 +20,6 @@ namespace Game1.Interface
 
 		private ImageText _text;
 
-		public event EventHandler OnClick;
-
 		public Button(Rectangle bounds, string text, bool killFurtherInput = true) : base(bounds, hasBorder: true, killFurtherInput: killFurtherInput)
 		{
 			_text = new ImageText(text, true) { Position = bounds.CenterVector() };
@@ -46,15 +44,6 @@ namespace Game1.Interface
 			_text.Scale = _mouseover ? Button.MouseOverScale : Vector2.One;
 			_text.Update(gameTime);
 			base.UpdateActive(gameTime);
-		}
-
-		public override void UpdateInput(GameTime gameTime)
-		{
-			if (InputManager.LeftMouseClick(this.Bounds))
-				OnClick?.Invoke(this, new MouseEventArgs(MouseButton.Left));
-			else if (InputManager.RightMouseClick(this.Bounds))
-				OnClick?.Invoke(this, new MouseEventArgs(MouseButton.Right));
-			base.UpdateInput(gameTime);
 		}
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)

@@ -22,7 +22,7 @@ namespace Game1.Interface.Windows
 		private ItemContainerView _containerViewHotbar;
 		private ItemContainer _containerBackpack;
 		private ItemContainer _containerHotbar;
-		private InventoryContextMenu _contextMenu;
+		//private InventoryContextMenu _contextMenu;
 		private SplitWindow _splitWindow;
 
 		public InventoryWindow(	Rectangle bounds,
@@ -46,7 +46,8 @@ namespace Game1.Interface.Windows
 
 			// Eventually, we want to make ItemContainerView a component (and InventoryItemView)....
 			_activator.Register(_containerViewBackpack = ItemContainerView.New<ItemContainerView>(_containerBackpack, viewPosition.Offset(0, this.ContentMargin.Height * 3), false), true, "backpack");
-			_containerViewBackpack.OnMouseClick += _containerView_OnMouseClick;
+			_containerViewBackpack.OnMouseLeftClick += _containerView_OnMouseLeftClick;
+			//_containerViewBackpack.OnMouseRightClick += _containerView_OnMouseRightClick;
 
 			// Eventually, we want to make ItemContainerView a component (and InventoryItemView)....
 			_containerHotbar = _world.Character.HotBar;
@@ -56,12 +57,13 @@ namespace Game1.Interface.Windows
 					new Point(viewPosition.X, _containerViewBackpack.Bounds.Bottom + (this.ContentMargin.Height * 2)),
 					false
 				), true, "hotbar");
-			_containerViewHotbar.OnMouseClick += _containerView_OnMouseClick;
+			_containerViewHotbar.OnMouseLeftClick += _containerView_OnMouseLeftClick;
+			//_containerViewHotbar.OnMouseRightClick += _containerView_OnMouseRightClick;
 
 			var contextBatchData = SpriteBatchManager.Get("context");
-			_activator.Register(_contextMenu = new InventoryContextMenu(contextBatchData), false, new[] { "popup", "backpack", "hotbar" });
-			_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
-			_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
+			//_activator.Register(_contextMenu = new InventoryContextMenu(contextBatchData), false, new[] { "popup", "backpack", "hotbar" });
+			//_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
+			//_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
 
 			_activator.Register(_splitWindow = new SplitWindow(contextBatchData), false, new[] { "popup", "backpack", "hotbar" });
 			_splitWindow.OnButtonClick += _splitWindow_OnButtonClick;
@@ -84,7 +86,7 @@ namespace Game1.Interface.Windows
 			_containerViewHotbar.UnloadContent();
 			_contextMenu.UnloadContent();
 			_splitWindow.UnloadContent();
-			DisableContextMenu();
+			//DisableContextMenu();
 			DisableSplitWindow();
 		}
 
@@ -107,46 +109,48 @@ namespace Game1.Interface.Windows
 			_splitWindow.Draw(spriteBatch);
 		}
 
-		private void _containerView_OnMouseClick(object sender, ComponentEventArgs e)
+		private void _containerView_OnMouseLeftClick(object sender, ComponentEventArgs e)
 		{
 			var clickedItemView = (InventoryItemView)e.Meta;
 			var clickedContainer = ((ItemContainerView)sender).Container;
-
-			if (e.Button == MouseButton.Left)
-			{
-				_world.Character.SwapHeld(clickedContainer, clickedItemView.Index);
-			}
-			else if ((e.Button == MouseButton.Right) && (clickedItemView.Item != null))
-			{
-				EnableContextMenu(clickedItemView);
-			}
+			_world.Character.SwapHeld(clickedContainer, clickedItemView.Index);
 		}
 
-		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e)
+		/*
+		private void _containerView_OnMouseRightClick(object sender, ComponentEventArgs e)
 		{
-			var itemView = (InventoryItemView)e.Meta;
+			var clickedItemView = (InventoryItemView)e.Meta;
+			if (clickedItemView.Item != null)
+				EnableContextMenu(clickedItemView);
+		}
+		*/
+
+		protected override void ContextMenuSelect(ComponentEventArgs e)
+		{
+			if (!(e.Meta is InventoryItemView itemView))
+				return;
 
 			switch (e.Value)
 			{
 				case "equip"	:	
 					_world.Character.EquipArmor(itemView.ContainingView.Container, itemView.Index);
-					DisableContextMenu();
+					//DisableContextMenu();
 					break;
 				case "eat"		:
 				case "drink"	:
 					_world.Character.Consume(itemView.ContainingView.Container, itemView.Index);
-					DisableContextMenu();
+					//DisableContextMenu();
 					break;
 				case "drop"		:
 					var item = itemView.ContainingView.Container.RemoveItem(itemView.Index);
 					_world.AddItem(item, pickup: false);
-					DisableContextMenu();
+					//DisableContextMenu();
 					break;
 				case "split"	:
-					EnableSplitWindow(itemView);
+					//EnableSplitWindow(itemView);
 					break;
 				case "cancel" :
-					DisableContextMenu();
+					//DisableContextMenu();
 					break;
 			}
 		}
@@ -154,7 +158,7 @@ namespace Game1.Interface.Windows
 		protected override void ReadyDisable(ComponentEventArgs e)
 		{
 			DisableSplitWindow();
-			DisableContextMenu();
+			//DisableContextMenu();
 			base.ReadyDisable(e);
 		}
 
@@ -192,23 +196,30 @@ namespace Game1.Interface.Windows
 			}
 		}
 
+		/*
 		private void _contextMenu_OnMouseOut(object sender, ComponentEventArgs e)
 		{
 			DisableContextMenu();
 		}
+		*/
 
+		/*
 		private void EnableContextMenu(InventoryItemView clickedItemView)
 		{
 			_contextMenu.Initialize(clickedItemView, InputManager.MousePosition.Offset(-10, -10), false);
 			_activator.SetState(_contextMenu, true);
 		}
+		*/
 
+		// Do we still need to re-enable these (need event for context menu dying) on context disable???
+		/*
 		private void DisableContextMenu()
 		{
 			_activator.SetState(new[] {_containerViewBackpack, _containerViewHotbar}, true);
 			// Verify we don't need this
 			//_contextMenu.Clear();
 		}
+		*/
 
 		private void EnableSplitWindow(InventoryItemView itemView)
 		{

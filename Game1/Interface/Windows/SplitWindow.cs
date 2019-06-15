@@ -53,7 +53,7 @@ namespace Game1.Interface.Windows
 			_input.OnBeforeTextUpdate += _input_OnBeforeTextUpdate;
 
 			_halfButton = new Button(bounds.CenteredRegion(80, 40), "Half") { IsActive = true };
-			_halfButton.OnClick += _halfButton_OnClick;
+			_halfButton.OnMouseLeftClick += _halfButton_OnMouseLeftClick;
 
 			LoadContent();
 		}
@@ -102,7 +102,7 @@ namespace Game1.Interface.Windows
 			_halfButton?.Draw(spriteBatch);
 		}
 
-		private void _halfButton_OnClick(object sender, EventArgs e)
+		private void _halfButton_OnMouseLeftClick(object sender, EventArgs e)
 		{
 			if (this.Owner?.Item == null)
 				return;

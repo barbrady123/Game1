@@ -15,6 +15,7 @@ namespace Game1.Screens.Menu.Character
 		public SexMenu(Rectangle bounds): base(	bounds: bounds,
 												layout: MenuLayout.Horizontal,
 												background: null,
-												escapeToDisable: true) { }
+												escapeToDisable: true,
+												drawIfDisabled: true) { }
 	}
 }

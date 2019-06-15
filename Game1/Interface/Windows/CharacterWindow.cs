@@ -36,10 +36,9 @@ namespace Game1.Interface.Windows
 			for (int i = 0; i < _armorItemView.Length; i++)
 			{
 				var position = this.Bounds.TopRightVector(-100, this.ContentMargin.Height + InventoryItemView.Size / 2 + (100 * i)).ExpandToRectangleCentered(InventoryItemView.Size / 2, InventoryItemView.Size / 2);
-				_activator.Register(_armorItemView[i] = new InventoryItemView(position, i, ((ArmorSlot)i).ToString("g")), true, $"armor{i}");
-				_armorItemView[i].OnMouseClick += ArmorItemView_OnMouseClick;
+				_activator.Register(_armorItemView[i] = new InventoryItemView(position, i, ((ArmorSlot)i).ToString("g"), true), true, $"armor{i}");
+				_armorItemView[i].OnMouseRightClick += ArmorItemView_OnMouseRightClick;
 				_armorItemView[i].OnMouseOver += ArmorItemView_OnMouseOver;
-				_armorItemView[i].OnMouseOut += ArmorItemView_OnMouseOut;
 			}
 			
 			_characterStat = new ImageText[System.Enum.GetNames(typeof(CharacterAttribute)).Length];
@@ -99,11 +98,10 @@ namespace Game1.Interface.Windows
 			_contextMenu.Draw(spriteBatch);
 		}
 
-		private void ArmorItemView_OnMouseClick(object sender, ComponentEventArgs e)
+		private void ArmorItemView_OnMouseRightClick(object sender, ComponentEventArgs e)
 		{
 			var itemView = (InventoryItemView)sender;
-
-			if ((e.Button == MouseButton.Right) && (itemView?.Item != null))
+			if (itemView?.Item != null)
 				EnableContextMenu(itemView);
 		}
 
@@ -111,26 +109,12 @@ namespace Game1.Interface.Windows
 		{
 			e.Meta = sender;
 			MouseOver(e);
-			//_tooltip.Owner = (InventoryItemView)e.Meta;
-			/*
-			var overItem = (sender as InventoryItemView).Item;
-
-			if ((overItem != null) && (_contextMenu.Owner != sender))
-				_tooltip.Show(overItem.Item.DisplayName, InputManager.MousePosition.Offset(10, 10), 15, sender);
-			else
-				_tooltip.Reset(sender);
-			*/
 		}
 
 		protected override void ReadyDisable(ComponentEventArgs e)
 		{
 			DisableContextMenu();
 			base.ReadyDisable(e);
-		}
-
-		private void ArmorItemView_OnMouseOut(object sender, EventArgs e)
-		{
-			//_tooltip.Reset(sender);
 		}
 
 		private void UpdateArmorViews()

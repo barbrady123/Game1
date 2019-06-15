@@ -44,11 +44,17 @@ namespace Game1.Screens
 		{
 			base.UpdateInput(gameTime);
 
-			if (InputManager.KeyPressed(Keys.Enter) || InputManager.LeftMouseClick())
+			if (InputManager.KeyPressed(Keys.Enter))
 			{
 				_title.IsActive = false;
 				ReadyDisable(new ComponentEventArgs { Trigger = EventTrigger.KeyPressed });
 			}
+		}
+
+		protected override void MouseLeftClick(ComponentEventArgs e)
+		{
+			_title.IsActive = false;
+			ReadyDisable(new ComponentEventArgs { Trigger = EventTrigger.ButtonClick });
 		}
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)
