@@ -75,9 +75,9 @@ namespace Game1.Interface
 				SetFill(current, max);
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_fill?.Draw(spriteBatch);
 			_textImage.Draw(spriteBatch);
 		}

@@ -51,9 +51,9 @@ namespace Game1.Screens
 			}
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{	
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_title.Draw(spriteBatch);
 		}
 	}

@@ -49,9 +49,9 @@ namespace Game1
 				_statuses[i].Icon.Position = CalculateItemViewPosition(i);
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			foreach (var status in _statuses)
 			{
 				status.Icon.Draw(spriteBatch);

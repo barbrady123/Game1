@@ -44,9 +44,8 @@ namespace Game1.Interface.Windows
 			switch (this.Buttons)
 			{
 				case DialogButton.Ok :	
-					_buttonMenu = new OkMenu(new Rectangle(this.Bounds.X, this.Bounds.Y + (int)(this.Bounds.Height * 0.75f),  this.Bounds.Width, (int)(this.Bounds.Height * 0.25f))) { State = ComponentState.All };
+					_buttonMenu = new OkMenu(new Rectangle(this.Bounds.X, this.Bounds.Y + (int)(this.Bounds.Height * 0.75f),  this.Bounds.Width, (int)(this.Bounds.Height * 0.25f))) { IsActive = true };
 					_buttonMenu.OnItemSelect += _buttonMenu_OnItemSelect;
-					// Window should handle the escape key now...
 					break;
 			}
 
@@ -76,9 +75,9 @@ namespace Game1.Interface.Windows
 			_textImage.Update(gameTime);
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_buttonMenu?.Draw(spriteBatch);
 			_textImage.Draw(spriteBatch);
 		}

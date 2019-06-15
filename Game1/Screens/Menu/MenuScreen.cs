@@ -40,10 +40,9 @@ namespace Game1.Screens.Menu
 
 		public int ItemCount => _items?.Count ?? 0;
 
-		protected override void StateChange()
+		protected override void IsActiveChange()
 		{
-			base.StateChange();
-			if (this.State.HasFlag(ComponentState.Active))
+			if (this.IsActive)
 			{
 				SetCurrentItemEffects(true);
 				DelayInput(1);
@@ -193,12 +192,12 @@ namespace Game1.Screens.Menu
 			ItemSelect(new ComponentEventArgs { Value = _items[_currentIndex]?.Id });
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 
 			foreach (var item in _items)
-				item.Image.Draw(spriteBatch, this.State.HasFlag(ComponentState.Active) ? MenuScreen.ENABLED_MENU_ALPHA : MenuScreen.DISABLED_MENU_ALPHA);
+				item.Image.Draw(spriteBatch, this.IsActive ? MenuScreen.ENABLED_MENU_ALPHA : MenuScreen.DISABLED_MENU_ALPHA);
 		}
 
 		public int SetById(string id)

@@ -16,8 +16,9 @@ using Game1.Screens.Menu;
 
 namespace Game1
 {
-	public abstract class Component
+	public abstract class Component : IActivatable
 	{
+		protected ActivationManager _activator;
 		private int _delayInputCycles;
 		protected ImageTexture _background;
 		private string _backgroundName;
@@ -27,22 +28,25 @@ namespace Game1
 		private bool _hasBorder;
 		private bool _fireMouseEvents;
 		private bool _inactiveMouseEvents;
-		private ComponentState _state;
+		private bool _killFurtherInput;
+		private bool _isActive;
 		private readonly SpriteBatchData _spriteBatchData;
 
-		public virtual ComponentState State
+		// TODO: add tooltip, context?
+
+		public virtual bool IsActive
 		{
-			get { return _state; }
+			get { return _isActive; }
 			set {
-				if (_state != value)
+				if (_isActive != value)
 				{
-					_state = value;
-					StateChange();
+					_isActive = value;
+					IsActiveChange();
 				}
 			}
 		}
 
-		protected virtual void StateChange() { }
+		protected virtual void IsActiveChange() { }
 
 		public int? Duration { get; set; }
 
@@ -80,9 +84,12 @@ namespace Game1
 						 SpriteBatchData spriteBatchData = null,
 						 bool hasBorder = false,
 						 bool fireMouseEvents = true,
-						 bool inactiveMouseEvents = false)
+						 bool inactiveMouseEvents = false,
+						 bool killFurtherInput = false)
 		{
 			_bounds = bounds ?? Rectangle.Empty;
+			_activator = new ActivationManager();
+			// Auto register tooltip/context/etc...when available...
 			_readyDisableOnEscape = readyDisableOnEscape;
 			_spriteBatchData = spriteBatchData;
 			_hasBorder = hasBorder;
@@ -91,6 +98,7 @@ namespace Game1
 			_backgroundName = background;
 			_fireMouseEvents = fireMouseEvents;
 			_inactiveMouseEvents = inactiveMouseEvents;
+			_killFurtherInput = killFurtherInput;
 
 			SetupBackground();
 			SetupBorder();
@@ -111,10 +119,10 @@ namespace Game1
 
 		public virtual void Update(GameTime gameTime)
 		{
-			if (_inactiveMouseEvents && !this.State.HasFlag(ComponentState.Active))
+			if (_inactiveMouseEvents && !this.IsActive)
 				CheckMouseEvents();
 
-			if (this.State.HasFlag(ComponentState.Active))
+			if (this.IsActive)
 				UpdateDuration(gameTime);
 		}
 
@@ -151,8 +159,7 @@ namespace Game1
 				return;
 			}
 
-			if (this.State.HasFlag(ComponentState.TakingInput))
-				UpdateInput(gameTime);
+			UpdateInput(gameTime);
 		}
 
 		public virtual void UpdateInput(GameTime gameTime)
@@ -161,6 +168,9 @@ namespace Game1
 
 			if (_readyDisableOnEscape && InputManager.KeyPressed(Keys.Escape, true))
 				ReadyDisable(new ComponentEventArgs { Trigger = EventTrigger.Escape, Value = "escape" });
+
+			if (_killFurtherInput)
+				InputManager.BlockAllInput();
 		}
 
 		public virtual bool CheckMouseEvents()
@@ -183,18 +193,15 @@ namespace Game1
 			return mouseover;
 		}
 
-		public virtual void Draw(SpriteBatch spriteBatch)
+		public void Draw(SpriteBatch spriteBatch)
 		{
-			if (this.State.HasFlag(ComponentState.Visible))
-			{
-				if (_spriteBatchData != null)
-					Util.WrappedDraw(DrawVisible, _spriteBatchData, _bounds);
-				else
-					DrawVisible(spriteBatch);
-			}
+			if (_spriteBatchData != null)
+				Util.WrappedDraw(DrawInternal, _spriteBatchData, _bounds);
+			else
+				DrawInternal(spriteBatch);
 		}
 
-		public virtual void DrawVisible(SpriteBatch spriteBatch)
+		protected virtual void DrawInternal(SpriteBatch spriteBatch)
 		{
 			_background?.Draw(spriteBatch);
 			_border?.Draw(spriteBatch);

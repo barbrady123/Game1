@@ -22,7 +22,7 @@ namespace Game1.Interface
 
 		public event EventHandler OnClick;
 
-		public Button(Rectangle bounds, string text) : base(bounds, hasBorder: true)
+		public Button(Rectangle bounds, string text, bool killFurtherInput = true) : base(bounds, hasBorder: true, killFurtherInput: killFurtherInput)
 		{
 			_text = new ImageText(text, true) { Position = bounds.CenterVector() };
 		}
@@ -54,12 +54,12 @@ namespace Game1.Interface
 				OnClick?.Invoke(this, new MouseEventArgs(MouseButton.Left));
 			else if (InputManager.RightMouseClick(this.Bounds))
 				OnClick?.Invoke(this, new MouseEventArgs(MouseButton.Right));
-			InputManager.BlockButtonClicks();
+			base.UpdateInput(gameTime);
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_text.Draw(spriteBatch);
 		}
 	}

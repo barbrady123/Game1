@@ -17,7 +17,6 @@ namespace Game1.Interface.Windows
 {
 	public class CharacterWindow : Component
 	{
-		private readonly ComponentManager _components;
 		private World _world;
 		private InventoryItemView[] _armorItemView;
 		private ImageText _characterName;
@@ -26,10 +25,8 @@ namespace Game1.Interface.Windows
 
 		private Tooltip _tooltip;
 
-		public CharacterWindow(Rectangle bounds, World world, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData)
+		public CharacterWindow(Rectangle bounds, World world, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData, killFurtherInput: true)
 		{
-			_components = new ComponentManager();
-
 			_world = world;
 			_armorItemView = new InventoryItemView[System.Enum.GetNames(typeof(ArmorSlot)).Length];
 
@@ -41,12 +38,11 @@ namespace Game1.Interface.Windows
 			for (int i = 0; i < _armorItemView.Length; i++)
 			{
 				var position = this.Bounds.TopRightVector(-100, this.ContentMargin.Height + InventoryItemView.Size / 2 + (100 * i)).ExpandToRectangleCentered(InventoryItemView.Size / 2, InventoryItemView.Size / 2);
-				_components.Register(_armorItemView[i] = new InventoryItemView(position, i, ((ArmorSlot)i).ToString("g")));
+				_activator.Register(_armorItemView[i] = new InventoryItemView(position, i, ((ArmorSlot)i).ToString("g")), true, $"armor{i}");
 				_armorItemView[i].OnMouseClick += ArmorItemView_OnMouseClick;
 				_armorItemView[i].OnMouseOver += ArmorItemView_OnMouseOver;
 				_armorItemView[i].OnMouseOut += ArmorItemView_OnMouseOut;
 			}
-			_components.SetState(_armorItemView, ComponentState.All, null);
 			
 			_characterStat = new ImageText[System.Enum.GetNames(typeof(CharacterAttribute)).Length];
 			for (int i = 0; i < _characterStat.Length; i++)
@@ -55,10 +51,9 @@ namespace Game1.Interface.Windows
 				_characterStat[i] = new ImageText(null, true) { Position = position, Alignment = ImageAlignment.LeftCentered };
 			}
 
-			_components.Register(_tooltip = new Tooltip(SpriteBatchManager.Get("tooltip")));
-			_components.SetState(_tooltip, ComponentState.Active, null);
-
-			_components.Register(_contextMenu = new InventoryContextMenu(SpriteBatchManager.Get("context")));
+			// Verify the tooltip cannot break the context menu (shouldn't be able to get input while the other is active)....
+			_activator.Register(_tooltip = new Tooltip(SpriteBatchManager.Get("tooltip")), true, "top");
+			_activator.Register(_contextMenu = new InventoryContextMenu(SpriteBatchManager.Get("context")), true, new[] { "top", "armor0", "armor1", "armor2", "armor3" });
 			_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 			_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
 		}
@@ -98,13 +93,11 @@ namespace Game1.Interface.Windows
 			foreach (var stat in _characterStat)
 				stat.Update(gameTime);
 			base.UpdateActive(gameTime);
-			InputManager.BlockAllInput();
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			// Refactor this spritebatch stuff...
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_characterName.Draw(spriteBatch);
 			foreach (var armorView in _armorItemView)
 				armorView.Draw(spriteBatch);
@@ -181,17 +174,18 @@ namespace Game1.Interface.Windows
 
 		private void EnableContextMenu(InventoryItemView clickedItemView)
 		{
+			// Make this a more consistent method (once we have DynamicComponent)...
 			_contextMenu.Initialize(clickedItemView, InputManager.MousePosition.Offset(-10, -10), true);
-			_components.SetState(_contextMenu, ComponentState.All, null);
-			_components.ClearState(_armorItemView, ComponentState.TakingInput);	// Is this enough or do we need to kill Active also?
-			_tooltip.Reset();
+			_activator.SetState(_contextMenu, true);
+			// Do we still need these types of calls for the dynamic stuff? Shouldn't making them inactive be enough?
+			//_tooltip.Reset();
 		}
 
 		private void DisableContextMenu()
 		{
-			_components.AddState(_armorItemView, ComponentState.TakingInput);
-			_components.SetState(_contextMenu, ComponentState.None, null);
-			_contextMenu.Clear();
+			_activator.SetState(_armorItemView, true);
+			// Do we still need these types of calls for the dynamic stuff? Shouldn't making them inactive be enough?
+			//_contextMenu.Clear();
 		}
 	}
 }

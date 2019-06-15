@@ -57,10 +57,10 @@ namespace Game1.Interface
 			}
 		}
 
-		protected override void StateChange()
+		protected override void IsActiveChange()
 		{
 			this.CurrentPositionIndex = 0;
-			if (this.State.HasFlag(ComponentState.Active))
+			if (this.IsActive)
 				DelayInput(1);
 		}
 
@@ -104,10 +104,10 @@ namespace Game1.Interface
 
 		public override void Update(GameTime gameTime)
 		{
-			_background.IsActive = this.State.HasFlag(ComponentState.Active);
-			_border.IsActive = this.State.HasFlag(ComponentState.Active);
-			_cursor.IsActive = this.State.HasFlag(ComponentState.TakingInput);
-			_textImage.Alpha = this.State.HasFlag(ComponentState.Active) ? TextInput.ActiveTextAlpha : TextInput.InactiveTextAlpha;
+			_background.IsActive = this.IsActive;
+			_border.IsActive = this.IsActive;
+			_cursor.IsActive = this.IsActive;
+			_textImage.Alpha = this.IsActive ? TextInput.ActiveTextAlpha : TextInput.InactiveTextAlpha;
 			_textImage.UpdateText(_visibleText);
 			_textImage.Update(gameTime);
 			base.Update(gameTime);
@@ -121,9 +121,9 @@ namespace Game1.Interface
 			base.UpdateInput(gameTime);
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_cursor.Draw(spriteBatch);
 			_textImage.Draw(spriteBatch);
 		}

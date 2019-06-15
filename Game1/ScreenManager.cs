@@ -60,9 +60,9 @@ namespace Game1
 			if (_currentScreen != null)
 			{
 				if (_isTransitioning)
-					_currentScreen.State &= ~ComponentState.TakingInput;
+					_currentScreen.IsActive = false;
 				else
-					_currentScreen.State |= ComponentState.TakingInput;
+					_currentScreen.IsActive = true;
 				_currentScreen.Update(gameTime);
 			}
 
@@ -119,7 +119,6 @@ namespace Game1
 				menuScreen.OnItemSelect += MenuScreen_OnItemSelect;
 
 			_currentScreen.LoadContent();
-			_currentScreen.State = ComponentState.ActiveVisible;
 		}
 
 		private void _fadeInEffect_OnActiveChange(object sender, EventArgs e)
@@ -137,10 +136,12 @@ namespace Game1
 			if (_isTransitioning && !((EffectEventArgs)e).IsActive)
 			{
 				_isTransitioning = false;
-				_transitionImage.IsActive = false;				
+				_transitionImage.IsActive = false;		
+				_currentScreen.IsActive = true;
 			}
 		}
 
+		// Really, we should have a menu screen wrapper so we don't get direct menu screen events....
 		private void MenuScreen_OnItemSelect(object sender, ComponentEventArgs e)
 		{
 			switch (sender)

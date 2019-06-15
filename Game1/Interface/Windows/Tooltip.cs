@@ -51,7 +51,7 @@ namespace Game1.Interface.Windows
 			if (_timer == 0)
 			{
 				_timer = -1;
-				this.State |= ComponentState.Visible;
+				this.IsActive = true;
 			}
 			else if (_timer > 0)
 			{
@@ -59,9 +59,9 @@ namespace Game1.Interface.Windows
 			}
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_text.Draw(spriteBatch);
 		}
 
@@ -89,6 +89,8 @@ namespace Game1.Interface.Windows
 				_text.Position = this.Bounds.CenterVector();
 		}
 
+		// This whole thing is going to be redone with automatic registering of mouse events 
+		// when Owner is linked to it (and reset if owner changes), etc....
 		public void Reset(object sender = null)
 		{
 			if ((sender != null) && (sender != this.Owner))
@@ -96,7 +98,7 @@ namespace Game1.Interface.Windows
 
 			_timer = -1;
 			this.Owner = null;
-			this.State &= ~ComponentState.Visible;
+			this.IsActive = false;
 		}
 	}
 }

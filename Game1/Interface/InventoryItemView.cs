@@ -22,12 +22,6 @@ namespace Game1.Interface
 
 		protected override int BorderThickness => InventoryItemView.BorderWidth;
 
-		public override ComponentState State
-		{ 
-			get => this.ContainingView != null ? this.ContainingView.State : base.State;
-			set => base.State = value;
-		}
-
 		private ImageTexture _highlightBorder;
 		private ImageTexture _emptyIcon;
 		private ImageText _quantity;
@@ -103,9 +97,9 @@ namespace Game1.Interface
 				OnMouseClick?.Invoke(this, new ComponentEventArgs { Button = MouseButton.Right });
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_highlightBorder.Draw(spriteBatch);
 			_emptyIcon?.Draw(spriteBatch);
 			if (this.Item != null)

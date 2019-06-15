@@ -28,7 +28,7 @@ namespace Game1.Interface.Windows
 
 		public InventoryItemView Owner { get; private set; }
 
-		public SplitWindow(SpriteBatchData spriteBatchData) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData)
+		public SplitWindow(SpriteBatchData spriteBatchData) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData, killFurtherInput: true)
 		{
 			// We allow empty instanciation so the object can be registered with a ComponentManager if necessary...
 		}
@@ -42,17 +42,17 @@ namespace Game1.Interface.Windows
 			var bottomCenter = bounds.BottomCenterVector();
 			// This arbitrary sizing sucks...TODO: Read the comment on the MenuScreen class...menus should be able to auto-size themselves given a Top-Left position...
 			// Is it ssafe for all these subitems to get State.All ?
-			_menu = new OkCancelMenu(new Rectangle((int)bottomCenter.X - 90, (int)bottomCenter.Y - 50, bounds.Width, 30)) { State = ComponentState.All };
+			_menu = new OkCancelMenu(new Rectangle((int)bottomCenter.X - 90, (int)bottomCenter.Y - 50, bounds.Width, 30)) { IsActive = true };
 			_menu.OnItemSelect += _menu_OnItemSelect;
 			
 			_input = new TextInput(SplitWindow.TextInputWidth, new Vector2(bounds.Center.X, bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2)), "", 2) {
-				State = ComponentState.All,
+				IsActive = true,
 				AllowedCharacters = "0123456789"
 			};
 			_input.OnReadyDisable += _input_OnReadyDisable;
 			_input.OnBeforeTextUpdate += _input_OnBeforeTextUpdate;
 
-			_halfButton = new Button(bounds.CenteredRegion(80, 40), "Half") { State = ComponentState.All };
+			_halfButton = new Button(bounds.CenteredRegion(80, 40), "Half") { IsActive = true };
 			_halfButton.OnClick += _halfButton_OnClick;
 
 			LoadContent();
@@ -92,12 +92,11 @@ namespace Game1.Interface.Windows
 			_menu.Update(gameTime);
 			_input.Update(gameTime);
 			_halfButton.Update(gameTime);
-			InputManager.BlockAllInput();
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_menu?.Draw(spriteBatch);
 			_input?.Draw(spriteBatch);
 			_halfButton?.Draw(spriteBatch);

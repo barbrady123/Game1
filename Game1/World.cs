@@ -110,8 +110,6 @@ namespace Game1
 			}
 		}
 
-		public override void Draw(SpriteBatch spriteBatch) { }
-
 		public void AddItem(InventoryItem item, Vector2? position = null, bool pickup = true)
 		{
 			if (item == null)

@@ -22,14 +22,12 @@ namespace Game1
 
 		protected override Size ContentMargin => new Size(25, 25);
 
-		private readonly ComponentManager _components;
 		private readonly Rectangle _gameViewArea;
 		private readonly GamePlayCamera _camera;
 		private readonly World _world;
 		private readonly CharacterWindow _characterWindow;
 		private readonly InventoryWindow _inventoryWindow;
 		private readonly HotbarView _hotbarView;
-		private readonly Dialog _tooltip;	// We're not even using this...might be useful?
 		private readonly StatBar _barHealth;
 		private readonly StatBar  _barMana;
 		private readonly ImageText _defense;
@@ -39,9 +37,8 @@ namespace Game1
 
 		public GamePlayManager(Rectangle bounds) : base(bounds, true, "stone")
 		{
-			_components = new ComponentManager();
-
-			_components.Register(_world = new World());
+			// Might want a couple frame delay before actually running the game?
+			_activator.Register(_world = new World(), true, "top");
 			_world.Initialize();
 			_world.Character.OnHeldItemChanged += InputManager.HandleCursorChange;
 
@@ -55,45 +52,37 @@ namespace Game1
 			_camera = new GamePlayCamera(_world, _gameViewArea, SpriteBatchManager.Get("gameplay"));
 
 			var modalSpriteBatchData = SpriteBatchManager.Get("modal");
-			_components.Register(_characterWindow = new CharacterWindow(this.Bounds.CenteredRegion(870, 575), _world, modalSpriteBatchData));
+			_activator.Register(_characterWindow = new CharacterWindow(this.Bounds.CenteredRegion(870, 575), _world, modalSpriteBatchData), false, "top");
 			_characterWindow.OnReadyDisable += _characterWindow_OnReadyDisable;
 
-			_components.Register(_inventoryWindow = new InventoryWindow(this.Bounds.CenteredRegion(870, 575),  _world, "Backpack", modalSpriteBatchData));
+			_activator.Register(_inventoryWindow = new InventoryWindow(this.Bounds.CenteredRegion(870, 575),  _world, "Backpack", modalSpriteBatchData), false, "top");
 			_inventoryWindow.OnReadyDisable += _inventoryView_OnReadyDisable;
 
-			_components.Register(_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(this.ContentMargin.Width, _gameViewArea.Bottom + this.ContentMargin.Height), true));
+			_activator.Register(_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(this.ContentMargin.Width, _gameViewArea.Bottom + this.ContentMargin.Height), true), true);
 			_hotbarView.OnMouseClick += _hotbarView_OnMouseClick;
 			_hotbarView.OnActiveItemChange += _hotbarView_OnActiveItemChange;
-			_components.SetState(_hotbarView, ComponentState.All, null);
 
-			_tooltip = new Dialog(null, DialogButton.None, Rectangle.Empty, null);
-			_components.Register(_barHealth = new StatBar(
+			_activator.Register(_barHealth = new StatBar(
 				GamePlayManager.StatBarSize, 
 				this.Bounds.TopRightVector((-GamePlayManager.StatBarSize / 2) - this.ContentMargin.Width, this.ContentMargin.Height + StatBar.Height / 2),
 				Color.Red,
 				_world.Character,
 				"CurrentHP",
 				"MaxHP"
-			));
-			_components.SetState(_barHealth, ComponentState.ActiveVisible, null);
-			_components.Register(_barMana = new StatBar(
+			), true);
+			_activator.Register(_barMana = new StatBar(
 				GamePlayManager.StatBarSize,
 				this.Bounds.TopRightVector((-GamePlayManager.StatBarSize / 2) - this.ContentMargin.Width, this.ContentMargin.Height * 3 + StatBar.Height / 2),
 				Color.Blue,
 				_world.Character,
 				"CurrentMana",
 				"MaxMana"
-			));
-			_components.SetState(_barMana, ComponentState.ActiveVisible, null);
+			), true);
 
-			_components.Register(_buffs = new StatusViewer<CharacterBuff>(new Rectangle(this.Bounds.TopRightVector(-300 - this.ContentMargin.Width, this.ContentMargin.Height * 6).ToPoint(), new Point(300, 120)), _world.Character.Buffs));
-			_components.SetState(_buffs, ComponentState.ActiveVisible, null);
+			_activator.Register(_buffs = new StatusViewer<CharacterBuff>(new Rectangle(this.Bounds.TopRightVector(-300 - this.ContentMargin.Width, this.ContentMargin.Height * 6).ToPoint(), new Point(300, 120)), _world.Character.Buffs), true);
 
-			// Eventually make ImageText(ure) consistent with the components so we can register them also (or create containers for basic images/text)...
+			// Eventually make a component for display of this stuff on the right...
 			_defense = new ImageText("", true) { Position = this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, 350) };
-
-			// Might want a couple frame delay before actually running the game?
-			_components.SetState(_world, ComponentState.Active, null);
 		}
 
 		public override void LoadContent()
@@ -109,7 +98,6 @@ namespace Game1
 			_inventoryWindow.LoadContent();
 			_hotbarView.LoadContent();
 			_hotbarView.ActiveItemChange();
-			_tooltip.LoadContent();
 			_barHealth.LoadContent();
 			_barMana.LoadContent();
 			_buffs.LoadContent();
@@ -126,7 +114,6 @@ namespace Game1
 			_characterWindow.UnloadContent();
 			_inventoryWindow.UnloadContent();
 			_hotbarView.UnloadContent();
-			_tooltip.UnloadContent();
 			_barHealth.UnloadContent();
 			_barMana.UnloadContent();
 			_buffs.UnloadContent();
@@ -144,7 +131,6 @@ namespace Game1
 			_characterWindow.Update(gameTime);
 			_inventoryWindow.Update(gameTime);
 			_hotbarView.Update(gameTime);
-			_tooltip.Update(gameTime);
 			_barHealth.Update(gameTime);
 			_barMana.Update(gameTime);
 			UpdateVisibleStats();
@@ -161,13 +147,11 @@ namespace Game1
 			// TODO: Move this to a better location...should be it's own component with no UI, so it can be disabled correctly below
 			if (InputManager.KeyPressed(Keys.I))
 			{
-				_components.AddState(_inventoryWindow, ComponentState.All);
-				_components.ClearState(_world, ComponentState.Active);
+				_activator.SetState(_inventoryWindow, true);
 			}
 			else if (InputManager.KeyPressed(Keys.C))
 			{
-				_components.AddState(_characterWindow, ComponentState.All);
-				_components.ClearState(_world, ComponentState.Active);
+				_activator.SetState(_characterWindow, true);
 			}
 			else if (InputManager.KeyPressed(Keys.OemTilde))
 			{
@@ -193,15 +177,14 @@ namespace Game1
 			base.UpdateInput(gameTime);
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_gameViewBorder.Draw(spriteBatch);
 			_camera.Draw();
 			_characterWindow.Draw(spriteBatch);
 			_inventoryWindow.Draw(spriteBatch);
 			_hotbarView.Draw(spriteBatch);
-			_tooltip.Draw(spriteBatch);
 			_barHealth.Draw(spriteBatch);
 			_barMana.Draw(spriteBatch);
 			_defense.Draw(spriteBatch);
@@ -222,16 +205,12 @@ namespace Game1
 
 		private void _characterWindow_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
-			_components.SetState(_characterWindow, ComponentState.None, null);
-			_components.AddState(_world, ComponentState.ActiveInput);
-			_components.AddState(_hotbarView, ComponentState.TakingInput);
+			_activator.SetState(_world, true);
 		}
 
 		private void _inventoryView_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
-			_components.SetState(_inventoryWindow, ComponentState.None, null);
-			_components.AddState(_world, ComponentState.ActiveInput);
-			_components.AddState(_hotbarView, ComponentState.TakingInput);
+			_activator.SetState(_world, true);
 		}
 
 		private void _hotbarView_OnMouseClick(object sender, ComponentEventArgs e)

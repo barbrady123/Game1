@@ -47,7 +47,7 @@ namespace Game1.Interface
 
 		public int Size => this.Container?.Size ?? 0;
 
-		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem) : base(bounds, fireMouseEvents: false)
+		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem) : base(bounds, background: null, fireMouseEvents: false)
 		{
 			this.Container = container;
 			this.Container.OnItemChanged += Container_OnItemChanged;
@@ -59,8 +59,7 @@ namespace Game1.Interface
 				_itemViews[i].OnMouseClick += ItemContainerView_OnMouseClick;
 				_itemViews[i].OnMouseOver += ItemContainerView_OnMouseOver;
 				_itemViews[i].OnMouseOut += ItemContainerView_OnMouseOut;				
-				// use manager!!
-				_itemViews[i].State = ComponentState.All;
+				_itemViews[i].IsActive = true;
 			}
 			this.HightlightActiveItem = highlightActiveItem;
 			this.ActiveItemIndex = 0;
@@ -84,8 +83,9 @@ namespace Game1.Interface
 			UpdateItems(gameTime);
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
+			base.DrawInternal(spriteBatch);
 			foreach (var item in _itemViews)
 				item.Draw(spriteBatch);
 		}
