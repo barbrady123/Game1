@@ -12,6 +12,8 @@ using Game1.Enum;
 
 namespace Game1
 {
+	// TODO: Need to add ImageText for displaying stack count when > 1
+	// TODO: Need tooltips on the icons after Componegeddon 2.0 is complete...
 	public class StatusViewer<T> : Component where T: CharacterStatus
 	{
 		private const int ItemsPerRow = 5;
