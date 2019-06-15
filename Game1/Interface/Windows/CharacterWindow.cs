@@ -23,7 +23,7 @@ namespace Game1.Interface.Windows
 		private ImageText[] _characterStat;
 		private InventoryContextMenu _contextMenu;
 
-		public CharacterWindow(Rectangle bounds, World world, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData, killFurtherInput: true, drawIfDisabled: false)
+		public CharacterWindow(Rectangle bounds, World world, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData, killFurtherInput: true, drawIfDisabled: false, fireMouseEvents: false, enabledTooltip: true)
 		{
 			_world = world;
 			_armorItemView = new InventoryItemView[System.Enum.GetNames(typeof(ArmorSlot)).Length];
@@ -49,9 +49,7 @@ namespace Game1.Interface.Windows
 				_characterStat[i] = new ImageText(null, true) { Position = position, Alignment = ImageAlignment.LeftCentered };
 			}
 
-			// Verify the tooltip cannot break the context menu (shouldn't be able to get input while the other is active)....
-			_activator.Register(_tooltip = new Tooltip(this, SpriteBatchManager.Get("tooltip")), false, "top");
-			_activator.Register(_contextMenu = new InventoryContextMenu(SpriteBatchManager.Get("context")), false, new[] { "top", "armor0", "armor1", "armor2", "armor3" });
+			_activator.Register(_contextMenu = new InventoryContextMenu(SpriteBatchManager.Get("context")), false, new[] { "popup", "armor0", "armor1", "armor2", "armor3" });
 			_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 			_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
 		}
@@ -60,7 +58,6 @@ namespace Game1.Interface.Windows
 		{
 			base.LoadContent();
 			_characterName.LoadContent();
-			_tooltip.LoadContent();
 			foreach (var armorView in _armorItemView)
 				armorView.LoadContent();
 			foreach (var stat in _characterStat)
@@ -71,7 +68,6 @@ namespace Game1.Interface.Windows
 		{
 			base.UnloadContent();
 			_characterName.UnloadContent();
-			_tooltip.UnloadContent();
 			_contextMenu.UnloadContent();
 			foreach (var armorView in _armorItemView)
 				armorView.UnloadContent();
@@ -83,7 +79,6 @@ namespace Game1.Interface.Windows
 		{
 			_contextMenu.Update(gameTime);
 			_characterName.Update(gameTime);
-			_tooltip.Update(gameTime);
 			UpdateArmorViews();
 			foreach (var armorView in _armorItemView)
 				armorView.Update(gameTime);
@@ -101,7 +96,6 @@ namespace Game1.Interface.Windows
 				armorView.Draw(spriteBatch);
 			foreach (var stat in _characterStat)
 				stat.Draw(spriteBatch);
-			_tooltip.Draw(spriteBatch);
 			_contextMenu.Draw(spriteBatch);
 		}
 
@@ -115,7 +109,9 @@ namespace Game1.Interface.Windows
 
 		private void ArmorItemView_OnMouseOver(object sender, ComponentEventArgs e)
 		{
-			_tooltip.Owner = (InventoryItemView)e.Meta;
+			e.Meta = sender;
+			MouseOver(e);
+			//_tooltip.Owner = (InventoryItemView)e.Meta;
 			/*
 			var overItem = (sender as InventoryItemView).Item;
 

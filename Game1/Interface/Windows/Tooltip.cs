@@ -104,7 +104,7 @@ namespace Game1.Interface.Windows
 			_text.Draw(spriteBatch);
 		}
 
-		public void Show(string text)
+		private void Show(string text)
 		{
 			if (String.IsNullOrWhiteSpace(text))
 				return;
