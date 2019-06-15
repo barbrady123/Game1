@@ -199,7 +199,7 @@ namespace Game1.Interface.Windows
 		{
 			var overItemView = (InventoryItemView)e.Meta;
 
-			if ((_contextMenu?.Owner != overItemView) && (overItemView.Item != null))
+			if (overItemView.Item != null)
 				_tooltip.Show(overItemView.Item.Item.DisplayName, InputManager.MousePosition.Offset(10, 10), 15, overItemView);
 			else
 				_tooltip.Reset(sender);

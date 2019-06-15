@@ -19,7 +19,7 @@ namespace Game1.Interface.Windows
 		private int _timer;
 		private ImageText _text;
 
-		public object Owner { get; private set; }
+		public object Owner { get; private set; }	// This should be a Component
 		public int TextPadding => 5;
 
 		// Eventually we'll want prettier tooltips with more than just a line of text...

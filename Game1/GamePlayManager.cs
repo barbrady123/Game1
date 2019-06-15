@@ -29,7 +29,7 @@ namespace Game1
 		private readonly CharacterWindow _characterWindow;
 		private readonly InventoryWindow _inventoryWindow;
 		private readonly HotbarView _hotbarView;
-		private readonly Dialog _tooltip;
+		private readonly Dialog _tooltip;	// We're not even using this...might be useful?
 		private readonly StatBar _barHealth;
 		private readonly StatBar  _barMana;
 		private readonly ImageText _defense;
@@ -162,14 +162,12 @@ namespace Game1
 			if (InputManager.KeyPressed(Keys.I))
 			{
 				_components.AddState(_inventoryWindow, ComponentState.All);
-				_components.ClearState(_world, ComponentState.ActiveInput);
-				_components.ClearState(_hotbarView, ComponentState.TakingInput);
+				_components.ClearState(_world, ComponentState.Active);
 			}
 			else if (InputManager.KeyPressed(Keys.C))
 			{
 				_components.AddState(_characterWindow, ComponentState.All);
-				_components.ClearState(_world, ComponentState.ActiveInput);
-				_components.ClearState(_hotbarView, ComponentState.TakingInput);
+				_components.ClearState(_world, ComponentState.Active);
 			}
 			else if (InputManager.KeyPressed(Keys.OemTilde))
 			{
