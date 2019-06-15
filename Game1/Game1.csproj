@@ -41,7 +41,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BuffEffect.cs" />
     <Compile Include="Character.cs" />
+    <Compile Include="CharacterBuff.cs" />
+    <Compile Include="CharacterStatus.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="ComponentEventArgs.cs" />
     <Compile Include="ComponentManager.cs" />
@@ -49,12 +52,17 @@
     <Compile Include="Effect\FadeCycleEffect.cs" />
     <Compile Include="Effect\FadeInEffect.cs" />
     <Compile Include="Effect\FadeOutEffect.cs" />
+    <Compile Include="Effect\UseItemWestEffect.cs" />
+    <Compile Include="Effect\UseItemEastEffect.cs" />
     <Compile Include="Effect\SpriteSheetEffect.cs" />
     <Compile Include="Effect\ZoomCycleEffect.cs" />
     <Compile Include="Enum\ArmorSlotEnum.cs" />
     <Compile Include="Enum\CharacterAttributeEnum.cs" />
+    <Compile Include="Enum\CharacterBuffEffectEnum.cs" />
+    <Compile Include="Enum\CharacterInstantEffectEnum.cs" />
     <Compile Include="Enum\CharacterSexEnum.cs" />
     <Compile Include="Enum\ComponentStateEnum.cs" />
+    <Compile Include="Enum\ConsumableTypeEnum.cs" />
     <Compile Include="Enum\DialogButtonEnum.cs" />
     <Compile Include="Enum\CardinalEnum.cs" />
     <Compile Include="Enum\EventTriggerEnum.cs" />
@@ -80,6 +88,7 @@
     <Compile Include="ImageText.cs" />
     <Compile Include="ImageTexture.cs" />
     <Compile Include="InputManager.cs" />
+    <Compile Include="InstantEffect.cs" />
     <Compile Include="Interface\Button.cs" />
     <Compile Include="Interface\HotbarView.cs" />
     <Compile Include="Interface\ItemContainerView.cs" />
@@ -126,9 +135,13 @@
     <Compile Include="Screens\Menu\OptionsMenu.cs" />
     <Compile Include="Screens\SplashScreen.cs" />
     <Compile Include="SpriteBatchManager.cs" />
+    <Compile Include="MetaManager.cs" />
+    <Compile Include="StatusEffect.cs" />
+    <Compile Include="StatusViewer.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="World.cs" />
+    <Compile Include="WorldItem.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
@@ -199,6 +212,8 @@
     <Content Include="Content\Gameplay\Icon\upg_wand.png" />
     <Content Include="Content\Gameplay\Icon\wand.png" />
     <Content Include="Content\Gameplay\Icon\x.png" />
+    <Content Include="Content\Gameplay\Status\minorDefense.png" />
+    <Content Include="Content\Gameplay\Status\minorMovementSpeed.png" />
     <Content Include="Content\Gameplay\TileSheet\ground.png" />
     <Content Include="Content\Interface\cursor.png" />
     <Content Include="Content\Interface\pointer.png" />

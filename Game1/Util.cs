@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -60,6 +62,20 @@ namespace Game1
 		{
 			spriteBatchData.ScissorWindow = bounds;
 			func.Invoke(spriteBatchData.SpriteBatch);
+		}
+
+		public static Cardinal DirectionFromVector(Vector2 vector, Cardinal defaultDir)
+		{
+			// Prioritize Left/Right images (they just look better)...
+			if (vector.X > 0.0f)
+				return Cardinal.East;
+			if (vector.X < 0.0f)
+				return Cardinal.West;
+			if (vector.Y > 0.0f)
+				return Cardinal.South;
+			if (vector.Y < 0.0f)
+				return Cardinal.North;
+			return defaultDir;
 		}
 	}
 }

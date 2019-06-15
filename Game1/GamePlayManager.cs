@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Effect;
 using Game1.Enum;
 using Game1.Interface;
 using Game1.Interface.Windows;
@@ -28,10 +29,11 @@ namespace Game1
 		private readonly CharacterWindow _characterWindow;
 		private readonly InventoryWindow _inventoryWindow;
 		private readonly HotbarView _hotbarView;
-		private readonly Dialog _tooltip;
+		private readonly Dialog _tooltip;	// We're not even using this...might be useful?
 		private readonly StatBar _barHealth;
 		private readonly StatBar  _barMana;
 		private readonly ImageText _defense;
+		private readonly StatusViewer<CharacterBuff> _buffs;
 
 		private ImageTexture _gameViewBorder;
 
@@ -53,14 +55,15 @@ namespace Game1
 			_camera = new GamePlayCamera(_world, _gameViewArea, SpriteBatchManager.Get("gameplay"));
 
 			var modalSpriteBatchData = SpriteBatchManager.Get("modal");
-			_components.Register(_characterWindow = new CharacterWindow(this.Bounds.CenteredRegion(870, 575), _world.Character, modalSpriteBatchData));
+			_components.Register(_characterWindow = new CharacterWindow(this.Bounds.CenteredRegion(870, 575), _world, modalSpriteBatchData));
 			_characterWindow.OnReadyDisable += _characterWindow_OnReadyDisable;
 
-			_components.Register(_inventoryWindow = new InventoryWindow(this.Bounds.CenteredRegion(870, 575),  _world.Character, "Backpack", modalSpriteBatchData));
+			_components.Register(_inventoryWindow = new InventoryWindow(this.Bounds.CenteredRegion(870, 575),  _world, "Backpack", modalSpriteBatchData));
 			_inventoryWindow.OnReadyDisable += _inventoryView_OnReadyDisable;
 
 			_components.Register(_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(this.ContentMargin.Width, _gameViewArea.Bottom + this.ContentMargin.Height), true));
 			_hotbarView.OnMouseClick += _hotbarView_OnMouseClick;
+			_hotbarView.OnActiveItemChange += _hotbarView_OnActiveItemChange;
 			_components.SetState(_hotbarView, ComponentState.All, null);
 
 			_tooltip = new Dialog(null, DialogButton.None, Rectangle.Empty, null);
@@ -83,8 +86,11 @@ namespace Game1
 			));
 			_components.SetState(_barMana, ComponentState.ActiveVisible, null);
 
+			_components.Register(_buffs = new StatusViewer<CharacterBuff>(new Rectangle(this.Bounds.TopRightVector(-300 - this.ContentMargin.Width, this.ContentMargin.Height * 6).ToPoint(), new Point(300, 120)), _world.Character.Buffs));
+			_components.SetState(_buffs, ComponentState.ActiveVisible, null);
+
 			// Eventually make ImageText(ure) consistent with the components so we can register them also (or create containers for basic images/text)...
-			_defense = new ImageText("", true) { Position = this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, this.ContentMargin.Height * 6) };
+			_defense = new ImageText("", true) { Position = this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, 350) };
 
 			// Might want a couple frame delay before actually running the game?
 			_components.SetState(_world, ComponentState.Active, null);
@@ -102,9 +108,11 @@ namespace Game1
 			_characterWindow.LoadContent();
 			_inventoryWindow.LoadContent();
 			_hotbarView.LoadContent();
+			_hotbarView.ActiveItemChange();
 			_tooltip.LoadContent();
 			_barHealth.LoadContent();
 			_barMana.LoadContent();
+			_buffs.LoadContent();
 			_defense.LoadContent();
 		}
 
@@ -121,6 +129,7 @@ namespace Game1
 			_tooltip.UnloadContent();
 			_barHealth.UnloadContent();
 			_barMana.UnloadContent();
+			_buffs.UnloadContent();
 			_defense.UnloadContent();
 		}
 
@@ -139,6 +148,7 @@ namespace Game1
 			_barHealth.Update(gameTime);
 			_barMana.Update(gameTime);
 			UpdateVisibleStats();
+			_buffs.Update(gameTime);
 			_defense.Update(gameTime);
 			_gameViewBorder.Update(gameTime);
 			_world.Update(gameTime);
@@ -152,20 +162,32 @@ namespace Game1
 			if (InputManager.KeyPressed(Keys.I))
 			{
 				_components.AddState(_inventoryWindow, ComponentState.All);
-				_components.ClearState(_world, ComponentState.ActiveInput);
-				_components.ClearState(_hotbarView, ComponentState.TakingInput);
+				_components.ClearState(_world, ComponentState.Active);
 			}
 			else if (InputManager.KeyPressed(Keys.C))
 			{
 				_components.AddState(_characterWindow, ComponentState.All);
-				_components.ClearState(_world, ComponentState.ActiveInput);
-				_components.ClearState(_hotbarView, ComponentState.TakingInput);
+				_components.ClearState(_world, ComponentState.Active);
 			}
-			// TEMP....
-			else if (InputManager.KeyPressed(Keys.H))
+			else if (InputManager.KeyPressed(Keys.OemTilde))
 			{
-				_world.Character.CurrentHP += 3;
-				_world.Character.CurrentMana -= 1;
+				Game1.Instance.ToggleFullScreen();
+			}
+
+			if (InputManager.LeftMouseClick(_gameViewArea))
+			{
+				if (_world.Character.IsItemHeld)
+				{
+					_world.AddItem(_world.Character.DropHeld(), pickup: false);
+				}
+				else if (_world.Character.ActiveItem?.Item is ItemWeapon weapon)
+				{
+					// TEMP...probably shouldn't be here...
+					if ((_world.Character.Direction == Cardinal.North) || (_world.Character.Direction == Cardinal.West))
+						_world.Character.ActiveItem.Icon.AddEffect<UseItemWestEffect>(true);
+					else
+						_world.Character.ActiveItem.Icon.AddEffect<UseItemEastEffect>(true);
+				}
 			}
 
 			base.UpdateInput(gameTime);
@@ -183,6 +205,7 @@ namespace Game1
 			_barHealth.Draw(spriteBatch);
 			_barMana.Draw(spriteBatch);
 			_defense.Draw(spriteBatch);
+			_buffs.Draw(spriteBatch);
 		}
 
 		private ImageTexture GenerateGameViewBorder()
@@ -215,7 +238,7 @@ namespace Game1
 		{
 			var itemClicked = (InventoryItemView)e.Meta;
 			if (itemClicked != null)
-				_hotbarView.Container.ActiveItemIndex = itemClicked.Index;
+				_hotbarView.ActiveItemIndex = itemClicked.Index;
 		}
 
 		// Eventually we may want to encapsulate this in some kind of control that shows all these things and removes this from the GamePlayManager....
@@ -223,6 +246,11 @@ namespace Game1
 		{
 			// Currently the only stat is Defense...
 			_defense.UpdateText($"Defense: {_world.Character.Defense}");
+		}
+
+		private void _hotbarView_OnActiveItemChange(object sender, ComponentEventArgs e)
+		{
+			_world.Character.ActiveItem = (InventoryItem)e.Meta;
 		}
 	}
 }

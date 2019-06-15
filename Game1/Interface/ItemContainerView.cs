@@ -20,7 +20,22 @@ namespace Game1.Interface
 		private const int ItemViewPadding = 10;
 
 		private InventoryItemView[] _itemViews;
+		private int _activeItemIndex;
 		
+		public int ActiveItemIndex
+		{
+			get { return _activeItemIndex; }
+			set 
+			{
+				int val = Util.Clamp(value, 0, this.Container.Size - 1);
+				if (_activeItemIndex != val)
+				{
+					_activeItemIndex = val;
+					ActiveItemChange();
+				}
+			}
+		}
+
 		public ItemContainer Container { get; private set; }
 
 		protected override Size ContentMargin => new Size(10, 10);
@@ -28,10 +43,14 @@ namespace Game1.Interface
 		public bool HightlightActiveItem { get; set; }
 
 		public event EventHandler<ComponentEventArgs> OnMouseClick;
+		public event EventHandler<ComponentEventArgs> OnActiveItemChange;
+
+		public int Size => this.Container?.Size ?? 0;
 
 		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem) : base(bounds, fireMouseEvents: false)
 		{
 			this.Container = container;
+			this.Container.OnItemChanged += Container_OnItemChanged;
 			_itemViews = new InventoryItemView[this.Container.Size];
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
@@ -39,11 +58,12 @@ namespace Game1.Interface
 				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(InventoryItemView.Size, InventoryItemView.Size), i, null, this);
 				_itemViews[i].OnMouseClick += ItemContainerView_OnMouseClick;
 				_itemViews[i].OnMouseOver += ItemContainerView_OnMouseOver;
-				_itemViews[i].OnMouseOut += ItemContainerView_OnMouseOut;
+				_itemViews[i].OnMouseOut += ItemContainerView_OnMouseOut;				
 				// use manager!!
 				_itemViews[i].State = ComponentState.All;
 			}
 			this.HightlightActiveItem = highlightActiveItem;
+			this.ActiveItemIndex = 0;
 		}
 
 		public override void LoadContent()
@@ -70,6 +90,11 @@ namespace Game1.Interface
 				item.Draw(spriteBatch);
 		}
 
+		public void ActiveItemChange()
+		{
+			OnActiveItemChange?.Invoke(this, new ComponentEventArgs { Index = _activeItemIndex, Meta = this.Container[_activeItemIndex] });
+		}
+
 		private Vector2 CalculateItemViewPosition(int index)
 		{
 			int row = index / ItemContainerView.ItemsPerRow;
@@ -92,7 +117,7 @@ namespace Game1.Interface
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
 				_itemViews[i].Item = this.Container[i];
-				_itemViews[i].Highlight = this.HightlightActiveItem && (this.Container.ActiveItemIndex == i);
+				_itemViews[i].Highlight = this.HightlightActiveItem && (this.ActiveItemIndex == i);
 				_itemViews[i].Update(gameTime);
 			}
 		}
@@ -128,6 +153,12 @@ namespace Game1.Interface
 		{
 			e.Meta = sender;
 			MouseOut(e);
+		}
+
+		private void Container_OnItemChanged(object sender, ComponentEventArgs e)
+		{
+			if (e.Index == this.ActiveItemIndex)
+				ActiveItemChange();
 		}
 	}
 }

@@ -24,6 +24,36 @@ namespace Game1
 			_world = world;
 		}
 
+		public bool MovementOk(Rectangle mapBounds, Character character, List<Character> allChars)
+		{
+			if (character.Motion == Vector2.Zero)
+				return true;
+
+			var proposedBox = (character.Position + character.Motion).ExpandToRectangleCentered((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
+
+			// Map bounds
+			if (!mapBounds.Contains(proposedBox))
+				return false;
+
+			// Solid blocks
+			foreach (var solidBlock in _solidBlocks)
+			{
+				if (solidBlock.Intersects(proposedBox))
+					return false;
+			}
+
+			// Other mobs
+			foreach (var otherChar in allChars.Where(c => c != character))
+			{
+				// Eventually need to check mob "size" or "type" for bounding box settings...
+				var otherCharBox = otherChar.Position.ExpandToRectangleCentered((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
+				if (otherCharBox.Intersects(proposedBox))
+					return false;
+			}
+
+			return true;
+		}
+
 		public void Update(GameTime gameTime)
 		{
 			var mapBounds = new Rectangle(0, 0, _world.CurrentMap.Width * Game1.TileSize, _world.CurrentMap.Height * Game1.TileSize);
@@ -31,48 +61,27 @@ namespace Game1
 		
 			foreach (var character in allChars)
 			{
-				if (character.Motion == Vector2.Zero)
+				var originalMotion = character.Motion;
+				if (MovementOk(mapBounds, character, allChars))
+				{
+					character.Position += originalMotion;
 					continue;
-
-				// Eventually need to check mob "size" or "type" for bounding box settings...
-				var charBox = character.Position.ExpandToRectangleCentered((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
-				bool moved = true;
-
-				// Map bounds
-				if (!mapBounds.Contains(charBox))
-				{				
-					character.RevertPosition();
-					moved = AttemptPartialMotion(character, mapBounds, IntersectionType.Contains, true);
 				}
 
-				if (moved)
+				// Try X movement only...
+				character.Motion = originalMotion.XVector();
+				if (MovementOk(mapBounds, character, allChars))
 				{
-					// Solid blocks
-					foreach (var solidBlock in _solidBlocks)
-					{
-						if (solidBlock.Intersects(charBox))
-						{						
-							character.RevertPosition();
-							if (!AttemptPartialMotion(character, solidBlock, IntersectionType.Intersects, false))
-								break;
-						}
-					}
+					character.Position += character.Motion;
+					continue;
 				}
 
-				if (moved)
+				// Try Y movement only...
+				character.Motion = originalMotion.YVector();
+				if (MovementOk(mapBounds, character, allChars))
 				{
-					// Other mobs
-					foreach (var otherChar in allChars.Where(c => c != character))
-					{
-						// Eventually need to check mob "size" or "type" for bounding box settings...
-						var otherCharBox = otherChar.Position.ExpandToRectangleCentered((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
-						if (otherCharBox.Intersects(charBox))
-						{
-							character.RevertPosition();
-							if (!AttemptPartialMotion(character, otherCharBox, IntersectionType.Intersects, false))
-								break;
-						}
-					}
+					character.Position += character.Motion;
+					continue;
 				}
 			}
 		}
@@ -97,47 +106,6 @@ namespace Game1
 			}
 
 			_solidBlocks = solidBlocks.Values.ToList();
-		}
-
-		private bool AttemptPartialMotion(Character character, Rectangle boundary, IntersectionType type, bool condition)
-		{
-			bool acceptHorizontal = false;
-			bool acceptVeritical = false;
-
-			var motion = character.Motion;
-			if ((motion.X == 0.0f) || (motion.Y == 0.0f))
-				return false;
-
-			var proposedHorizontalPosition = (character.Position + new Vector2(motion.X, 0.0f)).ExpandToRectangleCentered((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
-			var proposedVerticalPosition = (character.Position + new Vector2(0.0f, motion.Y)).ExpandToRectangleCentered((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
-
-			if (type == IntersectionType.Contains)
-			{
-				if (boundary.Contains(proposedHorizontalPosition) == condition)
-					acceptHorizontal = true;
-				else if (boundary.Contains(proposedVerticalPosition) == condition)
-					acceptVeritical = true;
-			}
-			else if (type == IntersectionType.Intersects)
-			{
-				if (boundary.Intersects(proposedHorizontalPosition) == condition)
-					acceptHorizontal = true;
-				else if (boundary.Intersects(proposedVerticalPosition) == condition)
-					acceptVeritical = true;
-			}
-
-			if (acceptHorizontal)
-			{
-				character.Motion = new Vector2(motion.X, 0);
-				character.Position += character.Motion;
-			}
-			else if (acceptVeritical)
-			{
-				character.Motion = new Vector2(0, motion.Y);
-				character.Position += character.Motion;
-			}
-
-			return (acceptHorizontal || acceptVeritical);
 		}
 	}
 }

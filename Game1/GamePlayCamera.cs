@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
 using Game1.Enum;
+using Game1.Items;
 
 namespace Game1
 {
@@ -18,12 +19,25 @@ namespace Game1
 		public Character Character { get; set; }
 		public ImageTexture SpriteSheet { get; set; }	// TODO : Eventually these should  be a seperate collection and we point to an ID here, to prevent loading duplicate sprite sheets...
 		public Vector2 PreviousPosition { get; set; }
-		public SpriteSheetEffect Animation { get; set; }
+		//public SpriteSheetEffect Animation { get; set; }
+		public bool ShowActiveItem { get; set; }
+		public Vector2 ActiveItemPosition { get; set; }
+		public bool FlipActiveItem { get; set; }
+	}
+
+	// TODO : Move this when complete...
+	public class ItemRenderData
+	{
+		public WorldItem Item { get; set; }
+		public Vector2 Position { get; set; }
 	}
 
 	public class GamePlayCamera
 	{
+		public static readonly Vector2 ActiveItemScale = new Vector2(0.7f, 0.7f);
+		public static readonly Vector2 MapItemScale = new Vector2(0.7f, 0.7f);
 		private const float OverLayerAlpha = 0.7f;
+
 
 		private readonly World _world;
 		private readonly Rectangle _gameViewArea;
@@ -35,6 +49,7 @@ namespace Game1
 		//private SpriteSheetEffect _playerAnimation;
 		private List<ImageTexture> _terrainMaps;
 		private Dictionary<Character, CharacterRenderData> _renderData;
+		private List<ItemRenderData> _itemRenderData;
 		private CharacterRenderData _playerRenderData;
 		
 		public string TerrainTileSheetName { get; set; }
@@ -43,12 +58,13 @@ namespace Game1
 		public GamePlayCamera(World world, Rectangle gameViewArea, SpriteBatchData spriteBatchData)
 		{
 			_world = world;
+			_world.OnItemsChange += _world_OnItemsChange;
 			_gameViewArea = gameViewArea;
 			_spriteBatchData = spriteBatchData;
 			_terrainSourceRect = Rectangle.Empty;
 			_playerRenderData = new CharacterRenderData {
 				Character = _world.Character,
-				Animation = new SpriteSheetEffect(false),
+				//Animation = new SpriteSheetEffect(false),
 				PreviousPosition = -Vector2.One
 			};
 			_renderData = new Dictionary<Character, CharacterRenderData>();
@@ -57,7 +73,7 @@ namespace Game1
 			{
 				_renderData[npc] = new CharacterRenderData {
 					Character = npc,
-					Animation = new SpriteSheetEffect(false),
+					//Animation = new SpriteSheetEffect(false),
 					PreviousPosition = -Vector2.One
 				};
 			}
@@ -71,6 +87,10 @@ namespace Game1
 			LoadCharacterSpriteSheet(_playerRenderData);
 			foreach (var data in _renderData.Values)
 				LoadCharacterSpriteSheet(data);
+
+			// This is temp, and has to be in LoadContent because ItemManager needs to have it's LoadContent called before we can access items...
+			_itemRenderData = new List<ItemRenderData>();
+			UpdateItemRenderData();
 		}
 
 		public void UnloadContent()
@@ -85,6 +105,10 @@ namespace Game1
 
 		public void Update(GameTime gameTime)
 		{
+			// If the world isn't running, we can skip render calculations for the gameplay view...
+			if (!_world.State.HasFlag(ComponentState.Active))
+				return;
+
 			var playerPosition = _world.Character.Position;
 
 			if (_playerRenderData.PreviousPosition != playerPosition)
@@ -121,16 +145,9 @@ namespace Game1
 			// Other Characters...
 			foreach (var data in _renderData)
 				UpdateCharacterRenderData(gameTime, data.Value);
-		}
 
-		private void UpdateCharacterRenderData(GameTime gameTime, CharacterRenderData renderData)
-		{
-			var character = renderData.Character;
-			renderData.Animation.IsActive = (renderData.PreviousPosition != character.Position);
-			renderData.SpriteSheet.SourceRect = new Rectangle(renderData.SpriteSheet.SourceRect.X, (int)character.Direction * Game1.TileSize, Game1.TileSize, Game1.TileSize);
-			renderData.SpriteSheet.Update(gameTime);
-			renderData.SpriteSheet.Position = new Vector2(character.Position.X - _terrainSourceRect.X + _gameViewArea.X, character.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
-			renderData.PreviousPosition = character.Position;
+			// Items...
+			UpdateItemRenderData(gameTime);
 		}
 
 		public void Draw()
@@ -138,19 +155,91 @@ namespace Game1
 			Util.WrappedDraw(DrawInternal, _spriteBatchData, _gameViewArea);
 		}
 
+		// Drawing a bit off the view for pixel-perfect clipping is fine...but this will potentially draw WAY off the visible map...need some logic to resolve this
+		// so we aren't drawing tons of entities that aren't anywhere near visible within the current camera view...
+		// Actually, I'm not sure what the performance hit here is, vs just drawing everything and letting it get clipped....TBD....
+		// Also...might need to eventually just sort everything by Y-axis and draw in a single loop...right now things draw based on Y position relative to player,
+		// but we also care about other objects on the map relative to each other (mobs, etc)....
 		public void DrawInternal(SpriteBatch spriteBatch)
 		{
+			// Terrain maps that are "below" the characters...
 			foreach (var map in _terrainMaps.OrderBy(m => m.Index).Where(m => m.Index <= Game1.PlayerDrawIndex))
 				map.Draw(spriteBatch);
+			// Draw characters that should be "behind" the player...when their Y coord is <= the player's...
 			foreach (var data in _renderData.Where(d => d.Value.Character.Position.Y <= _playerRenderData.Character.Position.Y).OrderBy(d => d.Value.Character.Position.Y))
 				data.Value.SpriteSheet.Draw(spriteBatch);
+			foreach (var item in _itemRenderData)
+				item.Item.Item.Icon.Draw(spriteBatch, position: item.Position, scale: GamePlayCamera.MapItemScale);
+			// Draw the player...and the active item (if applicable) either "under" or "over" the player depending on direction
+			if (!_playerRenderData.FlipActiveItem)
+				DrawActivItem(spriteBatch);
 			_playerRenderData.SpriteSheet.Draw(spriteBatch);
+			if (_playerRenderData.FlipActiveItem)
+				DrawActivItem(spriteBatch);
+			// Draw characters that should be "in front" of the player...when their Y coor is > the player's...
 			foreach (var data in _renderData.Where(d => d.Value.Character.Position.Y > _playerRenderData.Character.Position.Y).OrderBy(d => d.Value.Character.Position.Y))
 				data.Value.SpriteSheet.Draw(spriteBatch);
+			// Terrain maps that are "above" the characters...
 			foreach (var map in _terrainMaps.OrderBy(m => m.Index).Where(m => m.Index > Game1.PlayerDrawIndex))
 			{
 				map.Alpha = GamePlayCamera.OverLayerAlpha;
 				map.Draw(spriteBatch);
+			}
+		}
+
+		private void DrawActivItem(SpriteBatch spriteBatch)
+		{
+			if (_playerRenderData.ShowActiveItem)
+				_playerRenderData.Character.ActiveItem.Icon.Draw(
+					spriteBatch,
+					position: _playerRenderData.ActiveItemPosition,
+					scale: GamePlayCamera.ActiveItemScale,
+					spriteEffects: _playerRenderData.FlipActiveItem ? SpriteEffects.FlipHorizontally : SpriteEffects.None);
+		}
+
+		private void UpdateItemRenderData()
+		{
+			_itemRenderData.Clear();
+			foreach (var item in _world.Items)
+				_itemRenderData.Add(new ItemRenderData { Item = item });
+		}
+
+		private void UpdateCharacterRenderData(GameTime gameTime, CharacterRenderData renderData)
+		{
+			var character = renderData.Character;
+			if (renderData.PreviousPosition != character.Position)
+				renderData.SpriteSheet.AddEffect<SpriteSheetEffect>(true);
+			else
+				renderData.SpriteSheet.StopEffect(typeof(SpriteSheetEffect));
+			
+			renderData.SpriteSheet.SourceRect = new Rectangle(renderData.SpriteSheet.SourceRect.X, (int)character.Direction * Game1.TileSize, Game1.TileSize, Game1.TileSize);
+			renderData.SpriteSheet.Update(gameTime);
+			renderData.SpriteSheet.Position = new Vector2(character.Position.X - _terrainSourceRect.X + _gameViewArea.X, character.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
+			renderData.PreviousPosition = character.Position;
+			// This should also show tools when we have them available (Pickaxe, etc)...
+			if (renderData.ShowActiveItem = (character.ActiveItem?.Item is ItemWeapon weapon))
+			{
+				if ((character.Direction == Cardinal.North) || (character.Direction == Cardinal.West))
+				{
+					renderData.ActiveItemPosition = renderData.SpriteSheet.Position.Offset(character.Direction == Cardinal.North ? 10 : 2, 10);
+					character.ActiveItem.Icon.OriginOffset = new Vector2(20, 22);
+					renderData.FlipActiveItem = false;
+
+				}
+				else
+				{
+					renderData.ActiveItemPosition = renderData.SpriteSheet.Position.Offset(character.Direction == Cardinal.South ? -13 : -9, 12);
+					character.ActiveItem.Icon.OriginOffset = new Vector2(-20, 22);
+					renderData.FlipActiveItem = true;
+				}
+			}
+		}
+
+		private void UpdateItemRenderData(GameTime gameTime)
+		{	
+			foreach (var data in _itemRenderData)
+			{
+				data.Position = new Vector2(data.Item.Position.X - _terrainSourceRect.X + _gameViewArea.X, data.Item.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
 			}
 		}
 
@@ -162,7 +251,7 @@ namespace Game1
 				Alignment = ImageAlignment.Centered,
 			};
 			renderData.SpriteSheet.LoadContent();
-			renderData.SpriteSheet.AddEffect(renderData.Animation);
+			renderData.SpriteSheet.AddEffect<SpriteSheetEffect>(false);
 		}
 
 		private void LoadTerrainTileSheet()
@@ -223,6 +312,11 @@ namespace Game1
 			var texture = (Texture2D)renderTarget;
 			Game1.Graphics.SetRenderTarget(null);
 			return new ImageTexture(texture) { IsActive = true, Position = _gameViewArea.TopLeftVector() };
+		}
+
+		private void _world_OnItemsChange(object sender, ComponentEventArgs e)
+		{
+			UpdateItemRenderData();
 		}
 	}
 }

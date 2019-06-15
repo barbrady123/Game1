@@ -19,7 +19,7 @@ namespace Game1.Screens
 		public SplashScreen(Rectangle bounds): base(bounds, true, "maze")
 		{
 			_title = new ImageText("Labyrinth", true) { Position = this.Bounds.CenterVector() };
-			_title.AddEffect(new ZoomCycleEffect(true));
+			_title.AddEffect<ZoomCycleEffect>(true);
 		}
 
 		public override void LoadContent()

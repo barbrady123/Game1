@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Xml.Serialization;
 using System.Threading.Tasks;
@@ -26,6 +28,9 @@ namespace Game1
 		public float Alpha { get; set; }
 		public Color Color { get; set; }
 		public int Index { get; set; }
+		public float Rotation { get; set; }
+
+		public Vector2 OriginOffset { get; set; }
 
 		public Rectangle SourceRect
 		{ 
@@ -36,11 +41,33 @@ namespace Game1
 			}
 		}
 
-		public T AddEffect<T>(T effect) where T: ImageEffect
+		public T AddEffect<T>(bool isActive) where T : ImageEffect
 		{
+			var currentEffect = _effects.FirstOrDefault(e => e.GetType() == typeof(T));
+			if ((currentEffect != null) && isActive)
+			{
+				currentEffect.Start();
+				return (T)currentEffect;
+			}
+
+			var effect = (T)Activator.CreateInstance(typeof(T), args:isActive);
 			effect.Image = this;
 			_effects.Add(effect);
 			return effect;
+		}
+
+		public void StartEffect(Type effectType)
+		{
+			foreach (var effect in _effects)
+				if (effect.GetType() == effectType)
+					effect.Start();
+		}
+
+		public void StopEffect(Type effectType)
+		{
+			foreach (var effect in _effects)
+				if (effect.GetType() == effectType)
+					effect.IsActive = false;
 		}
 
 		public void ClearEffects()
@@ -64,6 +91,7 @@ namespace Game1
 			this.Alignment = ImageAlignment.Centered;
 			this.Color = Color.White;
 			_origin = Vector2.Zero;
+			this.OriginOffset = Vector2.Zero;
 		}
 
 		public virtual void LoadContent()
@@ -86,13 +114,13 @@ namespace Game1
 			}
 		}
 
-		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null)
+		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null, SpriteEffects? spriteEffects = null)
 		{
 			if (this.IsActive)
-				DrawActive(spriteBatch, alphaBlend, position);
+				DrawActive(spriteBatch, alphaBlend, position, scale, spriteEffects);
 		}
 
-		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null);
+		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null, SpriteEffects? spriteEffects = null);
 
 		protected virtual void SetOrigin()
 		{

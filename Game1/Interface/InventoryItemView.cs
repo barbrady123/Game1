@@ -82,6 +82,7 @@ namespace Game1.Interface
 
 			_highlightBorder.IsActive = this.Highlight;
 
+			this.Item?.Update(gameTime);
 			base.Update(gameTime);
 		}
 
@@ -109,8 +110,8 @@ namespace Game1.Interface
 			_emptyIcon?.Draw(spriteBatch);
 			if (this.Item != null)
 			{
-				this.Item.Item.Icon.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
-				this.Item.Item.Icon.Draw(spriteBatch, null, this.Bounds.CenterVector());
+				this.Item.Icon.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
+				this.Item.Icon.Draw(spriteBatch, null, this.Bounds.CenterVector());
 				_quantity.Draw(spriteBatch);
 			}
 		}

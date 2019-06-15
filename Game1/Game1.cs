@@ -26,6 +26,7 @@ namespace Game1
 		public const string TilesheetRoot = "Gameplay\\TileSheet";
 		public const string SpriteSheetRoot = "Gameplay\\Character";
 		public const string IconRoot = "Gameplay\\Icon";
+		public const string StatusIconRoot = "Gameplay\\Status";
 		public const int TileSize = 64;
 		public const int TileHalfSize = TileSize / 2;
 		public const int IconSize = 64;
@@ -34,20 +35,27 @@ namespace Game1
 		public const int SpriteSheetWalkFrameCount = 9;
 		public const int SpriteSheetDefaultFrame = 0;
 		public const Cardinal SpriteSheetDefaultDirection = Cardinal.South;
-		public const int GameViewAreaWidth = 15;
+		public const int GameViewAreaWidth = 19;
 		public const int GameViewAreaHeight = 15;
 		public const int PlayerDrawIndex = 100;
+		public const int DefaultPickupRadius = 20;		
 
 		GraphicsDeviceManager _graphicsManager;
 		//SpriteBatch _spriteBatch;
 		ScreenManager _screenManager;
 		GameConfiguration _config;
 
-		public static Game Instance { get; private set; }
+		public static Game1 Instance { get; private set; }
 
 		public static IServiceProvider ServiceProvider { get; private set; }
 
 		public static GraphicsDevice Graphics { get; private set; }
+
+		public void ToggleFullScreen()
+		{
+			_graphicsManager.IsFullScreen = !_graphicsManager.IsFullScreen;	
+			_graphicsManager.ApplyChanges();
+		}
 
 		public Game1()
 		{
@@ -85,9 +93,7 @@ namespace Game1
 			Game1.ServiceProvider = Content.ServiceProvider;
 			// General use...
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), null, 100, "general");
-			// Gameplay camera drawing...
-			var gameplayBatch = new SpriteBatch(GraphicsDevice);
-			gameplayBatch.GraphicsDevice.ScissorRectangle = new Rectangle(28, 28, 960, 960);
+			// Gameplay camera...
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice), new RasterizerState { ScissorTestEnable = true }, 200, "gameplay");			
 			// Modals...
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice),  new RasterizerState { ScissorTestEnable = true }, 300, "modal");
@@ -98,6 +104,7 @@ namespace Game1
 
 			FontManager.LoadContent();
 			InputManager.LoadContent();
+			MetaManager.LoadContent();
 			_screenManager.LoadContent();
 			_screenManager.StartScreen();
 		}
@@ -110,6 +117,7 @@ namespace Game1
 		{
 			FontManager.UnloadContent();
 			InputManager.UnloadContent();
+			MetaManager.UnloadContent();
 			_screenManager.UnloadContent();
 		}
 

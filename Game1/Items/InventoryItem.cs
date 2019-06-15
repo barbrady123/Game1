@@ -1,23 +1,30 @@
 ﻿using System;
+using Microsoft.Xna.Framework;
 
 namespace Game1.Items
 {
 	public class InventoryItem
 	{
+		public Guid Id { get; set; }
+
 		public Item Item { get; set; }
+
+		public ImageTexture Icon { get; set; }
 
 		public int Quantity { get; set; }
 
-		public InventoryItem(InventoryItem item, int? quantity)
+		public InventoryItem(Item item, ImageTexture icon, int quantity, Guid? id = null)
 		{
-			this.Item = item.Item;
-			this.Quantity = quantity ?? item.Quantity;
+			this.Id = id ?? Guid.NewGuid();
+			this.Item = item ?? throw new ArgumentNullException(nameof(item));
+			this.Icon = icon;
+			this.Icon.LoadContent();
+			this.Quantity = quantity;
 		}
 
-		public InventoryItem(Item item, int quantity)
+		public void Update(GameTime gameTime)
 		{
-			this.Item = item ?? throw new ArgumentNullException(nameof(item));
-			this.Quantity = quantity;
+			this.Icon.Update(gameTime);
 		}
 	}
 }

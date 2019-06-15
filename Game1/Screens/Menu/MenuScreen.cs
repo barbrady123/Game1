@@ -228,11 +228,11 @@ namespace Game1.Screens.Menu
 
 			if (active)
 			{
-				_items[_currentIndex].Image.AddEffect(new FadeCycleEffect(true));
+				_items[_currentIndex].Image.AddEffect<FadeCycleEffect>(true);
 			}
 			else
 			{
-				_items[_currentIndex].Image.ClearEffects();
+				_items[_currentIndex].Image.StopEffect(typeof(FadeCycleEffect));
 				_items[_currentIndex].Image.Alpha = MenuScreen.DEFAULT_ITEM_ALPHA;
 			}
 		}

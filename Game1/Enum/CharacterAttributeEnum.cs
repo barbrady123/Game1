@@ -12,6 +12,12 @@
 
 		Charisma = 4,
 
-		Constitution = 5
+		Constitution = 5,
+
+		CurrentHP = 6,
+
+		Defense = 7,
+
+		MovementSpeed = 8
 	}
 }

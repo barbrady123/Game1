@@ -9,12 +9,16 @@ namespace Game1.Effect
 {
 	public class SpriteSheetEffect : ImageEffect
 	{
-		private int _switchInterval;
+		private const int SwitchInterval = 5;
 		private int _currentInterval;
 
 		public SpriteSheetEffect(bool isActive) : base(isActive)
 		{
-			_switchInterval = 5;
+			Initialize();
+		}
+
+		protected override void Initialize()
+		{
 			_currentInterval = 0;
 		}
 
@@ -23,7 +27,7 @@ namespace Game1.Effect
 			if (!this.IsActive)
 				return;
 
-			if (_currentInterval < _switchInterval)
+			if (_currentInterval < SpriteSheetEffect.SwitchInterval)
 			{
 				_currentInterval++;
 				return;

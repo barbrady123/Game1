@@ -19,8 +19,12 @@ namespace Game1
 		public List<NPC> NPCs { get; set; }
 		public Character Character { get; set; }
 		public Map CurrentMap { get; set; }
+		// Testing this out as objects that sit directly on the map....
+		public List<WorldItem> Items{ get; set; }
 
 		public List<Character> AllCharacters => new List<Character>((this.NPCs?.Count ?? 0) + 1) { this.Character }.Concat(this.NPCs).ToList();
+
+		public event EventHandler<ComponentEventArgs> OnItemsChange;
 
 		public World()
 		{
@@ -54,16 +58,21 @@ namespace Game1
 
 		public override void LoadContent()
 		{
-			// Obviously none of this crap should be here...
+			// Obviously none of this crap should be here...just for testing purposes...
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
+			this.Character.HotBar.AddItem(ItemManager.GetItem(6));
 			for (int i = 0; i < 15; i++)
-				this.Character.Backpack.AddItem(ItemManager.GetItem());
-			//this.Character.EquippedArmorHead = ItemManager.GetItem();
-			//this.Character.EquippedArmorChest = ItemManager.GetItem();
-			//this.Character.EquippedArmorLegs = ItemManager.GetItem();
-			//this.Character.EquippedArmorFeet = ItemManager.GetItem();
+				this.Character.Backpack.AddItem(ItemManager.GetItem((i < 9) ? i : (int?)null));
+
+			this.Items = new List<WorldItem> {
+				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) },
+				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) },
+				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) },
+				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) },
+				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) }
+			};
 
 			// This will need to be redone if the map changes....
 			_physics.CalculateParameters();
@@ -76,8 +85,41 @@ namespace Game1
 			foreach (var npc in this.NPCs)
 				npc.Update(gameTime);
 			_physics.Update(gameTime);
+			foreach (var item in this.Items)
+				item.Update(gameTime);
+
+			// I think it makes sense to put things like "Item pickup" from proximity after the physics update?
+			// I'm not 100% sure where i even want this to live yet or what entity's responsibility this should be
+			List<WorldItem> removedItems = new List<WorldItem>();
+
+			foreach (var item in this.Items)
+			{
+				item.InRange = Vector2.Distance(item.Position, this.Character.Position) <= Game1.DefaultPickupRadius;
+
+				if (item.Pickup && item.InRange)
+				{
+					if (this.Character.AddItem(item.Item))
+						removedItems.Add(item);
+				}
+			}
+
+			if (removedItems.Any())
+			{
+				this.Items.RemoveAll(x => removedItems.Contains(x));
+				OnItemsChange?.Invoke(this, null);
+			}
 		}
 
 		public override void Draw(SpriteBatch spriteBatch) { }
+
+		public void AddItem(InventoryItem item, Vector2? position = null, bool pickup = true)
+		{
+			if (item == null)
+				return;
+
+			position = position ?? this.Character.Position;
+			this.Items.Add(new WorldItem { Item = item, Position = (Vector2)position, Pickup = pickup });
+			OnItemsChange?.Invoke(this, null);
+		}
 	}
 }
