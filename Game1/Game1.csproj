@@ -48,6 +48,7 @@
     <Compile Include="Component.cs" />
     <Compile Include="ComponentEventArgs.cs" />
     <Compile Include="ActivationManager.cs" />
+    <Compile Include="ContextMenu.cs" />
     <Compile Include="Effect\EffectEventArgs.cs" />
     <Compile Include="Effect\FadeCycleEffect.cs" />
     <Compile Include="Effect\FadeInEffect.cs" />

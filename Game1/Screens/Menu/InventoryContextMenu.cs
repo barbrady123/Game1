@@ -30,7 +30,7 @@ namespace Game1.Screens.Menu
 			UnloadContent();
 
 			this.Owner = owner;
-			this.Bounds = InventoryContextMenu.CalculateItemMenuBounds(position, owner?.Item, isEquipped);
+			this.Bounds = CalculateItemMenuBounds(position, owner?.Item, isEquipped);
 			_isEquipped = isEquipped;
 
 			// Setup MenuScreen stuff (items)
@@ -53,15 +53,15 @@ namespace Game1.Screens.Menu
 
 		protected override List<MenuItem> GetItemData()
 		{
-			return InventoryContextMenu.GetItemMenuOptions(this.Owner?.Item, _isEquipped).Select(o => new MenuItem { Id = o.ToLower(), Text = o }).ToList();
+			return GetItemMenuOptions(this.Owner?.Item, _isEquipped).Select(o => new MenuItem { Id = o.ToLower(), Text = o }).ToList();
 		}
 
-		private static Rectangle CalculateItemMenuBounds(Point position, InventoryItem item, bool isEquipped)
+		private Rectangle CalculateItemMenuBounds(Point position, InventoryItem item, bool isEquipped)
 		{
 			if ((position == Util.PointInvalid) || (item == null))
 				return Rectangle.Empty;
 
-			var size = MenuScreen.CalculateMenuSize(MenuScreen.MENU_PADDING, MenuScreen.MENU_PADDING, InventoryContextMenu.GetItemMenuOptions(item, isEquipped), MenuLayout.Vertical);
+			var size = MenuScreen.CalculateMenuSize(MenuScreen.MENU_PADDING, MenuScreen.MENU_PADDING, GetItemMenuOptions(item, isEquipped), MenuLayout.Vertical);
 			return new Rectangle(position.X, position.Y, size.Width, size.Height);
 		}
 
@@ -71,7 +71,7 @@ namespace Game1.Screens.Menu
 			base.ItemSelect(e);
 		}
 
-		private static List<string> GetItemMenuOptions(InventoryItem item, bool isEquipped)
+		private List<string> GetItemMenuOptions(InventoryItem item, bool isEquipped)
 		{
 			var items = new List<string>();
 			if (item == null)

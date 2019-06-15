@@ -14,6 +14,7 @@ using Game1.Screens.Menu;
 
 namespace Game1.Interface.Windows
 {
+	// Should derive from something like DynamicComponent so we can reuse this shit with Context, split, etc...
 	public class Tooltip : Component
 	{
 		private const int TooltipTimer = 15;
@@ -42,7 +43,7 @@ namespace Game1.Interface.Windows
 					{
 						_owner.OnMouseOut += _owner_OnMouseOut;
 						_owner.OnMouseOver += _owner_OnMouseOver;
-						Show(_owner.TooltipText);
+						Show();
 					}
 					else
 					{
@@ -104,15 +105,15 @@ namespace Game1.Interface.Windows
 			_text.Draw(spriteBatch);
 		}
 
-		private void Show(string text)
+		private void Show()
 		{
-			if (String.IsNullOrWhiteSpace(text))
+			if (String.IsNullOrWhiteSpace(_owner.TooltipText))
 				return;
 
 			_timer = Tooltip.TooltipTimer;
 			UnloadContent();
 			var position = InputManager.MousePosition.Offset(10, 10);
-			_text.UpdateText(text);
+			_text.UpdateText(_owner.TooltipText);
 			var textSize = _text.Size;
 			this.Bounds = new Rectangle(position.X, position.Y, (int)textSize.X + this.TextPadding * 2, (int)textSize.Y + this.TextPadding * 2);
 			LoadContent();

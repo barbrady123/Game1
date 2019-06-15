@@ -34,6 +34,7 @@ namespace Game1
 		private bool _drawIfDisabled;
 		private bool _enabledTooltip;
 		protected Tooltip _tooltip;
+		private bool _enabledContextMenu;
 
 		// TODO: add context?
 
