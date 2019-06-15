@@ -83,7 +83,9 @@ namespace Game1.Screens.Menu
 						  SpriteBatchData spriteBatchData = null,
 						  bool escapeToDisable = false,
 						  bool fireMouseEvents = true,
-						  bool inactiveMouseEvents = false): base(bounds, escapeToDisable, background, spriteBatchData, false, fireMouseEvents, inactiveMouseEvents)
+						  bool inactiveMouseEvents = false,
+						  bool killFurtherInput = false,
+						  bool drawIfDisabled = false): base(bounds, escapeToDisable, background, spriteBatchData, false, fireMouseEvents, inactiveMouseEvents, killFurtherInput, drawIfDisabled)
 		{
 			_currentIndex = -1;
 			_layout = layout;
@@ -157,6 +159,8 @@ namespace Game1.Screens.Menu
 
 		public override void UpdateInput(GameTime gameTime)
 		{
+			base.UpdateInput(gameTime);
+
 			bool mouseOverItem = false;
 
 			for (int i = 0; i < _items.Count; i++)
@@ -174,12 +178,12 @@ namespace Game1.Screens.Menu
 
 				if (InputManager.LeftMouseClick())
 					ItemSelect(new ComponentEventArgs { Value = _items[_currentIndex]?.Id });
+
+				break;
 			}
 
 			if (!mouseOverItem)
 				this.CurrentIndex = -1;
-
-			base.UpdateInput(gameTime);
 		}
 
 

@@ -92,7 +92,7 @@ namespace Game1.Screens
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.Draw(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_titleText.Draw(spriteBatch);
 			_characterViewBack.Draw(spriteBatch);
 			_characterView.Draw(spriteBatch);

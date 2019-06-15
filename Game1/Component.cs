@@ -30,6 +30,7 @@ namespace Game1
 		private bool _inactiveMouseEvents;
 		private bool _killFurtherInput;
 		private bool _isActive;
+		private bool _drawIfDisabled;
 		private readonly SpriteBatchData _spriteBatchData;
 
 		// TODO: add tooltip, context?
@@ -85,7 +86,8 @@ namespace Game1
 						 bool hasBorder = false,
 						 bool fireMouseEvents = true,
 						 bool inactiveMouseEvents = false,
-						 bool killFurtherInput = false)
+						 bool killFurtherInput = false,
+						 bool drawIfDisabled = true)
 		{
 			_bounds = bounds ?? Rectangle.Empty;
 			_activator = new ActivationManager();
@@ -99,6 +101,7 @@ namespace Game1
 			_fireMouseEvents = fireMouseEvents;
 			_inactiveMouseEvents = inactiveMouseEvents;
 			_killFurtherInput = killFurtherInput;
+			_drawIfDisabled = drawIfDisabled;
 
 			SetupBackground();
 			SetupBorder();
@@ -195,6 +198,9 @@ namespace Game1
 
 		public void Draw(SpriteBatch spriteBatch)
 		{
+			if ((!_drawIfDisabled) && (!this.IsActive))
+				return;
+
 			if (_spriteBatchData != null)
 				Util.WrappedDraw(DrawInternal, _spriteBatchData, _bounds);
 			else

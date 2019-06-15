@@ -26,7 +26,7 @@ namespace Game1.Interface.Windows
 		private Tooltip _tooltip;
 		private SplitWindow _splitWindow;
 
-		public InventoryWindow(Rectangle bounds, World world, string text,  SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData, killFurtherInput: true)
+		public InventoryWindow(Rectangle bounds, World world, string text,  SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData, killFurtherInput: true, drawIfDisabled: false)
 		{
 			_world = world;
 			_containerBackpack = _world.Character.Backpack;
@@ -128,20 +128,22 @@ namespace Game1.Interface.Windows
 		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
 			var itemView = (InventoryItemView)e.Meta;
-			DisableContextMenu();
 
 			switch (e.Value)
 			{
 				case "equip"	:	
 					_world.Character.EquipArmor(itemView.ContainingView.Container, itemView.Index);
+					DisableContextMenu();
 					break;
 				case "eat"		:
 				case "drink"	:
 					_world.Character.Consume(itemView.ContainingView.Container, itemView.Index);
+					DisableContextMenu();
 					break;
 				case "drop"		:
 					var item = itemView.ContainingView.Container.RemoveItem(itemView.Index);
 					_world.AddItem(item, pickup: false);
+					DisableContextMenu();
 					break;
 				case "split"	:
 					EnableSplitWindow(itemView);

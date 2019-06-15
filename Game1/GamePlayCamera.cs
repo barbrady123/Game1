@@ -51,6 +51,7 @@ namespace Game1
 		private Dictionary<Character, CharacterRenderData> _renderData;
 		private List<ItemRenderData> _itemRenderData;
 		private CharacterRenderData _playerRenderData;
+		private bool _refreshItemData;
 		
 		public string TerrainTileSheetName { get; set; }
 		public Layer[] TerrainLayerData{ get; set; }
@@ -77,6 +78,7 @@ namespace Game1
 					PreviousPosition = -Vector2.One
 				};
 			}
+			_refreshItemData = false;
 		}
 
 		public Vector2 MapSize => _terrainMaps?.FirstOrDefault()?.Texture.Bounds.SizeVector() ?? Vector2.Zero;
@@ -90,7 +92,7 @@ namespace Game1
 
 			// This is temp, and has to be in LoadContent because ItemManager needs to have it's LoadContent called before we can access items...
 			_itemRenderData = new List<ItemRenderData>();
-			UpdateItemRenderData();
+			RefreshItemRenderData();
 		}
 
 		public void UnloadContent()
@@ -147,6 +149,9 @@ namespace Game1
 				UpdateCharacterRenderData(gameTime, data.Value);
 
 			// Items...
+			if (_refreshItemData)
+				RefreshItemRenderData();
+
 			UpdateItemRenderData(gameTime);
 		}
 
@@ -197,7 +202,7 @@ namespace Game1
 					spriteEffects: _playerRenderData.FlipActiveItem ? SpriteEffects.FlipHorizontally : SpriteEffects.None);
 		}
 
-		private void UpdateItemRenderData()
+		private void RefreshItemRenderData()
 		{
 			_itemRenderData.Clear();
 			foreach (var item in _world.Items)
@@ -316,7 +321,7 @@ namespace Game1
 
 		private void _world_OnItemsChange(object sender, ComponentEventArgs e)
 		{
-			UpdateItemRenderData();
+			_refreshItemData = true;
 		}
 	}
 }

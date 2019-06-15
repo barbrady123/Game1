@@ -25,7 +25,7 @@ namespace Game1.Interface.Windows
 
 		private Tooltip _tooltip;
 
-		public CharacterWindow(Rectangle bounds, World world, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData, killFurtherInput: true)
+		public CharacterWindow(Rectangle bounds, World world, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData, killFurtherInput: true, drawIfDisabled: false)
 		{
 			_world = world;
 			_armorItemView = new InventoryItemView[System.Enum.GetNames(typeof(ArmorSlot)).Length];
@@ -52,8 +52,8 @@ namespace Game1.Interface.Windows
 			}
 
 			// Verify the tooltip cannot break the context menu (shouldn't be able to get input while the other is active)....
-			_activator.Register(_tooltip = new Tooltip(SpriteBatchManager.Get("tooltip")), true, "top");
-			_activator.Register(_contextMenu = new InventoryContextMenu(SpriteBatchManager.Get("context")), true, new[] { "top", "armor0", "armor1", "armor2", "armor3" });
+			_activator.Register(_tooltip = new Tooltip(SpriteBatchManager.Get("tooltip")), false, "top");
+			_activator.Register(_contextMenu = new InventoryContextMenu(SpriteBatchManager.Get("context")), false, new[] { "top", "armor0", "armor1", "armor2", "armor3" });
 			_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 			_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
 		}

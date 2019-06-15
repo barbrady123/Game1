@@ -23,7 +23,7 @@ namespace Game1.Interface.Windows
 		public int TextPadding => 5;
 
 		// Eventually we'll want prettier tooltips with more than just a line of text...
-		public Tooltip(SpriteBatchData spriteBatchData = null) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData)
+		public Tooltip(SpriteBatchData spriteBatchData = null) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData, drawIfDisabled: false)
 		{			
 			_timer = -1;
 			_text = new ImageText(null, true);
@@ -43,11 +43,8 @@ namespace Game1.Interface.Windows
 			_text.UnloadContent();
 		}
 
-		public override void UpdateActive(GameTime gameTime)
+		public override void Update(GameTime gameTime)
 		{
-			base.UpdateActive(gameTime);
-			_text.Update(gameTime);
-
 			if (_timer == 0)
 			{
 				_timer = -1;
@@ -57,6 +54,14 @@ namespace Game1.Interface.Windows
 			{
 				_timer--;
 			}
+
+			base.Update(gameTime);
+		}
+
+		public override void UpdateActive(GameTime gameTime)
+		{
+			base.UpdateActive(gameTime);
+			_text.Update(gameTime);
 		}
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)

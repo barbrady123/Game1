@@ -36,7 +36,7 @@ namespace Game1.Interface.Windows
 
 		public event EventHandler<ComponentEventArgs> OnItemSelect;
 		
-		public Dialog(string text, DialogButton buttons, Rectangle bounds, int? duration) : base(bounds, true, "black")
+		public Dialog(string text, DialogButton buttons, Rectangle bounds, int? duration) : base(bounds, true, "black", drawIfDisabled: false)
 		{
 			this.Buttons = buttons;
 

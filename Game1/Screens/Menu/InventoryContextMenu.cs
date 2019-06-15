@@ -20,7 +20,7 @@ namespace Game1.Screens.Menu
 
 		private bool _isEquipped;
 
-		public InventoryContextMenu(SpriteBatchData spriteBatchData = null) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData)
+		public InventoryContextMenu(SpriteBatchData spriteBatchData = null) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData, drawIfDisabled: false)
 		{
 			// We allow empty instanciation so the object can be registered with a ComponentManager if necessary...
 		}

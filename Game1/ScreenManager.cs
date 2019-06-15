@@ -57,17 +57,14 @@ namespace Game1
 
 		public void Update(GameTime gameTime)
 		{
-			if (_currentScreen != null)
+			if (_isTransitioning)
 			{
-				if (_isTransitioning)
-					_currentScreen.IsActive = false;
-				else
-					_currentScreen.IsActive = true;
-				_currentScreen.Update(gameTime);
+				_transitionImage.Update(gameTime);
+				InputManager.BlockAllInput();
 			}
 
-			if (_isTransitioning)
-				_transitionImage.Update(gameTime);
+			if (_currentScreen != null)
+				_currentScreen.Update(gameTime);
 		}
 
 		public void Draw(SpriteBatch spriteBatch)
@@ -113,6 +110,7 @@ namespace Game1
 		{
 			_currentScreen?.UnloadContent();
 			_currentScreen = _newScreen;
+			_currentScreen.IsActive = true;
 			_newScreen = null;
 			_currentScreen.OnReadyDisable += _currentScreen_OnReadyDisable;
 			if (_currentScreen is MenuScreen menuScreen)
@@ -137,7 +135,6 @@ namespace Game1
 			{
 				_isTransitioning = false;
 				_transitionImage.IsActive = false;		
-				_currentScreen.IsActive = true;
 			}
 		}
 
