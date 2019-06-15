@@ -14,7 +14,7 @@ namespace Game1
 
 		public NPC() : base()
 		{
-			this.Speed = 75.0f;
+			_speed = 75.0f;
 		}
 
 		public override Vector2 UpdateMotion()

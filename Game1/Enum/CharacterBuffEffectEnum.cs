@@ -8,6 +8,8 @@ namespace Game1.Enum
 {
 	public enum CharacterBuffEffect
 	{
-		MinorDefense = 0
+		MinorDefense = 0,
+
+		MinorMovementSpeed = 1
 	}
 }

@@ -54,11 +54,20 @@ namespace Game1.Items
 					Type = ConsumableType.Potion,
 					BuffEffect = CharacterBuffEffect.MinorDefense,
 				},
+				new ItemConsumable {
+					DisplayName = "Minor Movement Potion",
+					IconName = "potionBlue",
+					Id = 4,
+					MaxStackSize = 99,
+					Weight = 0.1f,
+					Type = ConsumableType.Potion,
+					BuffEffect = CharacterBuffEffect.MinorMovementSpeed,
+				},
 				// Things like metal type, etc. should be modifiers to a base type...
-				new ItemArmor {		DisplayName = "Chain Helm",		IconName = "helmet",	Id = 4,	MaxStackSize = 1,	Weight = 3.2f,	Slot = ArmorSlot.Head,	Defense = 2	},
-				new ItemArmor {		DisplayName = "Iron Armor",		IconName = "armor",		Id = 5,	MaxStackSize = 1,	Weight = 6.4f,	Slot = ArmorSlot.Chest, Defense = 5	},
-				new ItemArmor {		DisplayName = "Gold Armor",		IconName = "upg_armor",	Id = 6,	MaxStackSize = 1,	Weight = 8.5f,	Slot = ArmorSlot.Chest, Defense = 8	},
-				new ItemWeapon {	DisplayName = "Iron Sword",		IconName = "sword",		Id = 7, MaxStackSize = 1,	Weight = 2.9f,	MaxDamage = 10 }
+				new ItemArmor {		DisplayName = "Chain Helm",		IconName = "helmet",	Id = 5,	MaxStackSize = 1,	Weight = 3.2f,	Slot = ArmorSlot.Head,	Defense = 2	},
+				new ItemArmor {		DisplayName = "Iron Armor",		IconName = "armor",		Id = 6,	MaxStackSize = 1,	Weight = 6.4f,	Slot = ArmorSlot.Chest, Defense = 5	},
+				new ItemArmor {		DisplayName = "Gold Armor",		IconName = "upg_armor",	Id = 7,	MaxStackSize = 1,	Weight = 8.5f,	Slot = ArmorSlot.Chest, Defense = 8	},
+				new ItemWeapon {	DisplayName = "Iron Sword",		IconName = "sword",		Id = 8, MaxStackSize = 1,	Weight = 2.9f,	MaxDamage = 10 }
 			};
 		}
 

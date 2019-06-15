@@ -44,6 +44,7 @@
     <Compile Include="BuffEffect.cs" />
     <Compile Include="Character.cs" />
     <Compile Include="CharacterBuff.cs" />
+    <Compile Include="CharacterStatus.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="ComponentEventArgs.cs" />
     <Compile Include="ComponentManager.cs" />
@@ -135,6 +136,8 @@
     <Compile Include="Screens\SplashScreen.cs" />
     <Compile Include="SpriteBatchManager.cs" />
     <Compile Include="MetaManager.cs" />
+    <Compile Include="StatusEffect.cs" />
+    <Compile Include="StatusViewer.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="World.cs" />
@@ -209,6 +212,8 @@
     <Content Include="Content\Gameplay\Icon\upg_wand.png" />
     <Content Include="Content\Gameplay\Icon\wand.png" />
     <Content Include="Content\Gameplay\Icon\x.png" />
+    <Content Include="Content\Gameplay\Status\minorDefense.png" />
+    <Content Include="Content\Gameplay\Status\minorMovementSpeed.png" />
     <Content Include="Content\Gameplay\TileSheet\ground.png" />
     <Content Include="Content\Interface\cursor.png" />
     <Content Include="Content\Interface\pointer.png" />

@@ -19,6 +19,7 @@ namespace Game1
 		private Vector2 _position;
 		private ItemContainer _hotbar;
 		private ItemContainer _backpack;
+		protected float _speed;
 		private int _currentHP;
 		private int _currentMana;
 		private InventoryItem _heldItem;
@@ -28,7 +29,7 @@ namespace Game1
 
 		public string SpriteSheetName => this.Sex.ToString("g");
 		public Vector2 Motion { get; set; }
-		public float Speed { get; set; }
+		public float Speed => _speed * SpeedModifier();
 		public Cardinal Direction { get; set; }
 
 		public string Name { get; set; }
@@ -50,11 +51,16 @@ namespace Game1
 			(((ItemArmor)this.EquippedArmorChest?.Item)?.Defense ?? 0) +
 			(((ItemArmor)this.EquippedArmorLegs?.Item)?.Defense ?? 0) +
 			(((ItemArmor)this.EquippedArmorFeet?.Item)?.Defense ?? 0) +
-			this.DefenseModifier();
+			DefenseModifier();
 
-		public int DefenseModifier()
+		private int DefenseModifier()
 		{
 			return this.Buffs.Where(b => b.Buff.AffectedAttribute == CharacterAttribute.Defense).Sum(b => b.Buff.EffectValue);
+		}
+
+		private float SpeedModifier()
+		{
+			return 1.0f + (float)this.Buffs.Where(b => b.Buff.AffectedAttribute == CharacterAttribute.MovementSpeed).Sum(b => b.Buff.EffectValue) / 100.0f;
 		}
 
 		public int MaxHP { get; set; }
@@ -125,7 +131,7 @@ namespace Game1
 		public Character()
 		{
 			this.Direction = Cardinal.South;
-			this.Speed = 150.0f;
+			_speed = 150.0f;
 			_hotbar = new ItemContainer(10);
 			_backpack = new ItemContainer(40);
 			this.Buffs = new List<CharacterBuff>();

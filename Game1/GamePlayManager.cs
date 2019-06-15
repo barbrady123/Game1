@@ -33,6 +33,7 @@ namespace Game1
 		private readonly StatBar _barHealth;
 		private readonly StatBar  _barMana;
 		private readonly ImageText _defense;
+		private readonly StatusViewer<CharacterBuff> _buffs;
 
 		private ImageTexture _gameViewBorder;
 
@@ -85,8 +86,11 @@ namespace Game1
 			));
 			_components.SetState(_barMana, ComponentState.ActiveVisible, null);
 
+			_components.Register(_buffs = new StatusViewer<CharacterBuff>(new Rectangle(this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, this.ContentMargin.Height * 6).ToPoint(), new Point(100, 70)), _world.Character.Buffs));
+			_components.SetState(_buffs, ComponentState.ActiveVisible, null);
+
 			// Eventually make ImageText(ure) consistent with the components so we can register them also (or create containers for basic images/text)...
-			_defense = new ImageText("", true) { Position = this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, this.ContentMargin.Height * 6) };
+			_defense = new ImageText("", true) { Position = this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, this.ContentMargin.Height * 10) };
 
 			// Might want a couple frame delay before actually running the game?
 			_components.SetState(_world, ComponentState.Active, null);
@@ -108,6 +112,7 @@ namespace Game1
 			_tooltip.LoadContent();
 			_barHealth.LoadContent();
 			_barMana.LoadContent();
+			_buffs.LoadContent();
 			_defense.LoadContent();
 		}
 
@@ -124,6 +129,7 @@ namespace Game1
 			_tooltip.UnloadContent();
 			_barHealth.UnloadContent();
 			_barMana.UnloadContent();
+			_buffs.UnloadContent();
 			_defense.UnloadContent();
 		}
 
@@ -142,6 +148,7 @@ namespace Game1
 			_barHealth.Update(gameTime);
 			_barMana.Update(gameTime);
 			UpdateVisibleStats();
+			_buffs.Update(gameTime);
 			_defense.Update(gameTime);
 			_gameViewBorder.Update(gameTime);
 			_world.Update(gameTime);
@@ -196,6 +203,7 @@ namespace Game1
 			_barHealth.Draw(spriteBatch);
 			_barMana.Draw(spriteBatch);
 			_defense.Draw(spriteBatch);
+			_buffs.Draw(spriteBatch);
 		}
 
 		private ImageTexture GenerateGameViewBorder()

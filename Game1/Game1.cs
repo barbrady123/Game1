@@ -26,6 +26,7 @@ namespace Game1
 		public const string TilesheetRoot = "Gameplay\\TileSheet";
 		public const string SpriteSheetRoot = "Gameplay\\Character";
 		public const string IconRoot = "Gameplay\\Icon";
+		public const string StatusIconRoot = "Gameplay\\Status";
 		public const int TileSize = 64;
 		public const int TileHalfSize = TileSize / 2;
 		public const int IconSize = 64;

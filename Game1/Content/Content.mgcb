@@ -680,6 +680,30 @@
 /processorParam:TextureFormat=Color
 /build:Gameplay/Icon/x.png
 
+#begin Gameplay/Status/minorDefense.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Gameplay/Status/minorDefense.png
+
+#begin Gameplay/Status/minorMovementSpeed.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Gameplay/Status/minorMovementSpeed.png
+
 #begin Gameplay/TileSheet/ground.png
 /importer:TextureImporter
 /processor:TextureProcessor

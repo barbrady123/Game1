@@ -16,6 +16,8 @@
 
 		CurrentHP = 6,
 
-		Defense = 7
+		Defense = 7,
+
+		MovementSpeed = 8
 	}
 }
