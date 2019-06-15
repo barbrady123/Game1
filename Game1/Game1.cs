@@ -45,11 +45,17 @@ namespace Game1
 		ScreenManager _screenManager;
 		GameConfiguration _config;
 
-		public static Game Instance { get; private set; }
+		public static Game1 Instance { get; private set; }
 
 		public static IServiceProvider ServiceProvider { get; private set; }
 
 		public static GraphicsDevice Graphics { get; private set; }
+
+		public void ToggleFullScreen()
+		{
+			_graphicsManager.IsFullScreen = !_graphicsManager.IsFullScreen;	
+			_graphicsManager.ApplyChanges();
+		}
 
 		public Game1()
 		{

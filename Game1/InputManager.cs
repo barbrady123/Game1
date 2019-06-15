@@ -200,12 +200,14 @@ namespace Game1
 
 		private static Texture2D AddTextAndPointer(Texture2D texture, int? quantity)
 		{
-			var renderTarget = new RenderTarget2D(Game1.Graphics, texture.Bounds.Width, texture.Bounds.Height);
+			// For non-square textures, they get all willy-wonka when converted to mouse cursor, so instead we always use full size icon target 
+			// and just offset the drawing of the icon itself if it's smaller than the standard size (64x64) 
+			var renderTarget = new RenderTarget2D(Game1.Graphics, Game1.IconSize, Game1.IconSize);
 			Game1.Graphics.SetRenderTarget(renderTarget);
 			Game1.Graphics.Clear(Color.Transparent);
 			var spriteBatch = new SpriteBatch(Game1.Graphics);
 			spriteBatch.Begin();
-			spriteBatch.Draw(texture, Vector2.Zero, Color.White);
+			spriteBatch.Draw(texture, Vector2.Zero.Offset((Game1.IconSize - texture.Width) / 2, (Game1.IconSize - texture.Height) / 2), Color.White);
 			spriteBatch.Draw(_pointer, Vector2.Zero, Color.White);
 			if (quantity != null)
 				spriteBatch.DrawString(FontManager.Get(), ((int)quantity).ToString(), new Vector2(Game1.IconSize - 25, Game1.IconSize - 20), Color.White);

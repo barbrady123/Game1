@@ -86,11 +86,11 @@ namespace Game1
 			));
 			_components.SetState(_barMana, ComponentState.ActiveVisible, null);
 
-			_components.Register(_buffs = new StatusViewer<CharacterBuff>(new Rectangle(this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, this.ContentMargin.Height * 6).ToPoint(), new Point(100, 70)), _world.Character.Buffs));
+			_components.Register(_buffs = new StatusViewer<CharacterBuff>(new Rectangle(this.Bounds.TopRightVector(-300 - this.ContentMargin.Width, this.ContentMargin.Height * 6).ToPoint(), new Point(300, 120)), _world.Character.Buffs));
 			_components.SetState(_buffs, ComponentState.ActiveVisible, null);
 
 			// Eventually make ImageText(ure) consistent with the components so we can register them also (or create containers for basic images/text)...
-			_defense = new ImageText("", true) { Position = this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, this.ContentMargin.Height * 10) };
+			_defense = new ImageText("", true) { Position = this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, 350) };
 
 			// Might want a couple frame delay before actually running the game?
 			_components.SetState(_world, ComponentState.Active, null);
@@ -170,6 +170,10 @@ namespace Game1
 				_components.AddState(_characterWindow, ComponentState.All);
 				_components.ClearState(_world, ComponentState.ActiveInput);
 				_components.ClearState(_hotbarView, ComponentState.TakingInput);
+			}
+			else if (InputManager.KeyPressed(Keys.OemTilde))
+			{
+				Game1.Instance.ToggleFullScreen();
 			}
 
 			if (InputManager.LeftMouseClick(_gameViewArea))

@@ -147,7 +147,9 @@ namespace Game1.Interface.Windows
 
 		private void UpdateCharacterStats()
 		{
-			for (int i = 0; i < _characterStat.Length; i++)
+			// This is stupid loop, just for display purposes...we are just arbitrarily stopped after the first 6 "core" stats...because now the enumeration
+			// this is based on is growing so I can test other things...obviously we wouldn't try to base this UI on a enum list...
+			for (int i = 0; i < 6; i++)
 			{
 				string statName = ((CharacterAttribute)i).ToString("g");
 				int currentVal = (int)typeof(Character).InvokeMember(statName, Util.GetPropertyFlags, Type.DefaultBinder, _world.Character, null);

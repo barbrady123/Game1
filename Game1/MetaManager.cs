@@ -71,7 +71,7 @@ namespace Game1
 				"Minor Movement Speed",
 				"Increases Movement Speed by 100% for 20 seconds",
 				100,
-				10,
+				20,
 				null,
 				2,
 				20,
@@ -91,7 +91,6 @@ namespace Game1
 
 			switch (instant.AffectedAttribute)
 			{
-				// Should we break up actual buffs from instant effects???
 				case CharacterAttribute.CurrentHP :
 					character.CurrentHP += GameRandom.Next(instant.EffectRangeMin, instant.EffectRangeMax);
 					break;

@@ -19,7 +19,7 @@ namespace Game1
 		private Vector2 _position;
 		private ItemContainer _hotbar;
 		private ItemContainer _backpack;
-		protected float _speed;
+		protected float _movementSpeed;
 		private int _currentHP;
 		private int _currentMana;
 		private InventoryItem _heldItem;
@@ -29,7 +29,7 @@ namespace Game1
 
 		public string SpriteSheetName => this.Sex.ToString("g");
 		public Vector2 Motion { get; set; }
-		public float Speed => _speed * SpeedModifier();
+		public float MovementSpeed => _movementSpeed * MovementSpeedModifier();
 		public Cardinal Direction { get; set; }
 
 		public string Name { get; set; }
@@ -53,14 +53,15 @@ namespace Game1
 			(((ItemArmor)this.EquippedArmorFeet?.Item)?.Defense ?? 0) +
 			DefenseModifier();
 
+		// Find a better place for these types of methods...
 		private int DefenseModifier()
 		{
-			return this.Buffs.Where(b => b.Buff.AffectedAttribute == CharacterAttribute.Defense).Sum(b => b.Buff.EffectValue);
+			return this.Buffs.Where(b => b.Buff.AffectedAttribute == CharacterAttribute.Defense).Sum(b => b.Buff.EffectValue * b.Stacks);
 		}
 
-		private float SpeedModifier()
+		private float MovementSpeedModifier()
 		{
-			return 1.0f + (float)this.Buffs.Where(b => b.Buff.AffectedAttribute == CharacterAttribute.MovementSpeed).Sum(b => b.Buff.EffectValue) / 100.0f;
+			return 1.0f + (float)this.Buffs.Where(b => b.Buff.AffectedAttribute == CharacterAttribute.MovementSpeed).Sum(b => b.Buff.EffectValue * b.Stacks) / 100.0f;
 		}
 
 		public int MaxHP { get; set; }
@@ -131,7 +132,7 @@ namespace Game1
 		public Character()
 		{
 			this.Direction = Cardinal.South;
-			_speed = 150.0f;
+			_movementSpeed = 150.0f;
 			_hotbar = new ItemContainer(10);
 			_backpack = new ItemContainer(40);
 			this.Buffs = new List<CharacterBuff>();
@@ -160,7 +161,7 @@ namespace Game1
 			if (motion != Vector2.Zero)
 			{
 				motion.Normalize();
-				motion *= (this.Speed * (float)gameTime.ElapsedGameTime.TotalSeconds);
+				motion *= (this.MovementSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
 			}
 
 			this.Motion = motion;

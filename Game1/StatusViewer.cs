@@ -14,10 +14,10 @@ namespace Game1
 {
 	public class StatusViewer<T> : Component where T: CharacterStatus
 	{
-		private const int ItemsPerRow = 3;
+		private const int ItemsPerRow = 5;
 		private const int IconSize = 32;
-		private const int ItemPadding = 5;
-		private const int RowPadding = 15;
+		private const int ItemPadding = 7;
+		private const int RowPadding = 25;
 
 		protected override Size ContentMargin => new Size(10, 10);
 
@@ -79,7 +79,7 @@ namespace Game1
 			else
 				xPos = this.Bounds.X + this.ContentMargin.Width + (StatusViewer<T>.IconSize * col) + (StatusViewer<T>.ItemPadding * col);
 
-			int yPos = this.Bounds.Y + this.ContentMargin.Height + (StatusViewer<T>.IconSize * row) + (StatusViewer<T>.ItemPadding * row);
+			int yPos = this.Bounds.Y + this.ContentMargin.Height + (StatusViewer<T>.IconSize * row) + (StatusViewer<T>.RowPadding * row);
 
 			return new Vector2(xPos, yPos);
 		}

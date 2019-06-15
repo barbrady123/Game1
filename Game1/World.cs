@@ -64,7 +64,8 @@ namespace Game1
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
 			this.Character.HotBar.AddItem(ItemManager.GetItem(6));
 			for (int i = 0; i < 15; i++)
-				this.Character.Backpack.AddItem(ItemManager.GetItem());
+				this.Character.Backpack.AddItem(ItemManager.GetItem((i < 9) ? i : (int?)null));
+
 			this.Items = new List<WorldItem> {
 				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) },
 				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) },
