@@ -21,6 +21,7 @@ namespace Game1.Interface
 		public static readonly Vector2 MouseOverScale = new Vector2(1.1f, 1.1f);
 
 		protected override int BorderThickness => InventoryItemView.BorderWidth;
+		public override string TooltipText => this.Item?.Item.DisplayName;
 
 		private ImageTexture _highlightBorder;
 		private ImageTexture _emptyIcon;
@@ -53,7 +54,7 @@ namespace Game1.Interface
 			_highlightBorder.Position = this.Bounds.CenterVector();
 			_highlightBorder.LoadContent();
 			_quantity = new ImageText("", true) { Alignment = ImageAlignment.RightBottom };
-			_quantity.Position = this.Bounds.BottomRightVector(-InventoryItemView.ImagePadding, -InventoryItemView.ImagePadding);
+			_quantity.Position = this.Bounds.BottomRightVector(-InventoryItemView.ImagePadding -2, -InventoryItemView.ImagePadding);
 			_quantity.LoadContent();
 			_emptyIcon?.LoadContent();
 		}
@@ -81,7 +82,7 @@ namespace Game1.Interface
 		}
 
 		public override void UpdateActive(GameTime gameTime)
-		{
+		{			
 			base.UpdateActive(gameTime);
 		}
 

@@ -18,22 +18,24 @@ namespace Game1
 {
 	public abstract class Component : IActivatable
 	{
+		private readonly SpriteBatchData _spriteBatchData;
+		private bool _isActive;
 		protected ActivationManager _activator;
-		private int _delayInputCycles;
-		protected ImageTexture _background;
 		private string _backgroundName;
-		protected ImageTexture _border;
-		private bool _readyDisableOnEscape;
-		private Rectangle _bounds;
+		protected ImageTexture _background;
 		private bool _hasBorder;
+		protected ImageTexture _border;
+		private Rectangle _bounds;
+		private int _delayInputCycles;
+		private bool _readyDisableOnEscape;
 		private bool _fireMouseEvents;
 		private bool _inactiveMouseEvents;
 		private bool _killFurtherInput;
-		private bool _isActive;
 		private bool _drawIfDisabled;
-		private readonly SpriteBatchData _spriteBatchData;
+		private bool _enabledTooltip;
+		protected Tooltip _tooltip;
 
-		// TODO: add tooltip, context?
+		// TODO: add context?
 
 		public virtual bool IsActive
 		{
@@ -59,9 +61,9 @@ namespace Game1
 				if (_bounds != value)
 				{
 					_bounds = value;
-					SetupBackground();
-					SetupBorder();
-					RepositionObjects();
+					bool bgLoaded = SetupBackground();
+					bool borderLoaded = SetupBorder();
+					RepositionObjects(bgLoaded || borderLoaded);
 				}
 			}
 		}
@@ -75,10 +77,8 @@ namespace Game1
 		protected virtual Size ContentMargin => new Size(20, 20);
 		protected virtual int BorderThickness => 2;
 		protected virtual Color BorderColor => Color.White;
+		public virtual string TooltipText => null;
 
-		/// <summary>
-		/// For non-visual components....
-		/// </summary>
 		public Component(Rectangle? bounds = null,
 						 bool readyDisableOnEscape = false,
 						 string background = "black",
@@ -87,7 +87,8 @@ namespace Game1
 						 bool fireMouseEvents = true,
 						 bool inactiveMouseEvents = false,
 						 bool killFurtherInput = false,
-						 bool drawIfDisabled = true)
+						 bool drawIfDisabled = true,
+						 bool enabledTooltip = false)
 		{
 			_bounds = bounds ?? Rectangle.Empty;
 			_activator = new ActivationManager();
@@ -102,6 +103,8 @@ namespace Game1
 			_inactiveMouseEvents = inactiveMouseEvents;
 			_killFurtherInput = killFurtherInput;
 			_drawIfDisabled = drawIfDisabled;
+			if (_enabledTooltip = enabledTooltip)
+				_activator.Register(_tooltip = new Tooltip(this, SpriteBatchManager.Get("tooltip")), false, "popup");
 
 			SetupBackground();
 			SetupBorder();
@@ -112,12 +115,14 @@ namespace Game1
 		{
 			_background?.LoadContent();
 			_border?.LoadContent();
+			_tooltip?.LoadContent();
 		}
 
 		public virtual void UnloadContent()
 		{
 			_background?.UnloadContent();
 			_border?.UnloadContent();
+			_tooltip?.UnloadContent();
 		}
 
 		public virtual void Update(GameTime gameTime)
@@ -151,6 +156,7 @@ namespace Game1
 		{
 			_background?.Update(gameTime);
 			_border?.Update(gameTime);
+			_tooltip?.Update(gameTime);
 			UpdateDelayInput(gameTime);
 		}
 
@@ -211,6 +217,7 @@ namespace Game1
 		{
 			_background?.Draw(spriteBatch);
 			_border?.Draw(spriteBatch);
+			_tooltip?.Draw(spriteBatch);
 		}
 
 		public void DelayInput(int delayCycles)
@@ -226,8 +233,17 @@ namespace Game1
 
 		protected virtual void MouseOut(ComponentEventArgs e) => OnMouseOut?.Invoke(this, e);
 
-		protected virtual void RepositionObjects()
+		protected virtual void RepositionObjects(bool loadContent = false)
 		{
+			if (loadContent)
+			{
+				if (_background?.Texture != null)
+					_background?.UnloadContent();
+
+				if (_border?.Texture != null)
+					_border?.UnloadContent();
+			}
+
 			if (_background != null)
 			{
 				_background.Position = this.Bounds.CenterVector();
@@ -236,24 +252,38 @@ namespace Game1
 
 			if (_border != null)
 				_border.Position = this.Bounds.CenterVector();
+
+			if (loadContent)
+			{
+				_background?.LoadContent();
+				_border?.LoadContent();
+			}
 		}
 
-		protected void SetupBackground()
+		protected bool SetupBackground()
 		{
+			bool wasLoaded = _background?.Texture != null;
+
 			_background?.UnloadContent();
 			// TODO: This should add support for the Util.GenerateSolidBackgroundTexture method for solid colors...
 			if ((!String.IsNullOrWhiteSpace(_backgroundName)) && (this.Bounds != Rectangle.Empty))
 				_background = new ImageTexture($"{Game1.BackgroundRoot}/{_backgroundName}", true) { Alignment = ImageAlignment.Centered };
+
+			return wasLoaded;
 		}
 
-		protected void SetupBorder()
+		protected bool SetupBorder()
 		{
+			bool wasLoaded = _border?.Texture != null;
+
 			if (_hasBorder && (this.Bounds != Rectangle.Empty))
 			{
 				_border?.UnloadContent();
 				_border = Util.GenerateBorderTexture(this.Bounds.Width, this.Bounds.Height, this.BorderThickness, this.BorderColor, true);
 				_border.Alignment = ImageAlignment.Centered;
 			}
+
+			return wasLoaded;
 		}
 	}
 }

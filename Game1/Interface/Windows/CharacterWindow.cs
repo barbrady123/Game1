@@ -23,8 +23,6 @@ namespace Game1.Interface.Windows
 		private ImageText[] _characterStat;
 		private InventoryContextMenu _contextMenu;
 
-		private Tooltip _tooltip;
-
 		public CharacterWindow(Rectangle bounds, World world, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData, killFurtherInput: true, drawIfDisabled: false)
 		{
 			_world = world;
@@ -52,7 +50,7 @@ namespace Game1.Interface.Windows
 			}
 
 			// Verify the tooltip cannot break the context menu (shouldn't be able to get input while the other is active)....
-			_activator.Register(_tooltip = new Tooltip(SpriteBatchManager.Get("tooltip")), false, "top");
+			_activator.Register(_tooltip = new Tooltip(this, SpriteBatchManager.Get("tooltip")), false, "top");
 			_activator.Register(_contextMenu = new InventoryContextMenu(SpriteBatchManager.Get("context")), false, new[] { "top", "armor0", "armor1", "armor2", "armor3" });
 			_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
 			_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
@@ -115,19 +113,28 @@ namespace Game1.Interface.Windows
 				EnableContextMenu(itemView);
 		}
 
-		private void ArmorItemView_OnMouseOver(object sender, EventArgs e)
+		private void ArmorItemView_OnMouseOver(object sender, ComponentEventArgs e)
 		{
+			_tooltip.Owner = (InventoryItemView)e.Meta;
+			/*
 			var overItem = (sender as InventoryItemView).Item;
 
 			if ((overItem != null) && (_contextMenu.Owner != sender))
 				_tooltip.Show(overItem.Item.DisplayName, InputManager.MousePosition.Offset(10, 10), 15, sender);
 			else
 				_tooltip.Reset(sender);
+			*/
+		}
+
+		protected override void ReadyDisable(ComponentEventArgs e)
+		{
+			DisableContextMenu();
+			base.ReadyDisable(e);
 		}
 
 		private void ArmorItemView_OnMouseOut(object sender, EventArgs e)
 		{
-			_tooltip.Reset(sender);
+			//_tooltip.Reset(sender);
 		}
 
 		private void UpdateArmorViews()

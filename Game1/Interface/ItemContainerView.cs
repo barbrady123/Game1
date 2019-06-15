@@ -47,7 +47,7 @@ namespace Game1.Interface
 
 		public int Size => this.Container?.Size ?? 0;
 
-		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem) : base(bounds, background: null, fireMouseEvents: false)
+		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem) : base(bounds, background: null, fireMouseEvents: false, enabledTooltip: true)
 		{
 			this.Container = container;
 			this.Container.OnItemChanged += Container_OnItemChanged;
@@ -67,12 +67,14 @@ namespace Game1.Interface
 
 		public override void LoadContent()
 		{
+			base.LoadContent();
 			foreach (var item in _itemViews)
 				item.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
+			base.UnloadContent();
 			foreach (var item in _itemViews)
 				item.UnloadContent();
 		}
