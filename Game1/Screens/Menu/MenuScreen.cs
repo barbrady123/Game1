@@ -84,8 +84,7 @@ namespace Game1.Screens.Menu
 						  bool escapeToDisable = false,
 						  bool fireMouseEvents = true,
 						  bool inactiveMouseEvents = false,
-						  bool killFurtherInput = false,
-						  bool drawIfDisabled = false): base(bounds, escapeToDisable, background, spriteBatchData, false, fireMouseEvents, inactiveMouseEvents, killFurtherInput, drawIfDisabled)
+						  bool drawIfDisabled = false): base(bounds, escapeToDisable, background, spriteBatchData, false, fireMouseEvents, inactiveMouseEvents, drawIfDisabled)
 		{
 			_currentIndex = -1;
 			_layout = layout;

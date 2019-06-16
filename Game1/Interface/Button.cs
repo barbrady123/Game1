@@ -20,7 +20,7 @@ namespace Game1.Interface
 
 		private ImageText _text;
 
-		public Button(Rectangle bounds, string text, bool killFurtherInput = true) : base(bounds, hasBorder: true, killFurtherInput: killFurtherInput)
+		public Button(Rectangle bounds, string text, bool killFurtherInput = true) : base(bounds, hasBorder: true)
 		{
 			_text = new ImageText(text, true) { Position = bounds.CenterVector() };
 		}
@@ -44,6 +44,7 @@ namespace Game1.Interface
 			_text.Scale = _mouseover ? Button.MouseOverScale : Vector2.One;
 			_text.Update(gameTime);
 			base.UpdateActive(gameTime);
+			//InputManager.BlockAllInput();
 		}
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)

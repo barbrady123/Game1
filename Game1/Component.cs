@@ -30,7 +30,6 @@ namespace Game1
 		private bool _readyDisableOnEscape;
 		private bool _fireMouseEvents;
 		private bool _inactiveMouseEvents;
-		private bool _killFurtherInput;
 		private bool _drawIfDisabled;
 		private bool _enabledTooltip;
 		protected Tooltip _tooltip;
@@ -88,7 +87,6 @@ namespace Game1
 						 bool hasBorder = false,
 						 bool fireMouseEvents = true,
 						 bool inactiveMouseEvents = false,
-						 bool killFurtherInput = false,
 						 bool drawIfDisabled = true,
 						 bool enabledTooltip = false,
 						 bool enabledContextMenu = false)
@@ -104,7 +102,6 @@ namespace Game1
 			_backgroundName = background;
 			_fireMouseEvents = fireMouseEvents;
 			_inactiveMouseEvents = inactiveMouseEvents;
-			_killFurtherInput = killFurtherInput;
 			_drawIfDisabled = drawIfDisabled;
 			if (_enabledTooltip = enabledTooltip)
 				_activator.Register(_tooltip = new Tooltip(this, SpriteBatchManager.Get("tooltip")), false, "popup");
@@ -124,6 +121,7 @@ namespace Game1
 			_background?.LoadContent();
 			_border?.LoadContent();
 			_tooltip?.LoadContent();
+			_contextMenu?.LoadContent();
 		}
 
 		public virtual void UnloadContent()
@@ -131,6 +129,7 @@ namespace Game1
 			_background?.UnloadContent();
 			_border?.UnloadContent();
 			_tooltip?.UnloadContent();
+			_contextMenu?.UnloadContent();
 		}
 
 		public virtual void Update(GameTime gameTime)
@@ -165,6 +164,7 @@ namespace Game1
 			_background?.Update(gameTime);
 			_border?.Update(gameTime);
 			_tooltip?.Update(gameTime);
+			_contextMenu?.Update(gameTime);
 			UpdateDelayInput(gameTime);
 		}
 
@@ -185,9 +185,6 @@ namespace Game1
 
 			if (_readyDisableOnEscape && InputManager.KeyPressed(Keys.Escape, true))
 				ReadyDisable(new ComponentEventArgs { Trigger = EventTrigger.Escape, Value = "escape" });
-
-			if (_killFurtherInput)
-				InputManager.BlockAllInput();
 		}
 
 		public virtual bool CheckMouseEvents()
@@ -230,6 +227,7 @@ namespace Game1
 			_background?.Draw(spriteBatch);
 			_border?.Draw(spriteBatch);
 			_tooltip?.Draw(spriteBatch);
+			_contextMenu?.Draw(spriteBatch);
 		}
 
 		public void DelayInput(int delayCycles)

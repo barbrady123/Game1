@@ -24,21 +24,23 @@ namespace Game1.Interface
 		private ImageText _textImage;		
 
 		private object _source;
-		private string _currentProperty;
-		private string _maxProperty;
 
-		private int CurrentValue => (int)_source.GetType().InvokeMember(_currentProperty, BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty, Type.DefaultBinder, _source, null);
-		private int MaxValue => (int)_source.GetType().InvokeMember(_maxProperty, BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty, Type.DefaultBinder, _source, null);
+		private Func<int> CurrentProperty;
+		private Func<int> MaxProperty;
+
 		private int _previousCurrent;
 		private int _previousMax;
 
-		private string Text => $"{CurrentValue} / {MaxValue}";
+		private string Text => $"{CurrentProperty()} / {MaxProperty()}";
 
 		public StatBar(int width, Vector2 position, Color color, object source, string currentProperty, string maxProperty) : base(position.ExpandToRectangleCentered(width / 2, StatBar.Height / 2), hasBorder: true)
 		{
 			_source = source;
-			_currentProperty = currentProperty;
-			_maxProperty = maxProperty;
+
+			var propInfo = typeof(Character).GetProperty(currentProperty, typeof(int));
+			CurrentProperty = (Func<int>) Delegate.CreateDelegate(typeof(Func<int>), source, propInfo.GetGetMethod());
+			propInfo = typeof(Character).GetProperty(maxProperty, typeof(int));
+			MaxProperty = (Func<int>)Delegate.CreateDelegate(typeof(Func<int>), source, propInfo.GetGetMethod());
 			_barColor = color;
 			_previousCurrent = -1;
 			_previousMax = -1;
@@ -68,8 +70,8 @@ namespace Game1.Interface
 			_textImage.Update(gameTime);
 			_fill?.Update(gameTime);
 
-			int current = this.CurrentValue;
-			int max = this.MaxValue;
+			int current = CurrentProperty();
+			int max = MaxProperty();
 
 			if ((current != _previousCurrent) || (max != _previousMax))
 				SetFill(current, max);
@@ -82,21 +84,18 @@ namespace Game1.Interface
 			_textImage.Draw(spriteBatch);
 		}
 
-		private void SetFill(int? current = null, int? max = null)
+		private void SetFill(int current, int max)
 		{
-			int currentVal = current ?? this.CurrentValue;
-			int maxVal = max ?? this.MaxValue;
-
 			var fillBarBounds = this.Bounds.CenteredRegion(this.Bounds.Width - (2 * this.BorderThickness), this.Bounds.Height - (2 * this.BorderThickness));
 
 			_fill?.UnloadContent();
-			_fill = Util.GenerateSolidBackground((int)(fillBarBounds.Width * (maxVal > 0 ? (float)currentVal / (float)maxVal : 0.0f)), fillBarBounds.Height, _barColor);
+			_fill = Util.GenerateSolidBackground((int)(fillBarBounds.Width * (max > 0 ? (float)current / (float)max : 0.0f)), fillBarBounds.Height, _barColor);
 			_fill.Alignment = ImageAlignment.LeftTop;
 			_fill.Position = fillBarBounds.TopLeftVector();
 			_fill.LoadContent();
 
-			_previousCurrent = currentVal;
-			_previousMax = maxVal;
+			_previousCurrent = current;
+			_previousMax = max;
 		}
 	}
 }

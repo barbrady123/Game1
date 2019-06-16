@@ -28,7 +28,7 @@ namespace Game1.Interface.Windows
 
 		public InventoryItemView Owner { get; private set; }
 
-		public SplitWindow(SpriteBatchData spriteBatchData) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData, killFurtherInput: true, drawIfDisabled: false)
+		public SplitWindow(SpriteBatchData spriteBatchData) : base(Rectangle.Empty, true, background: "black", spriteBatchData: spriteBatchData, drawIfDisabled: false)
 		{
 			// We allow empty instanciation so the object can be registered with a ComponentManager if necessary...
 		}
@@ -88,10 +88,11 @@ namespace Game1.Interface.Windows
 
 		public override void UpdateActive(GameTime gameTime)
 		{
+			base.UpdateActive(gameTime);
 			_menu.Update(gameTime);
 			_input.Update(gameTime);
 			_halfButton.Update(gameTime);
-			base.UpdateActive(gameTime);
+			InputManager.BlockAllInput();
 		}
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)

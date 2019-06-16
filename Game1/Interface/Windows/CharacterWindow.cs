@@ -23,7 +23,7 @@ namespace Game1.Interface.Windows
 		private ImageText[] _characterStat;
 		private InventoryContextMenu _contextMenu;
 
-		public CharacterWindow(Rectangle bounds, World world, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData, killFurtherInput: true, drawIfDisabled: false, fireMouseEvents: false, enabledTooltip: true)
+		public CharacterWindow(Rectangle bounds, World world, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData, drawIfDisabled: false, fireMouseEvents: false, enabledTooltip: true)
 		{
 			_world = world;
 			_armorItemView = new InventoryItemView[System.Enum.GetNames(typeof(ArmorSlot)).Length];
@@ -76,6 +76,7 @@ namespace Game1.Interface.Windows
 
 		public override void UpdateActive(GameTime gameTime)
 		{
+			base.UpdateActive(gameTime);
 			_contextMenu.Update(gameTime);
 			_characterName.Update(gameTime);
 			UpdateArmorViews();
@@ -84,7 +85,7 @@ namespace Game1.Interface.Windows
 			UpdateCharacterStats();
 			foreach (var stat in _characterStat)
 				stat.Update(gameTime);
-			base.UpdateActive(gameTime);
+			InputManager.BlockAllInput();
 		}
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)
