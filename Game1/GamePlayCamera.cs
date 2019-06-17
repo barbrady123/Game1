@@ -292,6 +292,7 @@ namespace Game1
 		}
 
 		// Eventually we'll load the map in chunks...
+		// NOTE: This type of technique is only valid for completely STATIC map data...everything interactive will have to be rendered on top of this...
 		private ImageTexture GenerateTerrainMap(Layer layer, Point start, Point end)
 		{
 			var renderTarget = new RenderTarget2D(Game1.Graphics, (end.X - start.X + 1) * Game1.TileSize, (end.Y - start.Y + 1) * Game1.TileSize);

@@ -67,6 +67,18 @@ namespace Game1
 			}
 		}
 
+		protected virtual void BoundsChanged(bool resized)
+		{
+			// Background
+			if (_background != null)
+			{
+				_background.Position = this.Bounds.CenterVector();
+				_background.SourceRect = this.Bounds;
+			}
+
+
+		}
+
 		public event EventHandler<ComponentEventArgs> OnReadyDisable;
 		public event EventHandler<ComponentEventArgs> OnMouseOver;
 		public event EventHandler<ComponentEventArgs> OnMouseIn;

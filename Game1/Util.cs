@@ -31,6 +31,7 @@ namespace Game1
 			return new ImageTexture(t, isActive);
 		}
 
+		// Hmm, wouldn't it be faster to create a render target, clear it to a color, then save it/cast to texture??
 		public static ImageTexture GenerateSolidBackground(int width, int height, Color color)
 		{
 			if (width > 0)

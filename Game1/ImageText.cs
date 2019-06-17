@@ -12,6 +12,7 @@ using Game1.Enum;
 
 namespace Game1
 {
+	// Why are we fucking with SourceRect in here, this is just DrawString....???
 	public class ImageText : Image
 	{
 		public const string DefaultFont = "Orbitron";
