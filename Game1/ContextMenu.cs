@@ -54,9 +54,12 @@ namespace Game1.Screens.Menu
 		{
 			UnloadContent();
 			var position = InputManager.MousePosition.Offset(-10, -10);
-			this.Bounds = CalculateItemMenuBounds(position);
-			LoadContent();
-			this.IsActive = true;
+			this.Bounds = SetupMenuItems(position);
+			if (this.Bounds != Rectangle.Empty)
+			{
+				LoadContent();
+				this.IsActive = true;
+			}
 		}
 
 		private void Hide()
@@ -64,12 +67,18 @@ namespace Game1.Screens.Menu
 			this.IsActive = false;
 		}
 
-		protected virtual Rectangle CalculateItemMenuBounds(Point position)
+		protected virtual Rectangle SetupMenuItems(Point position)
 		{
 			if ((position == Util.PointInvalid) || (this.Owner == null))
 				return Rectangle.Empty;
 			
 			var menuOptions = this.Owner.GetContextMenuOptions();
+			if (!menuOptions.Any())
+			{
+				this.Owner = null;
+				return Rectangle.Empty;
+			}
+
 			var size = MenuScreen.CalculateMenuSize(MenuScreen.MENU_PADDING, MenuScreen.MENU_PADDING, menuOptions, MenuLayout.Vertical);
 			_items = menuOptions.Select(o => new MenuItem { Id = o.ToLower(), Text = o }).ToList();
 			return new Rectangle(position.X, position.Y, size.Width, size.Height);
@@ -79,7 +88,7 @@ namespace Game1.Screens.Menu
 		{
 			e.Meta = this.Owner;
 			base.ItemSelect(e);
-			this.Owner = null;	// Is this the right spot to kill it after select??
+			this.Owner = null;
 		}
 
 		protected override void MouseOut(ComponentEventArgs e)

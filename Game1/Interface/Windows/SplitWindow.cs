@@ -18,57 +18,66 @@ namespace Game1.Interface.Windows
 	{
 		private const int TextInputWidth = 50;
 
+		private InventoryItemView _owner;
 		private OkCancelMenu _menu;
 		private TextInput _input;
 		private Button _halfButton;
 
+		public InventoryItemView Owner
+		{
+			get { return _owner; }
+			set
+			{
+				if (_owner != value)
+				{
+					_owner = value;
+
+					if (_owner != null)
+						Show();
+					else
+						Hide();
+				}
+			}
+		}
+
 		public int Quantity => Int32.TryParse(_input?.Text, out int quantity) ? quantity : 0;
 
 		public event EventHandler<ComponentEventArgs> OnButtonClick;
-
-		public InventoryItemView Owner { get; private set; }
 
 		public SplitWindow(SpriteBatchData spriteBatchData) : base(Rectangle.Empty, true, background: "black", spriteBatchData: spriteBatchData, drawIfDisabled: false)
 		{
 			// We allow empty instanciation so the object can be registered with a ComponentManager if necessary...
 		}
 
-		public void Initialize(InventoryItemView owner, Rectangle bounds)
+		// This will WAY simplier after Positiongeddon....
+		private void Show()
 		{
 			UnloadContent();
-			this.Owner = owner;
-			this.Bounds = bounds;
+			var position = InputManager.MousePosition.Offset(-10, -10);
+			this.Bounds = new Rectangle(position.X, position.Y, 160, 200);
 
-			var bottomCenter = bounds.BottomCenterVector();
-			// This arbitrary sizing sucks...TODO: Read the comment on the MenuScreen class...menus should be able to auto-size themselves given a Top-Left position...
-			// Is it ssafe for all these subitems to get State.All ?
-			_menu = new OkCancelMenu(new Rectangle((int)bottomCenter.X - 90, (int)bottomCenter.Y - 50, bounds.Width, 30)) { IsActive = true };
+			var bottomCenter = this.Bounds.BottomCenterVector();
+
+			_menu = new OkCancelMenu(new Rectangle((int)bottomCenter.X - 80, (int)bottomCenter.Y - 50, this.Bounds.Width, 30)) { IsActive = true };
 			_menu.OnItemSelect += _menu_OnItemSelect;
 			
-			_input = new TextInput(SplitWindow.TextInputWidth, new Vector2(bounds.Center.X, bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2)), "", 2) {
+			_input = new TextInput(SplitWindow.TextInputWidth, new Vector2(this.Bounds.Center.X, this.Bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2)), "", 2) {
 				IsActive = true,
 				AllowedCharacters = "0123456789"
 			};
 			_input.OnReadyDisable += _input_OnReadyDisable;
 			_input.OnBeforeTextUpdate += _input_OnBeforeTextUpdate;
 
-			_halfButton = new Button(bounds.CenteredRegion(80, 40), "Half") { IsActive = true };
+			_halfButton = new Button(this.Bounds.CenteredRegion(80, 40), "Half") { IsActive = true };
 			_halfButton.OnMouseLeftClick += _halfButton_OnMouseLeftClick;
 
 			LoadContent();
+			this.IsActive = true;
 		}
 
-		public void Clear()
+		private void Hide()
 		{
-			this.Owner = null;
-			this.Bounds = Rectangle.Empty;
-			UnloadContent();
-			_background = null;
-			_border = null;
-			_menu?.UnloadContent();
-			_input?.UnloadContent();
-			_halfButton?.UnloadContent();
-			_mouseover = false;
+			this.IsActive = false;
 		}
 
 		public override void LoadContent()
@@ -114,6 +123,7 @@ namespace Game1.Interface.Windows
 		private void _menu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
 			OnButtonClick?.Invoke(this, e);
+			ReadyDisable(e);
 		}
 
 		private void _input_OnReadyDisable(object sender, ComponentEventArgs e)
@@ -137,6 +147,12 @@ namespace Game1.Interface.Windows
 			int newValue = Int32.Parse(e.Text);
 			if (newValue > this.Owner.Item.Quantity)
 				e.Cancel = true;
+		}
+
+		protected override void ReadyDisable(ComponentEventArgs e)
+		{
+			this.Owner = null;
+			base.ReadyDisable(e);
 		}
 	}
 }

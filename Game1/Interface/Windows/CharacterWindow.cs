@@ -21,9 +21,17 @@ namespace Game1.Interface.Windows
 		private InventoryItemView[] _armorItemView;
 		private ImageText _characterName;
 		private ImageText[] _characterStat;
-		private InventoryContextMenu _contextMenu;
 
-		public CharacterWindow(Rectangle bounds, World world, SpriteBatchData spriteBatchData = null) : base(bounds, true, "brick", spriteBatchData, drawIfDisabled: false, fireMouseEvents: false, enabledTooltip: true)
+		public CharacterWindow(	Rectangle bounds,
+								World world,
+								SpriteBatchData spriteBatchData = null) : base(bounds: bounds,
+																			   readyDisableOnEscape: true,
+																			   background: "brick",
+																			   spriteBatchData: spriteBatchData,
+																			   drawIfDisabled: false,
+																			   fireMouseEvents: false,
+																			   enabledTooltip: true,
+																			   enabledContextMenu: true)
 		{
 			_world = world;
 			_armorItemView = new InventoryItemView[System.Enum.GetNames(typeof(ArmorSlot)).Length];
@@ -37,8 +45,8 @@ namespace Game1.Interface.Windows
 			{
 				var position = this.Bounds.TopRightVector(-100, this.ContentMargin.Height + InventoryItemView.Size / 2 + (100 * i)).ExpandToRectangleCentered(InventoryItemView.Size / 2, InventoryItemView.Size / 2);
 				_activator.Register(_armorItemView[i] = new InventoryItemView(position, i, ((ArmorSlot)i).ToString("g"), true), true, $"armor{i}");
-				_armorItemView[i].OnMouseRightClick += ArmorItemView_OnMouseRightClick;
 				_armorItemView[i].OnMouseOver += ArmorItemView_OnMouseOver;
+				_armorItemView[i].OnMouseRightClick += ArmorItemView_OnMouseRightClick;
 			}
 			
 			_characterStat = new ImageText[System.Enum.GetNames(typeof(CharacterAttribute)).Length];
@@ -47,10 +55,6 @@ namespace Game1.Interface.Windows
 				var position = this.Bounds.TopLeftVector(this.ContentMargin.Width, this.ContentMargin.Height + 20 + (this.ContentMargin.Height * 2 * i));
 				_characterStat[i] = new ImageText(null, true) { Position = position, Alignment = ImageAlignment.LeftCentered };
 			}
-
-			_activator.Register(_contextMenu = new InventoryContextMenu(SpriteBatchManager.Get("context")), false, new[] { "popup", "armor0", "armor1", "armor2", "armor3" });
-			_contextMenu.OnMouseOut += _contextMenu_OnMouseOut;
-			_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
 		}
 
 		public override void LoadContent()
@@ -67,7 +71,6 @@ namespace Game1.Interface.Windows
 		{
 			base.UnloadContent();
 			_characterName.UnloadContent();
-			_contextMenu.UnloadContent();
 			foreach (var armorView in _armorItemView)
 				armorView.UnloadContent();
 			foreach (var stat in _characterStat)
@@ -77,7 +80,6 @@ namespace Game1.Interface.Windows
 		public override void UpdateActive(GameTime gameTime)
 		{
 			base.UpdateActive(gameTime);
-			_contextMenu.Update(gameTime);
 			_characterName.Update(gameTime);
 			UpdateArmorViews();
 			foreach (var armorView in _armorItemView)
@@ -96,14 +98,6 @@ namespace Game1.Interface.Windows
 				armorView.Draw(spriteBatch);
 			foreach (var stat in _characterStat)
 				stat.Draw(spriteBatch);
-			_contextMenu.Draw(spriteBatch);
-		}
-
-		private void ArmorItemView_OnMouseRightClick(object sender, ComponentEventArgs e)
-		{
-			var itemView = (InventoryItemView)sender;
-			if (itemView?.Item != null)
-				EnableContextMenu(itemView);
 		}
 
 		private void ArmorItemView_OnMouseOver(object sender, ComponentEventArgs e)
@@ -112,9 +106,14 @@ namespace Game1.Interface.Windows
 			MouseOver(e);
 		}
 
+		private void ArmorItemView_OnMouseRightClick(object sender, ComponentEventArgs e)
+		{
+			e.Meta = sender;
+			MouseRightClick(e);
+		}
+
 		protected override void ReadyDisable(ComponentEventArgs e)
 		{
-			DisableContextMenu();
 			base.ReadyDisable(e);
 		}
 
@@ -138,9 +137,12 @@ namespace Game1.Interface.Windows
 			}
 		}
 
-		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e)
+		protected override void ContextMenuSelect(ComponentEventArgs e)
 		{
-			var itemView = (InventoryItemView)e.Meta;
+			// e.Meta type check is needed since a component supporting ContextMenu could have different objects that we need menus for...
+			if (!(e.Meta is InventoryItemView itemView))
+				return;
+
 			switch (e.Value)
 			{
 				case "unequip"	:	
@@ -152,28 +154,6 @@ namespace Game1.Interface.Windows
 					_world.AddItem(item, pickup: false);
 					break;
 			}
-			DisableContextMenu();
-		}
-
-		private void _contextMenu_OnMouseOut(object sender, ComponentEventArgs e)
-		{
-			DisableContextMenu();
-		}
-
-		private void EnableContextMenu(InventoryItemView clickedItemView)
-		{
-			// Make this a more consistent method (once we have DynamicComponent)...
-			_contextMenu.Initialize(clickedItemView, InputManager.MousePosition.Offset(-10, -10), true);
-			_activator.SetState(_contextMenu, true);
-			// Do we still need these types of calls for the dynamic stuff? Shouldn't making them inactive be enough?
-			//_tooltip.Reset();
-		}
-
-		private void DisableContextMenu()
-		{
-			_activator.SetState(_armorItemView, true);
-			// Do we still need these types of calls for the dynamic stuff? Shouldn't making them inactive be enough?
-			//_contextMenu.Clear();
 		}
 	}
 }

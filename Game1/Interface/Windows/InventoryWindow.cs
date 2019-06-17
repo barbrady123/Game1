@@ -65,7 +65,7 @@ namespace Game1.Interface.Windows
 
 			_activator.Register(_splitWindow = new SplitWindow(SpriteBatchManager.Get("context")), false, new[] { "popup", "backpack", "hotbar" });
 			_splitWindow.OnButtonClick += _splitWindow_OnButtonClick;
-			_splitWindow.OnReadyDisable += _splitWindow_OnReadyDisable;
+			//_splitWindow.OnReadyDisable += _splitWindow_OnReadyDisable;
 		}
 
 		public override void LoadContent()
@@ -143,14 +143,16 @@ namespace Game1.Interface.Windows
 
 		protected override void ReadyDisable(ComponentEventArgs e)
 		{
-			DisableSplitWindow();
+			_splitWindow.Owner = null;
 			base.ReadyDisable(e);
 		}
 
+		/*
 		private void _splitWindow_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
 			DisableSplitWindow();
 		}
+		*/
 
 		// This functionality needs to be sharable somehow....move elsewhere...
 		// This could be SplitWindow functionality, but then we'd have to give the
@@ -163,11 +165,9 @@ namespace Game1.Interface.Windows
 					var window = (SplitWindow)sender;
 					SplitItem(window.Owner, window.Quantity);
 					break;
-				case "cancel" :
-					break;
 			}
 
-			DisableSplitWindow();
+			//DisableSplitWindow();
 		}
 
 		// This functionality needs to be sharable somehow....move elsewhere...
@@ -183,10 +183,7 @@ namespace Game1.Interface.Windows
 
 		private void EnableSplitWindow(InventoryItemView itemView)
 		{
-			var startPosition = InputManager.MousePosition.Offset(-10, -10);
-			_splitWindow.Initialize(itemView, new Rectangle(startPosition.X, startPosition.Y, 200, 200));
-			//_activator.SetState(_splitWindow, true);
-			_splitWindow.IsActive = true;
+			_splitWindow.Owner = itemView;
 		}
 
 		private void DisableSplitWindow()
