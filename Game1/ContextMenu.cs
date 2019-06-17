@@ -14,11 +14,12 @@ using Game1.Screens.Menu;
 
 namespace Game1.Screens.Menu
 {
-	public abstract class ContextMenu : MenuScreen
+	public class ContextMenu : MenuScreen
 	{
-		private Component _owner;
+		private ISupportsContextMenu _owner;
+		private Component _host;
 
-		public Component Owner
+		public ISupportsContextMenu Owner
 		{
 			get { return _owner; }
 			set
@@ -35,34 +36,60 @@ namespace Game1.Screens.Menu
 			}
 		}
 
-		public ContextMenu(SpriteBatchData spriteBatchData = null) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData, killFurtherInput: true, drawIfDisabled: false)
+		public ContextMenu(Component host, SpriteBatchData spriteBatchData = null) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData, drawIfDisabled: false)
 		{
-			// We allow empty instanciation so the object can be registered with a ComponentManager if necessary...
+			_host = host;
+			_host.OnMouseRightClick += _host_OnMouseRightClick;
 		}
 
-		public void Show()
+		protected override List<MenuItem> GetItemData() { return new List<MenuItem>(); }
+
+		public override void UpdateActive(GameTime gameTime)
+		{
+			base.UpdateActive(gameTime);
+			InputManager.BlockAllInput();
+		}
+
+		private void Show()
 		{
 			UnloadContent();
 			var position = InputManager.MousePosition.Offset(-10, -10);
-			this.Bounds = CalculateItemMenuBounds(position);
-			_items = GetItemData();
-			LoadContent();
+			this.Bounds = SetupMenuItems(position);
+			if (this.Bounds != Rectangle.Empty)
+			{
+				LoadContent();
+				this.IsActive = true;
+			}
 		}
 
-		public void Hide()
+		private void Hide()
 		{
 			this.IsActive = false;
 		}
 
-		protected abstract Rectangle CalculateItemMenuBounds(Point position);
+		protected virtual Rectangle SetupMenuItems(Point position)
+		{
+			if ((position == Util.PointInvalid) || (this.Owner == null))
+				return Rectangle.Empty;
+			
+			var menuOptions = this.Owner.GetContextMenuOptions();
+			if (!menuOptions.Any())
+			{
+				this.Owner = null;
+				return Rectangle.Empty;
+			}
+
+			var size = MenuScreen.CalculateMenuSize(MenuScreen.MENU_PADDING, MenuScreen.MENU_PADDING, menuOptions, MenuLayout.Vertical);
+			_items = menuOptions.Select(o => new MenuItem { Id = o.ToLower(), Text = o }).ToList();
+			return new Rectangle(position.X, position.Y, size.Width, size.Height);
+		}
 
 		protected override void ItemSelect(ComponentEventArgs e)
 		{
 			e.Meta = this.Owner;
 			base.ItemSelect(e);
+			this.Owner = null;
 		}
-
-		protected abstract List<string> GetItemMenuOptions();
 
 		protected override void MouseOut(ComponentEventArgs e)
 		{
@@ -70,9 +97,9 @@ namespace Game1.Screens.Menu
 			this.Owner = null;
 		}
 
-		private void _host_OnMouseOver(object sender, ComponentEventArgs e)
+		private void _host_OnMouseRightClick(object sender, ComponentEventArgs e)
 		{
-			this.Owner = e.Meta as Component;
+			this.Owner = (ISupportsContextMenu)e.Meta;
 		}
 	}
 }

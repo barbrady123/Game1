@@ -66,7 +66,7 @@ namespace Game1.Interface
 
 		public event EventHandler<ComponentEventArgs> OnBeforeTextUpdate;
 
-		public TextInput(int width, Vector2 position, string text = null, int maxLength = 100) : base(position.ExpandToRectangleCentered(width / 2, TextInput.Height / 2), true, hasBorder: true)
+		public TextInput(int width, Vector2 position, string text = null, int maxLength = 100) : base(position.ExpandToRectangleCentered(width / 2, TextInput.Height / 2), true, hasBorder: true, drawIfDisabled: true)
 		{
 			_width = width;
 			_maxVisibleLength = _width - (this.BorderThickness * 2) - (TextInput.TextPadding.Width * 2);

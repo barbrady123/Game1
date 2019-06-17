@@ -165,6 +165,7 @@ namespace Game1
 			{
 				case SplashScreen _ : switch (e.Trigger)
 				{
+					case EventTrigger.ButtonClick:
 					case EventTrigger.KeyPressed :	TransitionScreens(new MainMenu(_bounds));	break;
 					case EventTrigger.Escape :		Game1.Instance.Exit();						break;
 				}

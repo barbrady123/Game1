@@ -102,6 +102,7 @@
     <Compile Include="Interface\Windows\InventoryWindow.cs" />
     <Compile Include="Interface\Windows\SplitWindow.cs" />
     <Compile Include="Interface\Windows\Tooltip.cs" />
+    <Compile Include="ISupportsContextMenu.cs" />
     <Compile Include="Items\InventoryItem.cs" />
     <Compile Include="IOManager.cs" />
     <Compile Include="Items\Item.cs" />
