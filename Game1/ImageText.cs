@@ -34,19 +34,15 @@ namespace Game1
 
 		public int StringLength(string text) => (int)this.StringSize(text).X;
 
-		public ImageText(string text = null, bool isActive = false) : this(text, null, isActive) { }
+		public ImageText(string text = null, bool isActive = false, ImageAlignment? alignment = null) : this(text, null, isActive, alignment) { }
 
-		public ImageText(string text = null, string fontName = null, bool isActive = false) : base(isActive)
+		public ImageText(string text = null, string fontName = null, bool isActive = false, ImageAlignment? alignment = null) : base(isActive)
 		{
 			_text = text ?? "";
 			_fontName = fontName ?? ImageText.DefaultFont;
-		}
-
-		public override void LoadContent()
-		{
-			base.LoadContent();
-			_font = FontManager.Get(_fontName);
-			CalculateTextSize(false);
+			_font = FontManager.Get(_fontName);			
+			this.Alignment = alignment ?? this.Alignment;
+			CalculateTextSize();
 		}
 
 		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null, SpriteEffects? spriteEffects = null)
@@ -60,17 +56,16 @@ namespace Game1
 			if (text != _text)
 			{
 				_text = text;
-				// I think this is safe because 1.  UpdateText most certainly will want the source rect updated, and 2. I don't think we ever explicitly set this for text images...?
-				CalculateTextSize(true);
+				CalculateTextSize();
 			}
 		}
 
-		private void CalculateTextSize(bool recalculateSourceRect)
+		private void CalculateTextSize()
 		{
 			var baseSize = _font.MeasureString(_text);
 			this.Size = baseSize * this.Scale;
-			if ((this.SourceRect == Rectangle.Empty) || recalculateSourceRect)
-				this.SourceRect = new Rectangle(0, 0, (int)baseSize.X, (int)baseSize.Y);
+			// SourceRect neded for SetOrigin...
+			this.SourceRect = new Rectangle(0, 0, (int)baseSize.X, (int)baseSize.Y);
 			SetOrigin();
 		}
 	}

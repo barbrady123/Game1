@@ -26,7 +26,7 @@ namespace Game1.Screens.Menu.Character
 		public event EventHandler<ComponentEventArgs> OnSexItemChange;
 		public event EventHandler<ComponentEventArgs> OnUserNotify;
 
-		public CharacterNewCompositeMenu(Rectangle bounds) : base(bounds, true, "brick")
+		public CharacterNewCompositeMenu(Rectangle bounds) : base(bounds, true, null)
 		{
 			// Main menu...
 			_activator.Register(_menuCharacter = new CharacterNewMenu(new Rectangle(this.Bounds.Left, this.Bounds.Top, 200, 200)), true, "active");

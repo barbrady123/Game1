@@ -111,12 +111,10 @@ namespace Game1.Interface.Windows
 				return;
 
 			_timer = Tooltip.TooltipTimer;
-			UnloadContent();
 			var position = InputManager.MousePosition.Offset(10, 10);
 			_text.UpdateText(_owner.TooltipText);
 			var textSize = _text.Size;
 			this.Bounds = new Rectangle(position.X, position.Y, (int)textSize.X + this.TextPadding * 2, (int)textSize.Y + this.TextPadding * 2);
-			LoadContent();
 		}
 
 		private void Refresh()
@@ -130,9 +128,9 @@ namespace Game1.Interface.Windows
 			this.Bounds = new Rectangle(position.X, position.Y, (int)textSize.X + this.TextPadding * 2, (int)textSize.Y + this.TextPadding * 2);
 		}
 
-		protected override void RepositionObjects(bool loadContent = false)
+		protected override void BoundsChanged(bool resized)
 		{
-			base.RepositionObjects(loadContent);
+			base.BoundsChanged(resized);
 			if (_text != null)
 				_text.Position = this.Bounds.CenterVector();
 		}

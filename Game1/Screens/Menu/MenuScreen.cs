@@ -89,24 +89,30 @@ namespace Game1.Screens.Menu
 			_currentIndex = -1;
 			_layout = layout;
 			_items = GetItemData();
+			SetupItems();
 		}
 
 		public override void LoadContent()
 		{			
 			base.LoadContent();
-			if (_items.Any())
-				LoadItemContent();
 		}
 
-		protected virtual void LoadItemContent()
+		protected override void BoundsChanged(bool resized)
 		{
+			base.BoundsChanged(resized);
+			SetupItems();
+		}
+
+		protected virtual void SetupItems()
+		{
+			if ((!(_items?.Any() ?? false)) || (this.Bounds == Rectangle.Empty))
+				return;
+
 			int menuSize = 0;
 
 			foreach (var item in _items)
 			{
-				item.Image = new ImageText(item.Text, true);
-				item.Image.Alignment = ImageAlignment.LeftTop;
-				item.Image.LoadContent();
+				item.Image = new ImageText(item.Text, true, ImageAlignment.LeftTop);
 				menuSize += (menuSize > 0 ? MENU_PADDING : 0) + (_layout == MenuLayout.Vertical ? (int)item.Image.Size.Y : (int)item.Image.Size.X);
 			}
 

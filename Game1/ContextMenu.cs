@@ -52,14 +52,10 @@ namespace Game1.Screens.Menu
 
 		private void Show()
 		{
-			UnloadContent();
 			var position = InputManager.MousePosition.Offset(-10, -10);
-			this.Bounds = SetupMenuItems(position);
+			this.Bounds = SetupContextMenuItems(position);
 			if (this.Bounds != Rectangle.Empty)
-			{
-				LoadContent();
 				this.IsActive = true;
-			}
 		}
 
 		private void Hide()
@@ -67,7 +63,7 @@ namespace Game1.Screens.Menu
 			this.IsActive = false;
 		}
 
-		protected virtual Rectangle SetupMenuItems(Point position)
+		protected virtual Rectangle SetupContextMenuItems(Point position)
 		{
 			if ((position == Util.PointInvalid) || (this.Owner == null))
 				return Rectangle.Empty;

@@ -12,7 +12,6 @@ namespace Game1.Screens.Menu.Character
 {
 	public class CharacterNewMenu : MenuScreen
 	{
-		// shouldn't need escape to disable here either
 		public CharacterNewMenu(Rectangle bounds): base(bounds, background: null, inactiveMouseEvents: true, drawIfDisabled: true) { }
 
 		public override void UpdateInput(GameTime gameTime)

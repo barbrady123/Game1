@@ -244,7 +244,6 @@ namespace Game1
 		{	
 			foreach (var data in _itemRenderData)
 			{
-				// Another case where Positiongeddon should make easier, _gameViewArea should not be a factor here...
 				data.Position = new Vector2(data.Item.Position.X - _terrainSourceRect.X + _gameViewArea.X, data.Item.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
 				// We could also do something like "if this position is X.pixels beyond the _gameViewArea, just set it to null...and then on Draw we skip drawing this...(say > 64 pixels out of bounds, for example)
 				// Need to test if extra computation here is worth it on the backend...
