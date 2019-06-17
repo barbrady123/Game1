@@ -25,6 +25,13 @@ namespace Game1.Interface
 			_text = new ImageText(text, true) { Position = bounds.CenterVector() };
 		}
 
+		protected override void BoundsChanged(bool resized)
+		{
+			base.BoundsChanged(resized);
+			if (_text != null)
+				_text.Position = Bounds.CenterVector();
+		}
+
 		public override void LoadContent()
 		{
 			base.LoadContent();
@@ -44,7 +51,6 @@ namespace Game1.Interface
 			_text.Scale = _mouseover ? Button.MouseOverScale : Vector2.One;
 			_text.Update(gameTime);
 			base.UpdateActive(gameTime);
-			//InputManager.BlockAllInput();
 		}
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)

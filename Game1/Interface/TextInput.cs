@@ -53,8 +53,18 @@ namespace Game1.Interface
 				{
 					_text = value;
 					CalculateVisibleText(TextInputAction.Add);
+					this.CurrentPositionIndex = Math.Min(_text.Length, this.CurrentPositionIndex);
 				}
 			}
+		}
+
+		protected override void BoundsChanged(bool resized)
+		{
+			base.BoundsChanged(resized);
+			if (_textImage != null)
+				_textImage.Position = this.TextPosition + new Vector2(0.0f, FontManager.FontHeight);
+			if (_cursor != null)
+				_cursor.Position = new Vector2(this.CursorPositionX, this.TextPosition.Y);
 		}
 
 		protected override void IsActiveChange()
@@ -77,22 +87,24 @@ namespace Game1.Interface
 			this.AllowedCharacters = "";
 			this.BlockedCharacters = "";
 			this.CurrentPositionIndex = this.Text.Length;
-		}
 
-		public override void LoadContent()
-		{
-			base.LoadContent();
 			_textImage = new ImageText(this.Text, true) { 
 				Position = this.TextPosition + new Vector2(0.0f, FontManager.FontHeight),
 				Alignment = ImageAlignment.LeftBottom,
 				Scale = new Vector2(1.1f, 1.1f)
 			};
-			_textImage.LoadContent();
+
 			_cursor = new ImageTexture("Interface/cursor", true) { Position = new Vector2(this.CursorPositionX, this.TextPosition.Y) };
 			var effect = _cursor.AddEffect<FadeCycleEffect>(true);
 			effect.Speed = 5.0f;	// Add dynamic params so we can include this in call above
-			_cursor.LoadContent();
 			CalculateVisibleText(TextInputAction.Right);
+		}
+
+		public override void LoadContent()
+		{
+			base.LoadContent();
+			_textImage.LoadContent();
+			_cursor.LoadContent();
 		}
 
 		public override void UnloadContent()

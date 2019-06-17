@@ -48,21 +48,7 @@ namespace Game1.Interface.Windows
 		{
 			_menu = new OkCancelMenu(Rectangle.Empty) { IsActive = true };
 			_menu.OnItemSelect += _menu_OnItemSelect;
-		}
 
-		private void Show()
-		{
-			UnloadContent();	// Need to go away
-			var position = InputManager.MousePosition.Offset(-10, -10);
-			this.Bounds = new Rectangle(position.X, position.Y, 160, 200);
-
-			var bottomCenter = this.Bounds.BottomCenterVector();
-
-			// Menu moved successfully without reconstructing it, but...
-			// Component level stuff (background) still not because of this load/unload crap...
-			_menu.Bounds = new Rectangle((int)bottomCenter.X - 80, (int)bottomCenter.Y - 50, this.Bounds.Width, 30);
-			
-			// DO NOT!!! DO THIS...JUST MOVE IT!
 			_input = new TextInput(SplitWindow.TextInputWidth, new Vector2(this.Bounds.Center.X, this.Bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2)), "", 2) {
 				IsActive = true,
 				AllowedCharacters = "0123456789"
@@ -70,11 +56,25 @@ namespace Game1.Interface.Windows
 			_input.OnReadyDisable += _input_OnReadyDisable;
 			_input.OnBeforeTextUpdate += _input_OnBeforeTextUpdate;
 
-			// DO NOT!!! DO THIS...JUST MOVE IT!
 			_halfButton = new Button(this.Bounds.CenteredRegion(80, 40), "Half") { IsActive = true };
 			_halfButton.OnMouseLeftClick += _halfButton_OnMouseLeftClick;
+		}
 
-			LoadContent();	// needs to go away
+		// There's some redundant code in here to clean up...
+		private void Show()
+		{
+			var position = InputManager.MousePosition.Offset(-10, -10);
+			this.Bounds = new Rectangle(position.X, position.Y, 160, 200);
+			var bottomCenter = this.Bounds.BottomCenterVector();
+
+			_menu.Bounds = new Rectangle((int)bottomCenter.X - 80, (int)bottomCenter.Y - 50, this.Bounds.Width, 30);
+			
+			var inputPosition = new Vector2(this.Bounds.Center.X, this.Bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2));
+			_input.Bounds = inputPosition.ExpandToRectangleCentered(SplitWindow.TextInputWidth / 2, TextInput.Height / 2);
+			_input.Text = "";
+
+			_halfButton.Bounds = this.Bounds.CenteredRegion(80, 40);
+
 			this.IsActive = true;
 		}
 
