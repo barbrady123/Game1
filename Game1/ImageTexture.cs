@@ -37,6 +37,11 @@ namespace Game1
 			if (_texture == null)
 				_texture = _content.Load<Texture2D>(_name);
 
+			UpdatePosition();
+		}
+
+		protected virtual void UpdatePosition()
+		{
 			if (this.SourceRect == Rectangle.Empty)
 				this.SourceRect = _texture.Bounds;
 

@@ -75,8 +75,6 @@ namespace Game1
 				_background.Position = this.Bounds.CenterVector();
 				_background.SourceRect = this.Bounds;
 			}
-
-
 		}
 
 		public event EventHandler<ComponentEventArgs> OnReadyDisable;

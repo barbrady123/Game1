@@ -86,6 +86,7 @@
     <Compile Include="IActivatable.cs" />
     <Compile Include="ImageAlignment.cs" />
     <Compile Include="Image.cs" />
+    <Compile Include="ImageSpriteSheet.cs" />
     <Compile Include="ImageText.cs" />
     <Compile Include="ImageTexture.cs" />
     <Compile Include="InputManager.cs" />

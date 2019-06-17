@@ -17,7 +17,7 @@ namespace Game1
 	public class CharacterRenderData
 	{
 		public Character Character { get; set; }
-		public ImageTexture SpriteSheet { get; set; }	// TODO : Eventually these should  be a seperate collection and we point to an ID here, to prevent loading duplicate sprite sheets...
+		public ImageSpriteSheet SpriteSheet { get; set; }	// TODO : Eventually these should  be a seperate collection and we point to an ID here, to prevent loading duplicate sprite sheets...
 		public Vector2 PreviousPosition { get; set; }
 		//public SpriteSheetEffect Animation { get; set; }
 		public bool ShowActiveItem { get; set; }
@@ -217,7 +217,7 @@ namespace Game1
 			else
 				renderData.SpriteSheet.StopEffect(typeof(SpriteSheetEffect));
 			
-			renderData.SpriteSheet.SourceRect = new Rectangle(renderData.SpriteSheet.SourceRect.X, (int)character.Direction * Game1.TileSize, Game1.TileSize, Game1.TileSize);
+			renderData.SpriteSheet.UpdateDirection(character.Direction);
 			renderData.SpriteSheet.Update(gameTime);
 			renderData.SpriteSheet.Position = new Vector2(character.Position.X - _terrainSourceRect.X + _gameViewArea.X, character.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
 			renderData.PreviousPosition = character.Position;
@@ -254,10 +254,7 @@ namespace Game1
 		private void LoadCharacterSpriteSheet(CharacterRenderData renderData)
 		{
 			// TODO: Fix this so it loads unique sprite sheets into collection ONLY and they are referenced by id here...
-			renderData.SpriteSheet = new ImageTexture($"{Game1.SpriteSheetRoot}\\{renderData.Character.SpriteSheetName}") { 
-				IsActive = true,
-				Alignment = ImageAlignment.Centered,
-			};
+			renderData.SpriteSheet = new ImageSpriteSheet($"{Game1.SpriteSheetRoot}\\{renderData.Character.SpriteSheetName}") { IsActive = true };
 			renderData.SpriteSheet.LoadContent();
 			renderData.SpriteSheet.AddEffect<SpriteSheetEffect>(false);
 		}
