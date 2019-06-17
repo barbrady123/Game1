@@ -46,21 +46,23 @@ namespace Game1.Interface.Windows
 
 		public SplitWindow(SpriteBatchData spriteBatchData) : base(Rectangle.Empty, true, background: "black", spriteBatchData: spriteBatchData, drawIfDisabled: false)
 		{
-			// We allow empty instanciation so the object can be registered with a ComponentManager if necessary...
+			_menu = new OkCancelMenu(Rectangle.Empty) { IsActive = true };
+			_menu.OnItemSelect += _menu_OnItemSelect;
 		}
 
-		// This will WAY simplier after Positiongeddon....
 		private void Show()
 		{
-			UnloadContent();
+			UnloadContent();	// Need to go away
 			var position = InputManager.MousePosition.Offset(-10, -10);
 			this.Bounds = new Rectangle(position.X, position.Y, 160, 200);
 
 			var bottomCenter = this.Bounds.BottomCenterVector();
 
-			_menu = new OkCancelMenu(new Rectangle((int)bottomCenter.X - 80, (int)bottomCenter.Y - 50, this.Bounds.Width, 30)) { IsActive = true };
-			_menu.OnItemSelect += _menu_OnItemSelect;
+			// Menu moved successfully without reconstructing it, but...
+			// Component level stuff (background) still not because of this load/unload crap...
+			_menu.Bounds = new Rectangle((int)bottomCenter.X - 80, (int)bottomCenter.Y - 50, this.Bounds.Width, 30);
 			
+			// DO NOT!!! DO THIS...JUST MOVE IT!
 			_input = new TextInput(SplitWindow.TextInputWidth, new Vector2(this.Bounds.Center.X, this.Bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2)), "", 2) {
 				IsActive = true,
 				AllowedCharacters = "0123456789"
@@ -68,10 +70,11 @@ namespace Game1.Interface.Windows
 			_input.OnReadyDisable += _input_OnReadyDisable;
 			_input.OnBeforeTextUpdate += _input_OnBeforeTextUpdate;
 
+			// DO NOT!!! DO THIS...JUST MOVE IT!
 			_halfButton = new Button(this.Bounds.CenteredRegion(80, 40), "Half") { IsActive = true };
 			_halfButton.OnMouseLeftClick += _halfButton_OnMouseLeftClick;
 
-			LoadContent();
+			LoadContent();	// needs to go away
 			this.IsActive = true;
 		}
 
@@ -90,6 +93,7 @@ namespace Game1.Interface.Windows
 
 		public override void UnloadContent()
 		{
+			base.UnloadContent();
 			_menu?.UnloadContent();
 			_input?.UnloadContent();
 			_halfButton?.UnloadContent();

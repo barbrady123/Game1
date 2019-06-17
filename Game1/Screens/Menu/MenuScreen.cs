@@ -148,7 +148,7 @@ namespace Game1.Screens.Menu
 		{
 			base.UnloadContent();
 			foreach (var item in _items)
-				item.Image.UnloadContent();
+				item.Image?.UnloadContent();
 		}
 
 		public override void UpdateActive(GameTime gameTime)
