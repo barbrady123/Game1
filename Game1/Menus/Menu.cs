@@ -9,18 +9,12 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Newtonsoft.Json;
 using Game1.Effect;
 using Game1.Enum;
 
-namespace Game1.Screens.Menu
+namespace Game1.Menus
 {	
-	/// <summary>
-	/// TODO: This should just take a Position and optional Size...and calculate based on items if size isn't specified...
-	/// This would greatly simplify other parts of the code where the items are dynamic, etc....and we don't have arbitrary
-	/// menu sizes, such as "the entire screen", etc...
-	/// </summary>
-	public class MenuScreen : Component
+	public abstract class Menu : Component
 	{
 		public const int MENU_PADDING = 20;
 		private const float ENABLED_MENU_ALPHA = 1.0f;
@@ -53,7 +47,7 @@ namespace Game1.Screens.Menu
 				for (int x = 0; x < _items.Count; x++)
 				{
 					if (_items[x].Image != null)
-						_items[x].Image.Color = (x == _currentIndex) ? MenuScreen.SelectedItemColor : MenuScreen.UnselectedItemColor;
+						_items[x].Image.Color = (x == _currentIndex) ? Menu.SelectedItemColor : Menu.UnselectedItemColor;
 				}
 			}
 		}
@@ -77,19 +71,19 @@ namespace Game1.Screens.Menu
 			_currentIndex = -1;
 		}
 
-		public MenuScreen(Rectangle bounds,
+		public Menu(Point position,
 						  MenuLayout layout = MenuLayout.Vertical,
 						  string background = "brick",
 						  SpriteBatchData spriteBatchData = null,
 						  bool escapeToDisable = false,
 						  bool fireMouseEvents = true,
 						  bool inactiveMouseEvents = false,
-						  bool drawIfDisabled = false): base(bounds, escapeToDisable, background, spriteBatchData, false, fireMouseEvents, inactiveMouseEvents, drawIfDisabled)
+						  bool drawIfDisabled = false): base(Rectangle.Empty, escapeToDisable, background, spriteBatchData, false, fireMouseEvents, inactiveMouseEvents, drawIfDisabled)
 		{
 			_currentIndex = -1;
 			_layout = layout;
-			_items = GetItemData();
-			SetupItems();
+			this.Bounds = SetupMenuItems(position);
+			SetupMenuItemPositions();
 		}
 
 		public override void LoadContent()
@@ -97,13 +91,34 @@ namespace Game1.Screens.Menu
 			base.LoadContent();
 		}
 
+		public void UpdatePosition(Point position)
+		{
+			this.Bounds = new Rectangle(position.X, position.Y, this.Bounds.Width, this.Bounds.Height);
+		}
+
 		protected override void BoundsChanged(bool resized)
 		{
 			base.BoundsChanged(resized);
-			SetupItems();
+			SetupMenuItemPositions();
 		}
 
-		protected virtual void SetupItems()
+		protected abstract List<string> GetItemData();
+
+		protected virtual Rectangle SetupMenuItems(Point position)
+		{		
+			var menuOptions = this.GetItemData();
+			if (!menuOptions.Any())
+				return Rectangle.Empty;
+
+			_items = menuOptions.Select(o => new MenuItem { Id = o.Replace(" ", "").ToLower(), Text = o }).ToList();
+
+			if (position == Util.PointInvalid)
+				return Rectangle.Empty;
+			var size = this.CalculateMenuSize(menuOptions);
+			return new Rectangle(position.X, position.Y, size.Width, size.Height);
+		}
+
+		protected virtual void SetupMenuItemPositions()
 		{
 			if ((!(_items?.Any() ?? false)) || (this.Bounds == Rectangle.Empty))
 				return;
@@ -154,7 +169,7 @@ namespace Game1.Screens.Menu
 		public override void UpdateActive(GameTime gameTime)
 		{
 			for (int x = 0; x < _items.Count; x++)
-				_items[x].Image.Color = MenuScreen.ActiveItemColor;
+				_items[x].Image.Color = Menu.ActiveItemColor;
 
 			foreach (var item in _items)
 				item.Image.Update(gameTime);
@@ -206,7 +221,7 @@ namespace Game1.Screens.Menu
 			base.DrawInternal(spriteBatch);
 
 			foreach (var item in _items)
-				item.Image.Draw(spriteBatch, this.IsActive ? MenuScreen.ENABLED_MENU_ALPHA : MenuScreen.DISABLED_MENU_ALPHA);
+				item.Image.Draw(spriteBatch, this.IsActive ? Menu.ENABLED_MENU_ALPHA : Menu.DISABLED_MENU_ALPHA);
 		}
 
 		public int SetById(string id)
@@ -221,14 +236,6 @@ namespace Game1.Screens.Menu
 			return -1;
 		}
 
-		protected virtual List<MenuItem> GetItemData()
-		{
-			using (var reader = new StreamReader($"Load\\Menu\\{this.GetType().Name}.json"))
-			{
-				return JsonConvert.DeserializeObject<List<MenuItem>>(reader.ReadToEnd());
-			}
-		}
-
 		private void SetCurrentItemEffects(bool active)
 		{
 			if ((_currentIndex < 0) || !_items.Any())
@@ -241,29 +248,36 @@ namespace Game1.Screens.Menu
 			else
 			{
 				_items[_currentIndex].Image.StopEffect(typeof(FadeCycleEffect));
-				_items[_currentIndex].Image.Alpha = MenuScreen.DEFAULT_ITEM_ALPHA;
+				_items[_currentIndex].Image.Alpha = Menu.DEFAULT_ITEM_ALPHA;
 			}
 		}
 
-		public static Size CalculateMenuSize(int padding, int spacing, List<string> options, MenuLayout layout)
+		public Size CalculateMenuSize(List<string> options, bool includePadding = true)
 		{
+			if (options == null)
+			{
+				options = this.GetItemData();
+				if (!options.Any())
+					return new Size(0, 0);
+			}
+
 			float width = 0;
 			float height = 0;
 
 			foreach (var option in options)
 			{
 				var size = FontManager.MeasureString(option);
-				width = (layout == MenuLayout.Vertical) ? Math.Max(width, size.X) : width + size.X;
-				height = (layout == MenuLayout.Vertical) ? height + size.Y : Math.Max(height, size.Y);
+				width = (_layout == MenuLayout.Vertical) ? Math.Max(width, size.X) : width + size.X;
+				height = (_layout == MenuLayout.Vertical) ? height + size.Y : Math.Max(height, size.Y);
 			}
 
-			int paddingWidth = padding * 2;
-			if (layout == MenuLayout.Horizontal)
-				paddingWidth += padding * (options.Count - 1);
+			int paddingWidth = (includePadding ? Menu.MENU_PADDING * 2 : 0);
+			if (_layout == MenuLayout.Horizontal)
+				paddingWidth += Menu.MENU_PADDING * (options.Count - 1);
 
-			int paddingHeight = padding * 2;
-			if (layout == MenuLayout.Vertical)
-				paddingHeight += padding * (options.Count - 1);
+			int paddingHeight = (includePadding ? Menu.MENU_PADDING * 2 : 0);
+			if (_layout == MenuLayout.Vertical)
+				paddingHeight += Menu.MENU_PADDING * (options.Count - 1);
 
 			return new Size((int)width + paddingWidth, (int)height + paddingHeight);
 		}
@@ -273,9 +287,9 @@ namespace Game1.Screens.Menu
 			OnCurrentItemChange?.Invoke(this, args);
 		}
 
-		protected virtual void ItemSelect(ComponentEventArgs args)
+		protected virtual void ItemSelect(ComponentEventArgs e)
 		{
-			OnItemSelect?.Invoke(this, args);
+			OnItemSelect?.Invoke(this, e);
 			InputManager.BlockAllInput();
 		}
 	}

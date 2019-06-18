@@ -8,14 +8,13 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
-using Game1.Items;
-using Game1.Screens;
-using Game1.Menus;
 
-namespace Game1
+namespace Game1.Menus
 {
-	public static class PointExtensions
+	public class OkCancelMenu : Menu
 	{
-		public static Point Offset(this Point point, int xOffset, int yOffset) => new Point(point.X + xOffset, point.Y + yOffset);
+		public OkCancelMenu(Point position) : base(position, MenuLayout.Horizontal, null) { }
+
+		protected override List<string> GetItemData() => new List<string> { "OK", "Cancel" };
 	}
 }

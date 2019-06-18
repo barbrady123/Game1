@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Items;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1.Interface
 {

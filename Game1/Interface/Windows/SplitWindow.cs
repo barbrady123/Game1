@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Items;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1.Interface.Windows
 {
@@ -46,7 +46,7 @@ namespace Game1.Interface.Windows
 
 		public SplitWindow(SpriteBatchData spriteBatchData) : base(Rectangle.Empty, true, background: "black", spriteBatchData: spriteBatchData, drawIfDisabled: false)
 		{
-			_menu = new OkCancelMenu(Rectangle.Empty) { IsActive = true };
+			_menu = new OkCancelMenu(Util.PointInvalid) { IsActive = true };
 			_menu.OnItemSelect += _menu_OnItemSelect;
 
 			_input = new TextInput(SplitWindow.TextInputWidth, new Vector2(this.Bounds.Center.X, this.Bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2)), "", 2) {
@@ -67,7 +67,8 @@ namespace Game1.Interface.Windows
 			this.Bounds = new Rectangle(position.X, position.Y, 160, 200);
 			var bottomCenter = this.Bounds.BottomCenterVector();
 
-			_menu.Bounds = new Rectangle((int)bottomCenter.X - 80, (int)bottomCenter.Y - 50, this.Bounds.Width, 30);
+			var size = _menu.CalculateMenuSize(null, false);
+			_menu.UpdatePosition(new Point(this.Bounds.Center.X, this.Bounds.Bottom - this.ContentMargin.Height - (size.Height / 2)));
 			
 			var inputPosition = new Vector2(this.Bounds.Center.X, this.Bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2));
 			_input.Bounds = inputPosition.ExpandToRectangleCentered(SplitWindow.TextInputWidth / 2, TextInput.Height / 2);

@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using Microsoft.Xna.Framework;
 using Game1.Enum;
 
-namespace Game1.Screens.Menu
+namespace Game1.Menus
 {
 	public class MenuItem
 	{

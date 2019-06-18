@@ -12,7 +12,7 @@ using Game1.Interface;
 using Game1.Interface.Windows;
 using Game1.Items;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1
 {
@@ -34,7 +34,7 @@ namespace Game1
 		private bool _enabledTooltip;
 		protected Tooltip _tooltip;
 		private bool _enabledContextMenu;
-		protected MenuScreen _contextMenu;
+		protected Menu _contextMenu;
 
 		public virtual bool IsActive
 		{
