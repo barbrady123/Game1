@@ -19,6 +19,12 @@ namespace Game1.Effect
 			this.IsIncreasing = false;
 		}
 
+		protected override void ResetImage()
+		{
+			if (_image != null)
+				_image.Alpha = 1.0f;
+		}
+
 		public override void Update(GameTime gameTime)
 		{
 			if (this.IsActive)

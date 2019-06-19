@@ -248,7 +248,6 @@ namespace Game1.Menus
 			else
 			{
 				_items[_currentIndex].Image.StopEffect(typeof(FadeCycleEffect));
-				_items[_currentIndex].Image.Alpha = Menu.DEFAULT_ITEM_ALPHA;
 			}
 		}
 

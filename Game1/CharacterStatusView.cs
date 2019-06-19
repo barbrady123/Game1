@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Game1.Effect;
 
 namespace Game1
 {
@@ -28,6 +29,16 @@ namespace Game1
 		{
 			base.Update(gameTime);
 			_status.Icon.Position = this.Bounds.TopLeftVector();
+			if (_status.Duration < 10.0f)
+			{
+				var effect =_status.Icon.AddEffect<FadeCycleEffect>(true);
+				effect.Speed = (_status.Duration < 5.0f) ? 2.5f : 1.2f;
+			}
+			else
+			{
+				_status.Icon.StopEffect(typeof(FadeCycleEffect));
+			}
+
 			_status.Icon.Update(gameTime);
 		}
 

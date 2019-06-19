@@ -136,6 +136,12 @@ namespace Game1.Interface.Windows
 			EnsureVisible();
 		}
 
+		public void HideIfOwner(ISupportsTooltip possibleOwner)
+		{
+			if (this.Owner == possibleOwner)
+				this.Owner = null;
+		}
+
 		private void EnsureVisible()
 		{
 			Rectangle gameBounds = Game1.Graphics.Viewport.Bounds;
