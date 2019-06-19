@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Items;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1.Interface.Windows
 {
@@ -21,10 +21,10 @@ namespace Game1.Interface.Windows
 
 		private int _timer;
 		private ImageText _text;
-		private Component _owner;
+		private ISupportsTooltip _owner;
 		private Component _host;
 
-		public Component Owner
+		public ISupportsTooltip Owner
 		{
 			get { return _owner; }
 			set
@@ -111,12 +111,10 @@ namespace Game1.Interface.Windows
 				return;
 
 			_timer = Tooltip.TooltipTimer;
-			UnloadContent();
 			var position = InputManager.MousePosition.Offset(10, 10);
 			_text.UpdateText(_owner.TooltipText);
 			var textSize = _text.Size;
 			this.Bounds = new Rectangle(position.X, position.Y, (int)textSize.X + this.TextPadding * 2, (int)textSize.Y + this.TextPadding * 2);
-			LoadContent();
 		}
 
 		private void Refresh()
@@ -130,11 +128,28 @@ namespace Game1.Interface.Windows
 			this.Bounds = new Rectangle(position.X, position.Y, (int)textSize.X + this.TextPadding * 2, (int)textSize.Y + this.TextPadding * 2);
 		}
 
-		protected override void RepositionObjects(bool loadContent = false)
+		protected override void BoundsChanged(bool resized)
 		{
-			base.RepositionObjects(loadContent);
+			base.BoundsChanged(resized);
 			if (_text != null)
 				_text.Position = this.Bounds.CenterVector();
+			EnsureVisible();
+		}
+
+		public void HideIfOwner(ISupportsTooltip possibleOwner)
+		{
+			if (this.Owner == possibleOwner)
+				this.Owner = null;
+		}
+
+		private void EnsureVisible()
+		{
+			Rectangle gameBounds = Game1.Graphics.Viewport.Bounds;
+			if (!gameBounds.Contains(this.Bounds))
+			{
+				int overflowX = gameBounds.Right - this.Bounds.Right;
+				this.Bounds = this.Bounds.Move(-overflowX, 0);
+			}
 		}
 
 		private void Hide()
@@ -155,7 +170,7 @@ namespace Game1.Interface.Windows
 
 		private void _host_OnMouseOver(object sender, ComponentEventArgs e)
 		{
-			this.Owner = e.Meta as Component;
+			this.Owner = e.Meta as ISupportsTooltip;
 		}
 	}
 }

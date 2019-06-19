@@ -37,6 +37,11 @@ namespace Game1
 			if (_texture == null)
 				_texture = _content.Load<Texture2D>(_name);
 
+			UpdatePosition();
+		}
+
+		protected virtual void UpdatePosition()
+		{
 			if (this.SourceRect == Rectangle.Empty)
 				this.SourceRect = _texture.Bounds;
 
@@ -49,6 +54,7 @@ namespace Game1
 			// In case this texture was generated elsewhere...
 			_texture?.Dispose();
 		}
+
 
 		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null, SpriteEffects? spriteEffects = null)
 		{

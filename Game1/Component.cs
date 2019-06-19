@@ -12,11 +12,11 @@ using Game1.Interface;
 using Game1.Interface.Windows;
 using Game1.Items;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1
 {
-	public abstract class Component : IActivatable
+	public abstract class Component : IActivatable, ISupportsTooltip
 	{
 		private readonly SpriteBatchData _spriteBatchData;
 		private bool _isActive;
@@ -34,7 +34,7 @@ namespace Game1
 		private bool _enabledTooltip;
 		protected Tooltip _tooltip;
 		private bool _enabledContextMenu;
-		protected MenuScreen _contextMenu;
+		protected Menu _contextMenu;
 
 		public virtual bool IsActive
 		{
@@ -59,11 +59,31 @@ namespace Game1
 			{
 				if (_bounds != value)
 				{
+					bool resized = (_bounds.Width != value.Width) || (_bounds.Height != value.Height);
 					_bounds = value;
-					bool bgLoaded = SetupBackground();
-					bool borderLoaded = SetupBorder();
-					RepositionObjects(bgLoaded || borderLoaded);
+					BoundsChanged(resized);
 				}
+			}
+		}
+
+		protected virtual void BoundsChanged(bool resized)
+		{
+			if (this.Bounds == Rectangle.Empty)
+				return;
+
+			if (_background != null)
+			{
+				_background.Position = this.Bounds.CenterVector();
+				_background.SourceRect = this.Bounds.MoveTo(0, 0);
+			}
+
+			if (resized)
+				SetupBorder();
+
+			if (_border != null)
+			{
+				_border.Position = this.Bounds.CenterVector();
+				_border.SourceRect = this.Bounds.MoveTo(0, 0);
 			}
 		}
 
@@ -111,9 +131,10 @@ namespace Game1
 				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
 			}
 
-			SetupBackground();
-			SetupBorder();
-			RepositionObjects();
+			if (!String.IsNullOrWhiteSpace(_backgroundName))
+				_background = new ImageTexture($"{Game1.BackgroundRoot}/{_backgroundName}", true) { Alignment = ImageAlignment.Centered };
+
+			BoundsChanged(true);
 		}
 
 		public virtual void LoadContent()
@@ -247,57 +268,13 @@ namespace Game1
 
 		protected virtual void MouseRightClick(ComponentEventArgs e) => OnMouseRightClick?.Invoke(this, e);
 
-		protected virtual void RepositionObjects(bool loadContent = false)
+		protected void SetupBorder()
 		{
-			if (loadContent)
-			{
-				if (_background?.Texture != null)
-					_background?.UnloadContent();
-
-				if (_border?.Texture != null)
-					_border?.UnloadContent();
-			}
-
-			if (_background != null)
-			{
-				_background.Position = this.Bounds.CenterVector();
-				_background.SourceRect = this.Bounds;
-			}
-
-			if (_border != null)
-				_border.Position = this.Bounds.CenterVector();
-
-			if (loadContent)
-			{
-				_background?.LoadContent();
-				_border?.LoadContent();
-			}
-		}
-
-		protected bool SetupBackground()
-		{
-			bool wasLoaded = _background?.Texture != null;
-
-			_background?.UnloadContent();
-			// TODO: This should add support for the Util.GenerateSolidBackgroundTexture method for solid colors...
-			if ((!String.IsNullOrWhiteSpace(_backgroundName)) && (this.Bounds != Rectangle.Empty))
-				_background = new ImageTexture($"{Game1.BackgroundRoot}/{_backgroundName}", true) { Alignment = ImageAlignment.Centered };
-
-			return wasLoaded;
-		}
-
-		protected bool SetupBorder()
-		{
-			bool wasLoaded = _border?.Texture != null;
-
 			if (_hasBorder && (this.Bounds != Rectangle.Empty))
 			{
 				_border?.UnloadContent();
 				_border = Util.GenerateBorderTexture(this.Bounds.Width, this.Bounds.Height, this.BorderThickness, this.BorderColor, true);
-				_border.Alignment = ImageAlignment.Centered;
 			}
-
-			return wasLoaded;
 		}
 
 		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e) => ContextMenuSelect(e);

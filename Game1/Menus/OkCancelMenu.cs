@@ -9,17 +9,12 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 
-namespace Game1
+namespace Game1.Menus
 {
-	/*
-	public class CharacterBuff : CharacterStatus
+	public class OkCancelMenu : Menu
 	{
-		public BuffEffect Buff { get; set; }
+		public OkCancelMenu(Point position) : base(position, MenuLayout.Horizontal, null) { }
 
-		public CharacterBuff(BuffEffect buff, ImageTexture icon) : base(buff.Duration, icon)
-		{
-			this.Buff = buff;
-		}
+		protected override List<string> GetItemData() => new List<string> { "OK", "Cancel" };
 	}
-	*/
 }

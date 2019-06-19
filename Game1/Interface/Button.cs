@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
 using Game1.Enum;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1.Interface
 {
@@ -23,6 +23,13 @@ namespace Game1.Interface
 		public Button(Rectangle bounds, string text, bool killFurtherInput = true) : base(bounds, hasBorder: true)
 		{
 			_text = new ImageText(text, true) { Position = bounds.CenterVector() };
+		}
+
+		protected override void BoundsChanged(bool resized)
+		{
+			base.BoundsChanged(resized);
+			if (_text != null)
+				_text.Position = Bounds.CenterVector();
 		}
 
 		public override void LoadContent()
@@ -44,7 +51,6 @@ namespace Game1.Interface
 			_text.Scale = _mouseover ? Button.MouseOverScale : Vector2.One;
 			_text.Update(gameTime);
 			base.UpdateActive(gameTime);
-			//InputManager.BlockAllInput();
 		}
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)

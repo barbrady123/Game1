@@ -8,10 +8,10 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
-using Game1.Screens.Menu.Character;
+using Game1.Menus.Character;
 using Game1.Interface;
 using Game1.Interface.Windows;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1.Screens
 {

@@ -10,11 +10,10 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Interface;
 using Game1.Items;
-using Game1.Screens.Menu;
 
-namespace Game1.Screens.Menu
+namespace Game1.Menus
 {
-	public class ContextMenu : MenuScreen
+	public class ContextMenu : Menu
 	{
 		private ISupportsContextMenu _owner;
 		private Component _host;
@@ -36,13 +35,11 @@ namespace Game1.Screens.Menu
 			}
 		}
 
-		public ContextMenu(Component host, SpriteBatchData spriteBatchData = null) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData, drawIfDisabled: false)
+		public ContextMenu(Component host, SpriteBatchData spriteBatchData = null) : base(Util.PointInvalid, background: "black", spriteBatchData: spriteBatchData, drawIfDisabled: false)
 		{
 			_host = host;
 			_host.OnMouseRightClick += _host_OnMouseRightClick;
 		}
-
-		protected override List<MenuItem> GetItemData() { return new List<MenuItem>(); }
 
 		public override void UpdateActive(GameTime gameTime)
 		{
@@ -52,14 +49,10 @@ namespace Game1.Screens.Menu
 
 		private void Show()
 		{
-			UnloadContent();
 			var position = InputManager.MousePosition.Offset(-10, -10);
 			this.Bounds = SetupMenuItems(position);
 			if (this.Bounds != Rectangle.Empty)
-			{
-				LoadContent();
 				this.IsActive = true;
-			}
 		}
 
 		private void Hide()
@@ -67,21 +60,9 @@ namespace Game1.Screens.Menu
 			this.IsActive = false;
 		}
 
-		protected virtual Rectangle SetupMenuItems(Point position)
+		protected override List<string> GetItemData()
 		{
-			if ((position == Util.PointInvalid) || (this.Owner == null))
-				return Rectangle.Empty;
-			
-			var menuOptions = this.Owner.GetContextMenuOptions();
-			if (!menuOptions.Any())
-			{
-				this.Owner = null;
-				return Rectangle.Empty;
-			}
-
-			var size = MenuScreen.CalculateMenuSize(MenuScreen.MENU_PADDING, MenuScreen.MENU_PADDING, menuOptions, MenuLayout.Vertical);
-			_items = menuOptions.Select(o => new MenuItem { Id = o.ToLower(), Text = o }).ToList();
-			return new Rectangle(position.X, position.Y, size.Width, size.Height);
+			return this.Owner?.GetContextMenuOptions() ?? new List<string>();
 		}
 
 		protected override void ItemSelect(ComponentEventArgs e)

@@ -41,7 +41,6 @@ namespace Game1
 		public const int DefaultPickupRadius = 20;		
 
 		GraphicsDeviceManager _graphicsManager;
-		//SpriteBatch _spriteBatch;
 		ScreenManager _screenManager;
 		GameConfiguration _config;
 
@@ -77,7 +76,6 @@ namespace Game1
 			LoadConfiguration();
 			_graphicsManager.PreferredBackBufferWidth = _config.WindowWidth;
 			_graphicsManager.PreferredBackBufferHeight = _config.WindowHeight;
-			//_graphicsManager.IsFullScreen = true;
 			_graphicsManager.ApplyChanges();
 			Game1.Graphics = GraphicsDevice;
 			_screenManager = new ScreenManager(GraphicsDevice.Viewport.Bounds);

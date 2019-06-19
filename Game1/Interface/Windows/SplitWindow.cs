@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Items;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1.Interface.Windows
 {
@@ -46,21 +46,9 @@ namespace Game1.Interface.Windows
 
 		public SplitWindow(SpriteBatchData spriteBatchData) : base(Rectangle.Empty, true, background: "black", spriteBatchData: spriteBatchData, drawIfDisabled: false)
 		{
-			// We allow empty instanciation so the object can be registered with a ComponentManager if necessary...
-		}
-
-		// This will WAY simplier after Positiongeddon....
-		private void Show()
-		{
-			UnloadContent();
-			var position = InputManager.MousePosition.Offset(-10, -10);
-			this.Bounds = new Rectangle(position.X, position.Y, 160, 200);
-
-			var bottomCenter = this.Bounds.BottomCenterVector();
-
-			_menu = new OkCancelMenu(new Rectangle((int)bottomCenter.X - 80, (int)bottomCenter.Y - 50, this.Bounds.Width, 30)) { IsActive = true };
+			_menu = new OkCancelMenu(Util.PointInvalid) { IsActive = true };
 			_menu.OnItemSelect += _menu_OnItemSelect;
-			
+
 			_input = new TextInput(SplitWindow.TextInputWidth, new Vector2(this.Bounds.Center.X, this.Bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2)), "", 2) {
 				IsActive = true,
 				AllowedCharacters = "0123456789"
@@ -70,8 +58,24 @@ namespace Game1.Interface.Windows
 
 			_halfButton = new Button(this.Bounds.CenteredRegion(80, 40), "Half") { IsActive = true };
 			_halfButton.OnMouseLeftClick += _halfButton_OnMouseLeftClick;
+		}
 
-			LoadContent();
+		// There's some redundant code in here to clean up...
+		private void Show()
+		{
+			var position = InputManager.MousePosition.Offset(-10, -10);
+			this.Bounds = new Rectangle(position.X, position.Y, 160, 200);
+			var bottomCenter = this.Bounds.BottomCenterVector();
+
+			var size = _menu.CalculateMenuSize(null, false);
+			_menu.UpdatePosition(new Point(this.Bounds.Center.X, this.Bounds.Bottom - this.ContentMargin.Height - (size.Height / 2)));
+			
+			var inputPosition = new Vector2(this.Bounds.Center.X, this.Bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2));
+			_input.Bounds = inputPosition.ExpandToRectangleCentered(SplitWindow.TextInputWidth / 2, TextInput.Height / 2);
+			_input.Text = "";
+
+			_halfButton.Bounds = this.Bounds.CenteredRegion(80, 40);
+
 			this.IsActive = true;
 		}
 
@@ -90,6 +94,7 @@ namespace Game1.Interface.Windows
 
 		public override void UnloadContent()
 		{
+			base.UnloadContent();
 			_menu?.UnloadContent();
 			_input?.UnloadContent();
 			_halfButton?.UnloadContent();

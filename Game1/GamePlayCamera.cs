@@ -17,7 +17,7 @@ namespace Game1
 	public class CharacterRenderData
 	{
 		public Character Character { get; set; }
-		public ImageTexture SpriteSheet { get; set; }	// TODO : Eventually these should  be a seperate collection and we point to an ID here, to prevent loading duplicate sprite sheets...
+		public ImageSpriteSheet SpriteSheet { get; set; }	// TODO : Eventually these should  be a seperate collection and we point to an ID here, to prevent loading duplicate sprite sheets...
 		public Vector2 PreviousPosition { get; set; }
 		//public SpriteSheetEffect Animation { get; set; }
 		public bool ShowActiveItem { get; set; }
@@ -217,7 +217,7 @@ namespace Game1
 			else
 				renderData.SpriteSheet.StopEffect(typeof(SpriteSheetEffect));
 			
-			renderData.SpriteSheet.SourceRect = new Rectangle(renderData.SpriteSheet.SourceRect.X, (int)character.Direction * Game1.TileSize, Game1.TileSize, Game1.TileSize);
+			renderData.SpriteSheet.UpdateDirection(character.Direction);
 			renderData.SpriteSheet.Update(gameTime);
 			renderData.SpriteSheet.Position = new Vector2(character.Position.X - _terrainSourceRect.X + _gameViewArea.X, character.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
 			renderData.PreviousPosition = character.Position;
@@ -244,7 +244,6 @@ namespace Game1
 		{	
 			foreach (var data in _itemRenderData)
 			{
-				// Another case where Positiongeddon should make easier, _gameViewArea should not be a factor here...
 				data.Position = new Vector2(data.Item.Position.X - _terrainSourceRect.X + _gameViewArea.X, data.Item.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
 				// We could also do something like "if this position is X.pixels beyond the _gameViewArea, just set it to null...and then on Draw we skip drawing this...(say > 64 pixels out of bounds, for example)
 				// Need to test if extra computation here is worth it on the backend...
@@ -254,10 +253,7 @@ namespace Game1
 		private void LoadCharacterSpriteSheet(CharacterRenderData renderData)
 		{
 			// TODO: Fix this so it loads unique sprite sheets into collection ONLY and they are referenced by id here...
-			renderData.SpriteSheet = new ImageTexture($"{Game1.SpriteSheetRoot}\\{renderData.Character.SpriteSheetName}") { 
-				IsActive = true,
-				Alignment = ImageAlignment.Centered,
-			};
+			renderData.SpriteSheet = new ImageSpriteSheet($"{Game1.SpriteSheetRoot}\\{renderData.Character.SpriteSheetName}") { IsActive = true };
 			renderData.SpriteSheet.LoadContent();
 			renderData.SpriteSheet.AddEffect<SpriteSheetEffect>(false);
 		}
@@ -292,6 +288,7 @@ namespace Game1
 		}
 
 		// Eventually we'll load the map in chunks...
+		// NOTE: This type of technique is only valid for completely STATIC map data...everything interactive will have to be rendered on top of this...
 		private ImageTexture GenerateTerrainMap(Layer layer, Point start, Point end)
 		{
 			var renderTarget = new RenderTarget2D(Game1.Graphics, (end.X - start.X + 1) * Game1.TileSize, (end.Y - start.Y + 1) * Game1.TileSize);

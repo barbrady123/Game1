@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Items;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1.Interface.Windows
 {
@@ -74,6 +74,7 @@ namespace Game1.Interface.Windows
 			_containerName.LoadContent();
 			_containerViewBackpack.LoadContent();
 			_containerViewHotbar.LoadContent();
+			_splitWindow.LoadContent();
 		}
 
 		public override void UnloadContent()
@@ -97,11 +98,11 @@ namespace Game1.Interface.Windows
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
+			_splitWindow.Draw(spriteBatch);
 			base.DrawInternal(spriteBatch);
 			_containerName.Draw(spriteBatch);
 			_containerViewBackpack.Draw(spriteBatch);
 			_containerViewHotbar.Draw(spriteBatch);
-			_splitWindow.Draw(spriteBatch);
 		}
 
 		private void _containerView_OnMouseLeftClick(object sender, ComponentEventArgs e)

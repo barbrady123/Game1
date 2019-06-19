@@ -28,9 +28,10 @@ namespace Game1
 
 			var t = new Texture2D(Game1.Graphics, width, height);
 			t.SetData(data);
-			return new ImageTexture(t, isActive);
+			return new ImageTexture(t, isActive) { Alignment = ImageAlignment.Centered };
 		}
 
+		// Hmm, wouldn't it be faster to create a render target, clear it to a color, then save it/cast to texture??
 		public static ImageTexture GenerateSolidBackground(int width, int height, Color color)
 		{
 			if (width > 0)
