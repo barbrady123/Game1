@@ -16,7 +16,7 @@ using Game1.Menus;
 
 namespace Game1
 {
-	public abstract class Component : IActivatable, ISupportsTooltip
+	public abstract class Component : IActivatable, ISupportsTooltip, ISupportsContextMenu
 	{
 		private readonly SpriteBatchData _spriteBatchData;
 		private bool _isActive;
@@ -35,6 +35,7 @@ namespace Game1
 		protected Tooltip _tooltip;
 		private bool _enabledContextMenu;
 		protected Menu _contextMenu;
+		protected Dialog _dialog;
 
 		public virtual bool IsActive
 		{
@@ -151,6 +152,7 @@ namespace Game1
 			_border?.UnloadContent();
 			_tooltip?.UnloadContent();
 			_contextMenu?.UnloadContent();
+			_dialog?.UnloadContent();
 		}
 
 		public virtual void Update(GameTime gameTime)
@@ -182,6 +184,7 @@ namespace Game1
 
 		public virtual void UpdateActive(GameTime gameTime)
 		{
+			_dialog?.Update(gameTime);
 			_background?.Update(gameTime);
 			_border?.Update(gameTime);
 			_tooltip?.Update(gameTime);
@@ -249,6 +252,7 @@ namespace Game1
 			_border?.Draw(spriteBatch);
 			_tooltip?.Draw(spriteBatch);
 			_contextMenu?.Draw(spriteBatch);
+			_dialog?.Draw(spriteBatch);
 		}
 
 		public void DelayInput(int delayCycles)
@@ -279,9 +283,32 @@ namespace Game1
 
 		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e) => ContextMenuSelect(e);
 
-		/// <summary>
-		/// Handlers for the context menu selection goes here...
-		/// </summary>
 		protected virtual void ContextMenuSelect(ComponentEventArgs e) { }
+
+		public List<string> GetContextMenuOptions() => new List<string>();
+
+		protected void ShowNotification(string text, Rectangle parentBounds, string group = null)
+		{
+			if (_dialog == null)
+			{
+				_activator.Register(_dialog = new Dialog(text, DialogButton.Ok, parentBounds.CenteredRegion(400, 200), null), true, group);
+				_dialog.LoadContent();
+				_dialog.OnItemSelect += _dialog_OnItemSelect;
+				_dialog.OnReadyDisable += _dialog_OnReadyDisable;
+				return;
+			}
+
+			// Need to test that this works....
+			_dialog.Text = text;
+			_dialog.Bounds = parentBounds.CenteredRegion(400, 200);
+			_activator.SetState(_dialog, true);
+		}
+
+		protected virtual void _dialog_OnItemSelect(object sender, ComponentEventArgs e) { }
+
+		protected virtual void _dialog_OnReadyDisable(object sender, ComponentEventArgs e)
+		{
+			// Another place where it would be nice to just say "turn this off" and the activation manager would know what should be enabled (previous)...
+		}
 	}
 }

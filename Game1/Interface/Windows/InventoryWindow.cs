@@ -128,6 +128,7 @@ namespace Game1.Interface.Windows
 					break;
 				case "eat"		:
 				case "drink"	:
+				case "read"		:
 					_world.Character.Consume(itemView.ContainingView.Container, itemView.Index);
 					break;
 				case "drop"		:

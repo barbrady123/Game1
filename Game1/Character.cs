@@ -44,6 +44,7 @@ namespace Game1
 		public int Constitution { get; set; }
 
 		public List<CharacterStatus<BuffEffect>> Buffs { get; set; }
+		public List<CharacterStatus<DebuffEffect>> Debuffs { get; set; }
 
 		// Again...if these were indexed array slots, this would be way easier!
 		public int Defense =>
@@ -68,7 +69,12 @@ namespace Game1
 		public int CurrentHP 
 		{ 
 			get { return _currentHP; }
-			set { _currentHP = Util.Clamp(value, 0, this.MaxHP); }
+			set
+			{ 
+				_currentHP = Util.Clamp(value, 0, this.MaxHP);
+				if (_currentHP == 0)
+					OnDied?.Invoke(this, null);
+			}
 		}
 
 		public int MaxMana { get; set; }
@@ -83,8 +89,10 @@ namespace Game1
 		public ItemContainer HotBar => _hotbar;
 		public ItemContainer Backpack => _backpack;
 
+		// World entities probably shouldn't use ComponentEventArgs...
 		public event EventHandler<ComponentEventArgs> OnHeldItemChanged;
 		public event EventHandler<ComponentEventArgs> OnActiveItemChanged;
+		public event EventHandler<ComponentEventArgs> OnDied;
 		
 		public InventoryItem HeldItem
 		{ 
@@ -136,6 +144,7 @@ namespace Game1
 			_hotbar = new ItemContainer(10);
 			_backpack = new ItemContainer(40);
 			this.Buffs = new List<CharacterStatus<BuffEffect>>();
+			this.Debuffs = new List<CharacterStatus<DebuffEffect>>();
 		}
 
 		public virtual Vector2 UpdateMotion()
@@ -177,6 +186,9 @@ namespace Game1
 			this.ActiveItem?.Update(gameTime);
 			for (int i = this.Buffs.Count - 1; i >= 0; i--)
 				this.Buffs[i].Update(gameTime);
+
+			for (int i = this.Debuffs.Count - 1; i >= 0; i--)
+				this.Debuffs[i].Update(gameTime);
 		}
 
 		public bool IsItemHeld => this.HeldItem != null;
@@ -321,12 +333,33 @@ namespace Game1
 		public void AddBuff(CharacterStatus<BuffEffect> buff)
 		{
 			buff.OnExpired += Buff_OnExpired;
+			buff.OnPeriodicTick += Status_OnPeriodicTick;
 			this.Buffs.Add(buff);
 		}
 
-		private void Buff_OnExpired(object sender, ComponentEventArgs e)
+		public void AddDebuff(CharacterStatus<DebuffEffect> debuff)
+		{
+			debuff.OnExpired += Debuff_OnExpired;
+			debuff.OnPeriodicTick += Status_OnPeriodicTick;
+			this.Debuffs.Add(debuff);
+		}
+
+		private void Status_OnPeriodicTick(object sender, CharacterStatusEventArgs e)
+		{
+			switch (e.AffectedAttribute)
+			{
+				case CharacterAttribute.CurrentHP : this.CurrentHP += e.EffectValue;	break;
+			}
+		}
+
+		private void Buff_OnExpired(object sender, CharacterStatusEventArgs e)
 		{
 			this.Buffs.Remove((CharacterStatus<BuffEffect>)sender);
+		}
+
+		private void Debuff_OnExpired(object sender, CharacterStatusEventArgs e)
+		{
+			this.Debuffs.Remove((CharacterStatus<DebuffEffect>)sender);
 		}
 
 		public void Consume(ItemContainer container, int index)
@@ -339,6 +372,9 @@ namespace Game1
 
 			if (item.BuffEffect != null)
 				MetaManager.ApplyCharacterBuffEffect((CharacterBuffEffect)item.BuffEffect, this);
+
+			if (item.DebuffEffect != null)
+				MetaManager.ApplyCharacterDebuffEffect((CharacterDebuffEffect)item.DebuffEffect, this);
 
 			container[index].Quantity--;
 			if (container[index].Quantity <= 0)

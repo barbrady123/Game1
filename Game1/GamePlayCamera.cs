@@ -107,10 +107,6 @@ namespace Game1
 
 		public void Update(GameTime gameTime)
 		{
-			// If the world isn't running, we can skip render calculations for the gameplay view...
-			if (!_world.IsActive)
-				return;
-
 			var playerPosition = _world.Character.Position;
 
 			if (_playerRenderData.PreviousPosition != playerPosition)

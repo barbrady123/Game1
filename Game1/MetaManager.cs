@@ -22,6 +22,7 @@ namespace Game1
 
 		private static readonly Dictionary<CharacterInstantEffect, InstantEffect> _instants;
 		private static readonly Dictionary<CharacterBuffEffect, BuffEffect> _buffs;
+		private static readonly Dictionary<CharacterDebuffEffect, DebuffEffect> _debuffs;
 
 		static MetaManager()
 		{
@@ -30,6 +31,7 @@ namespace Game1
 
 			_instants = new Dictionary<CharacterInstantEffect, InstantEffect>();
 			_buffs = new Dictionary<CharacterBuffEffect, BuffEffect>();
+			_debuffs = new Dictionary<CharacterDebuffEffect, DebuffEffect>();
 		}
 
 		public static void LoadContent()
@@ -77,6 +79,20 @@ namespace Game1
 				20,
 				120
 			);
+
+			_debuffs[CharacterDebuffEffect.MinorDamageOverTime] = new DebuffEffect(
+				CharacterDebuffEffect.MinorDamageOverTime,
+				CharacterAttribute.CurrentHP,
+				"minorBleed",
+				"Minor Bleed",
+				"Take 1 HP damage per second for 10 seconds",
+				-1,
+				10,
+				1,
+				5,
+				10,
+				10
+			);
 		}
 
 		public static void UnloadContent()
@@ -113,6 +129,25 @@ namespace Game1
 					currentBuff.Stacks++;
 				if (currentBuff.Duration != null) 
 					currentBuff.Duration = Math.Min((double)currentBuff.Duration + buff.DurationStack, (int)currentBuff.Effect.MaxDuration);
+			}
+		}
+
+		public static void ApplyCharacterDebuffEffect(CharacterDebuffEffect effect, Character character)
+		{
+			if (!_debuffs.TryGetValue(effect, out DebuffEffect debuff))
+				throw new Exception($"Unexpected CharacterDebuffEffect type {effect} encountered!");
+
+			var currentDebuff = character.Debuffs.FirstOrDefault(x => x.Effect.Effect == effect);
+			if (currentDebuff == null)
+			{
+				character.AddDebuff(new CharacterStatus<DebuffEffect>(debuff, new ImageTexture(_textures[debuff.IconName], true)));
+			}
+			else
+			{
+				if (currentDebuff.Stacks < currentDebuff.Effect.MaxEffectStacks)
+					currentDebuff.Stacks++;
+				if (currentDebuff.Duration != null) 
+					currentDebuff.Duration = Math.Min((double)currentDebuff.Duration + debuff.DurationStack, (int)currentDebuff.Effect.MaxDuration);
 			}
 		}
 	}

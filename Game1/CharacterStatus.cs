@@ -17,8 +17,10 @@ namespace Game1
 		public ImageTexture Icon { get; set; }
 		public double? Duration { get; set; }
 		public int Stacks { get; set; }
+		public double CurrentPeriod { get; set; }
 
-		public event EventHandler<ComponentEventArgs> OnExpired;
+		public event EventHandler<CharacterStatusEventArgs> OnExpired;
+		public event EventHandler<CharacterStatusEventArgs> OnPeriodicTick;
 
 		public CharacterStatus(T effect, ImageTexture icon)
 		{
@@ -27,6 +29,7 @@ namespace Game1
 			this.Stacks = 1;
 			this.Icon = icon;
 			this.Icon.LoadContent();
+			this.CurrentPeriod = 0.0;
 		}
 
 		public virtual void Update(GameTime gameTime)
@@ -41,6 +44,16 @@ namespace Game1
 			{
 				this.Duration = null;
 				OnExpired?.Invoke(this, null);
+			}
+
+			if (this.Effect.Period == null)
+				return;
+
+			this.CurrentPeriod += gameTime.ElapsedGameTime.TotalSeconds;
+			if (this.CurrentPeriod >= (int)this.Effect.Period)
+			{
+				OnPeriodicTick?.Invoke(this, new CharacterStatusEventArgs { AffectedAttribute = this.Effect.AffectedAttribute, EffectValue = this.Effect.EffectValue * this.Stacks });
+				this.CurrentPeriod = 0.0;
 			}
 		}
 	}

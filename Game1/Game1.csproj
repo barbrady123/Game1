@@ -49,6 +49,8 @@
     <Compile Include="Component.cs" />
     <Compile Include="ComponentEventArgs.cs" />
     <Compile Include="ActivationManager.cs" />
+    <Compile Include="DebuffEffect.cs" />
+    <Compile Include="Enum\CharacterDebuffEffectEnum.cs" />
     <Compile Include="ISupportsTooltip.cs" />
     <Compile Include="Menus\ContextMenu.cs" />
     <Compile Include="Effect\EffectEventArgs.cs" />
@@ -142,6 +144,7 @@
     <Compile Include="SpriteBatchManager.cs" />
     <Compile Include="MetaManager.cs" />
     <Compile Include="StatusEffect.cs" />
+    <Compile Include="StatusEventArgs.cs" />
     <Compile Include="StatusViewer.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="Util.cs" />
@@ -217,6 +220,7 @@
     <Content Include="Content\Gameplay\Icon\upg_wand.png" />
     <Content Include="Content\Gameplay\Icon\wand.png" />
     <Content Include="Content\Gameplay\Icon\x.png" />
+    <Content Include="Content\Gameplay\Status\minorBleed.png" />
     <Content Include="Content\Gameplay\Status\minorDefense.png" />
     <Content Include="Content\Gameplay\Status\minorMovementSpeed.png" />
     <Content Include="Content\Gameplay\TileSheet\ground.png" />

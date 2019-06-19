@@ -25,6 +25,8 @@ namespace Game1
 		public List<Character> AllCharacters => new List<Character>((this.NPCs?.Count ?? 0) + 1) { this.Character }.Concat(this.NPCs).ToList();
 
 		public event EventHandler<ComponentEventArgs> OnItemsChange;
+		// This should probably be a more generalized event for character events...
+		public event EventHandler<ComponentEventArgs> OnCharacterDied;
 
 		public World()
 		{
@@ -37,6 +39,7 @@ namespace Game1
 			this.CurrentMap = IOManager.ObjectFromFile<Map>(Game1.MapFile);
 			this.CurrentMap.GenerateTiles();
 			this.Character = IOManager.ObjectFromFile<Character>(Game1.PlayerFile);
+			this.Character.OnDied += Character_OnDied;
 			this.Character.Strength = GameRandom.Next(10, 20);
 			this.Character.Dexterity = GameRandom.Next(10, 20);
 			this.Character.Intelligence = GameRandom.Next(10, 20);
@@ -44,7 +47,7 @@ namespace Game1
 			this.Character.Charisma = GameRandom.Next(10, 20);
 			this.Character.Constitution = GameRandom.Next(10, 20);
 			this.Character.MaxHP = GameRandom.Next(30, 50);
-			this.Character.CurrentHP = this.Character.MaxHP / 2;
+			this.Character.CurrentHP = 1;	//this.Character.MaxHP / 2;
 			this.Character.MaxMana = GameRandom.Next(30, 50);
 			this.Character.CurrentMana = this.Character.MaxMana;
 
@@ -56,6 +59,12 @@ namespace Game1
 			};
 		}
 
+		// Eventually make this more generalized event
+		private void Character_OnDied(object sender, ComponentEventArgs e)
+		{
+			OnCharacterDied?.Invoke(this, e);
+		}
+
 		public override void LoadContent()
 		{
 			// Obviously none of this crap should be here...just for testing purposes...
@@ -64,7 +73,7 @@ namespace Game1
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
 			this.Character.HotBar.AddItem(ItemManager.GetItem(6));
 			for (int i = 0; i < 15; i++)
-				this.Character.Backpack.AddItem(ItemManager.GetItem((i < 9) ? i : (int?)null));
+				this.Character.Backpack.AddItem(ItemManager.GetItem((i < 10) ? i : (int?)null));
 
 			this.Items = new List<WorldItem> {
 				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) },

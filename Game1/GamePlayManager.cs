@@ -32,15 +32,17 @@ namespace Game1
 		private readonly StatBar  _barMana;
 		private readonly ImageText _defense;
 		private readonly StatusViewer<CharacterStatus<BuffEffect>, BuffEffect> _buffs;
+		private readonly StatusViewer<CharacterStatus<DebuffEffect>, DebuffEffect> _debuffs;
 
 		private ImageTexture _gameViewBorder;
 
-		public GamePlayManager(Rectangle bounds) : base(bounds, true, "stone")
+		public GamePlayManager(Rectangle bounds) : base(bounds, background: "stone")
 		{
 			// Might want a couple frame delay before actually running the game?
 			_activator.Register(_world = new World(), true, "top");
 			_world.Initialize();
 			_world.Character.OnHeldItemChanged += InputManager.HandleCursorChange;
+			_world.OnCharacterDied += _world_OnCharacterDied;
 
 			_gameViewArea = new Rectangle(
 				this.ContentMargin.Width + GamePlayManager.ViewAreaBorderThickness,
@@ -78,12 +80,20 @@ namespace Game1
 				"MaxMana"
 			), true);
 
+			// These are going into the global group, so they don't get disabled when things stop the world...of course their time does not countdown
+			// since the character is stopped, but the graphics rendering (effects on the icons) still runs....thse should be in a group with the world, but...
+			// Since we don't have the ability to set groups back to their previous states, we would have to turn these back on manually like we do the world
+			// in every place...so we'll leave this for now but when the ActivationManager is improved with the ability to return to previous state this will be fixed...
 			_activator.Register(_buffs = new StatusViewer<CharacterStatus<BuffEffect>, BuffEffect>(
 				new Rectangle(this.Bounds.TopRightVector(-300 - this.ContentMargin.Width, this.ContentMargin.Height * 6).ToPoint(), new Point(300, 120)), _world.Character.Buffs), true
 			);
 
+			_activator.Register(_debuffs = new StatusViewer<CharacterStatus<DebuffEffect>, DebuffEffect>(
+				new Rectangle(this.Bounds.TopRightVector(-300 - this.ContentMargin.Width, this.ContentMargin.Height * 6 + 130).ToPoint(), new Point(300, 120)), _world.Character.Debuffs), true
+			);
+
 			// Eventually make a component for display of this stuff on the right...
-			_defense = new ImageText("", true) { Position = this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, 350) };
+			_defense = new ImageText("", true) { Position = this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, 400) };
 		}
 
 		public override void LoadContent()
@@ -102,6 +112,7 @@ namespace Game1
 			_barHealth.LoadContent();
 			_barMana.LoadContent();
 			_buffs.LoadContent();
+			_debuffs.LoadContent();
 			_defense.LoadContent();
 		}
 
@@ -118,6 +129,7 @@ namespace Game1
 			_barHealth.UnloadContent();
 			_barMana.UnloadContent();
 			_buffs.UnloadContent();
+			_debuffs.UnloadContent();
 			_defense.UnloadContent();
 		}
 
@@ -131,21 +143,23 @@ namespace Game1
 			// Modal windows go first, block all input after update...
 			_characterWindow.Update(gameTime);
 			_inventoryWindow.Update(gameTime);
-			_hotbarView.Update(gameTime);
+			_world.Update(gameTime);
 			_barHealth.Update(gameTime);
 			_barMana.Update(gameTime);
-			UpdateVisibleStats();
+			UpdateVisibleStats(gameTime);
 			_buffs.Update(gameTime);
-			_defense.Update(gameTime);
+			_debuffs.Update(gameTime);
 			_gameViewBorder.Update(gameTime);
-			_world.Update(gameTime);
-			_camera.Update(gameTime);		
+			if (_world.IsActive)
+			{
+				_hotbarView.Update(gameTime);
+				_camera.Update(gameTime);		
+			}
 			base.UpdateActive(gameTime);
 		}
 
 		public override void UpdateInput(GameTime gameTime)
 		{
-			// TODO: Move this to a better location...should be it's own component with no UI, so it can be disabled correctly below
 			if (InputManager.KeyPressed(Keys.I))
 			{
 				_activator.SetState(_inventoryWindow, true);
@@ -190,6 +204,7 @@ namespace Game1
 			_barMana.Draw(spriteBatch);
 			_defense.Draw(spriteBatch);
 			_buffs.Draw(spriteBatch);
+			_debuffs.Draw(spriteBatch);
 		}
 
 		private ImageTexture GenerateGameViewBorder()
@@ -206,24 +221,35 @@ namespace Game1
 
 		private void _characterWindow_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
-			_activator.SetState(_world, true);
+			_activator.SetState(_characterWindow, false);
 		}
 
 		private void _inventoryView_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
-			_activator.SetState(_world, true);
+			_activator.SetState(_inventoryWindow, false);
 		}
 
 		// Eventually we may want to encapsulate this in some kind of control that shows all these things and removes this from the GamePlayManager....
-		private void UpdateVisibleStats()
+		private void UpdateVisibleStats(GameTime gameTime)
 		{
 			// Currently the only stat is Defense...
 			_defense.UpdateText($"Defense: {_world.Character.Defense}");
+			_defense.Update(gameTime);
 		}
 
 		private void _hotbarView_OnActiveItemChange(object sender, ComponentEventArgs e)
 		{
 			_world.Character.ActiveItem = (InventoryItem)e.Meta;
+		}
+
+		protected override void _dialog_OnReadyDisable(object sender, ComponentEventArgs e)
+		{
+			_activator.SetState(_dialog, false);
+		}
+
+		private void _world_OnCharacterDied(object sender, ComponentEventArgs e)
+		{
+			ShowNotification("You died!!", this.Bounds, "top");
 		}
 	}
 }

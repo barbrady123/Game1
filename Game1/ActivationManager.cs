@@ -18,10 +18,12 @@ namespace Game1
 		private static readonly string GeneralGroup = "__GENERAL__";
 
 		private Dictionary<string, List<IActivatable>> _groups;
+		private Dictionary<string, IActivatable> _previouslyActive;
 
 		public ActivationManager()
 		{
 			_groups = new Dictionary<string, List<IActivatable>>();
+			_previouslyActive = new Dictionary<string, IActivatable>();
 		}
 
 		public void Register(Component[] components, bool isActive, string group) => Register(components, isActive, (group == null) ? null : new[] { group });
@@ -65,24 +67,35 @@ namespace Game1
 			return groups;
 		}
 
-		public void SetState(Component[] components, bool isActive)
+		public void SetState(Component[] components, bool isActive, bool revertGroupsOnDisable = true)
 		{
 			// Test for conflict...
 			if (isActive && ActiveConflict(components))
 				throw new Exception("Conflict with activation of multiple components in the same exclusive group");
 
 			foreach (var c in components)
-				SetState(c, isActive);
+				SetState(c, isActive, revertGroupsOnDisable);
 		}
 
-		public void SetState(Component component, bool isActive)
+		public void SetState(Component component, bool isActive, bool revertGroupOnDisable = true)
 		{
 			foreach (var group in FindGroups(component))
 			{
-				if ((group == ActivationManager.GeneralGroup) || (!isActive))
+				if (group == ActivationManager.GeneralGroup)
+				{
 					component.IsActive = isActive;
+				}
 				else if (isActive)
-					_groups[group].ForEach(c => c.IsActive = (c == component));			
+				{
+					_previouslyActive[group] = _groups[group].SingleOrDefault(x => x.IsActive);
+					_groups[group].ForEach(c => c.IsActive = (c == component));
+				}
+				else 
+				{
+					component.IsActive = isActive;
+					if (revertGroupOnDisable && _previouslyActive.ContainsKey(group) && (_previouslyActive[group] != null))
+						_previouslyActive[group].IsActive = true;
+				}
 			}
 		}
 

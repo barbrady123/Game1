@@ -99,6 +99,8 @@ namespace Game1
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice),  new RasterizerState { ScissorTestEnable = true }, 400, "tooltip");
 			// Context windows
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice),  new RasterizerState { ScissorTestEnable = true }, 500, "context");
+			// Context windows
+			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice),  new RasterizerState { ScissorTestEnable = true }, 600, "notification");
 
 			FontManager.LoadContent();
 			InputManager.LoadContent();

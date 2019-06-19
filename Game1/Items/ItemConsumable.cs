@@ -15,6 +15,8 @@ namespace Game1.Items
 
 		public CharacterBuffEffect? BuffEffect { get; set; }
 
+		public CharacterDebuffEffect? DebuffEffect { get; set; }
+
 		public int EffectRangeMin { get; set; }
 
 		public int EffectRangeMax { get; set; }

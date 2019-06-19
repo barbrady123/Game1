@@ -36,7 +36,7 @@ namespace Game1.Interface.Windows
 
 		public event EventHandler<ComponentEventArgs> OnItemSelect;
 		
-		public Dialog(string text, DialogButton buttons, Rectangle bounds, int? duration) : base(bounds, true, "black", drawIfDisabled: false)
+		public Dialog(string text, DialogButton buttons, Rectangle bounds, int? duration) : base(bounds, true, "black", spriteBatchData:SpriteBatchManager.Get("notification"), drawIfDisabled: false)
 		{
 			this.Buttons = buttons;
 
@@ -75,6 +75,7 @@ namespace Game1.Interface.Windows
 			base.UpdateActive(gameTime);
 			_buttonMenu?.Update(gameTime);
 			_textImage.Update(gameTime);
+			InputManager.BlockAllInput();
 		}
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)
@@ -87,6 +88,8 @@ namespace Game1.Interface.Windows
 		private void _buttonMenu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
 			OnItemSelect?.Invoke(this, e);
+			if (e.Value == "ok")
+				ReadyDisable(e);
 		}
 	}
 }

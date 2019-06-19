@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace Game1.Enum
 {
-	public enum ConsumableType
+	public enum CharacterDebuffEffect
 	{
-		Drink = 0,
-
-		Eat = 1,
-
-		Read = 2
+		MinorDamageOverTime = 0
 	}
 }

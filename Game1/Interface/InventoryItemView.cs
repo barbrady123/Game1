@@ -120,8 +120,9 @@ namespace Game1.Interface
 				case ItemConsumable consumable:
 					switch (consumable.Type)
 					{
-						case ConsumableType.Food : items.Add("Eat");		break;
-						case ConsumableType.Potion : items.Add("Drink");	break;
+						case ConsumableType.Eat : items.Add("Eat");		break;
+						case ConsumableType.Drink : items.Add("Drink");	break;
+						case ConsumableType.Read : items.Add("Read");	break;
 					}
 					break;
 			}
