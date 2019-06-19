@@ -16,7 +16,7 @@ using Game1.Menus;
 
 namespace Game1
 {
-	public abstract class Component : IActivatable
+	public abstract class Component : IActivatable, ISupportsTooltip
 	{
 		private readonly SpriteBatchData _spriteBatchData;
 		private bool _isActive;

@@ -31,7 +31,7 @@ namespace Game1
 		private readonly StatBar _barHealth;
 		private readonly StatBar  _barMana;
 		private readonly ImageText _defense;
-		private readonly StatusViewer<CharacterBuff> _buffs;
+		private readonly StatusViewer<CharacterStatus<BuffEffect>, BuffEffect> _buffs;
 
 		private ImageTexture _gameViewBorder;
 
@@ -78,7 +78,9 @@ namespace Game1
 				"MaxMana"
 			), true);
 
-			_activator.Register(_buffs = new StatusViewer<CharacterBuff>(new Rectangle(this.Bounds.TopRightVector(-300 - this.ContentMargin.Width, this.ContentMargin.Height * 6).ToPoint(), new Point(300, 120)), _world.Character.Buffs), true);
+			_activator.Register(_buffs = new StatusViewer<CharacterStatus<BuffEffect>, BuffEffect>(
+				new Rectangle(this.Bounds.TopRightVector(-300 - this.ContentMargin.Width, this.ContentMargin.Height * 6).ToPoint(), new Point(300, 120)), _world.Character.Buffs), true
+			);
 
 			// Eventually make a component for display of this stuff on the right...
 			_defense = new ImageText("", true) { Position = this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, 350) };

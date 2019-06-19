@@ -45,9 +45,11 @@
     <Compile Include="Character.cs" />
     <Compile Include="CharacterBuff.cs" />
     <Compile Include="CharacterStatus.cs" />
+    <Compile Include="CharacterStatusView.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="ComponentEventArgs.cs" />
     <Compile Include="ActivationManager.cs" />
+    <Compile Include="ISupportsTooltip.cs" />
     <Compile Include="Menus\ContextMenu.cs" />
     <Compile Include="Effect\EffectEventArgs.cs" />
     <Compile Include="Effect\FadeCycleEffect.cs" />

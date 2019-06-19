@@ -102,17 +102,17 @@ namespace Game1
 			if (!_buffs.TryGetValue(effect, out BuffEffect buff))
 				throw new Exception($"Unexpected CharacterBuffEffect type {effect} encountered!");
 
-			var currentBuff = character.Buffs.FirstOrDefault(x => x.Buff.Effect == effect);
+			var currentBuff = character.Buffs.FirstOrDefault(x => x.Effect.Effect == effect);
 			if (currentBuff == null)
 			{
-				character.AddBuff(new CharacterBuff(buff, new ImageTexture(_textures[buff.IconName], true)));
+				character.AddBuff(new CharacterStatus<BuffEffect>(buff, new ImageTexture(_textures[buff.IconName], true)));
 			}
 			else
 			{
-				if (currentBuff.Stacks < currentBuff.Buff.MaxEffectStacks)
+				if (currentBuff.Stacks < currentBuff.Effect.MaxEffectStacks)
 					currentBuff.Stacks++;
 				if (currentBuff.Duration != null) 
-					currentBuff.Duration = Math.Min((double)currentBuff.Duration + buff.DurationStack, (int)currentBuff.Buff.MaxDuration);
+					currentBuff.Duration = Math.Min((double)currentBuff.Duration + buff.DurationStack, (int)currentBuff.Effect.MaxDuration);
 			}
 		}
 	}

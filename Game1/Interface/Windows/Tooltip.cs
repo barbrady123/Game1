@@ -21,10 +21,10 @@ namespace Game1.Interface.Windows
 
 		private int _timer;
 		private ImageText _text;
-		private Component _owner;
+		private ISupportsTooltip _owner;
 		private Component _host;
 
-		public Component Owner
+		public ISupportsTooltip Owner
 		{
 			get { return _owner; }
 			set
@@ -133,6 +133,17 @@ namespace Game1.Interface.Windows
 			base.BoundsChanged(resized);
 			if (_text != null)
 				_text.Position = this.Bounds.CenterVector();
+			EnsureVisible();
+		}
+
+		private void EnsureVisible()
+		{
+			Rectangle gameBounds = Game1.Graphics.Viewport.Bounds;
+			if (!gameBounds.Contains(this.Bounds))
+			{
+				int overflowX = gameBounds.Right - this.Bounds.Right;
+				this.Bounds = this.Bounds.Move(-overflowX, 0);
+			}
 		}
 
 		private void Hide()
@@ -153,7 +164,7 @@ namespace Game1.Interface.Windows
 
 		private void _host_OnMouseOver(object sender, ComponentEventArgs e)
 		{
-			this.Owner = e.Meta as Component;
+			this.Owner = e.Meta as ISupportsTooltip;
 		}
 	}
 }

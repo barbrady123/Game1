@@ -11,6 +11,7 @@ using Game1.Enum;
 
 namespace Game1
 {
+	/*
 	public class CharacterBuff : CharacterStatus
 	{
 		public BuffEffect Buff { get; set; }
@@ -20,4 +21,5 @@ namespace Game1
 			this.Buff = buff;
 		}
 	}
+	*/
 }
