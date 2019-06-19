@@ -51,6 +51,7 @@
     <Compile Include="ActivationManager.cs" />
     <Compile Include="DebuffEffect.cs" />
     <Compile Include="Enum\CharacterDebuffEffectEnum.cs" />
+    <Compile Include="FixedQueue.cs" />
     <Compile Include="ISupportsTooltip.cs" />
     <Compile Include="Menus\ContextMenu.cs" />
     <Compile Include="Effect\EffectEventArgs.cs" />
@@ -120,6 +121,8 @@
     <Compile Include="Layer.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="MouseEventArgs.cs" />
+    <Compile Include="NewItemNotification.cs" />
+    <Compile Include="NewItemNotificationViewer.cs" />
     <Compile Include="NPC.cs" />
     <Compile Include="PhysicsManager.cs" />
     <Compile Include="Primatives.cs" />

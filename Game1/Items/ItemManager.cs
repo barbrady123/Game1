@@ -115,12 +115,12 @@ namespace Game1.Items
 				trueQuantity);
 		}
 
-		public static InventoryItem CopyItem(InventoryItem item)
+		public static InventoryItem CopyItem(InventoryItem item, int? newQuantity = null)
 		{
 			if (item == null)
 				return null;
 
-			return new InventoryItem(item.Item, new ImageTexture(_textures[item.Item.IconName], true) { Alignment = ImageAlignment.Centered }, item.Quantity, item.Id);
+			return new InventoryItem(item.Item, new ImageTexture(_textures[item.Item.IconName], true) { Alignment = ImageAlignment.Centered }, newQuantity ?? item.Quantity, item.Id);
 		}
 	}
 }

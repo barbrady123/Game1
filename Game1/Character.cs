@@ -93,6 +93,7 @@ namespace Game1
 		public event EventHandler<ComponentEventArgs> OnHeldItemChanged;
 		public event EventHandler<ComponentEventArgs> OnActiveItemChanged;
 		public event EventHandler<ComponentEventArgs> OnDied;
+		public event EventHandler<ComponentEventArgs> OnGotExternalItem;
 		
 		public InventoryItem HeldItem
 		{ 
@@ -193,14 +194,23 @@ namespace Game1
 
 		public bool IsItemHeld => this.HeldItem != null;
 
-		public bool AddItem(InventoryItem item)
+		public bool AddItem(InventoryItem item, bool fromExternal = false)
 		{
+			// In case the stack is split and the original item quantity
+			// has changed, we want to notify the world of the original
+			// quantity that was receieved...
+			int originalQuantity = item.Quantity;
+
 			if (item == null)
 				return true;
 
 			int? index = _hotbar.AddItem(item);
 			if (index == null)
 				index = _backpack.AddItem(item);
+
+			if ((index != null) && fromExternal)
+				OnGotExternalItem?.Invoke(this, new ComponentEventArgs { Meta = ItemManager.CopyItem(item, originalQuantity) });
+
 			return index != null;
 		}
 

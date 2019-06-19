@@ -53,7 +53,7 @@ namespace Game1
 			for (int i = 0; i < _statuses.Count; i++)
 			{
 				var position = CalculateItemViewPosition(i);
-				_statusViews[_statuses[i]].Bounds = position.ExpandToRectangeTopLeft(IconSize, IconSize);
+				_statusViews[_statuses[i]].Bounds = position.ExpandToRectangleTopLeft(IconSize, IconSize);
 				_statusViews[_statuses[i]].Update(gameTime);
 			}
 		}

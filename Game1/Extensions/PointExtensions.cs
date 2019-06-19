@@ -17,5 +17,10 @@ namespace Game1
 	public static class PointExtensions
 	{
 		public static Point Offset(this Point point, int xOffset, int yOffset) => new Point(point.X + xOffset, point.Y + yOffset);
+
+		public static Rectangle ExpandToRectangleTopLeft(this Point point, int expansionX, int expansionY)
+		{
+			return new Rectangle((int)point.X, (int)point.Y, expansionX, expansionY);
+		}
 	}
 }

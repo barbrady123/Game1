@@ -33,6 +33,7 @@ namespace Game1
 		private readonly ImageText _defense;
 		private readonly StatusViewer<CharacterStatus<BuffEffect>, BuffEffect> _buffs;
 		private readonly StatusViewer<CharacterStatus<DebuffEffect>, DebuffEffect> _debuffs;
+		private readonly NewItemNotificationViewer _newItems;
 
 		private ImageTexture _gameViewBorder;
 
@@ -42,6 +43,7 @@ namespace Game1
 			_activator.Register(_world = new World(), true, "top");
 			_world.Initialize();
 			_world.Character.OnHeldItemChanged += InputManager.HandleCursorChange;
+			_world.Character.OnGotExternalItem += Character_OnGotExternalItem;
 			_world.OnCharacterDied += _world_OnCharacterDied;
 
 			_gameViewArea = new Rectangle(
@@ -94,6 +96,13 @@ namespace Game1
 
 			// Eventually make a component for display of this stuff on the right...
 			_defense = new ImageText("", true) { Position = this.Bounds.TopRightVector(-100 - this.ContentMargin.Width, 400) };
+
+			_activator.Register(_newItems = new NewItemNotificationViewer(
+				new Rectangle(
+					this.Bounds.Right - NewItemNotification.Size.Width - this.ContentMargin.Width,
+					this.Bounds.Bottom - 280 - this.ContentMargin.Width, NewItemNotification.Size.Width, 300
+				)), true
+			);
 		}
 
 		public override void LoadContent()
@@ -149,11 +158,12 @@ namespace Game1
 			UpdateVisibleStats(gameTime);
 			_buffs.Update(gameTime);
 			_debuffs.Update(gameTime);
+			_newItems.Update(gameTime);
 			_gameViewBorder.Update(gameTime);
 			if (_world.IsActive)
 			{
 				_hotbarView.Update(gameTime);
-				_camera.Update(gameTime);		
+				_camera.Update(gameTime);
 			}
 			base.UpdateActive(gameTime);
 		}
@@ -205,6 +215,7 @@ namespace Game1
 			_defense.Draw(spriteBatch);
 			_buffs.Draw(spriteBatch);
 			_debuffs.Draw(spriteBatch);
+			_newItems.Draw(spriteBatch);
 		}
 
 		private ImageTexture GenerateGameViewBorder()
@@ -250,6 +261,11 @@ namespace Game1
 		private void _world_OnCharacterDied(object sender, ComponentEventArgs e)
 		{
 			ShowNotification("You died!!", this.Bounds, "top");
+		}
+
+		private void Character_OnGotExternalItem(object sender, ComponentEventArgs e)
+		{
+			_newItems.AddNotification(e.Meta as InventoryItem);
 		}
 	}
 }

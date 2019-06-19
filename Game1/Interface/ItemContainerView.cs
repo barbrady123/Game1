@@ -54,7 +54,7 @@ namespace Game1.Interface
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
 				var position = CalculateItemViewPosition(i);
-				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(InventoryItemView.Size, InventoryItemView.Size), i, null, false, this);
+				_itemViews[i] = new InventoryItemView(position.ExpandToRectangleTopLeft(InventoryItemView.Size, InventoryItemView.Size), i, null, false, this);
 				_itemViews[i].OnMouseLeftClick += ItemContainerView_OnMouseLeftClick;
 				_itemViews[i].OnMouseRightClick += ItemContainerView_OnMouseRightClick;
 				_itemViews[i].OnMouseOver += ItemContainerView_OnMouseOver;

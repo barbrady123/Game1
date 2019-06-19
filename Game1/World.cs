@@ -75,13 +75,12 @@ namespace Game1
 			for (int i = 0; i < 15; i++)
 				this.Character.Backpack.AddItem(ItemManager.GetItem((i < 10) ? i : (int?)null));
 
-			this.Items = new List<WorldItem> {
-				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) },
-				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) },
-				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) },
-				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) },
-				new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) }
-			};
+			this.Items = new List<WorldItem>();
+			
+			for (int i = 0; i < 30; i++)
+				this.Items.Add(
+					new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) }
+				);
 
 			// This will need to be redone if the map changes....
 			_physics.CalculateParameters();
@@ -107,7 +106,7 @@ namespace Game1
 
 				if (item.Pickup && item.InRange)
 				{
-					if (this.Character.AddItem(item.Item))
+					if (this.Character.AddItem(item.Item, true))
 						removedItems.Add(item);
 				}
 			}

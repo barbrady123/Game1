@@ -151,7 +151,7 @@ namespace Game1.Menus
 				item.Image.Position = new Vector2(
 					locX - ((_layout == MenuLayout.Vertical) ? (int)(size.X / 2) : 0),
 					locY - ((_layout == MenuLayout.Horizontal) ? (int)(size.Y / 2) : 0));
-				item.Bounds = item.Image.Position.ExpandToRectangeTopLeft(size.X, size.Y);
+				item.Bounds = item.Image.Position.ExpandToRectangleTopLeft(size.X, size.Y);
 				if (_layout == MenuLayout.Vertical)
 					locY += (int)item.Image.Size.Y + MENU_PADDING;
 				else
@@ -162,8 +162,11 @@ namespace Game1.Menus
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-			foreach (var item in _items)
-				item.Image?.UnloadContent();
+			if (_items != null)
+			{
+				foreach (var item in _items)
+					item.Image?.UnloadContent();
+			}
 		}
 
 		public override void UpdateActive(GameTime gameTime)
