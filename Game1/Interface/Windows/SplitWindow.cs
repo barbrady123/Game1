@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Items;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1.Interface.Windows
 {
@@ -18,57 +18,70 @@ namespace Game1.Interface.Windows
 	{
 		private const int TextInputWidth = 50;
 
+		private InventoryItemView _owner;
 		private OkCancelMenu _menu;
 		private TextInput _input;
 		private Button _halfButton;
+
+		public InventoryItemView Owner
+		{
+			get { return _owner; }
+			set
+			{
+				if (_owner != value)
+				{
+					_owner = value;
+
+					if (_owner != null)
+						Show();
+					else
+						Hide();
+				}
+			}
+		}
 
 		public int Quantity => Int32.TryParse(_input?.Text, out int quantity) ? quantity : 0;
 
 		public event EventHandler<ComponentEventArgs> OnButtonClick;
 
-		public InventoryItemView Owner { get; private set; }
-
-		public SplitWindow(SpriteBatchData spriteBatchData) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData)
+		public SplitWindow(SpriteBatchData spriteBatchData) : base(Rectangle.Empty, true, background: "black", spriteBatchData: spriteBatchData, drawIfDisabled: false)
 		{
-			// We allow empty instanciation so the object can be registered with a ComponentManager if necessary...
-		}
-
-		public void Initialize(InventoryItemView owner, Rectangle bounds)
-		{
-			UnloadContent();
-			this.Owner = owner;
-			this.Bounds = bounds;
-
-			var bottomCenter = bounds.BottomCenterVector();
-			// This arbitrary sizing sucks...TODO: Read the comment on the MenuScreen class...menus should be able to auto-size themselves given a Top-Left position...
-			// Is it ssafe for all these subitems to get State.All ?
-			_menu = new OkCancelMenu(new Rectangle((int)bottomCenter.X - 90, (int)bottomCenter.Y - 50, bounds.Width, 30)) { State = ComponentState.All };
+			_menu = new OkCancelMenu(Util.PointInvalid) { IsActive = true };
 			_menu.OnItemSelect += _menu_OnItemSelect;
-			
-			_input = new TextInput(SplitWindow.TextInputWidth, new Vector2(bounds.Center.X, bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2)), "", 2) {
-				State = ComponentState.All,
+
+			_input = new TextInput(SplitWindow.TextInputWidth, new Vector2(this.Bounds.Center.X, this.Bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2)), "", 2) {
+				IsActive = true,
 				AllowedCharacters = "0123456789"
 			};
 			_input.OnReadyDisable += _input_OnReadyDisable;
 			_input.OnBeforeTextUpdate += _input_OnBeforeTextUpdate;
 
-			_halfButton = new Button(bounds.CenteredRegion(80, 40), "Half") { State = ComponentState.All };
-			_halfButton.OnClick += _halfButton_OnClick;
-
-			LoadContent();
+			_halfButton = new Button(this.Bounds.CenteredRegion(80, 40), "Half") { IsActive = true };
+			_halfButton.OnMouseLeftClick += _halfButton_OnMouseLeftClick;
 		}
 
-		public void Clear()
+		// There's some redundant code in here to clean up...
+		private void Show()
 		{
-			this.Owner = null;
-			this.Bounds = Rectangle.Empty;
-			UnloadContent();
-			_background = null;
-			_border = null;
-			_menu?.UnloadContent();
-			_input?.UnloadContent();
-			_halfButton?.UnloadContent();
-			_mouseover = false;
+			var position = InputManager.MousePosition.Offset(-10, -10);
+			this.Bounds = new Rectangle(position.X, position.Y, 160, 200);
+			var bottomCenter = this.Bounds.BottomCenterVector();
+
+			var size = _menu.CalculateMenuSize(null, false);
+			_menu.UpdatePosition(new Point(this.Bounds.Center.X, this.Bounds.Bottom - this.ContentMargin.Height - (size.Height / 2)));
+			
+			var inputPosition = new Vector2(this.Bounds.Center.X, this.Bounds.Y + this.ContentMargin.Height + (TextInput.Height / 2));
+			_input.Bounds = inputPosition.ExpandToRectangleCentered(SplitWindow.TextInputWidth / 2, TextInput.Height / 2);
+			_input.Text = "";
+
+			_halfButton.Bounds = this.Bounds.CenteredRegion(80, 40);
+
+			this.IsActive = true;
+		}
+
+		private void Hide()
+		{
+			this.IsActive = false;
 		}
 
 		public override void LoadContent()
@@ -81,6 +94,7 @@ namespace Game1.Interface.Windows
 
 		public override void UnloadContent()
 		{
+			base.UnloadContent();
 			_menu?.UnloadContent();
 			_input?.UnloadContent();
 			_halfButton?.UnloadContent();
@@ -95,15 +109,15 @@ namespace Game1.Interface.Windows
 			InputManager.BlockAllInput();
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_menu?.Draw(spriteBatch);
 			_input?.Draw(spriteBatch);
 			_halfButton?.Draw(spriteBatch);
 		}
 
-		private void _halfButton_OnClick(object sender, EventArgs e)
+		private void _halfButton_OnMouseLeftClick(object sender, EventArgs e)
 		{
 			if (this.Owner?.Item == null)
 				return;
@@ -114,6 +128,7 @@ namespace Game1.Interface.Windows
 		private void _menu_OnItemSelect(object sender, ComponentEventArgs e)
 		{
 			OnButtonClick?.Invoke(this, e);
+			ReadyDisable(e);
 		}
 
 		private void _input_OnReadyDisable(object sender, ComponentEventArgs e)
@@ -137,6 +152,12 @@ namespace Game1.Interface.Windows
 			int newValue = Int32.Parse(e.Text);
 			if (newValue > this.Owner.Item.Quantity)
 				e.Cancel = true;
+		}
+
+		protected override void ReadyDisable(ComponentEventArgs e)
+		{
+			this.Owner = null;
+			base.ReadyDisable(e);
 		}
 	}
 }

@@ -9,14 +9,14 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1.Interface.Windows
 {
 	// TODO: Support text wrap/multiline...
 	public class Dialog : Component
 	{
-		private MenuScreen _buttonMenu;
+		private Menu _buttonMenu;
 		private ImageText _textImage;
 		private string _text;
 
@@ -36,7 +36,7 @@ namespace Game1.Interface.Windows
 
 		public event EventHandler<ComponentEventArgs> OnItemSelect;
 		
-		public Dialog(string text, DialogButton buttons, Rectangle bounds, int? duration) : base(bounds, true, "black")
+		public Dialog(string text, DialogButton buttons, Rectangle bounds, int? duration) : base(bounds, true, "black", drawIfDisabled: false)
 		{
 			this.Buttons = buttons;
 
@@ -44,9 +44,10 @@ namespace Game1.Interface.Windows
 			switch (this.Buttons)
 			{
 				case DialogButton.Ok :	
-					_buttonMenu = new OkMenu(new Rectangle(this.Bounds.X, this.Bounds.Y + (int)(this.Bounds.Height * 0.75f),  this.Bounds.Width, (int)(this.Bounds.Height * 0.25f))) { State = ComponentState.All };
+					_buttonMenu = new OkMenu(Point.Zero) { IsActive = true };
+					var size = _buttonMenu.CalculateMenuSize(null);
+					_buttonMenu.UpdatePosition(new Point(bounds.Center.X - (size.Width / 2), bounds.Bottom - this.ContentMargin.Height - (size.Height / 2)));
 					_buttonMenu.OnItemSelect += _buttonMenu_OnItemSelect;
-					// Window should handle the escape key now...
 					break;
 			}
 
@@ -76,9 +77,9 @@ namespace Game1.Interface.Windows
 			_textImage.Update(gameTime);
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_buttonMenu?.Draw(spriteBatch);
 			_textImage.Draw(spriteBatch);
 		}

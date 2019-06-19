@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
 using Game1.Enum;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1.Interface
 {
@@ -20,11 +20,16 @@ namespace Game1.Interface
 
 		private ImageText _text;
 
-		public event EventHandler OnClick;
-
-		public Button(Rectangle bounds, string text) : base(bounds, hasBorder: true)
+		public Button(Rectangle bounds, string text, bool killFurtherInput = true) : base(bounds, hasBorder: true)
 		{
 			_text = new ImageText(text, true) { Position = bounds.CenterVector() };
+		}
+
+		protected override void BoundsChanged(bool resized)
+		{
+			base.BoundsChanged(resized);
+			if (_text != null)
+				_text.Position = Bounds.CenterVector();
 		}
 
 		public override void LoadContent()
@@ -48,18 +53,9 @@ namespace Game1.Interface
 			base.UpdateActive(gameTime);
 		}
 
-		public override void UpdateInput(GameTime gameTime)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			if (InputManager.LeftMouseClick(this.Bounds))
-				OnClick?.Invoke(this, new MouseEventArgs(MouseButton.Left));
-			else if (InputManager.RightMouseClick(this.Bounds))
-				OnClick?.Invoke(this, new MouseEventArgs(MouseButton.Right));
-			InputManager.BlockButtonClicks();
-		}
-
-		public override void DrawVisible(SpriteBatch spriteBatch)
-		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_text.Draw(spriteBatch);
 		}
 	}

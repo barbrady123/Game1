@@ -14,6 +14,7 @@ using Game1.Enum;
 
 namespace Game1
 {
+	// TODO: Create a SpriteSheetImage that is basically ImageTexture but handles sourcerect, etc better...
 	public abstract class Image
 	{		
 		protected List<ImageEffect> _effects;

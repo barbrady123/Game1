@@ -7,12 +7,13 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Game1.Effect;
 
-namespace Game1.Screens.Menu
+namespace Game1.Menus
 {
-	public class OptionsMenu : MenuScreen
+	public class OkMenu : Menu
 	{
-		public OptionsMenu(Rectangle bounds): base(bounds, escapeToDisable: true) { }
+		public OkMenu(Point position) : base(position, background: null) { }
+
+		protected override List<string> GetItemData() =>new List<string> { "OK" };
 	}
 }

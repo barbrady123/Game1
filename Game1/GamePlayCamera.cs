@@ -17,7 +17,7 @@ namespace Game1
 	public class CharacterRenderData
 	{
 		public Character Character { get; set; }
-		public ImageTexture SpriteSheet { get; set; }	// TODO : Eventually these should  be a seperate collection and we point to an ID here, to prevent loading duplicate sprite sheets...
+		public ImageSpriteSheet SpriteSheet { get; set; }	// TODO : Eventually these should  be a seperate collection and we point to an ID here, to prevent loading duplicate sprite sheets...
 		public Vector2 PreviousPosition { get; set; }
 		//public SpriteSheetEffect Animation { get; set; }
 		public bool ShowActiveItem { get; set; }
@@ -51,6 +51,7 @@ namespace Game1
 		private Dictionary<Character, CharacterRenderData> _renderData;
 		private List<ItemRenderData> _itemRenderData;
 		private CharacterRenderData _playerRenderData;
+		private bool _refreshItemData;
 		
 		public string TerrainTileSheetName { get; set; }
 		public Layer[] TerrainLayerData{ get; set; }
@@ -77,6 +78,7 @@ namespace Game1
 					PreviousPosition = -Vector2.One
 				};
 			}
+			_refreshItemData = false;
 		}
 
 		public Vector2 MapSize => _terrainMaps?.FirstOrDefault()?.Texture.Bounds.SizeVector() ?? Vector2.Zero;
@@ -90,7 +92,7 @@ namespace Game1
 
 			// This is temp, and has to be in LoadContent because ItemManager needs to have it's LoadContent called before we can access items...
 			_itemRenderData = new List<ItemRenderData>();
-			UpdateItemRenderData();
+			RefreshItemRenderData();
 		}
 
 		public void UnloadContent()
@@ -106,7 +108,7 @@ namespace Game1
 		public void Update(GameTime gameTime)
 		{
 			// If the world isn't running, we can skip render calculations for the gameplay view...
-			if (!_world.State.HasFlag(ComponentState.Active))
+			if (!_world.IsActive)
 				return;
 
 			var playerPosition = _world.Character.Position;
@@ -147,6 +149,9 @@ namespace Game1
 				UpdateCharacterRenderData(gameTime, data.Value);
 
 			// Items...
+			if (_refreshItemData)
+				RefreshItemRenderData();
+
 			UpdateItemRenderData(gameTime);
 		}
 
@@ -197,7 +202,7 @@ namespace Game1
 					spriteEffects: _playerRenderData.FlipActiveItem ? SpriteEffects.FlipHorizontally : SpriteEffects.None);
 		}
 
-		private void UpdateItemRenderData()
+		private void RefreshItemRenderData()
 		{
 			_itemRenderData.Clear();
 			foreach (var item in _world.Items)
@@ -212,7 +217,7 @@ namespace Game1
 			else
 				renderData.SpriteSheet.StopEffect(typeof(SpriteSheetEffect));
 			
-			renderData.SpriteSheet.SourceRect = new Rectangle(renderData.SpriteSheet.SourceRect.X, (int)character.Direction * Game1.TileSize, Game1.TileSize, Game1.TileSize);
+			renderData.SpriteSheet.UpdateDirection(character.Direction);
 			renderData.SpriteSheet.Update(gameTime);
 			renderData.SpriteSheet.Position = new Vector2(character.Position.X - _terrainSourceRect.X + _gameViewArea.X, character.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
 			renderData.PreviousPosition = character.Position;
@@ -240,16 +245,15 @@ namespace Game1
 			foreach (var data in _itemRenderData)
 			{
 				data.Position = new Vector2(data.Item.Position.X - _terrainSourceRect.X + _gameViewArea.X, data.Item.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
+				// We could also do something like "if this position is X.pixels beyond the _gameViewArea, just set it to null...and then on Draw we skip drawing this...(say > 64 pixels out of bounds, for example)
+				// Need to test if extra computation here is worth it on the backend...
 			}
 		}
 
 		private void LoadCharacterSpriteSheet(CharacterRenderData renderData)
 		{
 			// TODO: Fix this so it loads unique sprite sheets into collection ONLY and they are referenced by id here...
-			renderData.SpriteSheet = new ImageTexture($"{Game1.SpriteSheetRoot}\\{renderData.Character.SpriteSheetName}") { 
-				IsActive = true,
-				Alignment = ImageAlignment.Centered,
-			};
+			renderData.SpriteSheet = new ImageSpriteSheet($"{Game1.SpriteSheetRoot}\\{renderData.Character.SpriteSheetName}") { IsActive = true };
 			renderData.SpriteSheet.LoadContent();
 			renderData.SpriteSheet.AddEffect<SpriteSheetEffect>(false);
 		}
@@ -284,6 +288,7 @@ namespace Game1
 		}
 
 		// Eventually we'll load the map in chunks...
+		// NOTE: This type of technique is only valid for completely STATIC map data...everything interactive will have to be rendered on top of this...
 		private ImageTexture GenerateTerrainMap(Layer layer, Point start, Point end)
 		{
 			var renderTarget = new RenderTarget2D(Game1.Graphics, (end.X - start.X + 1) * Game1.TileSize, (end.Y - start.Y + 1) * Game1.TileSize);
@@ -316,7 +321,7 @@ namespace Game1
 
 		private void _world_OnItemsChange(object sender, ComponentEventArgs e)
 		{
-			UpdateItemRenderData();
+			_refreshItemData = true;
 		}
 	}
 }

@@ -10,8 +10,8 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Effect;
 using Game1.Screens;
-using Game1.Screens.Menu;
-using Game1.Screens.Menu.Character;
+using Game1.Menus;
+using Game1.Menus.Character;
 
 namespace Game1
 {
@@ -57,17 +57,14 @@ namespace Game1
 
 		public void Update(GameTime gameTime)
 		{
-			if (_currentScreen != null)
+			if (_isTransitioning)
 			{
-				if (_isTransitioning)
-					_currentScreen.State &= ~ComponentState.TakingInput;
-				else
-					_currentScreen.State |= ComponentState.TakingInput;
-				_currentScreen.Update(gameTime);
+				_transitionImage.Update(gameTime);
+				InputManager.BlockAllInput();
 			}
 
-			if (_isTransitioning)
-				_transitionImage.Update(gameTime);
+			if (_currentScreen != null)
+				_currentScreen.Update(gameTime);
 		}
 
 		public void Draw(SpriteBatch spriteBatch)
@@ -113,13 +110,10 @@ namespace Game1
 		{
 			_currentScreen?.UnloadContent();
 			_currentScreen = _newScreen;
+			_currentScreen.IsActive = true;
 			_newScreen = null;
 			_currentScreen.OnReadyDisable += _currentScreen_OnReadyDisable;
-			if (_currentScreen is MenuScreen menuScreen)
-				menuScreen.OnItemSelect += MenuScreen_OnItemSelect;
-
 			_currentScreen.LoadContent();
-			_currentScreen.State = ComponentState.ActiveVisible;
 		}
 
 		private void _fadeInEffect_OnActiveChange(object sender, EventArgs e)
@@ -137,27 +131,7 @@ namespace Game1
 			if (_isTransitioning && !((EffectEventArgs)e).IsActive)
 			{
 				_isTransitioning = false;
-				_transitionImage.IsActive = false;				
-			}
-		}
-
-		private void MenuScreen_OnItemSelect(object sender, ComponentEventArgs e)
-		{
-			switch (sender)
-			{
-				case MainMenu _ : switch (e.Value)
-				{
-					case "startnewgame":	TransitionScreens(new CharacterCreateScreen(_bounds));	break;
-					case "options":			TransitionScreens(new OptionsMenu(_bounds));			break;
-					case "exitgame":		Game1.Instance.Exit();									break;
-					default: break;
-				}
-				break;
-				case OptionsMenu _ : switch (e.Value)
-				{
-					case "back":	TransitionScreens(new MainMenu(_bounds));	break;
-				}
-				break;
+				_transitionImage.IsActive = false;		
 			}
 		}
 
@@ -167,27 +141,28 @@ namespace Game1
 			{
 				case SplashScreen _ : switch (e.Trigger)
 				{
-					case EventTrigger.KeyPressed :	TransitionScreens(new MainMenu(_bounds));	break;
-					case EventTrigger.Escape :		Game1.Instance.Exit();						break;
+					case EventTrigger.ButtonClick:
+					case EventTrigger.KeyPressed :	TransitionScreens(new MenuScreen<MainMenu>(_bounds));	break;
+					case EventTrigger.Escape :		Game1.Instance.Exit();									break;
 				}
 				break;
-				case MainMenu _ : switch (e.Value)
+				case MenuScreen<MainMenu> _ : switch (e.Value)
 				{
-					case "startnewgame":	TransitionScreens(new CharacterCreateScreen(_bounds));	break;
-					case "options":			TransitionScreens(new OptionsMenu(_bounds));			break;
-					case "exitgame":		Game1.Instance.Exit();									break;
+					case "startnewgame":	TransitionScreens(new CharacterCreateScreen(_bounds));		break;
+					case "options":			TransitionScreens(new MenuScreen<OptionsMenu>(_bounds));	break;
+					case "exitgame":		Game1.Instance.Exit();										break;
 					default: break;
 				}
 				break;
-				case OptionsMenu _ : switch (e.Value)
+				case MenuScreen<OptionsMenu> _ : switch (e.Value)
 				{
-					case "back":	TransitionScreens(new MainMenu(_bounds));	break;
+					case "back":	TransitionScreens(new MenuScreen<MainMenu>(_bounds));	break;
 				}
 				break;
 				case CharacterCreateScreen _ : switch (e.Value)
 				{
 					case "escape" :
-					case "cancel" : TransitionScreens(new MainMenu(_bounds));		break;
+					case "cancel" : TransitionScreens(new MenuScreen<MainMenu>(_bounds));		break;
 					// This should NOT go directly to game screen...we need a "loading" transition screen with a call back (probably just part of the ScreenManager)....
 					case "startgame" : TransitionScreens(new GameScreen(_bounds));	break;
 				}

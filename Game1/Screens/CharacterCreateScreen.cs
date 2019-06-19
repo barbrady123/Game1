@@ -8,16 +8,15 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
-using Game1.Screens.Menu.Character;
+using Game1.Menus.Character;
 using Game1.Interface;
 using Game1.Interface.Windows;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1.Screens
 {
 	public class CharacterCreateScreen : Component
 	{
-		private readonly ComponentManager _components;
 		private Character _newChar;
 		private Vector2 _characterViewPosition = new Vector2(450.0f, 400.0f);
 		private readonly Dialog _dialog;
@@ -31,7 +30,6 @@ namespace Game1.Screens
 
 		public CharacterCreateScreen(Rectangle bounds): base(bounds, background: "brick")
 		{
-			_components = new ComponentManager();
 			_newChar = new Character();
 
 			// Title...
@@ -53,17 +51,15 @@ namespace Game1.Screens
 			};
 
 			// Menu
-			_components.Register(_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200)));
+			_activator.Register(_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200)), true, "active");
 			_menuCharacter.OnSexItemChange += _menuCharacter_OnSexItemChange;
 			_menuCharacter.OnReadyDisable += _menuCharacter_OnReadyDisable;
 			_menuCharacter.OnUserNotify += _menuCharacter_OnUserNotify;
 
 			// Dialog
-			_components.Register(_dialog = new Dialog(null, DialogButton.Ok, new Rectangle(600, 500, 400, 200), null));
+			_activator.Register(_dialog = new Dialog(null, DialogButton.Ok, new Rectangle(600, 500, 400, 200), null), false, "active");
 			_dialog.OnItemSelect += _dialog_OnItemSelect;
 			_dialog.OnReadyDisable += _dialogBox_OnButtonClick;
-
-			_components.SetState(_menuCharacter, ComponentState.All, null);
 		}
 
 		public override void LoadContent()
@@ -94,9 +90,9 @@ namespace Game1.Screens
 			_dialog.Update(gameTime);
 		}
 
-		public override void Draw(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.Draw(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_titleText.Draw(spriteBatch);
 			_characterViewBack.Draw(spriteBatch);
 			_characterView.Draw(spriteBatch);
@@ -138,20 +134,21 @@ namespace Game1.Screens
 
 		private void _menuCharacter_OnUserNotify(object sender, ComponentEventArgs e)
 		{
+			// Dialog should have a dynamiccomponent setup method...
 			_dialog.Text = e.Text;
 			_dialog.Duration = 300;
-			_components.SetState(_dialog, ComponentState.All, ComponentState.Visible);
+			_activator.SetState(_dialog, true);
 		}
 
 		private void _dialogBox_OnButtonClick(object sender, ComponentEventArgs e)
 		{
-			_components.SetState(_menuCharacter, ComponentState.All, ComponentState.None);
+			_activator.SetState(_menuCharacter, true);
 		}
 
 		private void _dialog_OnItemSelect(object sender, ComponentEventArgs e)
 		{
 			// Eventually we need to figure out what they clicked here...
-			_components.SetState(_menuCharacter, ComponentState.All, ComponentState.None);
+			_activator.SetState(_menuCharacter, true);
 		}
 	}
 }

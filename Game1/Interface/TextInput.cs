@@ -53,20 +53,30 @@ namespace Game1.Interface
 				{
 					_text = value;
 					CalculateVisibleText(TextInputAction.Add);
+					this.CurrentPositionIndex = Math.Min(_text.Length, this.CurrentPositionIndex);
 				}
 			}
 		}
 
-		protected override void StateChange()
+		protected override void BoundsChanged(bool resized)
+		{
+			base.BoundsChanged(resized);
+			if (_textImage != null)
+				_textImage.Position = this.TextPosition + new Vector2(0.0f, FontManager.FontHeight);
+			if (_cursor != null)
+				_cursor.Position = new Vector2(this.CursorPositionX, this.TextPosition.Y);
+		}
+
+		protected override void IsActiveChange()
 		{
 			this.CurrentPositionIndex = 0;
-			if (this.State.HasFlag(ComponentState.Active))
+			if (this.IsActive)
 				DelayInput(1);
 		}
 
 		public event EventHandler<ComponentEventArgs> OnBeforeTextUpdate;
 
-		public TextInput(int width, Vector2 position, string text = null, int maxLength = 100) : base(position.ExpandToRectangleCentered(width / 2, TextInput.Height / 2), true, hasBorder: true)
+		public TextInput(int width, Vector2 position, string text = null, int maxLength = 100) : base(position.ExpandToRectangleCentered(width / 2, TextInput.Height / 2), true, hasBorder: true, drawIfDisabled: true)
 		{
 			_width = width;
 			_maxVisibleLength = _width - (this.BorderThickness * 2) - (TextInput.TextPadding.Width * 2);
@@ -77,22 +87,24 @@ namespace Game1.Interface
 			this.AllowedCharacters = "";
 			this.BlockedCharacters = "";
 			this.CurrentPositionIndex = this.Text.Length;
-		}
 
-		public override void LoadContent()
-		{
-			base.LoadContent();
 			_textImage = new ImageText(this.Text, true) { 
 				Position = this.TextPosition + new Vector2(0.0f, FontManager.FontHeight),
 				Alignment = ImageAlignment.LeftBottom,
 				Scale = new Vector2(1.1f, 1.1f)
 			};
-			_textImage.LoadContent();
+
 			_cursor = new ImageTexture("Interface/cursor", true) { Position = new Vector2(this.CursorPositionX, this.TextPosition.Y) };
 			var effect = _cursor.AddEffect<FadeCycleEffect>(true);
 			effect.Speed = 5.0f;	// Add dynamic params so we can include this in call above
-			_cursor.LoadContent();
 			CalculateVisibleText(TextInputAction.Right);
+		}
+
+		public override void LoadContent()
+		{
+			base.LoadContent();
+			_textImage.LoadContent();
+			_cursor.LoadContent();
 		}
 
 		public override void UnloadContent()
@@ -104,10 +116,10 @@ namespace Game1.Interface
 
 		public override void Update(GameTime gameTime)
 		{
-			_background.IsActive = this.State.HasFlag(ComponentState.Active);
-			_border.IsActive = this.State.HasFlag(ComponentState.Active);
-			_cursor.IsActive = this.State.HasFlag(ComponentState.TakingInput);
-			_textImage.Alpha = this.State.HasFlag(ComponentState.Active) ? TextInput.ActiveTextAlpha : TextInput.InactiveTextAlpha;
+			_background.IsActive = this.IsActive;
+			_border.IsActive = this.IsActive;
+			_cursor.IsActive = this.IsActive;
+			_textImage.Alpha = this.IsActive ? TextInput.ActiveTextAlpha : TextInput.InactiveTextAlpha;
 			_textImage.UpdateText(_visibleText);
 			_textImage.Update(gameTime);
 			base.Update(gameTime);
@@ -121,9 +133,9 @@ namespace Game1.Interface
 			base.UpdateInput(gameTime);
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.DrawVisible(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_cursor.Draw(spriteBatch);
 			_textImage.Draw(spriteBatch);
 		}

@@ -28,6 +28,8 @@ namespace Game1
 
 		public static Rectangle Move(this Rectangle rect, int xMove, int yMove) => new Rectangle(rect.X + xMove, rect.Y + yMove, rect.Width, rect.Height);
 
+		public static Rectangle MoveTo(this Rectangle rect, int xMove, int yMove) => new Rectangle(xMove, yMove, rect.Width, rect.Height);
+
 		public static Point TopLeftPoint(this Rectangle rect, int? xOffset = null, int? yOffset = null) => new Point(rect.X + (xOffset ?? 0), rect.Y + (yOffset ?? 0));
 	}
 }

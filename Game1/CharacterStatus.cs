@@ -11,17 +11,19 @@ using Game1.Enum;
 
 namespace Game1
 {
-	public class CharacterStatus
+	public class CharacterStatus<T> where T: StatusEffect
 	{
+		public T Effect { get; set; }
 		public ImageTexture Icon { get; set; }
 		public double? Duration { get; set; }
 		public int Stacks { get; set; }
 
 		public event EventHandler<ComponentEventArgs> OnExpired;
 
-		public CharacterStatus(int? duration, ImageTexture icon)
+		public CharacterStatus(T effect, ImageTexture icon)
 		{
-			this.Duration = duration;
+			this.Effect = effect;
+			this.Duration = effect.Duration;
 			this.Stacks = 1;
 			this.Icon = icon;
 			this.Icon.LoadContent();

@@ -9,13 +9,11 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Interface;
-using Game1.Screens.Menu;
 
-namespace Game1.Screens.Menu.Character
+namespace Game1.Menus.Character
 {
 	public class CharacterNewCompositeMenu : Component
 	{
-		private readonly ComponentManager _components;
 		private readonly CharacterNewMenu _menuCharacter;
 		private readonly TextInput _nameEdit;
 		private readonly SexMenu _menuSex;
@@ -27,35 +25,29 @@ namespace Game1.Screens.Menu.Character
 		public event EventHandler<ComponentEventArgs> OnSexItemChange;
 		public event EventHandler<ComponentEventArgs> OnUserNotify;
 
-		public CharacterNewCompositeMenu(Rectangle bounds) : base(bounds, true, "brick")
+		public CharacterNewCompositeMenu(Rectangle bounds) : base(bounds, true, null)
 		{
-			_components = new ComponentManager();
-			
 			// Main menu...
-			_components.Register(_menuCharacter = new CharacterNewMenu(new Rectangle(this.Bounds.Left, this.Bounds.Top, 200, 200)));
+			_activator.Register(_menuCharacter = new CharacterNewMenu(new Point(this.Bounds.Left, this.Bounds.Top + 50)), true, "active");
 			_menuCharacter.OnItemSelect += _menuCharacter_OnItemSelect;
 			_menuCharacter.OnMouseIn += _menuCharacter_OnMouseIn;
 
 			var basePosition = _menuCharacter.Bounds.TopLeftPoint();
 
 			// Name edit box...
-			_components.Register(_nameEdit = new TextInput(275, _menuCharacter.Bounds.TopLeftVector(300, 80), this.CharacterName, 12));
+			_activator.Register(_nameEdit = new TextInput(275, basePosition.Offset(240, 24).ToVector2(), this.CharacterName, 12), false, "active");
 			_nameEdit.OnReadyDisable += _nameEdit_OnReadyDisable;
 
 			// Sex menu...
-			_components.Register(_menuSex = new SexMenu(new Rectangle(basePosition.X + 90, basePosition.Y + 60, 300, 120)));
+			_activator.Register(_menuSex = new SexMenu(new Point(basePosition.X + 90, basePosition.Y + 36)), false, "active");
 			_menuSex.OnCurrentItemChange += _menuSex_OnCurrentItemChange;
 			_menuSex.OnItemSelect += _menuSex_OnItemSelect;
 			_menuSex.OnReadyDisable += _menuSex_OnReadyDisable;
 
 			// Start/Cancel menu...
-			_components.Register(_menuStart = new StartCancelMenu(new Rectangle(basePosition.X + 50, basePosition.Y + 300, 300, 50)));
+			_activator.Register(_menuStart = new StartCancelMenu(new Point(basePosition.X + 50, basePosition.Y + 250)), false, "active");
 			_menuStart.OnItemSelect += _menuStart_OnItemSelect;
 			_menuStart.OnMouseIn += _menuStart_OnMouseIn;
-
-			
-			_components.SetStateAll(ComponentState.Visible, true);
-			_components.AddState(_menuCharacter, ComponentState.ActiveInput);
 		}
 
 		public override void LoadContent()
@@ -87,9 +79,9 @@ namespace Game1.Screens.Menu.Character
 			base.UpdateActive(gameTime);
 		}
 
-		public override void Draw(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
-			base.Draw(spriteBatch);
+			base.DrawInternal(spriteBatch);
 			_menuCharacter.Draw(spriteBatch);
 			_nameEdit.Draw(spriteBatch);
 			_menuSex.Draw(spriteBatch);
@@ -100,8 +92,8 @@ namespace Game1.Screens.Menu.Character
 		{
 			switch (e.Value)
 			{
-				case "name":	_components.AddState(_nameEdit, ComponentState.ActiveInput, true);	break;
-				case "sex":		_components.AddState(_menuSex, ComponentState.ActiveInput, true);	break;
+				case "name":	_activator.SetState(_nameEdit, true);	break;
+				case "sex":		_activator.SetState(_menuSex, true);	break;
 			}
 		}
 
@@ -118,7 +110,7 @@ namespace Game1.Screens.Menu.Character
 				_nameEdit.Text = this.CharacterName;
 			}
 
-			_components.AddState(_menuCharacter, ComponentState.ActiveInput, true);
+			_activator.SetState(_menuCharacter, true);
 		}
 
 		private void _menuSex_OnCurrentItemChange(object sender, ComponentEventArgs e)
@@ -135,14 +127,14 @@ namespace Game1.Screens.Menu.Character
 			}
 
 			OnSexItemChange?.Invoke(this, e);
-			_components.AddState(_menuCharacter, ComponentState.ActiveInput, true);
+			_activator.SetState(_menuCharacter, true);
 		}
 
 		private void _menuSex_OnReadyDisable(object sender, EventArgs e)
 		{
 			_menuSex.SetById(this.CharacterSex.ToString("g").ToLower());
 			OnSexItemChange?.Invoke(this, new ComponentEventArgs { Value = this.CharacterSex.ToString("g").ToLower() });
-			_components.AddState(_menuCharacter, ComponentState.ActiveInput, true);
+			_activator.SetState(_menuCharacter, true);
 		}
 
 		private void _menuStart_OnItemSelect(object sender, ComponentEventArgs e)
@@ -173,14 +165,14 @@ namespace Game1.Screens.Menu.Character
 
 		private void _menuCharacter_OnMouseIn(object sender, ComponentEventArgs e)
 		{			
-			if (_menuStart.State.HasFlag(ComponentState.Active))
-				_components.AddState(_menuCharacter, ComponentState.ActiveInput, true);
+			if (_menuStart.IsActive)
+				_activator.SetState(_menuCharacter, true);
 		}
 
 		private void _menuStart_OnMouseIn(object sender, EventArgs e)
 		{
-			if (_menuCharacter.State.HasFlag(ComponentState.Active))
-				_components.AddState(_menuStart, ComponentState.ActiveInput, true);
+			if (_menuCharacter.IsActive)
+				_activator.SetState(_menuStart, true);
 		}
 	}
 }

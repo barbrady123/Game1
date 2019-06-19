@@ -8,13 +8,16 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 
-namespace Game1.Screens.Menu.Character
+namespace Game1.Menus.Character
 {
-	public class StartCancelMenu : MenuScreen
+	public class StartCancelMenu : Menu
 	{
-		public StartCancelMenu (Rectangle bounds): base(bounds: bounds,
+		public StartCancelMenu (Point position): base(  position: position,
 														layout: MenuLayout.Horizontal,
 														background: null,
-														inactiveMouseEvents: true) { }
+														inactiveMouseEvents: true,
+														drawIfDisabled: true) { }
+
+		protected override List<string> GetItemData() => new List<string> { "Start Game", "Cancel" };
 	}
 }

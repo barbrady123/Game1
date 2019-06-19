@@ -8,13 +8,16 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 
-namespace Game1.Screens.Menu.Character
+namespace Game1.Menus.Character
 {
-	public class SexMenu : MenuScreen
+	public class SexMenu : Menu
 	{
-		public SexMenu(Rectangle bounds): base(	bounds: bounds,
+		public SexMenu(Point position): base(	position: position,
 												layout: MenuLayout.Horizontal,
 												background: null,
-												escapeToDisable: true) { }
+												escapeToDisable: true,
+												drawIfDisabled: true) { }
+
+		protected override List<string> GetItemData() => new List<string> { "Female", "Male" };
 	}
 }

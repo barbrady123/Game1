@@ -12,37 +12,43 @@ using Game1.Interface;
 using Game1.Interface.Windows;
 using Game1.Items;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1
 {
-	public abstract class Component
+	public abstract class Component : IActivatable, ISupportsTooltip
 	{
-		private int _delayInputCycles;
-		protected ImageTexture _background;
+		private readonly SpriteBatchData _spriteBatchData;
+		private bool _isActive;
+		protected ActivationManager _activator;
 		private string _backgroundName;
-		protected ImageTexture _border;
-		private bool _readyDisableOnEscape;
-		private Rectangle _bounds;
+		protected ImageTexture _background;
 		private bool _hasBorder;
+		protected ImageTexture _border;
+		private Rectangle _bounds;
+		private int _delayInputCycles;
+		private bool _readyDisableOnEscape;
 		private bool _fireMouseEvents;
 		private bool _inactiveMouseEvents;
-		private ComponentState _state;
-		private readonly SpriteBatchData _spriteBatchData;
+		private bool _drawIfDisabled;
+		private bool _enabledTooltip;
+		protected Tooltip _tooltip;
+		private bool _enabledContextMenu;
+		protected Menu _contextMenu;
 
-		public virtual ComponentState State
+		public virtual bool IsActive
 		{
-			get { return _state; }
+			get { return _isActive; }
 			set {
-				if (_state != value)
+				if (_isActive != value)
 				{
-					_state = value;
-					StateChange();
+					_isActive = value;
+					IsActiveChange();
 				}
 			}
 		}
 
-		protected virtual void StateChange() { }
+		protected virtual void IsActiveChange() { }
 
 		public int? Duration { get; set; }
 
@@ -53,11 +59,31 @@ namespace Game1
 			{
 				if (_bounds != value)
 				{
+					bool resized = (_bounds.Width != value.Width) || (_bounds.Height != value.Height);
 					_bounds = value;
-					SetupBackground();
-					SetupBorder();
-					RepositionObjects();
+					BoundsChanged(resized);
 				}
+			}
+		}
+
+		protected virtual void BoundsChanged(bool resized)
+		{
+			if (this.Bounds == Rectangle.Empty)
+				return;
+
+			if (_background != null)
+			{
+				_background.Position = this.Bounds.CenterVector();
+				_background.SourceRect = this.Bounds.MoveTo(0, 0);
+			}
+
+			if (resized)
+				SetupBorder();
+
+			if (_border != null)
+			{
+				_border.Position = this.Bounds.CenterVector();
+				_border.SourceRect = this.Bounds.MoveTo(0, 0);
 			}
 		}
 
@@ -65,24 +91,29 @@ namespace Game1
 		public event EventHandler<ComponentEventArgs> OnMouseOver;
 		public event EventHandler<ComponentEventArgs> OnMouseIn;
 		public event EventHandler<ComponentEventArgs> OnMouseOut;
+		public event EventHandler<ComponentEventArgs> OnMouseLeftClick;
+		public event EventHandler<ComponentEventArgs> OnMouseRightClick;
 
 		protected bool _mouseover;
 		protected virtual Size ContentMargin => new Size(20, 20);
 		protected virtual int BorderThickness => 2;
 		protected virtual Color BorderColor => Color.White;
+		public virtual string TooltipText => null;
 
-		/// <summary>
-		/// For non-visual components....
-		/// </summary>
 		public Component(Rectangle? bounds = null,
 						 bool readyDisableOnEscape = false,
 						 string background = "black",
 						 SpriteBatchData spriteBatchData = null,
 						 bool hasBorder = false,
 						 bool fireMouseEvents = true,
-						 bool inactiveMouseEvents = false)
+						 bool inactiveMouseEvents = false,
+						 bool drawIfDisabled = true,
+						 bool enabledTooltip = false,
+						 bool enabledContextMenu = false)
 		{
 			_bounds = bounds ?? Rectangle.Empty;
+			_activator = new ActivationManager();
+			// Auto register tooltip/context/etc...when available...
 			_readyDisableOnEscape = readyDisableOnEscape;
 			_spriteBatchData = spriteBatchData;
 			_hasBorder = hasBorder;
@@ -91,30 +122,43 @@ namespace Game1
 			_backgroundName = background;
 			_fireMouseEvents = fireMouseEvents;
 			_inactiveMouseEvents = inactiveMouseEvents;
+			_drawIfDisabled = drawIfDisabled;
+			if (_enabledTooltip = enabledTooltip)
+				_activator.Register(_tooltip = new Tooltip(this, SpriteBatchManager.Get("tooltip")), false, "popup");
+			if (_enabledContextMenu = enabledContextMenu)
+			{
+				_activator.Register(_contextMenu = new ContextMenu(this, SpriteBatchManager.Get("context")), false, "popup");
+				_contextMenu.OnItemSelect += _contextMenu_OnItemSelect;
+			}
 
-			SetupBackground();
-			SetupBorder();
-			RepositionObjects();
+			if (!String.IsNullOrWhiteSpace(_backgroundName))
+				_background = new ImageTexture($"{Game1.BackgroundRoot}/{_backgroundName}", true) { Alignment = ImageAlignment.Centered };
+
+			BoundsChanged(true);
 		}
 
 		public virtual void LoadContent()
 		{
 			_background?.LoadContent();
 			_border?.LoadContent();
+			_tooltip?.LoadContent();
+			_contextMenu?.LoadContent();
 		}
 
 		public virtual void UnloadContent()
 		{
 			_background?.UnloadContent();
 			_border?.UnloadContent();
+			_tooltip?.UnloadContent();
+			_contextMenu?.UnloadContent();
 		}
 
 		public virtual void Update(GameTime gameTime)
 		{
-			if (_inactiveMouseEvents && !this.State.HasFlag(ComponentState.Active))
+			if (_inactiveMouseEvents && !this.IsActive)
 				CheckMouseEvents();
 
-			if (this.State.HasFlag(ComponentState.Active))
+			if (this.IsActive)
 				UpdateDuration(gameTime);
 		}
 
@@ -140,6 +184,8 @@ namespace Game1
 		{
 			_background?.Update(gameTime);
 			_border?.Update(gameTime);
+			_tooltip?.Update(gameTime);
+			_contextMenu?.Update(gameTime);
 			UpdateDelayInput(gameTime);
 		}
 
@@ -151,8 +197,7 @@ namespace Game1
 				return;
 			}
 
-			if (this.State.HasFlag(ComponentState.TakingInput))
-				UpdateInput(gameTime);
+			UpdateInput(gameTime);
 		}
 
 		public virtual void UpdateInput(GameTime gameTime)
@@ -174,6 +219,10 @@ namespace Game1
 				if (!_mouseover)
 					MouseIn(new ComponentEventArgs());
 				MouseOver(new ComponentEventArgs());
+				if (InputManager.LeftMouseClick())
+					MouseLeftClick(new ComponentEventArgs { Button = MouseButton.Left });
+				if (InputManager.RightMouseClick())
+					MouseRightClick(new ComponentEventArgs { Button = MouseButton.Right });
 			}
 			else if (_mouseover)
 			{
@@ -183,21 +232,23 @@ namespace Game1
 			return mouseover;
 		}
 
-		public virtual void Draw(SpriteBatch spriteBatch)
+		public void Draw(SpriteBatch spriteBatch)
 		{
-			if (this.State.HasFlag(ComponentState.Visible))
-			{
-				if (_spriteBatchData != null)
-					Util.WrappedDraw(DrawVisible, _spriteBatchData, _bounds);
-				else
-					DrawVisible(spriteBatch);
-			}
+			if ((!_drawIfDisabled) && (!this.IsActive))
+				return;
+
+			if (_spriteBatchData != null)
+				Util.WrappedDraw(DrawInternal, _spriteBatchData, _bounds);
+			else
+				DrawInternal(spriteBatch);
 		}
 
-		public virtual void DrawVisible(SpriteBatch spriteBatch)
+		protected virtual void DrawInternal(SpriteBatch spriteBatch)
 		{
 			_background?.Draw(spriteBatch);
 			_border?.Draw(spriteBatch);
+			_tooltip?.Draw(spriteBatch);
+			_contextMenu?.Draw(spriteBatch);
 		}
 
 		public void DelayInput(int delayCycles)
@@ -213,25 +264,9 @@ namespace Game1
 
 		protected virtual void MouseOut(ComponentEventArgs e) => OnMouseOut?.Invoke(this, e);
 
-		protected virtual void RepositionObjects()
-		{
-			if (_background != null)
-			{
-				_background.Position = this.Bounds.CenterVector();
-				_background.SourceRect = this.Bounds;
-			}
+		protected virtual void MouseLeftClick(ComponentEventArgs e) => OnMouseLeftClick?.Invoke(this, e);
 
-			if (_border != null)
-				_border.Position = this.Bounds.CenterVector();
-		}
-
-		protected void SetupBackground()
-		{
-			_background?.UnloadContent();
-			// TODO: This should add support for the Util.GenerateSolidBackgroundTexture method for solid colors...
-			if ((!String.IsNullOrWhiteSpace(_backgroundName)) && (this.Bounds != Rectangle.Empty))
-				_background = new ImageTexture($"{Game1.BackgroundRoot}/{_backgroundName}", true) { Alignment = ImageAlignment.Centered };
-		}
+		protected virtual void MouseRightClick(ComponentEventArgs e) => OnMouseRightClick?.Invoke(this, e);
 
 		protected void SetupBorder()
 		{
@@ -239,8 +274,14 @@ namespace Game1
 			{
 				_border?.UnloadContent();
 				_border = Util.GenerateBorderTexture(this.Bounds.Width, this.Bounds.Height, this.BorderThickness, this.BorderColor, true);
-				_border.Alignment = ImageAlignment.Centered;
 			}
 		}
+
+		private void _contextMenu_OnItemSelect(object sender, ComponentEventArgs e) => ContextMenuSelect(e);
+
+		/// <summary>
+		/// Handlers for the context menu selection goes here...
+		/// </summary>
+		protected virtual void ContextMenuSelect(ComponentEventArgs e) { }
 	}
 }

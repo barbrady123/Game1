@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
 using Game1.Items;
 using Game1.Screens;
-using Game1.Screens.Menu;
+using Game1.Menus;
 
 namespace Game1.Interface
 {
@@ -42,12 +42,11 @@ namespace Game1.Interface
 
 		public bool HightlightActiveItem { get; set; }
 
-		public event EventHandler<ComponentEventArgs> OnMouseClick;
 		public event EventHandler<ComponentEventArgs> OnActiveItemChange;
 
 		public int Size => this.Container?.Size ?? 0;
 
-		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem) : base(bounds, fireMouseEvents: false)
+		public ItemContainerView(ItemContainer container, Rectangle bounds, bool highlightActiveItem) : base(bounds, background: null, fireMouseEvents: false)
 		{
 			this.Container = container;
 			this.Container.OnItemChanged += Container_OnItemChanged;
@@ -55,12 +54,12 @@ namespace Game1.Interface
 			for (int i = 0; i < _itemViews.Length; i++)
 			{
 				var position = CalculateItemViewPosition(i);
-				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(InventoryItemView.Size, InventoryItemView.Size), i, null, this);
-				_itemViews[i].OnMouseClick += ItemContainerView_OnMouseClick;
+				_itemViews[i] = new InventoryItemView(position.ExpandToRectangeTopLeft(InventoryItemView.Size, InventoryItemView.Size), i, null, false, this);
+				_itemViews[i].OnMouseLeftClick += ItemContainerView_OnMouseLeftClick;
+				_itemViews[i].OnMouseRightClick += ItemContainerView_OnMouseRightClick;
 				_itemViews[i].OnMouseOver += ItemContainerView_OnMouseOver;
 				_itemViews[i].OnMouseOut += ItemContainerView_OnMouseOut;				
-				// use manager!!
-				_itemViews[i].State = ComponentState.All;
+				_itemViews[i].IsActive = true;
 			}
 			this.HightlightActiveItem = highlightActiveItem;
 			this.ActiveItemIndex = 0;
@@ -68,12 +67,14 @@ namespace Game1.Interface
 
 		public override void LoadContent()
 		{
+			base.LoadContent();
 			foreach (var item in _itemViews)
 				item.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
+			base.UnloadContent();
 			foreach (var item in _itemViews)
 				item.UnloadContent();
 		}
@@ -84,8 +85,9 @@ namespace Game1.Interface
 			UpdateItems(gameTime);
 		}
 
-		public override void DrawVisible(SpriteBatch spriteBatch)
+		protected override void DrawInternal(SpriteBatch spriteBatch)
 		{
+			base.DrawInternal(spriteBatch);
 			foreach (var item in _itemViews)
 				item.Draw(spriteBatch);
 		}
@@ -137,10 +139,20 @@ namespace Game1.Interface
 			return (T)Activator.CreateInstance(typeof(T), container, new Rectangle(position.X, position.Y, requiredSize.Width, requiredSize.Height), hightlightActiveItem);
 		}
 
-		private void ItemContainerView_OnMouseClick(object sender, ComponentEventArgs e)
+		private void ItemContainerView_OnMouseLeftClick(object sender, ComponentEventArgs e)
+		{
+			var itemClicked = (InventoryItemView)sender;
+			if (itemClicked != null)
+				this.ActiveItemIndex = itemClicked.Index;
+			
+			e.Meta = sender;
+			MouseLeftClick(e);
+		}
+
+		private void ItemContainerView_OnMouseRightClick(object sender, ComponentEventArgs e)
 		{
 			e.Meta = sender;
-			OnMouseClick?.Invoke(this, e);
+			MouseRightClick(e);
 		}
 
 		private void ItemContainerView_OnMouseOver(object sender, ComponentEventArgs e)

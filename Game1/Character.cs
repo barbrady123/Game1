@@ -43,7 +43,7 @@ namespace Game1
 		public int Charisma { get; set; }
 		public int Constitution { get; set; }
 
-		public List<CharacterBuff> Buffs { get; set; }
+		public List<CharacterStatus<BuffEffect>> Buffs { get; set; }
 
 		// Again...if these were indexed array slots, this would be way easier!
 		public int Defense =>
@@ -56,12 +56,12 @@ namespace Game1
 		// Find a better place for these types of methods...
 		private int DefenseModifier()
 		{
-			return this.Buffs.Where(b => b.Buff.AffectedAttribute == CharacterAttribute.Defense).Sum(b => b.Buff.EffectValue * b.Stacks);
+			return this.Buffs.Where(b => b.Effect.AffectedAttribute == CharacterAttribute.Defense).Sum(b => b.Effect.EffectValue * b.Stacks);
 		}
 
 		private float MovementSpeedModifier()
 		{
-			return 1.0f + (float)this.Buffs.Where(b => b.Buff.AffectedAttribute == CharacterAttribute.MovementSpeed).Sum(b => b.Buff.EffectValue * b.Stacks) / 100.0f;
+			return 1.0f + (float)this.Buffs.Where(b => b.Effect.AffectedAttribute == CharacterAttribute.MovementSpeed).Sum(b => b.Effect.EffectValue * b.Stacks) / 100.0f;
 		}
 
 		public int MaxHP { get; set; }
@@ -135,7 +135,7 @@ namespace Game1
 			_movementSpeed = 150.0f;
 			_hotbar = new ItemContainer(10);
 			_backpack = new ItemContainer(40);
-			this.Buffs = new List<CharacterBuff>();
+			this.Buffs = new List<CharacterStatus<BuffEffect>>();
 		}
 
 		public virtual Vector2 UpdateMotion()
@@ -318,7 +318,7 @@ namespace Game1
 			return unequipped;
 		}
 
-		public void AddBuff(CharacterBuff buff)
+		public void AddBuff(CharacterStatus<BuffEffect> buff)
 		{
 			buff.OnExpired += Buff_OnExpired;
 			this.Buffs.Add(buff);
@@ -326,7 +326,7 @@ namespace Game1
 
 		private void Buff_OnExpired(object sender, ComponentEventArgs e)
 		{
-			this.Buffs.Remove((CharacterBuff)sender);
+			this.Buffs.Remove((CharacterStatus<BuffEffect>)sender);
 		}
 
 		public void Consume(ItemContainer container, int index)
