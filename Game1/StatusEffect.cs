@@ -7,7 +7,8 @@ using Game1.Enum;
 
 namespace Game1
 {
-	public class StatusEffect
+	// This could be StatusEffect<TCharacterEffect> where TCharacterEffect: System.Enum
+	public abstract class StatusEffect
 	{
 		public CharacterAttribute AffectedAttribute { get; set; }
 

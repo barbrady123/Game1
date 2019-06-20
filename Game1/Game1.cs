@@ -27,6 +27,7 @@ namespace Game1
 		public const string SpriteSheetRoot = "Gameplay\\Character";
 		public const string IconRoot = "Gameplay\\Icon";
 		public const string StatusIconRoot = "Gameplay\\Status";
+		public const string InteractiveIconRoot = "Gameplay\\Interactive";
 		public const int TileSize = 64;
 		public const int TileHalfSize = TileSize / 2;
 		public const int IconSize = 64;
@@ -52,7 +53,7 @@ namespace Game1
 
 		public void ToggleFullScreen()
 		{
-			_graphicsManager.IsFullScreen = !_graphicsManager.IsFullScreen;	
+			_graphicsManager.ToggleFullScreen();
 			_graphicsManager.ApplyChanges();
 		}
 

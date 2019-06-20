@@ -680,7 +680,7 @@
 /processorParam:TextureFormat=Color
 /build:Gameplay/Icon/x.png
 
-#begin Gameplay/Status/minorBleed.png
+#begin Gameplay/Interactive/rock.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -690,7 +690,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Gameplay/Status/minorBleed.png
+/build:Gameplay/Interactive/rock.png
 
 #begin Gameplay/Status/minorDefense.png
 /importer:TextureImporter

@@ -8,18 +8,14 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
+using Game1.Items;
 
 namespace Game1
 {
-	/*
-	public class CharacterBuff : CharacterStatus
+	public class Interactive
 	{
-		public BuffEffect Buff { get; set; }
+		public InteractiveType Type { get; set; }
 
-		public CharacterBuff(BuffEffect buff, ImageTexture icon) : base(buff.Duration, icon)
-		{
-			this.Buff = buff;
-		}
+		public ImageTexture Icon { get; set; }
 	}
-	*/
 }

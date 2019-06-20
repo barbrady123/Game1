@@ -19,7 +19,7 @@ namespace Game1.Screens
 	{
 		private GamePlayManager _gameplay;
 
-		public GameScreen(Rectangle bounds): base(bounds, true, background: "rock")
+		public GameScreen(Rectangle bounds): base(bounds, true, background: null)
 		{
 			_activator.Register(_gameplay = new GamePlayManager(bounds), true, "game");
 		}

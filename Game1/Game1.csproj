@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE;WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -43,7 +44,6 @@
   <ItemGroup>
     <Compile Include="BuffEffect.cs" />
     <Compile Include="Character.cs" />
-    <Compile Include="CharacterBuff.cs" />
     <Compile Include="CharacterStatus.cs" />
     <Compile Include="CharacterStatusView.cs" />
     <Compile Include="Component.cs" />
@@ -173,6 +173,7 @@
     <Content Include="Content\Background\maze.jpg" />
     <Content Include="Content\Background\rock.jpg" />
     <Content Include="Content\Background\stone.jpg" />
+    <Content Include="Content\Background\wood.jpg" />
     <Content Include="Content\Character\Preview\female.png" />
     <Content Include="Content\Character\Preview\male.png" />
     <Content Include="Content\Gameplay\Character\female.png" />

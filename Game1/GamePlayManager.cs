@@ -37,7 +37,7 @@ namespace Game1
 
 		private ImageTexture _gameViewBorder;
 
-		public GamePlayManager(Rectangle bounds) : base(bounds, background: "stone")
+		public GamePlayManager(Rectangle bounds) : base(bounds, background: "wood")
 		{
 			// Might want a couple frame delay before actually running the game?
 			_activator.Register(_world = new World(), true, "top");
@@ -50,7 +50,7 @@ namespace Game1
 				this.ContentMargin.Width + GamePlayManager.ViewAreaBorderThickness,
 				this.ContentMargin.Height + GamePlayManager.ViewAreaBorderThickness,
 				Game1.TileSize * Game1.GameViewAreaWidth,
-				Game1.TileSize * Game1.GameViewAreaHeight);
+				Game1.TileSize * Game1.GameViewAreaHeight);			
 			_gameViewBorder = GenerateGameViewBorder();
 
 			_camera = new GamePlayCamera(_world, _gameViewArea, SpriteBatchManager.Get("gameplay"));
@@ -99,7 +99,7 @@ namespace Game1
 
 			_activator.Register(_newItems = new NewItemNotificationViewer(
 				new Rectangle(
-					this.Bounds.Right - NewItemNotification.Size.Width - this.ContentMargin.Width,
+					this.Bounds.Right - NewItemNotification.Size.Width - this.ContentMargin.Width - 20,
 					this.Bounds.Bottom - 280 - this.ContentMargin.Width, NewItemNotification.Size.Width, 300
 				)), true
 			);
@@ -224,7 +224,7 @@ namespace Game1
 				_gameViewArea.Width + (GamePlayManager.ViewAreaBorderThickness * 2),
 				_gameViewArea.Height + (GamePlayManager.ViewAreaBorderThickness * 2),
 				GamePlayManager.ViewAreaBorderThickness,
-				Color.DarkSlateBlue);
+				Color.Black);
 			texture.Alignment = ImageAlignment.Centered;
 			texture.Position = _gameViewArea.CenterVector();
 			return texture;

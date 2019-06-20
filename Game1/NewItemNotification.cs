@@ -17,7 +17,10 @@ namespace Game1
 {
 	public class NewItemNotification : Component
 	{
+		public const float BackgroundAlpha = 0.2f;
 		public static readonly Size Size = new Size(300, 24);
+		protected override Color BorderColor => new Color(20, 20, 50);
+		protected override int BorderThickness => 1;
 
 		private readonly InventoryItem _item;
 		private readonly ImageText _text;
@@ -35,7 +38,6 @@ namespace Game1
 			_item = item;
 			string quantity = (item.Quantity > 1) ? $" ({item.Quantity})" : "";
 			_text = new ImageText($"Item Received: {item.Item.DisplayName}{quantity}", true, ImageAlignment.LeftTop) { Scale = new Vector2(0.7f, 0.7f) };
-			_background.Alpha = 0.7f;
 			this.Duration = duration;
 			this.IsActive = true;
 			BoundsChanged(false);
@@ -50,8 +52,8 @@ namespace Game1
 		{
 			base.UpdateActive(gameTime);
 			_fadeEffect?.Update(gameTime);
-			_background.Alpha = _text.Alpha;
-			_border.Alpha = _text.Alpha;
+			_background.Alpha = Math.Min(BackgroundAlpha, _text.Alpha);
+			_border.Alpha = Math.Min(BackgroundAlpha, _text.Alpha);
 		}
 
 		protected override void DrawInternal(SpriteBatch spriteBatch)
@@ -65,6 +67,7 @@ namespace Game1
 			if (e?.Trigger == EventTrigger.Timer)
 			{
 				_fadeEffect = _text.AddEffect<FadeOutEffect>(true);
+				_fadeEffect.OnActiveChange += _fadeEffect_OnActiveChange;
 			}
 			else
 			{
