@@ -57,7 +57,30 @@ namespace Game1
 
 
 		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null, SpriteEffects? spriteEffects = null)
-		{
+		{	
+			// Testing a highlight concept....there's gotta be a more performant way LOL...
+			/*if ((_texture.Name?.Contains("rock") ?? false) || (_texture.Name?.Contains("sword") ?? false))
+			{
+				// Testing...
+				var testPos = position ?? this.Position;
+				var data = new Color[_texture.Width * _texture.Height];
+				_texture.GetData(data);
+
+				for (int i = 0; i < data.Length; i++)
+				{
+					if (data[i].A > 0)
+						data[i] = Color.White;
+				}
+
+				var reversedTexture = new Texture2D(Game1.Graphics, _texture.Width, _texture.Height);
+				reversedTexture.SetData(data);
+
+				spriteBatch.Draw(reversedTexture, testPos.Offset(-1, -1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects ?? SpriteEffects.None, 0.0f);
+				spriteBatch.Draw(reversedTexture, testPos.Offset(1, -1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects ?? SpriteEffects.None, 0.0f);
+				spriteBatch.Draw(reversedTexture, testPos.Offset(-1, 1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects ?? SpriteEffects.None, 0.0f);
+				spriteBatch.Draw(reversedTexture, testPos.Offset(1, 1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects ?? SpriteEffects.None, 0.0f);
+			}*/
+
 			spriteBatch.Draw(_texture, position ?? this.Position, this.SourceRect, this.Color * this.Alpha * (alphaBlend ?? 1.0f), this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects ?? SpriteEffects.None, 0.0f);
 		}
 

@@ -13,6 +13,12 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Audio/overworld.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Audio/overworld.mp3
+
 #begin Background/black.png
 /importer:TextureImporter
 /processor:TextureProcessor

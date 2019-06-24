@@ -42,8 +42,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AudioManager.cs" />
     <Compile Include="BuffEffect.cs" />
     <Compile Include="Character.cs" />
+    <Compile Include="CharacterEventArgs.cs" />
     <Compile Include="CharacterStatus.cs" />
     <Compile Include="CharacterStatusView.cs" />
     <Compile Include="Component.cs" />
@@ -56,6 +58,8 @@
     <Compile Include="FixedQueue.cs" />
     <Compile Include="Interactive.cs" />
     <Compile Include="ISupportsTooltip.cs" />
+    <Compile Include="ItemHoldable.cs" />
+    <Compile Include="ItemTool.cs" />
     <Compile Include="Loot.cs" />
     <Compile Include="Menus\ContextMenu.cs" />
     <Compile Include="Effect\EffectEventArgs.cs" />
@@ -173,6 +177,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Audio\overworld.mp3" />
     <Content Include="Content\Background\black.png" />
     <Content Include="Content\Background\brick.jpg" />
     <Content Include="Content\Background\maze.jpg" />

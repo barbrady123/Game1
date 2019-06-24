@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Game1.Enum;
 
 namespace Game1.Items
 {
-	public class ItemWeapon : ItemHoldable
+	public class ItemTool: ItemHoldable
 	{
-		public int MinDamage { get; set; }
+		public ToolType Type { get; set; }
 
-		public int MaxDamage { get; set; }
+		public int Damage { get; set; }
 	}
 }

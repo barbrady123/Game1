@@ -103,6 +103,8 @@ namespace Game1
 					this.Bounds.Bottom - 280 - this.ContentMargin.Width, NewItemNotification.Size.Width, 300
 				)), true
 			);
+
+			//AudioManager.Start();
 		}
 
 		public override void LoadContent()
@@ -152,7 +154,7 @@ namespace Game1
 			// Modal windows go first, block all input after update...
 			_characterWindow.Update(gameTime);
 			_inventoryWindow.Update(gameTime);
-			_world.Update(gameTime);
+			_world.Update(gameTime, InputManager.MouseOver(_gameViewArea));
 			_barHealth.Update(gameTime);
 			_barMana.Update(gameTime);
 			UpdateVisibleStats(gameTime);
@@ -186,17 +188,7 @@ namespace Game1
 			if (InputManager.LeftMouseClick(_gameViewArea))
 			{
 				if (_world.Character.IsItemHeld)
-				{
 					_world.AddItem(_world.Character.DropHeld(), pickup: false);
-				}
-				else if (_world.Character.ActiveItem?.Item is ItemWeapon weapon)
-				{
-					// TEMP...probably shouldn't be here...need like a Character.UseActiveItem() method or something...
-					if ((_world.Character.Direction == Cardinal.North) || (_world.Character.Direction == Cardinal.West))
-						_world.Character.ActiveItem.Icon.AddEffect<UseItemWestEffect>(true);
-					else
-						_world.Character.ActiveItem.Icon.AddEffect<UseItemEastEffect>(true);
-				}
 			}
 
 			base.UpdateInput(gameTime);

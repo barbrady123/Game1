@@ -19,7 +19,10 @@ namespace Game1
 			Alignment = ImageAlignment.Centered;
 		}
 
-		public ImageSpriteSheet(Texture2D texture, bool isActive = false) : base(texture, isActive) { }
+		public ImageSpriteSheet(Texture2D texture, bool isActive = false) : base(texture, isActive)
+		{
+			Alignment = ImageAlignment.Centered;
+		}
 
 		public override void LoadContent()
 		{

@@ -285,7 +285,7 @@ namespace Game1
 
 		protected virtual void ContextMenuSelect(ComponentEventArgs e) { }
 
-		public List<string> GetContextMenuOptions() => new List<string>();
+		public virtual List<string> GetContextMenuOptions() => new List<string>();
 
 		protected void ShowNotification(string text, Rectangle parentBounds, string group = null)
 		{

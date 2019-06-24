@@ -106,7 +106,7 @@ namespace Game1.Interface
 			}
 		}
 
-		public List<string> GetContextMenuOptions()
+		public override List<string> GetContextMenuOptions()
 		{
 			var items = new List<string>();
 			if (this.Item == null)

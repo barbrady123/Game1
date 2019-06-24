@@ -15,6 +15,9 @@ using Game1.Menus;
 
 namespace Game1.Screens
 {
+	/// <summary>
+	/// TODO: Remove _dialog from here and use the Component stuff!!
+	/// </summary>
 	public class CharacterCreateScreen : Component
 	{
 		private Character _newChar;

@@ -17,9 +17,11 @@ namespace Game1
 	public class Character
 	{
 		private Vector2 _position;
+		private ImageSpriteSheet _spriteSheet;
 		private ItemContainer _hotbar;
 		private ItemContainer _backpack;
 		protected float _movementSpeed;
+		protected float _toolSpeed;
 		private int _currentHP;
 		private int _currentMana;
 		private InventoryItem _heldItem;
@@ -27,10 +29,14 @@ namespace Game1
 		//private int _itemDefense;
 		//private int _baseDefense;
 
-		public string SpriteSheetName => this.Sex.ToString("g");
+		public string SpriteSheetName => this.Sex.ToString("g").ToLower();
 		public Vector2 Motion { get; set; }
 		public float MovementSpeed => _movementSpeed * MovementSpeedModifier();
+		public float ToolSpeed => _toolSpeed * ToolSpeedModifier();
 		public Cardinal Direction { get; set; }
+
+		public Vector2 PreviousPosition { get; set; }
+		public bool Moved => this.PreviousPosition != this.Position;
 
 		public string Name { get; set; }
 		public CharacterSex Sex { get; set; }
@@ -65,6 +71,8 @@ namespace Game1
 			return 1.0f + (float)this.Buffs.Where(b => b.Effect.AffectedAttribute == CharacterAttribute.MovementSpeed).Sum(b => b.Effect.EffectValue * b.Stacks) / 100.0f;
 		}
 
+		private float ToolSpeedModifier() => 1.0f;
+
 		public int MaxHP { get; set; }
 		public int CurrentHP 
 		{ 
@@ -94,6 +102,7 @@ namespace Game1
 		public event EventHandler<ComponentEventArgs> OnActiveItemChanged;
 		public event EventHandler<ComponentEventArgs> OnDied;
 		public event EventHandler<ComponentEventArgs> OnGotExternalItem;
+		public event EventHandler<CharacterEventArgs> OnItemUse;
 		
 		public InventoryItem HeldItem
 		{ 
@@ -122,6 +131,8 @@ namespace Game1
 			}
 		}
 
+		public bool ActiveItemHoldable => this.ActiveItem?.Item is ItemHoldable;
+
 		public InventoryItem EquippedArmorHead	{ get; set; }
 		public InventoryItem EquippedArmorChest { get; set; }
 		public InventoryItem EquippedArmorLegs	{ get; set; }
@@ -142,10 +153,18 @@ namespace Game1
 		{
 			this.Direction = Cardinal.South;
 			_movementSpeed = 150.0f;
+			_toolSpeed = 3.0f;
 			_hotbar = new ItemContainer(10);
 			_backpack = new ItemContainer(40);
 			this.Buffs = new List<CharacterStatus<BuffEffect>>();
 			this.Debuffs = new List<CharacterStatus<DebuffEffect>>();
+			this.PreviousPosition = -Vector2.One;
+		}
+
+		public void LoadContent()
+		{
+			_spriteSheet = MetaManager.GetSpriteSheet(this.SpriteSheetName);
+			_spriteSheet.LoadContent();
 		}
 
 		public virtual Vector2 UpdateMotion()
@@ -164,18 +183,29 @@ namespace Game1
 			return motion;
 		}
 
-		public void Update(GameTime gameTime)
+		public void Update(GameTime gameTime, bool mouseInWorld = false)
 		{
+			this.PreviousPosition = _position;
 			Vector2 motion = UpdateMotion();
 
 			if (motion != Vector2.Zero)
 			{
 				motion.Normalize();
 				motion *= (this.MovementSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
+				_spriteSheet.AddEffect<SpriteSheetEffect>(true);
+			}
+			else
+			{
+				_spriteSheet.StopEffect(typeof(SpriteSheetEffect));
 			}
 
 			this.Motion = motion;
 			this.Direction = Util.DirectionFromVector(motion, this.Direction);
+			_spriteSheet.UpdateDirection(this.Direction);
+			_spriteSheet.Update(gameTime);
+
+			if (mouseInWorld)
+				UpdateMouse();
 
 			this.Backpack.Update(gameTime);
 			this.HotBar.Update(gameTime);
@@ -190,6 +220,65 @@ namespace Game1
 
 			for (int i = this.Debuffs.Count - 1; i >= 0; i--)
 				this.Debuffs[i].Update(gameTime);
+		}
+
+		private void UpdateMouse()
+		{
+			if (!InputManager.LeftMouseClick())
+				return;
+
+			if (!(this.ActiveItem?.Item is ItemHoldable held))
+				return;
+
+			if ((this.Direction == Cardinal.North) || (this.Direction == Cardinal.West))
+			{
+				var effect = this.ActiveItem.Icon.AddEffect<UseItemWestEffect>(true);
+				effect.OnFullyExtended -= Effect_OnFullyExtended;
+				effect.OnFullyExtended += Effect_OnFullyExtended;
+			}
+			else
+			{
+				var effect = this.ActiveItem.Icon.AddEffect<UseItemEastEffect>(true);
+				effect.OnFullyExtended -= Effect_OnFullyExtended;
+				effect.OnFullyExtended += Effect_OnFullyExtended;
+			}
+		}
+
+		private void Effect_OnFullyExtended(object sender, EventArgs e)
+		{
+			// I'm sure we'll need more values than just the held item...
+			OnItemUse?.Invoke(this, new CharacterEventArgs { Item = this.ActiveItem, Direction = this.Direction });	
+		}
+
+		public void Draw(SpriteBatch spriteBatch, Vector2 offset)
+		{
+			DrawBehind(spriteBatch, offset);
+			_spriteSheet.Draw(spriteBatch, position: this.Position + offset);
+			DrawInfront(spriteBatch, offset);
+		}
+
+		private void DrawBehind(SpriteBatch spriteBatch, Vector2 offset)
+		{
+			if (!this.ActiveItemHoldable)
+				return;
+
+			if ((this.Direction == Cardinal.North) || (this.Direction == Cardinal.West))
+			{
+				this.ActiveItem.Icon.OriginOffset = GamePlayCamera.ActiveItemOriginOffsets[this.Direction];
+				this.ActiveItem.Icon.Draw(spriteBatch, null, this.Position + offset + GamePlayCamera.ActiveItemOffsets[this.Direction], GamePlayCamera.ActiveItemScale);
+			}
+		}
+
+		private void DrawInfront(SpriteBatch spriteBatch, Vector2 offset)
+		{
+			if (!this.ActiveItemHoldable)
+				return;
+
+			if ((this.Direction == Cardinal.South) || (this.Direction == Cardinal.East))
+			{
+				this.ActiveItem.Icon.OriginOffset = GamePlayCamera.ActiveItemOriginOffsets[this.Direction];
+				this.ActiveItem.Icon.Draw(spriteBatch, null, this.Position + offset + GamePlayCamera.ActiveItemOffsets[this.Direction], GamePlayCamera.ActiveItemScale, SpriteEffects.FlipHorizontally);
+			}
 		}
 
 		public bool IsItemHeld => this.HeldItem != null;

@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Effect;
 using Game1.Enum;
 
 namespace Game1
@@ -27,6 +28,8 @@ namespace Game1
 		
 		private static readonly List<Interactive> _interactives;
 
+		private static readonly Dictionary<string, Texture2D> _spriteSheets;
+
 		static MetaManager()
 		{
 			_content = new ContentManager(Game1.ServiceProvider, Game1.ContentRoot);
@@ -38,6 +41,8 @@ namespace Game1
 			_debuffs = new Dictionary<CharacterDebuffEffect, DebuffEffect>();
 
 			_interactives = new List<Interactive>();
+
+			_spriteSheets = new Dictionary<string, Texture2D>();
 		}
 
 		public static void LoadContent()
@@ -52,6 +57,12 @@ namespace Game1
 			{
 				string fileName = Path.GetFileNameWithoutExtension(file);
 				_interactiveTextures[fileName] = _content.Load<Texture2D>(Path.Combine(Game1.InteractiveIconRoot, fileName));
+			}
+
+			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(Game1.ContentRoot, Game1.SpriteSheetRoot)))
+			{
+				string fileName = Path.GetFileNameWithoutExtension(file);
+				_spriteSheets[fileName] = _content.Load<Texture2D>(Path.Combine(Game1.SpriteSheetRoot, fileName));
 			}
 
 			// TEMP: This should come from file, etc...
@@ -187,6 +198,13 @@ namespace Game1
 		{
 			var i = _interactives.First();
 			return new WorldInteractive(i, new ImageTexture(_interactiveTextures[i.IconName], true) { Alignment = ImageAlignment.Centered }, position);
+		}
+
+		public static ImageSpriteSheet GetSpriteSheet(string name)
+		{
+			var img = new ImageSpriteSheet(_spriteSheets[name], true);
+			img.AddEffect<SpriteSheetEffect>(false);
+			return img;
 		}
 	}
 }

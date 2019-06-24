@@ -76,7 +76,8 @@ namespace Game1.Items
 				new ItemArmor {		DisplayName = "Chain Helm",		IconName = "helmet",	Id = 6,	MaxStackSize = 1,	Weight = 3.2f,	Slot = ArmorSlot.Head,	Defense = 2	},
 				new ItemArmor {		DisplayName = "Iron Armor",		IconName = "armor",		Id = 7,	MaxStackSize = 1,	Weight = 6.4f,	Slot = ArmorSlot.Chest, Defense = 5	},
 				new ItemArmor {		DisplayName = "Gold Armor",		IconName = "upg_armor",	Id = 8,	MaxStackSize = 1,	Weight = 8.5f,	Slot = ArmorSlot.Chest, Defense = 8	},
-				new ItemWeapon {	DisplayName = "Iron Sword",		IconName = "sword",		Id = 9, MaxStackSize = 1,	Weight = 2.9f,	MaxDamage = 10 }
+				new ItemWeapon {	DisplayName = "Iron Sword",		IconName = "sword",		Id = 9, MaxStackSize = 1,	Weight = 2.9f,	MaxDamage = 10, Range = 30 },
+				new ItemTool	{	DisplayName = "Iron Axe",		IconName = "axe",		Id = 10, MaxStackSize = 1,	Weight = 3.5f,  Damage = 50, Range = 30 }
 			};
 		}
 

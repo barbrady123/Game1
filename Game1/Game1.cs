@@ -28,6 +28,7 @@ namespace Game1
 		public const string IconRoot = "Gameplay\\Icon";
 		public const string StatusIconRoot = "Gameplay\\Status";
 		public const string InteractiveIconRoot = "Gameplay\\Interactive";
+		public const string AudioRoot = "Audio";
 		public const int TileSize = 64;
 		public const int TileHalfSize = TileSize / 2;
 		public const int IconSize = 64;
@@ -106,6 +107,7 @@ namespace Game1
 			FontManager.LoadContent();
 			InputManager.LoadContent();
 			MetaManager.LoadContent();
+			AudioManager.LoadContent();
 			_screenManager.LoadContent();
 			_screenManager.StartScreen();
 		}
@@ -119,6 +121,7 @@ namespace Game1
 			FontManager.UnloadContent();
 			InputManager.UnloadContent();
 			MetaManager.UnloadContent();
+			AudioManager.UnloadContent();
 			_screenManager.UnloadContent();
 		}
 

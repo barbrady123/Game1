@@ -51,6 +51,13 @@ namespace Game1
 					return false;
 			}
 
+			// Solid interactives
+			foreach (var solid in _world.Interactives.Where(i => i.Interactive.IsSolid))
+			{
+				if (solid.Bounds.Intersects(proposedBox))
+					return false;
+			}
+
 			return true;
 		}
 

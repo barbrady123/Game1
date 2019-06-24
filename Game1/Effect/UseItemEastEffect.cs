@@ -15,9 +15,11 @@ namespace Game1.Effect
 		public UseItemEastEffect(bool isActive = false) : base(isActive)
 		{			
 			_maxRotation = Convert.ToSingle(Math.PI / 4);	// 45 degrees
-			this.Speed = 10.0f;
+			this.Speed = 3.0f;
 			Initialize();
 		}
+
+		public event EventHandler OnFullyExtended;
 
 		protected override void Initialize()
 		{
@@ -35,6 +37,7 @@ namespace Game1.Effect
 					{
 						_image.Rotation = _maxRotation;
 						_movingForward = false;
+						OnFullyExtended?.Invoke(this, null);
 					}
 				}
 				else
