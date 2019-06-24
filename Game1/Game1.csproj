@@ -51,8 +51,12 @@
     <Compile Include="ActivationManager.cs" />
     <Compile Include="DebuffEffect.cs" />
     <Compile Include="Enum\CharacterDebuffEffectEnum.cs" />
+    <Compile Include="Enum\InteractiveTypeEnum.cs" />
+    <Compile Include="Enum\ToolTypeEnum.cs" />
     <Compile Include="FixedQueue.cs" />
+    <Compile Include="Interactive.cs" />
     <Compile Include="ISupportsTooltip.cs" />
+    <Compile Include="Loot.cs" />
     <Compile Include="Menus\ContextMenu.cs" />
     <Compile Include="Effect\EffectEventArgs.cs" />
     <Compile Include="Effect\FadeCycleEffect.cs" />
@@ -152,6 +156,7 @@
     <Compile Include="Tile.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="World.cs" />
+    <Compile Include="WorldInteractive.cs" />
     <Compile Include="WorldItem.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -224,6 +229,7 @@
     <Content Include="Content\Gameplay\Icon\upg_wand.png" />
     <Content Include="Content\Gameplay\Icon\wand.png" />
     <Content Include="Content\Gameplay\Icon\x.png" />
+    <Content Include="Content\Gameplay\Interactive\rock.png" />
     <Content Include="Content\Gameplay\Status\minorBleed.png" />
     <Content Include="Content\Gameplay\Status\minorDefense.png" />
     <Content Include="Content\Gameplay\Status\minorMovementSpeed.png" />

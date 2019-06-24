@@ -20,7 +20,10 @@ namespace Game1
 		public Character Character { get; set; }
 		public Map CurrentMap { get; set; }
 		// Testing this out as objects that sit directly on the map....
-		public List<WorldItem> Items{ get; set; }
+		public List<WorldItem> Items { get; set; }
+
+		// Testing this out as interactives that sit directly on the map...
+		public List<WorldInteractive> Interactives { get; set; }
 
 		public List<Character> AllCharacters => new List<Character>((this.NPCs?.Count ?? 0) + 1) { this.Character }.Concat(this.NPCs).ToList();
 
@@ -81,6 +84,10 @@ namespace Game1
 				this.Items.Add(
 					new WorldItem { Pickup = true, Item = ItemManager.GetItem(), Position = new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)) }
 				);
+
+			this.Interactives = new List<WorldInteractive> { 
+				MetaManager.GetInteractve(new Vector2(512, 512))
+			};
 
 			// This will need to be redone if the map changes....
 			_physics.CalculateParameters();

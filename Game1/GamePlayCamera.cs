@@ -25,13 +25,6 @@ namespace Game1
 		public bool FlipActiveItem { get; set; }
 	}
 
-	// TODO : Move this when complete...
-	public class ItemRenderData
-	{
-		public WorldItem Item { get; set; }
-		public Vector2 Position { get; set; }
-	}
-
 	public class GamePlayCamera
 	{
 		public static readonly Vector2 ActiveItemScale = new Vector2(0.7f, 0.7f);
@@ -43,13 +36,10 @@ namespace Game1
 		private readonly Rectangle _gameViewArea;
 		private readonly SpriteBatchData _spriteBatchData;
 		private ImageTexture _terrainTileSheet;
-		//private ImageTexture _playerSpriteSheet;
-		//private Vector2 _previousPlayerPosition;
 		private Rectangle _terrainSourceRect;
-		//private SpriteSheetEffect _playerAnimation;
+		private Vector2 _renderOffset;
 		private List<ImageTexture> _terrainMaps;
 		private Dictionary<Character, CharacterRenderData> _renderData;
-		private List<ItemRenderData> _itemRenderData;
 		private CharacterRenderData _playerRenderData;
 		private bool _refreshItemData;
 		
@@ -63,9 +53,9 @@ namespace Game1
 			_gameViewArea = gameViewArea;
 			_spriteBatchData = spriteBatchData;
 			_terrainSourceRect = Rectangle.Empty;
+			_renderOffset = Vector2.Zero;
 			_playerRenderData = new CharacterRenderData {
 				Character = _world.Character,
-				//Animation = new SpriteSheetEffect(false),
 				PreviousPosition = -Vector2.One
 			};
 			_renderData = new Dictionary<Character, CharacterRenderData>();
@@ -74,7 +64,6 @@ namespace Game1
 			{
 				_renderData[npc] = new CharacterRenderData {
 					Character = npc,
-					//Animation = new SpriteSheetEffect(false),
 					PreviousPosition = -Vector2.One
 				};
 			}
@@ -89,10 +78,6 @@ namespace Game1
 			LoadCharacterSpriteSheet(_playerRenderData);
 			foreach (var data in _renderData.Values)
 				LoadCharacterSpriteSheet(data);
-
-			// This is temp, and has to be in LoadContent because ItemManager needs to have it's LoadContent called before we can access items...
-			_itemRenderData = new List<ItemRenderData>();
-			RefreshItemRenderData();
 		}
 
 		public void UnloadContent()
@@ -136,6 +121,9 @@ namespace Game1
 				_terrainSourceRect = new Rectangle(sourceX, sourceY, _gameViewArea.Width, _gameViewArea.Height);
 				foreach (var terrainMap in _terrainMaps)
 					terrainMap.SourceRect = _terrainSourceRect;
+
+				// TEST: going to just store this offset and apply it realtime in Draw instead of calculating and caching this everywhere in Update...
+				_renderOffset = new Vector2(-sourceX + _gameViewArea.X, -sourceY + _gameViewArea.Y);
 			}
 
 			// Player...
@@ -143,12 +131,6 @@ namespace Game1
 			// Other Characters...
 			foreach (var data in _renderData)
 				UpdateCharacterRenderData(gameTime, data.Value);
-
-			// Items...
-			if (_refreshItemData)
-				RefreshItemRenderData();
-
-			UpdateItemRenderData(gameTime);
 		}
 
 		public void Draw()
@@ -169,8 +151,10 @@ namespace Game1
 			// Draw characters that should be "behind" the player...when their Y coord is <= the player's...
 			foreach (var data in _renderData.Where(d => d.Value.Character.Position.Y <= _playerRenderData.Character.Position.Y).OrderBy(d => d.Value.Character.Position.Y))
 				data.Value.SpriteSheet.Draw(spriteBatch);
-			foreach (var item in _itemRenderData)
-				item.Item.Item.Icon.Draw(spriteBatch, position: item.Position, scale: GamePlayCamera.MapItemScale);
+
+			foreach (var item in _world.Items)
+				item.Item.Icon.Draw(spriteBatch, position: item.Position + _renderOffset, scale: GamePlayCamera.MapItemScale);
+
 			// Draw the player...and the active item (if applicable) either "under" or "over" the player depending on direction
 			if (!_playerRenderData.FlipActiveItem)
 				DrawActivItem(spriteBatch);
@@ -196,13 +180,6 @@ namespace Game1
 					position: _playerRenderData.ActiveItemPosition,
 					scale: GamePlayCamera.ActiveItemScale,
 					spriteEffects: _playerRenderData.FlipActiveItem ? SpriteEffects.FlipHorizontally : SpriteEffects.None);
-		}
-
-		private void RefreshItemRenderData()
-		{
-			_itemRenderData.Clear();
-			foreach (var item in _world.Items)
-				_itemRenderData.Add(new ItemRenderData { Item = item });
 		}
 
 		private void UpdateCharacterRenderData(GameTime gameTime, CharacterRenderData renderData)
@@ -233,16 +210,6 @@ namespace Game1
 					character.ActiveItem.Icon.OriginOffset = new Vector2(-20, 22);
 					renderData.FlipActiveItem = true;
 				}
-			}
-		}
-
-		private void UpdateItemRenderData(GameTime gameTime)
-		{	
-			foreach (var data in _itemRenderData)
-			{
-				data.Position = new Vector2(data.Item.Position.X - _terrainSourceRect.X + _gameViewArea.X, data.Item.Position.Y - _terrainSourceRect.Y + _gameViewArea.Y);
-				// We could also do something like "if this position is X.pixels beyond the _gameViewArea, just set it to null...and then on Draw we skip drawing this...(say > 64 pixels out of bounds, for example)
-				// Need to test if extra computation here is worth it on the backend...
 			}
 		}
 

@@ -18,20 +18,26 @@ namespace Game1
 	public static class MetaManager
 	{
 		private static readonly ContentManager _content;
-		private static Dictionary<string, Texture2D> _textures;
+		private static Dictionary<string, Texture2D> _statusTextures;
+		private static Dictionary<string, Texture2D> _interactiveTextures;
 
 		private static readonly Dictionary<CharacterInstantEffect, InstantEffect> _instants;
 		private static readonly Dictionary<CharacterBuffEffect, BuffEffect> _buffs;
 		private static readonly Dictionary<CharacterDebuffEffect, DebuffEffect> _debuffs;
+		
+		private static readonly List<Interactive> _interactives;
 
 		static MetaManager()
 		{
 			_content = new ContentManager(Game1.ServiceProvider, Game1.ContentRoot);
-			_textures = new Dictionary<string, Texture2D>();
+			_statusTextures = new Dictionary<string, Texture2D>();
+			_interactiveTextures = new Dictionary<string, Texture2D>();
 
 			_instants = new Dictionary<CharacterInstantEffect, InstantEffect>();
 			_buffs = new Dictionary<CharacterBuffEffect, BuffEffect>();
 			_debuffs = new Dictionary<CharacterDebuffEffect, DebuffEffect>();
+
+			_interactives = new List<Interactive>();
 		}
 
 		public static void LoadContent()
@@ -39,7 +45,13 @@ namespace Game1
 			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(Game1.ContentRoot, Game1.StatusIconRoot)))
 			{				
 				string fileName = Path.GetFileNameWithoutExtension(file);
-				_textures[fileName] = _content.Load<Texture2D>(Path.Combine(Game1.StatusIconRoot, fileName));
+				_statusTextures[fileName] = _content.Load<Texture2D>(Path.Combine(Game1.StatusIconRoot, fileName));
+			}
+
+			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(Game1.ContentRoot, Game1.InteractiveIconRoot)))
+			{
+				string fileName = Path.GetFileNameWithoutExtension(file);
+				_interactiveTextures[fileName] = _content.Load<Texture2D>(Path.Combine(Game1.InteractiveIconRoot, fileName));
 			}
 
 			// TEMP: This should come from file, etc...
@@ -93,6 +105,25 @@ namespace Game1
 				10,
 				10
 			);
+
+			_interactives.Add(new Interactive {
+				DisplayText = "Rock",
+				IconName = "rock",
+				Health = 100,
+				Effectiveness = new Dictionary<ToolType, float> {	// Should be it's own object with a clean constructor
+					{ ToolType.Shovel, 0.5f },
+					{ ToolType.Axe, 0.5f },
+					{ ToolType.Pickaxe, 1.0f },
+				},
+				LootTable = new List<Loot> { new Loot {
+					Odds = 100,
+					ItemPool = new List<int> { 0, 1 },
+					MinQuantity = 1,
+					MaxQuantity = 2
+				}},
+				IsSolid = true,
+				Size = new Size(32, 32)
+			});
 		}
 
 		public static void UnloadContent()
@@ -121,7 +152,7 @@ namespace Game1
 			var currentBuff = character.Buffs.FirstOrDefault(x => x.Effect.Effect == effect);
 			if (currentBuff == null)
 			{
-				character.AddBuff(new CharacterStatus<BuffEffect>(buff, new ImageTexture(_textures[buff.IconName], true)));
+				character.AddBuff(new CharacterStatus<BuffEffect>(buff, new ImageTexture(_statusTextures[buff.IconName], true)));
 			}
 			else
 			{
@@ -140,7 +171,7 @@ namespace Game1
 			var currentDebuff = character.Debuffs.FirstOrDefault(x => x.Effect.Effect == effect);
 			if (currentDebuff == null)
 			{
-				character.AddDebuff(new CharacterStatus<DebuffEffect>(debuff, new ImageTexture(_textures[debuff.IconName], true)));
+				character.AddDebuff(new CharacterStatus<DebuffEffect>(debuff, new ImageTexture(_statusTextures[debuff.IconName], true)));
 			}
 			else
 			{
@@ -149,6 +180,13 @@ namespace Game1
 				if (currentDebuff.Duration != null) 
 					currentDebuff.Duration = Math.Min((double)currentDebuff.Duration + debuff.DurationStack, (int)currentDebuff.Effect.MaxDuration);
 			}
+		}
+
+		// Another temp test method...
+		public static WorldInteractive GetInteractve(Vector2 position)
+		{
+			var i = _interactives.First();
+			return new WorldInteractive(i, new ImageTexture(_interactiveTextures[i.IconName], true) { Alignment = ImageAlignment.Centered }, position);
 		}
 	}
 }

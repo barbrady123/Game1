@@ -196,13 +196,13 @@ namespace Game1
 
 		public bool AddItem(InventoryItem item, bool fromExternal = false)
 		{
+			if (item == null)
+				return true;
+
 			// In case the stack is split and the original item quantity
 			// has changed, we want to notify the world of the original
 			// quantity that was receieved...
 			int originalQuantity = item.Quantity;
-
-			if (item == null)
-				return true;
 
 			int? index = _hotbar.AddItem(item);
 			if (index == null)

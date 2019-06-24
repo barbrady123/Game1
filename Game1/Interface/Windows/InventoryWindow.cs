@@ -51,7 +51,6 @@ namespace Game1.Interface.Windows
 			_containerViewBackpack.OnMouseRightClick += _containerView_OnMouseRightClick;
 			_containerViewBackpack.OnMouseOver += _containerView_OnMouseOver;
 
-			// Eventually, we want to make ItemContainerView a component (and InventoryItemView)....
 			_containerHotbar = _world.Character.HotBar;
 			_activator.Register(
 				_containerViewHotbar = ItemContainerView.New<ItemContainerView>(
@@ -65,7 +64,6 @@ namespace Game1.Interface.Windows
 
 			_activator.Register(_splitWindow = new SplitWindow(SpriteBatchManager.Get("context")), false, new[] { "popup", "backpack", "hotbar" });
 			_splitWindow.OnButtonClick += _splitWindow_OnButtonClick;
-			//_splitWindow.OnReadyDisable += _splitWindow_OnReadyDisable;
 		}
 
 		public override void LoadContent()
@@ -149,13 +147,6 @@ namespace Game1.Interface.Windows
 			base.ReadyDisable(e);
 		}
 
-		/*
-		private void _splitWindow_OnReadyDisable(object sender, ComponentEventArgs e)
-		{
-			DisableSplitWindow();
-		}
-		*/
-
 		// This functionality needs to be sharable somehow....move elsewhere...
 		// This could be SplitWindow functionality, but then we'd have to give the
 		// window access to the _world object...seems odd...
@@ -168,8 +159,6 @@ namespace Game1.Interface.Windows
 					SplitItem(window.Owner, window.Quantity);
 					break;
 			}
-
-			//DisableSplitWindow();
 		}
 
 		// This functionality needs to be sharable somehow....move elsewhere...
@@ -190,9 +179,7 @@ namespace Game1.Interface.Windows
 
 		private void DisableSplitWindow()
 		{
-			_activator.SetState(new[] {_containerViewBackpack, _containerViewHotbar}, true);
-			// Verify we don't need this
-			//_splitWindow.Clear();
+			_activator.SetState(_splitWindow, false);
 		}
 	}
 }
