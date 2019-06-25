@@ -7,16 +7,15 @@ using Microsoft.Xna.Framework;
 
 namespace Game1.Effect
 {
-	public class JiggleEffect : ImageEffect
+	public class ShakeEffect : ImageEffect
 	{
 		private const int FrameSwitchCount = 2;
-		private const int MaxJiggles = 10;
+		private const int MaxShakes = 10;
 
-		private Vector2 _initialOffset;
 		private int _currentFrameCount;
-		private int _jiggleCount;
+		private int _shakeCount;
 
-		public JiggleEffect(bool isActive = false) : base(isActive)
+		public ShakeEffect(bool isActive = false) : base(isActive)
 		{	
 			Initialize();
 		}
@@ -24,19 +23,17 @@ namespace Game1.Effect
 		protected override void Initialize()
 		{
 			_currentFrameCount = 0;
-			_jiggleCount = 0;
+			_shakeCount = 0;
 		}
 
 		protected override void ResetImage()
 		{
-			_image.PositionOffset = _initialOffset;
+			_image.PositionOffset = Vector2.Zero;
 		}
 			
 		protected override void ActiveChange(bool isActive)
 		{
 			base.ActiveChange(isActive);
-			if (isActive)
-				_initialOffset = _image.PositionOffset;
 		}
 
 		public override void Update(GameTime gameTime)
@@ -49,15 +46,15 @@ namespace Game1.Effect
 					return;
 				}
 
-				if (_jiggleCount >= MaxJiggles)
+				if (_shakeCount >= MaxShakes)
 				{
 					this.IsActive = false;
 					return;
 				}
 
-				_image.PositionOffset = _initialOffset + new Vector2(GameRandom.Next(-1, 1), GameRandom.Next(-1, 1));
+				_image.PositionOffset = new Vector2(GameRandom.Next(-1, 1), GameRandom.Next(-1, 1));
 				_currentFrameCount = 0;
-				_jiggleCount++;
+				_shakeCount++;
 			}
 		}
 	}

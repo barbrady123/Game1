@@ -108,7 +108,7 @@ namespace Game1
 
 						if (_world.Interactives[i].Bounds.Intersects(activeBounds))
 						{
-							_world.Interactives[i].Icon.AddEffect<JiggleEffect>(true);
+							_world.Interactives[i].Icon.AddEffect<ShakeEffect>(true);
 							_world.Interactives[i].Health -= (int)(tool.Damage * _world.Interactives[i].Interactive.Effectiveness[tool.Type]);
 						}
 					}

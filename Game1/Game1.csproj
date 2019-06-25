@@ -52,7 +52,7 @@
     <Compile Include="ComponentEventArgs.cs" />
     <Compile Include="ActivationManager.cs" />
     <Compile Include="DebuffEffect.cs" />
-    <Compile Include="Effect\JiggleEffect.cs" />
+    <Compile Include="Effect\ShakeEffect.cs" />
     <Compile Include="Enum\CharacterDebuffEffectEnum.cs" />
     <Compile Include="Enum\InteractiveTypeEnum.cs" />
     <Compile Include="Enum\ToolTypeEnum.cs" />
