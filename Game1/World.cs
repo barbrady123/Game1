@@ -143,6 +143,8 @@ namespace Game1
 			_physics.Update(gameTime);
 			foreach (var item in this.Items)
 				item.Update(gameTime);
+			foreach (var interactive in this.Interactives)
+				interactive.Update(gameTime);
 
 			// I think it makes sense to put things like "Item pickup" from proximity after the physics update?
 			// I'm not 100% sure where i even want this to live yet or what entity's responsibility this should be

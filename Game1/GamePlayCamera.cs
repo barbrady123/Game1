@@ -112,11 +112,11 @@ namespace Game1
 
 			// Items on ground...
 			foreach (var item in _world.Items)
-				item.Item.Icon.Draw(spriteBatch, position: item.Position, positionOffset: _renderOffset, scale: GamePlayCamera.MapItemScale);
+				item.Item.Icon.Draw(spriteBatch, position: item.Position + _renderOffset, scale: GamePlayCamera.MapItemScale);
 
 			// Interactive objects...
 			foreach (var interactive in _world.Interactives)
-				interactive.Icon.Draw(spriteBatch, position: interactive.Position, positionOffset: _renderOffset);
+				interactive.Icon.Draw(spriteBatch, position: interactive.Position + _renderOffset);
 
 			_world.Character.Draw(spriteBatch, _renderOffset);
 

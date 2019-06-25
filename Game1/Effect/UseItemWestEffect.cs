@@ -11,8 +11,6 @@ namespace Game1.Effect
 	{
 		private bool _movingForward;
 		private float _maxRotation;
-		private Vector2 _initialOffset;
-		private Vector2 _animationOffset = new Vector2(-0.5f, -0.8f);
 
 		public UseItemWestEffect(bool isActive = false) : base(isActive)
 		{			
@@ -30,15 +28,12 @@ namespace Game1.Effect
 
 		protected override void ResetImage()
 		{
-			_image.PositionOffset = _initialOffset;
 			_image.Rotation = 0.0f;
 		}
 
 		protected override void ActiveChange(bool isActive)
 		{
 			base.ActiveChange(isActive);
-			if (isActive)
-				_initialOffset = _image.PositionOffset;
 		}
 
 		public override void Update(GameTime gameTime)
@@ -47,7 +42,6 @@ namespace Game1.Effect
 			{
 				if (_movingForward)
 				{
-					_image.PositionOffset += _animationOffset;
 					_image.Rotation -= this.Speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
 					if (_image.Rotation <= _maxRotation)
 					{
@@ -58,7 +52,6 @@ namespace Game1.Effect
 				}
 				else
 				{
-					_image.PositionOffset -= _animationOffset;
 					_image.Rotation += this.Speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
 					if (_image.Rotation >= 0.0f)
 						this.IsActive = false;

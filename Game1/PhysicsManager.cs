@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Effect;
 using Game1.Enum;
 using Game1.Items;
 
@@ -106,7 +107,10 @@ namespace Game1
 							continue;
 
 						if (_world.Interactives[i].Bounds.Intersects(activeBounds))
+						{
+							_world.Interactives[i].Icon.AddEffect<JiggleEffect>(true);
 							_world.Interactives[i].Health -= (int)(tool.Damage * _world.Interactives[i].Interactive.Effectiveness[tool.Type]);
+						}
 					}
 				}
 			}

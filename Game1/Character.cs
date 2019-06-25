@@ -29,6 +29,7 @@ namespace Game1
 		//private int _itemDefense;
 		//private int _baseDefense;
 		private bool _activeItemUsed;
+		private bool _activeItemMoving;
 
 		public string SpriteSheetName => this.Sex.ToString("g").ToLower();
 		public Vector2 Motion { get; set; }
@@ -126,7 +127,7 @@ namespace Game1
 				if (_activeItem?.Id != value?.Id)
 				{
 					// We're making a copy here so effects can be applied to the in-game image without affecting the inventory image...
-					_activeItem = ItemManager.CopyItem(value);					
+					_activeItem = ItemManager.CopyItem(value);
 					OnActiveItemChanged?.Invoke(this, new ComponentEventArgs { Meta = _activeItem });
 				}
 			}
@@ -254,18 +255,34 @@ namespace Game1
 			if (!(this.ActiveItem?.Item is ItemHoldable held))
 				return;
 
+			if (_activeItemMoving)
+				return;
+
+			_activeItemMoving = true;
+
+			// This is messy...redo this...
 			if ((this.Direction == Cardinal.North) || (this.Direction == Cardinal.West))
 			{
 				var effect = this.ActiveItem.Icon.AddEffect<UseItemWestEffect>(true);
 				effect.OnFullyExtended -= Effect_OnFullyExtended;
 				effect.OnFullyExtended += Effect_OnFullyExtended;
+				effect.OnActiveChange -= Effect_OnActiveChange;
+				effect.OnActiveChange += Effect_OnActiveChange;
 			}
 			else
 			{
 				var effect = this.ActiveItem.Icon.AddEffect<UseItemEastEffect>(true);
 				effect.OnFullyExtended -= Effect_OnFullyExtended;
 				effect.OnFullyExtended += Effect_OnFullyExtended;
+				effect.OnActiveChange -= Effect_OnActiveChange;
+				effect.OnActiveChange += Effect_OnActiveChange;
 			}
+		}
+
+		private void Effect_OnActiveChange(object sender, EventArgs e)
+		{
+			if (!((EffectEventArgs)e).IsActive)
+				_activeItemMoving = false;
 		}
 
 		private void Effect_OnFullyExtended(object sender, EventArgs e)
@@ -277,7 +294,7 @@ namespace Game1
 		public void Draw(SpriteBatch spriteBatch, Vector2 offset)
 		{
 			DrawBehind(spriteBatch, offset);
-			_spriteSheet.Draw(spriteBatch, position: this.Position, positionOffset: offset);
+			_spriteSheet.Draw(spriteBatch, position: this.Position + offset);
 			DrawInfront(spriteBatch, offset);
 		}
 
@@ -289,7 +306,7 @@ namespace Game1
 			if ((this.Direction == Cardinal.North) || (this.Direction == Cardinal.West))
 			{
 				this.ActiveItem.Icon.OriginOffset = GamePlayCamera.ActiveItemOriginOffsets[this.Direction];
-				this.ActiveItem.Icon.Draw(spriteBatch, position: this.Position, positionOffset: offset + GamePlayCamera.ActiveItemOffsets[this.Direction], scale: GamePlayCamera.ActiveItemScale);
+				this.ActiveItem.Icon.Draw(spriteBatch, position: this.Position + offset + GamePlayCamera.ActiveItemOffsets[this.Direction], scale: GamePlayCamera.ActiveItemScale);
 			}
 		}
 
@@ -301,7 +318,7 @@ namespace Game1
 			if ((this.Direction == Cardinal.South) || (this.Direction == Cardinal.East))
 			{
 				this.ActiveItem.Icon.OriginOffset = GamePlayCamera.ActiveItemOriginOffsets[this.Direction];
-				this.ActiveItem.Icon.Draw(spriteBatch, position: this.Position, positionOffset: offset + GamePlayCamera.ActiveItemOffsets[this.Direction], scale: GamePlayCamera.ActiveItemScale, spriteEffects: SpriteEffects.FlipHorizontally);
+				this.ActiveItem.Icon.Draw(spriteBatch, position: this.Position + offset + GamePlayCamera.ActiveItemOffsets[this.Direction], scale: GamePlayCamera.ActiveItemScale, spriteEffects: SpriteEffects.FlipHorizontally);
 			}
 		}
 
