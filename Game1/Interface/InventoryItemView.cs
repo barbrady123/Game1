@@ -100,8 +100,9 @@ namespace Game1.Interface
 			_emptyIcon?.Draw(spriteBatch);
 			if (this.Item != null)
 			{
+				this.Item.Icon.Position = this.Bounds.CenterVector();
 				this.Item.Icon.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
-				this.Item.Icon.Draw(spriteBatch, null, this.Bounds.CenterVector());
+				this.Item.Icon.Draw(spriteBatch);
 				_quantity.Draw(spriteBatch);
 			}
 		}

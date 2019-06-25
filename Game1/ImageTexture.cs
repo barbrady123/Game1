@@ -55,8 +55,7 @@ namespace Game1
 			_texture?.Dispose();
 		}
 
-
-		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null, SpriteEffects? spriteEffects = null)
+		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None)
 		{	
 			// Testing a highlight concept....there's gotta be a more performant way LOL...
 			/*if ((_texture.Name?.Contains("rock") ?? false) || (_texture.Name?.Contains("sword") ?? false))
@@ -81,7 +80,12 @@ namespace Game1
 				spriteBatch.Draw(reversedTexture, testPos.Offset(1, 1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects ?? SpriteEffects.None, 0.0f);
 			}*/
 
-			spriteBatch.Draw(_texture, position ?? this.Position, this.SourceRect, this.Color * this.Alpha * (alphaBlend ?? 1.0f), this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects ?? SpriteEffects.None, 0.0f);
+			// This is a lot of computation for each draw...resolve this....
+			var pos = (position ?? this.Position) + this.PositionOffset;
+			if (positionOffset != null)
+				pos += (Vector2)positionOffset;
+
+			spriteBatch.Draw(_texture, pos, this.SourceRect, this.Color * this.Alpha * (alphaBlend ?? 1.0f), this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects, 0.0f);
 		}
 
 		public void SwapTexture(string name, bool resetSourceRect = true)

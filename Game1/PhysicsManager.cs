@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
+using Game1.Items;
 
 namespace Game1
 {
@@ -89,6 +90,24 @@ namespace Game1
 				{
 					character.Position += character.Motion;
 					continue;
+				}
+			}
+
+			// Interactives...
+			var activeBounds = _world.Character.ActiveItemBounds;
+			if (activeBounds != Rectangle.Empty)
+			{
+				// Need to test weapons for combat also...
+				if (_world.Character.ActiveItem.Item is ItemTool tool)
+				{					
+					for (int i = _world.Interactives.Count - 1; i >= 0; i--)
+					{
+						if (_world.Interactives[i].Health == null)
+							continue;
+
+						if (_world.Interactives[i].Bounds.Intersects(activeBounds))
+							_world.Interactives[i].Health -= (int)(tool.Damage * _world.Interactives[i].Interactive.Effectiveness[tool.Type]);
+					}
 				}
 			}
 		}

@@ -224,7 +224,7 @@ namespace Game1.Menus
 			base.DrawInternal(spriteBatch);
 
 			foreach (var item in _items)
-				item.Image.Draw(spriteBatch, this.IsActive ? Menu.ENABLED_MENU_ALPHA : Menu.DISABLED_MENU_ALPHA);
+				item.Image.Draw(spriteBatch, alphaBlend: this.IsActive ? Menu.ENABLED_MENU_ALPHA : Menu.DISABLED_MENU_ALPHA);
 		}
 
 		public int SetById(string id)

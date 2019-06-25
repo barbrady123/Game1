@@ -18,6 +18,8 @@ namespace Game1
 	{
 		public int Odds { get; set; }
 
+		// This doesn't make sense to have min/max qty and itempool (which may have items with no min/max)...
+		// we need a class to specify item Id, min/max/whatever per item....
 		public List<int> ItemPool { get; set; }
 
 		public int MinQuantity { get; set; }

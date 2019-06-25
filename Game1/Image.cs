@@ -14,7 +14,6 @@ using Game1.Enum;
 
 namespace Game1
 {
-	// TODO: Create a SpriteSheetImage that is basically ImageTexture but handles sourcerect, etc better...
 	public abstract class Image
 	{		
 		protected List<ImageEffect> _effects;
@@ -25,7 +24,8 @@ namespace Game1
 		public bool IsActive { get; set; }
 
 		public Vector2 Scale { get; set; }
-		public Vector2 Position{ get; set; }
+		public Vector2 Position { get; set; }
+		public Vector2 PositionOffset { get; set; }
 		public float Alpha { get; set; }
 		public Color Color { get; set; }
 		public int Index { get; set; }
@@ -86,6 +86,7 @@ namespace Game1
 			this.IsActive = isActive;
 			this.Scale = Vector2.One;
 			this.Position = Vector2.Zero;
+			this.PositionOffset = Vector2.Zero;
 			this.Alpha = 1.0f;
 			this.SourceRect = Rectangle.Empty;
 			_effects = new List<ImageEffect>();
@@ -115,13 +116,13 @@ namespace Game1
 			}
 		}
 
-		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null, SpriteEffects? spriteEffects = null)
+		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None)
 		{
 			if (this.IsActive)
-				DrawActive(spriteBatch, alphaBlend, position, scale, spriteEffects);
+				DrawActive(spriteBatch, alphaBlend, position, positionOffset, scale, spriteEffects);
 		}
 
-		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? scale = null, SpriteEffects? spriteEffects = null);
+		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None);
 
 		protected virtual void SetOrigin()
 		{

@@ -44,7 +44,6 @@ namespace Game1
 			this.CurrentMap = IOManager.ObjectFromFile<Map>(Game1.MapFile);
 			this.CurrentMap.GenerateTiles();
 			this.Character = IOManager.ObjectFromFile<Character>(Game1.PlayerFile);
-			this.Character.OnItemUse += Character_OnItemUse;
 			this.Character.OnDied += Character_OnDied;
 			this.Character.Strength = GameRandom.Next(10, 20);
 			this.Character.Dexterity = GameRandom.Next(10, 20);
@@ -65,34 +64,20 @@ namespace Game1
 			};
 		}
 
-		private void Character_OnItemUse(object sender, CharacterEventArgs e)
+		private void Interactive_OnDestroyed(object sender, EventArgs e)
 		{
-			// Should this occur in the physics manager??
-			var character = (Character)sender;
-			var item = (InventoryItem)e.Item;
-			var holdable = (ItemHoldable)item.Item;
-
-			var actionBox = new Rectangle(
-				(e.Direction == Cardinal.West) ? (int)character.Position.X - holdable.Range : (int)character.Position.X,
-				(e.Direction == Cardinal.North) ? (int)character.Position.Y - holdable.Range : (int)character.Position.Y,
-				(e.Direction == Cardinal.West) || (e.Direction == Cardinal.East) ? holdable.Range : 1,
-				(e.Direction == Cardinal.North) || (e.Direction == Cardinal.South) ? holdable.Range : 1
-			);
-			
-			if (item.Item is ItemWeapon weapon)
+			// Another thing that shouldn't be here...testing...
+			var interactive = (WorldInteractive)sender;
+			this.Interactives.Remove(interactive);
+			// Need something to generate loot from loot table...just doing this temp...
+			foreach (var l in interactive.Interactive.LootTable)
 			{
-			}
-			else if (item.Item is ItemTool tool)
-			{
-				// Temp...just testing this...
-				foreach (var i in this.Interactives)
+				if (GameRandom.Next(0, 99) < l.Odds)
 				{
-					// need a concept of a range...
-					if (i.Bounds.Intersects(actionBox))
-					{
-						bool hit = true;
-					}
-					
+					// Makes no sense....
+					var newItem = ItemManager.GetItem(l.ItemPool.First());
+					newItem.Quantity = GameRandom.Next(l.MinQuantity, l.MaxQuantity);
+					AddItem(newItem, interactive.Position, true);
 				}
 			}
 		}
@@ -110,6 +95,7 @@ namespace Game1
 				npc.LoadContent();
 
 			// Obviously none of this crap should be here...just for testing purposes...
+			this.Character.HotBar.AddItem(ItemManager.GetItem(10));
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
 			this.Character.HotBar.AddItem(ItemManager.GetItem());
@@ -125,8 +111,18 @@ namespace Game1
 				);
 
 			this.Interactives = new List<WorldInteractive> { 
-				MetaManager.GetInteractve(new Vector2(512, 512))
+				MetaManager.GetInteractve(new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100))),
+				MetaManager.GetInteractve(new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100))),
+				MetaManager.GetInteractve(new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100))),
+				MetaManager.GetInteractve(new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100))),
+				MetaManager.GetInteractve(new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100))),
+				MetaManager.GetInteractve(new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100))),
+				MetaManager.GetInteractve(new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100))),
+				MetaManager.GetInteractve(new Vector2(GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100), GameRandom.Next(100, (this.CurrentMap.Width * Game1.TileSize) - 100)))
 			};
+
+			foreach (var i in this.Interactives)
+				i.OnDestroyed += Interactive_OnDestroyed;
 
 			// This will need to be redone if the map changes....
 			_physics.CalculateParameters();

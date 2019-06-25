@@ -28,6 +28,7 @@ namespace Game1
 		private InventoryItem _activeItem;
 		//private int _itemDefense;
 		//private int _baseDefense;
+		private bool _activeItemUsed;
 
 		public string SpriteSheetName => this.Sex.ToString("g").ToLower();
 		public Vector2 Motion { get; set; }
@@ -102,7 +103,7 @@ namespace Game1
 		public event EventHandler<ComponentEventArgs> OnActiveItemChanged;
 		public event EventHandler<ComponentEventArgs> OnDied;
 		public event EventHandler<ComponentEventArgs> OnGotExternalItem;
-		public event EventHandler<CharacterEventArgs> OnItemUse;
+		//public event EventHandler<CharacterEventArgs> OnItemUse;
 		
 		public InventoryItem HeldItem
 		{ 
@@ -132,6 +133,28 @@ namespace Game1
 		}
 
 		public bool ActiveItemHoldable => this.ActiveItem?.Item is ItemHoldable;
+
+		public Rectangle ActiveItemBounds
+		{
+			get
+			{
+				if ((!this.ActiveItemHoldable) || (!_activeItemUsed))
+					return Rectangle.Empty;
+
+				var holdable = (ItemHoldable)this.ActiveItem.Item;
+
+				// This isn't supporting diagonal...should we switch to independent lookup based on this.Motion??
+				switch (this.Direction)
+				{
+					case Cardinal.East  :	return new Rectangle((int)this.Position.X, (int)this.Position.Y, holdable.Range, 1);
+					case Cardinal.West	:	return new Rectangle((int)this.Position.X - holdable.Range, (int)this.Position.Y, holdable.Range, 1);
+					case Cardinal.North	:	return new Rectangle((int)this.Position.X, (int)this.Position.Y - holdable.Range, 1, holdable.Range);
+					case Cardinal.South	:	return new Rectangle((int)this.Position.X, (int)this.Position.Y, 1, holdable.Range);
+				}
+
+				throw new Exception($"Invalid direction {this.Direction}");
+			}
+		}
 
 		public InventoryItem EquippedArmorHead	{ get; set; }
 		public InventoryItem EquippedArmorChest { get; set; }
@@ -186,6 +209,7 @@ namespace Game1
 		public void Update(GameTime gameTime, bool mouseInWorld = false)
 		{
 			this.PreviousPosition = _position;
+			_activeItemUsed = false;
 			Vector2 motion = UpdateMotion();
 
 			if (motion != Vector2.Zero)
@@ -246,14 +270,14 @@ namespace Game1
 
 		private void Effect_OnFullyExtended(object sender, EventArgs e)
 		{
-			// I'm sure we'll need more values than just the held item...
-			OnItemUse?.Invoke(this, new CharacterEventArgs { Item = this.ActiveItem, Direction = this.Direction });	
+			// This effectively means the tool is only 'active' for a single frame, is this enough??
+			_activeItemUsed = true;
 		}
 
 		public void Draw(SpriteBatch spriteBatch, Vector2 offset)
 		{
 			DrawBehind(spriteBatch, offset);
-			_spriteSheet.Draw(spriteBatch, position: this.Position + offset);
+			_spriteSheet.Draw(spriteBatch, position: this.Position, positionOffset: offset);
 			DrawInfront(spriteBatch, offset);
 		}
 
@@ -265,7 +289,7 @@ namespace Game1
 			if ((this.Direction == Cardinal.North) || (this.Direction == Cardinal.West))
 			{
 				this.ActiveItem.Icon.OriginOffset = GamePlayCamera.ActiveItemOriginOffsets[this.Direction];
-				this.ActiveItem.Icon.Draw(spriteBatch, null, this.Position + offset + GamePlayCamera.ActiveItemOffsets[this.Direction], GamePlayCamera.ActiveItemScale);
+				this.ActiveItem.Icon.Draw(spriteBatch, position: this.Position, positionOffset: offset + GamePlayCamera.ActiveItemOffsets[this.Direction], scale: GamePlayCamera.ActiveItemScale);
 			}
 		}
 
@@ -277,7 +301,7 @@ namespace Game1
 			if ((this.Direction == Cardinal.South) || (this.Direction == Cardinal.East))
 			{
 				this.ActiveItem.Icon.OriginOffset = GamePlayCamera.ActiveItemOriginOffsets[this.Direction];
-				this.ActiveItem.Icon.Draw(spriteBatch, null, this.Position + offset + GamePlayCamera.ActiveItemOffsets[this.Direction], GamePlayCamera.ActiveItemScale, SpriteEffects.FlipHorizontally);
+				this.ActiveItem.Icon.Draw(spriteBatch, position: this.Position, positionOffset: offset + GamePlayCamera.ActiveItemOffsets[this.Direction], scale: GamePlayCamera.ActiveItemScale, spriteEffects: SpriteEffects.FlipHorizontally);
 			}
 		}
 

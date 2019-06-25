@@ -25,7 +25,7 @@ namespace Game1.Effect
 				if (_isActive != value)
 				{
 					_isActive = value;
-					OnActiveChange?.Invoke(this, new EffectEventArgs { IsActive = _isActive });
+					ActiveChange(_isActive);
 					if (!_isActive)
 						ResetImage();
 				}
@@ -33,6 +33,11 @@ namespace Game1.Effect
 		}
 
 		protected virtual void ResetImage() { }
+
+		protected virtual void ActiveChange(bool isActive)
+		{
+			OnActiveChange?.Invoke(this, new EffectEventArgs { IsActive = isActive });
+		}
 
 		public event EventHandler OnActiveChange;
 
@@ -45,7 +50,7 @@ namespace Game1.Effect
 
 		public ImageEffect(bool isActive = false)
 		{
-			this.IsActive = isActive;
+			_isActive = isActive;
 			this.Speed = 1.0f;
 		}
 
