@@ -58,10 +58,19 @@ namespace Game1
 
 			CharacterSex oppositeSex = (this.Character.Sex == CharacterSex.Male) ? CharacterSex.Female : CharacterSex.Male;
 			this.NPCs = new List<NPC> {
-				new NPC { Name = Guid.NewGuid().ToString(), Sex = oppositeSex, Position = new Vector2 (128.0f, 128.0f) },
-				new NPC { Name = Guid.NewGuid().ToString(), Sex = oppositeSex, Position = new Vector2 (256.0f, 256.0f) },
-				new NPC { Name = Guid.NewGuid().ToString(), Sex = oppositeSex, Position = new Vector2 (1024.0f, 1024.0f) }
+				new NPC { Name = Guid.NewGuid().ToString(), Sex = oppositeSex, Position = new Vector2 (128.0f, 128.0f), MaxHP = 10, CurrentHP = 10 },
+				new NPC { Name = Guid.NewGuid().ToString(), Sex = oppositeSex, Position = new Vector2 (256.0f, 256.0f), MaxHP = 10, CurrentHP = 10 },
+				new NPC { Name = Guid.NewGuid().ToString(), Sex = oppositeSex, Position = new Vector2 (1024.0f, 1024.0f), MaxHP = 10, CurrentHP = 10 }
 			};
+
+			foreach (var npc in this.NPCs)
+				npc.OnDied += Npc_OnDied;
+		}
+
+		private void Npc_OnDied(object sender, ComponentEventArgs e)
+		{
+			// Just testing...should be a loot check
+			this.NPCs.Remove((NPC)sender);
 		}
 
 		private void Interactive_OnDestroyed(object sender, EventArgs e)

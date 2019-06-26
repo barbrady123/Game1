@@ -16,7 +16,7 @@ namespace Game1
 	public class PhysicsManager
 	{
 		// Eventually these should be a config file (either load here or pass a PhysicsConfig object from outside)....
-		private Vector2 _humanoidBoxSize = new Vector2(28.0f, 54.0f);
+		private Size _humanoidBoxSize = new Size(28, 54);
 
 		private World _world;
 		private List<Rectangle> _solidBlocks;
@@ -26,12 +26,13 @@ namespace Game1
 			_world = world;
 		}
 
+		// This is slooooooooow......do something about it eventually (also we can just test x and y movement seperately, instead of possibly testing 3 possibilities)
 		public bool MovementOk(Rectangle mapBounds, Character character, List<Character> allChars)
 		{
 			if (character.Motion == Vector2.Zero)
 				return true;
 
-			var proposedBox = (character.Position + character.Motion).ExpandToRectangleCentered((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
+			var proposedBox = (character.Position + character.Motion).ExpandToRectangleCentered(_humanoidBoxSize.Width / 2, _humanoidBoxSize.Height / 2);
 
 			// Map bounds
 			if (!mapBounds.Contains(proposedBox))
@@ -48,7 +49,7 @@ namespace Game1
 			foreach (var otherChar in allChars.Where(c => c != character))
 			{
 				// Eventually need to check mob "size" or "type" for bounding box settings...
-				var otherCharBox = otherChar.Position.ExpandToRectangleCentered((int)_humanoidBoxSize.X / 2, (int)_humanoidBoxSize.Y / 2);
+				var otherCharBox = otherChar.Position.ExpandToRectangleCentered(_humanoidBoxSize.Width / 2, _humanoidBoxSize.Height / 2);
 				if (otherCharBox.Intersects(proposedBox))
 					return false;
 			}
@@ -94,11 +95,21 @@ namespace Game1
 				}
 			}
 
-			// Interactives...
 			var activeBounds = _world.Character.ActiveItemBounds;
 			if (activeBounds != Rectangle.Empty)
 			{
-				// Need to test weapons for combat also...
+				if (_world.Character.ActiveItem.Item is ItemWeapon weapon)
+				{
+					for (int i = _world.NPCs.Count - 1; i >= 0; i--)
+					{
+						var npcBox = _world.NPCs[i].Position.ExpandToRectangleCentered(_humanoidBoxSize.Width / 2, _humanoidBoxSize.Height / 2);
+						if (npcBox.Intersects(activeBounds))
+						{
+							_world.NPCs[i].SetImageEffect<ShakeEffect>();
+							_world.NPCs[i].CurrentHP -= GameRandom.Next(weapon.MinDamage, weapon.MaxDamage);	// Obviously greatly simplified...
+						}
+					}
+				}
 				if (_world.Character.ActiveItem.Item is ItemTool tool)
 				{					
 					for (int i = _world.Interactives.Count - 1; i >= 0; i--)

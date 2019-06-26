@@ -26,11 +26,9 @@ namespace Game1
 		private int _currentMana;
 		private InventoryItem _heldItem;
 		private InventoryItem _activeItem;
-		//private int _itemDefense;
-		//private int _baseDefense;
 		private bool _activeItemUsed;
 		private bool _activeItemMoving;
-
+		
 		public string SpriteSheetName => this.Sex.ToString("g").ToLower();
 		public Vector2 Motion { get; set; }
 		public float MovementSpeed => _movementSpeed * MovementSpeedModifier();
@@ -61,6 +59,11 @@ namespace Game1
 			(((ItemArmor)this.EquippedArmorLegs?.Item)?.Defense ?? 0) +
 			(((ItemArmor)this.EquippedArmorFeet?.Item)?.Defense ?? 0) +
 			DefenseModifier();
+
+		public void SetImageEffect<T>() where T: ImageEffect
+		{
+			_spriteSheet.AddEffect<T>(true);
+		}
 
 		// Find a better place for these types of methods...
 		private int DefenseModifier()
@@ -104,7 +107,6 @@ namespace Game1
 		public event EventHandler<ComponentEventArgs> OnActiveItemChanged;
 		public event EventHandler<ComponentEventArgs> OnDied;
 		public event EventHandler<ComponentEventArgs> OnGotExternalItem;
-		//public event EventHandler<CharacterEventArgs> OnItemUse;
 		
 		public InventoryItem HeldItem
 		{ 
@@ -217,6 +219,7 @@ namespace Game1
 			{
 				motion.Normalize();
 				motion *= (this.MovementSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
+				// TODO: Re-evaluate this...seems like it restarts the same effect each frame...
 				_spriteSheet.AddEffect<SpriteSheetEffect>(true);
 			}
 			else

@@ -11,7 +11,7 @@ namespace Game1
 	public class NPC : Character
 	{
 		private const int SameDirectionBias = 99;
-		private const int ContinueStopBias = 95;
+		private const int ContinueStopBias = 96;
 
 		public NPC() : base()
 		{
