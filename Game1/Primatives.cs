@@ -11,13 +11,11 @@ namespace Game1
 	/// <summary>
 	/// Primitive that better represets size...
 	/// </summary>
-	public class Size
+	public struct Size
 	{
 		public int Width { get; set; }
 
 		public int Height { get; set; }
-
-		public Size() { }
 
 		public Size(int squareSideLength)
 		{
@@ -29,6 +27,11 @@ namespace Game1
 		{
 			this.Width = width;
 			this.Height = height;
+		}
+
+		public static Size operator *(Size size, int i)
+		{
+			return new Size(size.Width * i, size.Height * i);
 		}
 	}
 }

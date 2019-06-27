@@ -1,0 +1,11 @@
+﻿[
+  {
+    "id": 10,
+    "displayname": "Iron Axe",
+    "iconname": "axe",
+    "maxstack": 1,
+    "weight": 3.5,
+    "damage": 50,
+    "range": 30
+  }
+]

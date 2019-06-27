@@ -19,9 +19,10 @@ namespace Game1.Screens
 	{
 		private GamePlayManager _gameplay;
 
-		public GameScreen(Rectangle bounds): base(bounds, true, background: null)
+		public GameScreen(Rectangle bounds, string playerId): base(bounds, true, background: null)
 		{
-			_activator.Register(_gameplay = new GamePlayManager(bounds), true, "game");
+			// Again, all of this stuff should preload on a "Loading" screen instead of realtime doing this while the player waits...
+			_activator.Register(_gameplay = new GamePlayManager(bounds, playerId), true, "game");
 		}
 
 		public override void LoadContent()

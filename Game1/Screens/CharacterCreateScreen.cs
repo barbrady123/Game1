@@ -123,8 +123,22 @@ namespace Game1.Screens
 				case "startgame" :
 					_newChar.Name = _menuCharacter.CharacterName;
 					_newChar.Sex = _menuCharacter.CharacterSex;
-					_newChar.Position = new Vector2(Game1.TileSize / 2, Game1.TileSize / 2);
+					_newChar.Position = new Vector2(Game1.PlayerStartLocation.X, Game1.PlayerStartLocation.Y);
+					// Temp population...
+					_newChar.Strength = GameRandom.Next(10, 20);
+					_newChar.Dexterity = GameRandom.Next(10, 20);
+					_newChar.Intelligence = GameRandom.Next(10, 20);
+					_newChar.Wisdom = GameRandom.Next(10, 20);
+					_newChar.Charisma = GameRandom.Next(10, 20);
+					_newChar.Constitution = GameRandom.Next(10, 20);
+					_newChar.MaxHP = GameRandom.Next(30, 50);
+					_newChar.CurrentHP = 1;	//this.Character.MaxHP / 2;
+					_newChar.MaxMana = GameRandom.Next(30, 50);
+					_newChar.CurrentMana = _newChar.MaxMana;
+					_newChar.Location = "map";
+					// TODO: Needs to store in it's own directory...based on a Guid/some other ID...
 					IOManager.ObjectToFile(Game1.PlayerFile, _newChar);
+					e.Meta = Guid.NewGuid().ToString();	// meaningless for now...
 					// TODO: Eventually we need to handle some kind of identifier of this new player to the parent, when we have multiple player/world files...
 					ReadyDisable(e);
 					break;

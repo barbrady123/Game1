@@ -4,46 +4,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Game1.Enum;
 
 namespace Game1
 {
-	/// <summary>
-	///  "Solid" concept should probably be per layer...makes calcs in the physics engine easier also...
-	/// </summary>
 	public class Layer
 	{
-		[JsonProperty("active")]
-		public bool IsActive { get; set; }
+		[JsonProperty("type")]
+		public LayerType Type { get; set; }
 
-		[JsonProperty("solid")]
-		public bool IsSolid { get; set; }
-
-		[JsonProperty("id")]
-		public string Id { get; set; }
-
-		[JsonProperty("index")]
-		public int Index { get; set; }
-
-		[JsonIgnore]
-		public Tile[,] TileData { get; set; }
+		[JsonProperty("tilesheet")]
+		public string TileSheet { get; set; }
 
 		[JsonProperty("tiledata")]
 		public string[] RawTileData { get; set; }
 
-		public void GenerateTiles()
+		[JsonIgnore]
+		public int[,] TileData { get; set; }
+
+		public void GenerateTiles(int width, int height)
 		{
-			if (!(this.RawTileData?.Any() ?? false))
-				return;
+			if (this.RawTileData == null)
+				this.RawTileData = new string[0];
 
-			int rowSize = this.RawTileData.First().Split(';').Count();
+			this.TileData = new int[height, width];			
 
-			this.TileData = new Tile[this.RawTileData.GetLength(0), rowSize];
-
-			for (int y = 0; y < this.RawTileData.Length; y++)
+			for (int y = 0; y < height; y++)
 			{
-				string[] tiles = this.RawTileData[y].Split(';');
-				for (int x = 0; x < tiles.Length; x++)
-					this.TileData[y,x] = new Tile { TileIndex = Int32.Parse(tiles[x]) };	// Again coords swapped...
+				string[] tiles = ((y < this.RawTileData.Length) && !String.IsNullOrWhiteSpace(this.RawTileData[y])) ? this.RawTileData[y].Split(';') : new string[0];
+				for (int x = 0; x < width; x++)
+					this.TileData[y, x] = (x < tiles.Length) ? Int32.Parse(tiles[x]) : -1;
 			}
 		}
 	}

@@ -55,13 +55,20 @@
     <Compile Include="Effect\ShakeEffect.cs" />
     <Compile Include="Enum\CharacterDebuffEffectEnum.cs" />
     <Compile Include="Enum\InteractiveTypeEnum.cs" />
+    <Compile Include="Enum\LayerTypeEnum.cs" />
     <Compile Include="Enum\ToolTypeEnum.cs" />
+    <Compile Include="Enum\TransitionTypeEnum.cs" />
     <Compile Include="FixedQueue.cs" />
     <Compile Include="Interactive.cs" />
     <Compile Include="ISupportsTooltip.cs" />
-    <Compile Include="ItemHoldable.cs" />
-    <Compile Include="ItemTool.cs" />
+    <Compile Include="Items\ItemHoldable.cs" />
+    <Compile Include="Items\ItemTool.cs" />
     <Compile Include="Loot.cs" />
+    <Compile Include="Maps\MapItem.cs" />
+    <Compile Include="Maps\MapMeta.cs" />
+    <Compile Include="Maps\MapMob.cs" />
+    <Compile Include="Maps\MapTransition.cs" />
+    <Compile Include="WorldTransition.cs" />
     <Compile Include="Menus\ContextMenu.cs" />
     <Compile Include="Effect\EffectEventArgs.cs" />
     <Compile Include="Effect\FadeCycleEffect.cs" />
@@ -128,7 +135,7 @@
     <Compile Include="Items\ItemManager.cs" />
     <Compile Include="Items\ItemWeapon.cs" />
     <Compile Include="Layer.cs" />
-    <Compile Include="Map.cs" />
+    <Compile Include="Maps\Map.cs" />
     <Compile Include="MouseEventArgs.cs" />
     <Compile Include="NewItemNotification.cs" />
     <Compile Include="NewItemNotificationViewer.cs" />
@@ -158,11 +165,11 @@
     <Compile Include="StatusEffect.cs" />
     <Compile Include="StatusEventArgs.cs" />
     <Compile Include="StatusViewer.cs" />
-    <Compile Include="Tile.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="World.cs" />
     <Compile Include="WorldInteractive.cs" />
     <Compile Include="WorldItem.cs" />
+    <Compile Include="Transition.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
@@ -240,9 +247,26 @@
     <Content Include="Content\Gameplay\Status\minorDefense.png" />
     <Content Include="Content\Gameplay\Status\minorMovementSpeed.png" />
     <Content Include="Content\Gameplay\TileSheet\ground.png" />
+    <Content Include="Content\Gameplay\Transition\stairs_down.png" />
+    <Content Include="Content\Gameplay\Transition\stairs_up.png" />
     <Content Include="Content\Interface\cursor.png" />
     <Content Include="Content\Interface\pointer.png" />
     <Content Include="Icon.ico" />
+    <None Include="Load\items_armor.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Load\items_consumable.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Load\items_general.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Load\items_tool.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Load\items_weapon.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Load\Map\map.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -251,6 +275,9 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
     <None Include="app.manifest" />
     <None Include="config.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Load\Map\map2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />

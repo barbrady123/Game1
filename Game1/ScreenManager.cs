@@ -79,7 +79,7 @@ namespace Game1
 			//TransitionScreens(new SplashScreen(_bounds));
 			//TransitionScreens(new MainMenu(_bounds));
 			//TransitionScreens(new CharacterCreateScreen(_bounds));
-			TransitionScreens(new GameScreen(_bounds));
+			TransitionScreens(new GameScreen(_bounds, "player"));
 		}
 
 		private void TransitionScreens(Component newScreen)
@@ -164,7 +164,7 @@ namespace Game1
 					case "escape" :
 					case "cancel" : TransitionScreens(new MenuScreen<MainMenu>(_bounds));		break;
 					// This should NOT go directly to game screen...we need a "loading" transition screen with a call back (probably just part of the ScreenManager)....
-					case "startgame" : TransitionScreens(new GameScreen(_bounds));	break;
+					case "startgame" : TransitionScreens(new GameScreen(_bounds, (string)e.Meta));	break;
 				}
 				break;
 			}

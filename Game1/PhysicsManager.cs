@@ -131,13 +131,13 @@ namespace Game1
 		{
 			var solidBlocks = new Dictionary<Point, Rectangle>();
 
-			foreach (var layer in _world.CurrentMap.Layers.Where(l => l.IsSolid))
+			foreach (var layer in _world.CurrentMap.Layers.Where(l => l.Type == LayerType.Solid))
 			{
 				for (int y = 0; y < layer.TileData.GetLength(1); y++)
 				for (int x = 0; x < layer.TileData.GetLength(0); x++)
 				{
 					// Again, coords here are reversed so file data can "visually" match the screen...
-					if (layer.TileData[y,x].TileIndex < 0)
+					if (layer.TileData[y,x] < 0)
 						continue;
 
 					var point = new Point(x, y);

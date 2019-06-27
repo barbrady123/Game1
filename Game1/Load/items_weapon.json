@@ -1,0 +1,12 @@
+﻿[
+  {
+    "id": 9,
+    "displayname": "Iron Sword",
+    "iconname": "sword",
+    "maxstack": 1,
+    "weight": 2.9,
+    "mindamage": 5,
+    "maxdamage": 10,
+    "range": 30
+  }
+]

@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json;
 using Game1.Enum;
+using Game1.Items;
 
 namespace Game1
 {
@@ -17,14 +18,14 @@ namespace Game1
 		public static readonly string GameName = typeof(Game1).Name;
 		public static readonly string GameStorageRoot = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\{Game1.GameName}";
 		public static readonly string PlayerFile = $"{Game1.GameStorageRoot}\\player";
-		public static readonly string MapFile = $"{Game1.MapRoot}\\map";
 		public const string ContentRoot = "Content";
 		public const string FontsRoot = "Fonts";
 		public const string BackgroundRoot = "Background";
-		public const string MenuConfigRoot = "Load\\Menu";
-		public const string MapRoot = "Load\\Map";
+		public const string MetaRoot = "Load";
+		public const string MapRoot = MetaRoot + "\\Map";
 		public const string TilesheetRoot = "Gameplay\\TileSheet";
 		public const string SpriteSheetRoot = "Gameplay\\Character";
+		public const string TransitionRoot = "Gameplay\\Transition";
 		public const string IconRoot = "Gameplay\\Icon";
 		public const string StatusIconRoot = "Gameplay\\Status";
 		public const string InteractiveIconRoot = "Gameplay\\Interactive";
@@ -40,7 +41,9 @@ namespace Game1
 		public const int GameViewAreaWidth = 19;
 		public const int GameViewAreaHeight = 15;
 		public const int PlayerDrawIndex = 100;
-		public const int DefaultPickupRadius = 20;		
+		public const int DefaultPickupRadius = 20;
+		public const string PlayerStartMap = "map";
+		public static readonly Point PlayerStartLocation = new Point(32, 32);
 
 		GraphicsDeviceManager _graphicsManager;
 		ScreenManager _screenManager;
@@ -106,6 +109,7 @@ namespace Game1
 
 			FontManager.LoadContent();
 			InputManager.LoadContent();
+			ItemManager.LoadContent();
 			MetaManager.LoadContent();
 			AudioManager.LoadContent();
 			_screenManager.LoadContent();
@@ -120,6 +124,7 @@ namespace Game1
 		{
 			FontManager.UnloadContent();
 			InputManager.UnloadContent();
+			ItemManager.UnloadContent();
 			MetaManager.UnloadContent();
 			AudioManager.UnloadContent();
 			_screenManager.UnloadContent();

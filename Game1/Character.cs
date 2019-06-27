@@ -15,7 +15,7 @@ namespace Game1
 {
 	// Either we need a new base class, or this should be the base and some of this crap needs to be moved into a child class....
 	public class Character
-	{
+	{		
 		private Vector2 _position;
 		private ImageSpriteSheet _spriteSheet;
 		private ItemContainer _hotbar;
@@ -34,6 +34,7 @@ namespace Game1
 		public float MovementSpeed => _movementSpeed * MovementSpeedModifier();
 		public float ToolSpeed => _toolSpeed * ToolSpeedModifier();
 		public Cardinal Direction { get; set; }
+		public string Location { get; set; }
 
 		public Vector2 PreviousPosition { get; set; }
 		public bool Moved => this.PreviousPosition != this.Position;

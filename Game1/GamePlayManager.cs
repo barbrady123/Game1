@@ -37,10 +37,10 @@ namespace Game1
 
 		private ImageTexture _gameViewBorder;
 
-		public GamePlayManager(Rectangle bounds) : base(bounds, background: "wood")
+		public GamePlayManager(Rectangle bounds, string playerId) : base(bounds, background: "wood")
 		{
 			// Might want a couple frame delay before actually running the game?
-			_activator.Register(_world = new World(), true, "top");
+			_activator.Register(_world = new World(playerId), true, "top");
 			_world.Initialize();
 			_world.Character.OnHeldItemChanged += InputManager.HandleCursorChange;
 			_world.Character.OnGotExternalItem += Character_OnGotExternalItem;
@@ -110,10 +110,7 @@ namespace Game1
 		public override void LoadContent()
 		{
 			base.LoadContent();
-			ItemManager.LoadContent();
 			_world.LoadContent();
-			_camera.TerrainTileSheetName = _world.CurrentMap.TileSheet;
-			_camera.TerrainLayerData  = _world.CurrentMap.Layers;
 			_camera.LoadContent();
 			_gameViewBorder.LoadContent();
 			_characterWindow.LoadContent();
@@ -130,7 +127,6 @@ namespace Game1
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-			ItemManager.UnloadContent();
 			_gameViewBorder.UnloadContent();
 			_world.UnloadContent();
 			_camera.UnloadContent();
@@ -183,6 +179,16 @@ namespace Game1
 			else if (InputManager.KeyPressed(Keys.OemTilde))
 			{
 				Game1.Instance.ToggleFullScreen();
+			}
+			else if (InputManager.KeyPressed(Keys.Space))
+			{
+				// Testing transitions...this probably won't actually be how we interact with them lol
+				foreach (var transition in _world.Transitions)
+					if (Vector2.Distance(transition.Position, _world.Character.Position) < 30.0f)
+					{
+						TransitionMap(transition);
+						break;
+					}
 			}
 
 			if (InputManager.LeftMouseClick(_gameViewArea))
@@ -258,6 +264,14 @@ namespace Game1
 		private void Character_OnGotExternalItem(object sender, ComponentEventArgs e)
 		{
 			_newItems.AddNotification(e.Meta as InventoryItem);
+		}
+
+		private void TransitionMap(WorldTransition transition)
+		{
+			// Should show a loading thing here...
+			_world.ChangeMap(transition.DestinationMap, transition.DestinationPosition);
+			_camera.UnloadContent();
+			_camera.LoadContent();
 		}
 	}
 }

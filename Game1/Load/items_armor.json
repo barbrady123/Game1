@@ -1,0 +1,29 @@
+﻿[
+  {
+    "id": 6,
+    "displayname": "Chain Helm",
+    "iconname": "helmet",
+    "maxstack": 1,
+    "weight": 3.2,
+    "slot": "Head",
+    "defense": 2
+  },
+  {
+    "id": 7,
+    "displayname": "Iron Armor",
+    "iconname": "armor",
+    "maxstack": 1,
+    "weight": 6.4,
+    "slot": "Chest",
+    "defense": 5
+  },
+  {
+    "id": 8,
+    "displayname": "Gold Armor",
+    "iconname": "upg_armor",
+    "maxstack": 1,
+    "weight": 8.5,
+    "slot": "Chest",
+    "defense": 8
+  }
+]

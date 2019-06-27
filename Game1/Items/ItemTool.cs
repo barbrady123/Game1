@@ -8,12 +8,12 @@ using Game1.Enum;
 
 namespace Game1.Items
 {
-	public class ItemArmor : Item
+	public class ItemTool: ItemHoldable
 	{
-		[JsonProperty("slot")]
-		public ArmorSlot Slot { get; set; }	
+		[JsonProperty("type")]
+		public ToolType Type { get; set; }
 
-		[JsonProperty("defense")]
-		public int Defense { get; set; }
+		[JsonProperty("damage")]
+		public int Damage { get; set; }
 	}
 }

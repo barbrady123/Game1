@@ -37,58 +37,38 @@ namespace Game1
 		private readonly World _world;
 		private readonly Rectangle _gameViewArea;
 		private readonly SpriteBatchData _spriteBatchData;
-		private ImageTexture _terrainTileSheet;
-		private Rectangle _terrainSourceRect;
+		private Dictionary<Layer, ImageTexture> _tileSheets;
+		private Dictionary<Layer, ImageTexture> _staticMaps;
 		private Vector2 _renderOffset;
-		private List<ImageTexture> _terrainMaps;
 		
-		public string TerrainTileSheetName { get; set; }
-		public Layer[] TerrainLayerData{ get; set; }
-
 		public GamePlayCamera(World world, Rectangle gameViewArea, SpriteBatchData spriteBatchData)
 		{
 			_world = world;
 			_gameViewArea = gameViewArea;
 			_spriteBatchData = spriteBatchData;
-			_terrainSourceRect = Rectangle.Empty;
 			_renderOffset = Vector2.Zero;
+			_tileSheets = new Dictionary<Layer, ImageTexture>();
+			_staticMaps = new Dictionary<Layer, ImageTexture>();
 		}
-
-		public Vector2 MapSize => _terrainMaps?.FirstOrDefault()?.Texture.Bounds.SizeVector() ?? Vector2.Zero;
 
 		public void LoadContent()
 		{
-			LoadTerrainTileSheet();
+			LoadTileSheets();
 		}
 
 		public void UnloadContent()
 		{
-			_terrainTileSheet?.UnloadContent();
-			foreach (var map in _terrainMaps)
+			foreach (var map in _staticMaps.Values)
 				map.UnloadContent();
+
+			foreach (var tileSheet in _tileSheets.Values)
+				tileSheet.UnloadContent();
 		}
 
 		public void Update(GameTime gameTime)
 		{
 			if (_world.Character.Moved)
-				SetTerrainSourceRect();
-		}
-
-		private void SetTerrainSourceRect()
-		{
-			// Terrain...
-			var map = _terrainMaps.First();	// there should just be a map size, not this silly thing...
-			var drawAreaPadding = _gameViewArea.SizeVector() / 2;
-
-			int sourceX = Util.Clamp((int)( _world.Character.Position.X - drawAreaPadding.X), 0, (int)(map.Texture.Width - _gameViewArea.Width));
-			int sourceY = Util.Clamp((int)( _world.Character.Position.Y - drawAreaPadding.Y), 0, (int)(map.Texture.Height - _gameViewArea.Height));
-
-			_terrainSourceRect = new Rectangle(sourceX, sourceY, _gameViewArea.Width, _gameViewArea.Height);
-			foreach (var terrainMap in _terrainMaps)
-				terrainMap.SourceRect = _terrainSourceRect;
-
-			// TEST: going to just store this offset and apply it realtime in Draw instead of calculating and caching this everywhere in Update...
-			_renderOffset = new Vector2(-sourceX + _gameViewArea.X, -sourceY + _gameViewArea.Y);
+				SetStaticMapsSourceRect();
 		}
 
 		public void Draw()
@@ -103,9 +83,15 @@ namespace Game1
 		// but we also care about other objects on the map relative to each other (mobs, etc)....
 		public void DrawInternal(SpriteBatch spriteBatch)
 		{
+			// Need a seperate param for "cameraOffset"...or just convert to matrix transformation....
+
 			// Terrain maps that are "below" the characters...
-			foreach (var map in _terrainMaps.OrderBy(m => m.Index).Where(m => m.Index <= Game1.PlayerDrawIndex))
-				map.Draw(spriteBatch);
+			foreach (var layer in _world.CurrentMap.Layers.Where(l => l.Type == LayerType.Terrain))
+				_staticMaps[layer].Draw(spriteBatch);
+
+			foreach (var transition in _world.Transitions)
+				transition.Icon.Draw(spriteBatch, position: transition.Position + _renderOffset);	// This is weird
+			
 			// Draw characters that should be "behind" the player...when their Y coord is <= the player's...
 			foreach (var npc in _world.NPCs.Where(n => n.Position.Y <= _world.Character.Position.Y).OrderBy(n => n.Position.Y))
 				npc.Draw(spriteBatch, _renderOffset);
@@ -124,52 +110,49 @@ namespace Game1
 			foreach (var npc in _world.NPCs.Where(n => n.Position.Y > _world.Character.Position.Y).OrderBy(n => n.Position.Y))
 				npc.Draw(spriteBatch, _renderOffset);
 
-			// Terrain maps that are "above" the characters...
-			foreach (var map in _terrainMaps.OrderBy(m => m.Index).Where(m => m.Index > Game1.PlayerDrawIndex))
-			{
-				map.Alpha = GamePlayCamera.OverLayerAlpha;
-				map.Draw(spriteBatch);
-			}
+			// We're drawing these as "above" the player, but probably doesn't matter...
+			foreach (var layer in _world.CurrentMap.Layers.Where(l => l.Type == LayerType.Solid))
+				_staticMaps[layer].Draw(spriteBatch);
+
+			foreach (var layer in _world.CurrentMap.Layers.Where(l => l.Type == LayerType.Top))
+				_staticMaps[layer].Draw(spriteBatch);
 		}
 
-		private void LoadTerrainTileSheet()
+		private void LoadTileSheets()
 		{
-			if (_terrainTileSheet != null)
-				_terrainTileSheet.UnloadContent();
+			foreach (var sheet in _tileSheets.Values)
+				sheet.UnloadContent();
+			_tileSheets.Clear();
 
-			_terrainTileSheet = new ImageTexture($"{Game1.TilesheetRoot}\\{this.TerrainTileSheetName}");
-			_terrainTileSheet.LoadContent();
-			LoadTerrainMaps();
-			SetTerrainSourceRect();
-		}
-
-		private void LoadTerrainMaps()
-		{
-			if (_terrainMaps?.Any() ?? false)
-				foreach (var terrainMap in _terrainMaps)
-					terrainMap.UnloadContent();
-					
-			_terrainMaps = new List<ImageTexture>();
-
-			// Right now first layer dictates size....but this should proably be explicitly set in the map...
-			var firstLayer = this.TerrainLayerData.First(l => l.IsActive);
-
-			foreach (var layer in this.TerrainLayerData.Where(l => l.IsActive))
+			foreach (var layer in _world.CurrentMap.StaticLayers)
 			{
-				var terrainMap = GenerateTerrainMap(layer, Point.Zero, new Point(firstLayer.TileData.GetLength(0) - 1, firstLayer.TileData.GetLength(1) - 1));
-				terrainMap.Index = layer.Index;
-				_terrainMaps.Add(terrainMap);
+				// TODO: Should load up the tile sheets elsewhere, so they aren't duplicated (though typically we wouldn't use the same tilesheet for multiple layers anyway)
+				var tileSheet = new ImageTexture($"{Game1.TilesheetRoot}\\{layer.TileSheet}");
+				tileSheet.LoadContent();
+				_tileSheets.Add(layer, tileSheet);
 			}
+
+			GenerateStaticMaps();
+			SetStaticMapsSourceRect();
 		}
 
-		// Eventually we'll load the map in chunks...
-		// NOTE: This type of technique is only valid for completely STATIC map data...everything interactive will have to be rendered on top of this...
-		private ImageTexture GenerateTerrainMap(Layer layer, Point start, Point end)
+		private void GenerateStaticMaps()
+		{
+			foreach (var staticMap in _staticMaps.Values)
+				staticMap.UnloadContent();
+			_staticMaps.Clear();
+
+			foreach (var layer in _world.CurrentMap.StaticLayers)
+				_staticMaps.Add(layer, GenerateStaticMap(layer, Point.Zero, new Point(_world.CurrentMap.Width - 1, _world.CurrentMap.Height - 1)));
+		}
+
+		private ImageTexture GenerateStaticMap(Layer layer, Point start, Point end)
 		{
 			var renderTarget = new RenderTarget2D(Game1.Graphics, (end.X - start.X + 1) * Game1.TileSize, (end.Y - start.Y + 1) * Game1.TileSize);
 			Game1.Graphics.SetRenderTarget(renderTarget);
 			Game1.Graphics.Clear(Color.Transparent);
 			var spriteBatch = new SpriteBatch(Game1.Graphics);
+			var tileSheetTexture = _tileSheets[layer].Texture;
 			spriteBatch.Begin();
 
 			for (int y = 0; y < end.Y - start.Y + 1; y++)
@@ -177,21 +160,39 @@ namespace Game1
 			{
 				var position = new Vector2((x + start.X) * Game1.TileSize, (y + start.Y) * Game1.TileSize);
 				// this.TileData[,] coords swapped here so texture representation matches what the JSON "looks like"...when we serialize to binary this will go away...
-				int tileIndex = layer.TileData[y,x].TileIndex;
+				int tileIndex = layer.TileData[y,x];
 				if (tileIndex < 0)
 					continue;
 
 				int tileIndexX = tileIndex % Game1.TileSheetSize;
 				int tileIndexY = tileIndex / Game1.TileSheetSize;
 				var sourceRect = new Rectangle(tileIndexX * Game1.TileSize, tileIndexY * Game1.TileSize, Game1.TileSize, Game1.TileSize);
-				// TODO: Why are we not calling _terrainTileSheet.Draw() here, why bypassing the class draw?? (this is the only place that does this)
-				spriteBatch.Draw(_terrainTileSheet.Texture, position, sourceRect, Color.White);
+				spriteBatch.Draw(tileSheetTexture, position, sourceRect, Color.White);
 			}
 
 			spriteBatch.End();
 			var texture = (Texture2D)renderTarget;
 			Game1.Graphics.SetRenderTarget(null);
-			return new ImageTexture(texture) { IsActive = true, Position = _gameViewArea.TopLeftVector() };
+			return new ImageTexture(texture) {
+				IsActive = true,
+				Position = _gameViewArea.TopLeftVector(),
+				Alpha = (layer.Type == LayerType.Top) ? GamePlayCamera.OverLayerAlpha : 1.0f
+			};
+		}
+
+		private void SetStaticMapsSourceRect()
+		{
+			var mapSize = _world.CurrentMap.Size;
+
+			var drawAreaPadding = _gameViewArea.SizeVector() / 2;
+			int sourceX = Util.Clamp((int)( _world.Character.Position.X - drawAreaPadding.X), 0, (int)(mapSize.Width - _gameViewArea.Width));
+			int sourceY = Util.Clamp((int)( _world.Character.Position.Y - drawAreaPadding.Y), 0, (int)(mapSize.Height - _gameViewArea.Height));
+			var visibleSourceRect = new Rectangle(sourceX, sourceY, _gameViewArea.Width, _gameViewArea.Height);
+
+			foreach (var staticMap in _staticMaps.Values)
+				staticMap.SourceRect = visibleSourceRect;
+
+			_renderOffset = new Vector2(-sourceX + _gameViewArea.X, -sourceY + _gameViewArea.Y);
 		}
 	}
 }

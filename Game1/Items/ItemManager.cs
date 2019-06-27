@@ -23,63 +23,30 @@ namespace Game1.Items
 		private static Dictionary<string, Texture2D> _textures;
 		private static ContentManager _content;
 
-		// Temp...
-		private static List<Item> _items;
+		private static List<ItemGeneral> _generals;
+		private static List<ItemConsumable> _consumables;
+		private static List<ItemArmor> _armors;
+		private static List<ItemWeapon> _weapons;
+		private static List<ItemTool> _tools;
 
 		static ItemManager()
 		{
 			_content = new ContentManager(Game1.ServiceProvider, Game1.ContentRoot);
 			_textures = new Dictionary<string, Texture2D>();
 
-			// Just load some temp data for testing...
-			_items = new List<Item> {
-				new ItemGeneral {	DisplayName = "Heart",			IconName = "heart",			Id = 0,	MaxStackSize = 99,	Weight = 0.4f },
-				new ItemGeneral {	DisplayName = "Ruby",			IconName = "gemRed",		Id = 1,	MaxStackSize = 99,	Weight = 0.2f },
-				new ItemConsumable {
-					DisplayName = "Health Potion",
-					IconName = "potionRed",
-					Id = 2,
-					MaxStackSize = 99,
-					Weight = 0.1f,
-					Type = ConsumableType.Drink,
-					InstantEffect = CharacterInstantEffect.MinorHeal,
-					Duration = null
-				},
-				new ItemConsumable {
-					DisplayName = "Defense Potion",
-					IconName = "potionGreen",
-					Id = 3,
-					MaxStackSize = 99,
-					Weight = 0.1f,
-					Type = ConsumableType.Drink,
-					BuffEffect = CharacterBuffEffect.MinorDefense,
-				},
-				new ItemConsumable {
-					DisplayName = "Minor Movement Potion",
-					IconName = "potionBlue",
-					Id = 4,
-					MaxStackSize = 99,
-					Weight = 0.1f,
-					Type = ConsumableType.Drink,
-					BuffEffect = CharacterBuffEffect.MinorMovementSpeed,
-				},
-				new ItemConsumable {
-					DisplayName = "Cursed Scroll",
-					IconName = "scroll",
-					Id = 5,
-					MaxStackSize = 99,
-					Weight = 0.1f,
-					Type = ConsumableType.Read,
-					DebuffEffect = CharacterDebuffEffect.MinorDamageOverTime
-				},
-				// Things like metal type, etc. should be modifiers to a base type...
-				new ItemArmor {		DisplayName = "Chain Helm",		IconName = "helmet",	Id = 6,	MaxStackSize = 1,	Weight = 3.2f,	Slot = ArmorSlot.Head,	Defense = 2	},
-				new ItemArmor {		DisplayName = "Iron Armor",		IconName = "armor",		Id = 7,	MaxStackSize = 1,	Weight = 6.4f,	Slot = ArmorSlot.Chest, Defense = 5	},
-				new ItemArmor {		DisplayName = "Gold Armor",		IconName = "upg_armor",	Id = 8,	MaxStackSize = 1,	Weight = 8.5f,	Slot = ArmorSlot.Chest, Defense = 8	},
-				new ItemWeapon {	DisplayName = "Iron Sword",		IconName = "sword",		Id = 9, MaxStackSize = 1,	Weight = 2.9f,	MaxDamage = 10, Range = 30 },
-				new ItemTool	{	DisplayName = "Iron Axe",		IconName = "axe",		Id = 10, MaxStackSize = 1,	Weight = 3.5f,  Damage = 50, Range = 30 }
-			};
+			_generals = IOManager.ObjectFromFile<List<ItemGeneral>>(Path.Combine(Game1.MetaRoot, "items_general"));
+			_consumables = IOManager.ObjectFromFile<List<ItemConsumable>>(Path.Combine(Game1.MetaRoot, "items_consumable"));
+			_armors = IOManager.ObjectFromFile<List<ItemArmor>>(Path.Combine(Game1.MetaRoot, "items_armor"));
+			_weapons = IOManager.ObjectFromFile<List<ItemWeapon>>(Path.Combine(Game1.MetaRoot, "items_weapon"));
+			_tools = IOManager.ObjectFromFile<List<ItemTool>>(Path.Combine(Game1.MetaRoot, "items_tool"));
 		}
+
+		// TEMP...this is dumb lol...
+		private static List<Item> _allItems =>	_generals.Cast<Item>()
+												.Concat(_consumables.Cast<Item>())
+												.Concat(_armors.Cast<Item>())
+												.Concat(_weapons.Cast<Item>())
+												.Concat(_tools.Cast<Item>()).ToList();
 
 		public static void LoadContent()
 		{
@@ -98,11 +65,27 @@ namespace Game1.Items
 		// TODO: This is just a temp crap method so I don't pollute the main code with temp code....
 		public static InventoryItem GetItem(int? index = null)
 		{
-			int val = index ?? GameRandom.Next(0, _items.Count - 1);
+			var items = _allItems;
+
+			int val = index ?? GameRandom.Next(0, items.Count - 1);
 			return new InventoryItem(
-				_items[val],
-				new ImageTexture(_textures[_items[val].IconName], true) { Alignment = ImageAlignment.Centered },
-				GameRandom.Next(1, _items[val].MaxStackSize));
+				items[val],
+				new ImageTexture(_textures[items[val].IconName], true) { Alignment = ImageAlignment.Centered },
+				GameRandom.Next(1, items[val].MaxStackSize));
+		}
+
+		public static InventoryItem GetItem(string id, int quantity)
+		{
+			var items = _allItems;
+
+			// TODO: For now, we're just using the IconName as the id lookup, but we have an actual id field (maybe should change to string)...
+			var item = items.SingleOrDefault(i => i.IconName == id);
+			if (item == null)
+				throw new ArgumentException($"No item found with id '{id}'");
+			if (quantity > item.MaxStackSize)
+				throw new ArgumentException($"Invalid quantity '{quantity}' requested for item '{id}' (max: {item.MaxStackSize})");
+
+			return new InventoryItem(item, new ImageTexture(_textures[item.IconName], true) { Alignment = ImageAlignment.Centered }, quantity);
 		}
 
 		public static InventoryItem FromItem(InventoryItem item, int? quantity, bool removeItemQuantity = true)

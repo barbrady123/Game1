@@ -10,17 +10,20 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Game1.Effect;
 using Game1.Enum;
+using Game1.Maps;
 
 namespace Game1
 {
 	/// <summary>
 	/// Manages various metadata for the game in general...
+	/// TODO: This is already too much scope..we'll need to break these out...
 	/// </summary>
 	public static class MetaManager
 	{
 		private static readonly ContentManager _content;
 		private static Dictionary<string, Texture2D> _statusTextures;
 		private static Dictionary<string, Texture2D> _interactiveTextures;
+		private static Dictionary<string, Texture2D> _transitionTextures;
 
 		private static readonly Dictionary<CharacterInstantEffect, InstantEffect> _instants;
 		private static readonly Dictionary<CharacterBuffEffect, BuffEffect> _buffs;
@@ -30,11 +33,14 @@ namespace Game1
 
 		private static readonly Dictionary<string, Texture2D> _spriteSheets;
 
+		private static readonly Dictionary<TransitionType, Transition> _transitions;
+
 		static MetaManager()
 		{
 			_content = new ContentManager(Game1.ServiceProvider, Game1.ContentRoot);
 			_statusTextures = new Dictionary<string, Texture2D>();
 			_interactiveTextures = new Dictionary<string, Texture2D>();
+			_transitionTextures = new Dictionary<string, Texture2D>();
 
 			_instants = new Dictionary<CharacterInstantEffect, InstantEffect>();
 			_buffs = new Dictionary<CharacterBuffEffect, BuffEffect>();
@@ -43,6 +49,7 @@ namespace Game1
 			_interactives = new List<Interactive>();
 
 			_spriteSheets = new Dictionary<string, Texture2D>();
+			_transitions = new Dictionary<TransitionType, Transition>();
 		}
 
 		public static void LoadContent()
@@ -63,6 +70,12 @@ namespace Game1
 			{
 				string fileName = Path.GetFileNameWithoutExtension(file);
 				_spriteSheets[fileName] = _content.Load<Texture2D>(Path.Combine(Game1.SpriteSheetRoot, fileName));
+			}
+
+			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(Game1.ContentRoot, Game1.TransitionRoot)))
+			{
+				string fileName = Path.GetFileNameWithoutExtension(file);
+				_transitionTextures[fileName] = _content.Load<Texture2D>(Path.Combine(Game1.TransitionRoot, fileName));
 			}
 
 			// TEMP: This should come from file, etc...
@@ -135,6 +148,9 @@ namespace Game1
 				IsSolid = true,
 				Size = new Size(32, 32)
 			});
+
+			_transitions.Add(TransitionType.StairsDown, new Transition { DisplayName = "Stairs Down", IconName = "stairs_down" });
+			_transitions.Add(TransitionType.StairsUp, new Transition { DisplayName = "Stairs Up", IconName = "stairs_up" });
 		}
 
 		public static void UnloadContent()
@@ -194,10 +210,13 @@ namespace Game1
 		}
 
 		// Another temp test method...
-		public static WorldInteractive GetInteractve(Vector2 position)
+		public static WorldInteractive GetInteractve(string id, Vector2 position)
 		{
-			var i = _interactives.First();
-			return new WorldInteractive(i, new ImageTexture(_interactiveTextures[i.IconName], true) { Alignment = ImageAlignment.Centered }, position);
+			// TODO: For now, we're just using the IconName as the id lookup, but we have an actual id field (maybe should change to string)...
+			var interactive = _interactives.SingleOrDefault(i => i.IconName == id);
+			if (interactive == null)
+				throw new ArgumentException($"No interactive found with id '{id}'");
+			return new WorldInteractive(interactive, new ImageTexture(_interactiveTextures[interactive.IconName], true) { Alignment = ImageAlignment.Centered }, position);
 		}
 
 		public static ImageSpriteSheet GetSpriteSheet(string name)
@@ -205,6 +224,20 @@ namespace Game1
 			var img = new ImageSpriteSheet(_spriteSheets[name], true);
 			img.AddEffect<SpriteSheetEffect>(false);
 			return img;
+		}
+
+		public static WorldTransition GetTransition(MapTransition transition)
+		{
+			if (!_transitions.ContainsKey(transition.Type))
+				throw new ArgumentException($"No transition found for type '{transition.Type}'");
+
+			return new WorldTransition(
+				_transitions[transition.Type],
+				transition.Position.ToVector2(),
+				new ImageTexture(_transitionTextures[_transitions[transition.Type].IconName], true) { Alignment = ImageAlignment.Centered },
+				transition.DestinationMap,
+				transition.DestinationPosition
+			);
 		}
 	}
 }
