@@ -34,7 +34,6 @@ namespace Game1
 
 		public List<Character> AllCharacters => new List<Character>((this.NPCs?.Count ?? 0) + 1) { this.Character }.Concat(this.NPCs).ToList();
 
-
 		public event EventHandler<ComponentEventArgs> OnItemsChange;
 		// This should probably be a more generalized event for character events...
 		public event EventHandler<ComponentEventArgs> OnCharacterDied;
@@ -50,46 +49,23 @@ namespace Game1
 		{
 			this.Character = IOManager.ObjectFromFile<Character>(Game1.PlayerFile);
 			this.Character.OnDied += Character_OnDied;
-
-			// TEMP: If we want 'default' stuff for the player it should be set with the character create stuff...
-			this.Character.HotBar.AddItem(ItemManager.GetItem(10));
-			this.Character.HotBar.AddItem(ItemManager.GetItem());
-			this.Character.HotBar.AddItem(ItemManager.GetItem());
-			this.Character.HotBar.AddItem(ItemManager.GetItem());
-			this.Character.HotBar.AddItem(ItemManager.GetItem(6));
-			for (int i = 0; i < 15; i++)
-				this.Character.Backpack.AddItem(ItemManager.GetItem((i < 11) ? i : (int?)null));
-			// END TEMP...
-
-			this.CurrentMap = IOManager.ObjectFromFile<Map>(Path.Combine(Game1.MapRoot, this.Character.Location));
-			this.CurrentMap.Initialize();
-			LoadDataFromCurrentMap();
-
-			foreach (var npc in this.NPCs)
-				npc.OnDied += Npc_OnDied;
+			ChangeMap(this.Character.Location, this.Character.Position.ToPoint());
 		}
 
 		public void ChangeMap(string mapName, Point playerPosition)
 		{
-			// Needs to save state of current map first...(or a game version of it without meta)...
+			if (this.CurrentMap != null)
+			{
+				// TODO: Save map with current data, timestamp it, etc...
+			}
+
 			this.CurrentMap = IOManager.ObjectFromFile<Map>(Path.Combine(Game1.MapRoot, mapName));
 			this.CurrentMap.Initialize();
 			LoadDataFromCurrentMap();
-			foreach (var npc in this.NPCs)
-				npc.OnDied += Npc_OnDied;
+
 			this.Character.Location = mapName;
 			this.Character.PreviousPosition = Vector2.Zero;
 			this.Character.Position = playerPosition.ToVector2();
-			// That really all we need?? 			
-			foreach (var npc in this.NPCs)
-				npc.LoadContent();
-		}
-
-		public override void LoadContent()
-		{
-			this.Character.LoadContent();
-			foreach (var npc in this.NPCs)
-				npc.LoadContent();
 		}
 
 		public void Update(GameTime gameTime, bool mouseInWorld)
@@ -173,8 +149,12 @@ namespace Game1
 			OnCharacterDied?.Invoke(this, e);
 		}
 
+		public object[,] MapObjects { get; set; }
+
 		private void LoadDataFromCurrentMap()
-		{
+		{			
+			this.MapObjects = new object[1,2];
+
 			this.Items = new List<WorldItem>();
 			foreach (var item in this.CurrentMap.Items)
 				this.Items.Add(new WorldItem { Pickup = true, Item = ItemManager.GetItem(item.Id, item.Quantity), Position = item.Position.ToVector2() });
@@ -190,7 +170,11 @@ namespace Game1
 			this.NPCs = new List<NPC>();
 			// TODO: Need Metadata for NPCs...
 			foreach (var npc in this.CurrentMap.NPCs)
-				this.NPCs.Add(new NPC { Name = npc.Id, Sex = CharacterSex.Male, Position = npc.Position.ToVector2(), MaxHP = 10, CurrentHP = 10 });
+			{
+				var worldNPC = new NPC(npc.Id, CharacterSex.Male, npc.Position.ToVector2(), 10, 10);
+				worldNPC.OnDied += Npc_OnDied;
+				this.NPCs.Add(worldNPC);
+			}
 
 			this.Transitions = new List<WorldTransition>();
 			foreach (var transition in this.CurrentMap.Transitions)

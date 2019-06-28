@@ -40,6 +40,8 @@ namespace Game1
 		private Dictionary<Layer, ImageTexture> _tileSheets;
 		private Dictionary<Layer, ImageTexture> _staticMaps;
 		private Vector2 _renderOffset;
+
+		public Vector2 RenderOffset => _renderOffset;
 		
 		public GamePlayCamera(World world, Rectangle gameViewArea, SpriteBatchData spriteBatchData)
 		{

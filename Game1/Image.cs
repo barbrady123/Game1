@@ -30,6 +30,7 @@ namespace Game1
 		public Color Color { get; set; }
 		public int Index { get; set; }
 		public float Rotation { get; set; }
+		public bool Highlight { get; set; }
 
 		public Vector2 OriginOffset { get; set; }
 

@@ -221,7 +221,7 @@ namespace Game1
 
 		public static ImageSpriteSheet GetSpriteSheet(string name)
 		{
-			var img = new ImageSpriteSheet(_spriteSheets[name], true);
+			var img = new ImageSpriteSheet(_spriteSheets[name.ToLower()], true);
 			img.AddEffect<SpriteSheetEffect>(false);
 			return img;
 		}

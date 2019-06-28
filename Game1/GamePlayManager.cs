@@ -191,10 +191,25 @@ namespace Game1
 					}
 			}
 
-			if (InputManager.LeftMouseClick(_gameViewArea))
+			if (InputManager.MouseOver(_gameViewArea))
 			{
-				if (_world.Character.IsItemHeld)
-					_world.AddItem(_world.Character.DropHeld(), pickup: false);
+				var mousePosition = InputManager.MousePosition.Offset(-(int)_camera.RenderOffset.X, -(int)_camera.RenderOffset.Y);
+				// Need to see if it's over anything that should be highlighted...
+				// We really need to start making determinations of what is "on screen"...
+				// First so we can stop drawing shit way off the viewport, but second...
+				// So when we need these scans, it's less crap do loop through...
+				// For now, going to very inefficiently loop through these, since
+				// we don't currently maintain a graph of where objects are in the space
+				// (I'm not 100% fully sure how to implement a Quadtree yet...but at the very
+				// least we can build a 2d array that objects can 'belong to' for culling, etc...
+				foreach (var interactive in _world.Interactives)
+					interactive.Icon.Highlight = interactive.Bounds.Contains(mousePosition);
+
+				if (InputManager.LeftMouseClick())
+				{
+					if (_world.Character.IsItemHeld)
+						_world.AddItem(_world.Character.DropHeld(), pickup: false);
+				}
 			}
 
 			base.UpdateInput(gameTime);

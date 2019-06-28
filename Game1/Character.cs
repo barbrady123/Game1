@@ -16,6 +16,7 @@ namespace Game1
 	// Either we need a new base class, or this should be the base and some of this crap needs to be moved into a child class....
 	public class Character
 	{		
+		protected readonly object _lock = new object();
 		private Vector2 _position;
 		private ImageSpriteSheet _spriteSheet;
 		private ItemContainer _hotbar;
@@ -87,7 +88,7 @@ namespace Game1
 			{ 
 				_currentHP = Util.Clamp(value, 0, this.MaxHP);
 				if (_currentHP == 0)
-					OnDied?.Invoke(this, null);
+					_onDied?.Invoke(this, null);
 			}
 		}
 
@@ -102,13 +103,7 @@ namespace Game1
 
 		public ItemContainer HotBar => _hotbar;
 		public ItemContainer Backpack => _backpack;
-
-		// World entities probably shouldn't use ComponentEventArgs...
-		public event EventHandler<ComponentEventArgs> OnHeldItemChanged;
-		public event EventHandler<ComponentEventArgs> OnActiveItemChanged;
-		public event EventHandler<ComponentEventArgs> OnDied;
-		public event EventHandler<ComponentEventArgs> OnGotExternalItem;
-		
+	
 		public InventoryItem HeldItem
 		{ 
 			get { return _heldItem; }
@@ -117,7 +112,7 @@ namespace Game1
 				if (_heldItem != value)
 				{
 					_heldItem = value;
-					OnHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = _heldItem });
+					_onHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = _heldItem });
 				}
 			}
 		}
@@ -131,7 +126,9 @@ namespace Game1
 				{
 					// We're making a copy here so effects can be applied to the in-game image without affecting the inventory image...
 					_activeItem = ItemManager.CopyItem(value);
-					OnActiveItemChanged?.Invoke(this, new ComponentEventArgs { Meta = _activeItem });
+					_onActiveItemChanged?.Invoke(this, new ComponentEventArgs { Meta = _activeItem });
+					_activeItemMoving = false;
+					_activeItemUsed = false;
 				}
 			}
 		}
@@ -176,7 +173,7 @@ namespace Game1
 			}
 		}
 
-		public Character()
+		public Character(string spriteSheetName)
 		{
 			this.Direction = Cardinal.South;
 			_movementSpeed = 150.0f;
@@ -186,12 +183,7 @@ namespace Game1
 			this.Buffs = new List<CharacterStatus<BuffEffect>>();
 			this.Debuffs = new List<CharacterStatus<DebuffEffect>>();
 			this.PreviousPosition = -Vector2.One;
-		}
-
-		public void LoadContent()
-		{
-			_spriteSheet = MetaManager.GetSpriteSheet(this.SpriteSheetName);
-			_spriteSheet.LoadContent();
+			_spriteSheet = MetaManager.GetSpriteSheet(spriteSheetName);
 		}
 
 		public virtual Vector2 UpdateMotion()
@@ -220,7 +212,6 @@ namespace Game1
 			{
 				motion.Normalize();
 				motion *= (this.MovementSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
-				// TODO: Re-evaluate this...seems like it restarts the same effect each frame...
 				_spriteSheet.AddEffect<SpriteSheetEffect>(true);
 			}
 			else
@@ -268,17 +259,13 @@ namespace Game1
 			if ((this.Direction == Cardinal.North) || (this.Direction == Cardinal.West))
 			{
 				var effect = this.ActiveItem.Icon.AddEffect<UseItemWestEffect>(true);
-				effect.OnFullyExtended -= Effect_OnFullyExtended;
 				effect.OnFullyExtended += Effect_OnFullyExtended;
-				effect.OnActiveChange -= Effect_OnActiveChange;
 				effect.OnActiveChange += Effect_OnActiveChange;
 			}
 			else
 			{
 				var effect = this.ActiveItem.Icon.AddEffect<UseItemEastEffect>(true);
-				effect.OnFullyExtended -= Effect_OnFullyExtended;
 				effect.OnFullyExtended += Effect_OnFullyExtended;
-				effect.OnActiveChange -= Effect_OnActiveChange;
 				effect.OnActiveChange += Effect_OnActiveChange;
 			}
 		}
@@ -343,7 +330,7 @@ namespace Game1
 				index = _backpack.AddItem(item);
 
 			if ((index != null) && fromExternal)
-				OnGotExternalItem?.Invoke(this, new ComponentEventArgs { Meta = ItemManager.CopyItem(item, originalQuantity) });
+				_onGotExternalItem?.Invoke(this, new ComponentEventArgs { Meta = ItemManager.CopyItem(item, originalQuantity) });
 
 			return index != null;
 		}
@@ -358,7 +345,7 @@ namespace Game1
 				// If, due to SwapItem(), only the non-null HeldItem quantity changes, the mouse cursor update won't trigger
 				// automatically (because technically this.HeldItem didn't "change")...so we call it manually
 				// here if it's the same item as before but the quantity has changed (due to an item merge with leftover)...
-				OnHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = this.HeldItem });
+				_onHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = this.HeldItem });
 		}
 
 		public bool StoreHeld()
@@ -393,7 +380,7 @@ namespace Game1
 					// If there's a held item that is the same as what you're picing up, and there's enough room to hold the requested quantity, combine them...
 					this.HeldItem.Quantity += trueQuantity;
 					// See comment above regarding this event firing...
-					OnHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = this.HeldItem });
+					_onHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = this.HeldItem });
 					container.RemoveItem(index);
 					return true;
 				}
@@ -411,7 +398,7 @@ namespace Game1
 				// If there's a held item that is the same as what you're picing up, and there's enough room to hold the requested quantity, combine them...
 				this.HeldItem.Quantity += trueQuantity;
 				// See comment above regarding this event firing...
-				OnHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = this.HeldItem });
+				_onHeldItemChanged?.Invoke(this, new ComponentEventArgs { Meta = this.HeldItem });
 				item.Quantity -= trueQuantity;
 				return true;
 			}
@@ -524,5 +511,56 @@ namespace Game1
 			if (container[index].Quantity <= 0)
 				container.Items[index] = null;
 		}
+
+		public static Character New(string name, CharacterSex sex)
+		{
+			return new Character(sex.ToString("g"))	{
+				Name = name,
+				Sex = sex,
+				Location = "map",
+				Position = new Vector2(Game1.PlayerStartLocation.X, Game1.PlayerStartLocation.Y),
+				Strength = GameRandom.Next(10, 20),
+				Dexterity = GameRandom.Next(10, 20),
+				Intelligence = GameRandom.Next(10, 20),
+				Wisdom = GameRandom.Next(10, 20),
+				Charisma = GameRandom.Next(10, 20),
+				Constitution = GameRandom.Next(10, 20),
+				MaxHP = GameRandom.Next(30, 50),
+				CurrentHP = GameRandom.Next(20, 30),
+				MaxMana = GameRandom.Next(30, 50),
+				CurrentMana = GameRandom.Next(20, 30)
+			};
+		}
+
+		#region Events
+		// World entities probably shouldn't use ComponentEventArgs...
+		private event EventHandler<ComponentEventArgs> _onHeldItemChanged;
+		public event EventHandler<ComponentEventArgs> OnHeldItemChanged
+		{
+			add		{ lock(_lock) { _onHeldItemChanged -= value; _onHeldItemChanged += value; } }
+			remove	{ lock(_lock) { _onHeldItemChanged -= value; } }
+		}
+
+		private event EventHandler<ComponentEventArgs> _onActiveItemChanged;
+		public event EventHandler<ComponentEventArgs> OnActiveItemChanged
+		{
+			add		{ lock(_lock) { _onActiveItemChanged -= value; _onActiveItemChanged += value; } }
+			remove	{ lock(_lock) { _onActiveItemChanged -= value; } }
+		}
+
+		private event EventHandler<ComponentEventArgs> _onDied;
+		public event EventHandler<ComponentEventArgs> OnDied
+		{
+			add		{ lock(_lock) { _onDied -= value; _onDied += value; } }
+			remove	{ lock(_lock) { _onDied -= value; } }
+		}
+
+		private event EventHandler<ComponentEventArgs> _onGotExternalItem;
+		public event EventHandler<ComponentEventArgs> OnGotExternalItem
+		{
+			add		{ lock(_lock) { _onGotExternalItem -= value; _onGotExternalItem += value; } }
+			remove	{ lock(_lock) { _onGotExternalItem -= value; } }
+		}
+		#endregion
 	}
 }

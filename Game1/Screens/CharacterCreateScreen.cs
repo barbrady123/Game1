@@ -20,7 +20,7 @@ namespace Game1.Screens
 	/// </summary>
 	public class CharacterCreateScreen : Component
 	{
-		private Character _newChar;
+		public const CharacterSex DefaultSex = CharacterSex.Female;
 		private Vector2 _characterViewPosition = new Vector2(450.0f, 400.0f);
 		private readonly Dialog _dialog;
 
@@ -33,8 +33,6 @@ namespace Game1.Screens
 
 		public CharacterCreateScreen(Rectangle bounds): base(bounds, background: "brick")
 		{
-			_newChar = new Character();
-
 			// Title...
 			_titleText = new ImageText("Create New Character", true)	{
 				Scale = new Vector2(1.5f, 1.5f),
@@ -47,14 +45,14 @@ namespace Game1.Screens
 				Scale = new Vector2(320.0f, 320.0f),
 				Position = _characterViewPosition
 			};
-			_characterView = new ImageTexture(this.CharacterPreviewImage(_newChar.Sex), true)	{
+			_characterView = new ImageTexture(this.CharacterPreviewImage(DefaultSex), true)	{
 				Alignment = ImageAlignment.Centered,
 				Scale = new Vector2(5.0f, 5.0f),
 				Position = _characterViewPosition
 			};
 
 			// Menu
-			_activator.Register(_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200)), true, "active");
+			_activator.Register(_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200)) { CharacterName = "", CharacterSex = DefaultSex }, true, "active");
 			_menuCharacter.OnSexItemChange += _menuCharacter_OnSexItemChange;
 			_menuCharacter.OnReadyDisable += _menuCharacter_OnReadyDisable;
 			_menuCharacter.OnUserNotify += _menuCharacter_OnUserNotify;
@@ -121,23 +119,9 @@ namespace Game1.Screens
 			switch (e.Value)
 			{
 				case "startgame" :
-					_newChar.Name = _menuCharacter.CharacterName;
-					_newChar.Sex = _menuCharacter.CharacterSex;
-					_newChar.Position = new Vector2(Game1.PlayerStartLocation.X, Game1.PlayerStartLocation.Y);
-					// Temp population...
-					_newChar.Strength = GameRandom.Next(10, 20);
-					_newChar.Dexterity = GameRandom.Next(10, 20);
-					_newChar.Intelligence = GameRandom.Next(10, 20);
-					_newChar.Wisdom = GameRandom.Next(10, 20);
-					_newChar.Charisma = GameRandom.Next(10, 20);
-					_newChar.Constitution = GameRandom.Next(10, 20);
-					_newChar.MaxHP = GameRandom.Next(30, 50);
-					_newChar.CurrentHP = 1;	//this.Character.MaxHP / 2;
-					_newChar.MaxMana = GameRandom.Next(30, 50);
-					_newChar.CurrentMana = _newChar.MaxMana;
-					_newChar.Location = "map";
+					var newChar = Character.New(_menuCharacter.CharacterName, _menuCharacter.CharacterSex);
 					// TODO: Needs to store in it's own directory...based on a Guid/some other ID...
-					IOManager.ObjectToFile(Game1.PlayerFile, _newChar);
+					IOManager.ObjectToFile(Game1.PlayerFile, newChar);
 					e.Meta = Guid.NewGuid().ToString();	// meaningless for now...
 					// TODO: Eventually we need to handle some kind of identifier of this new player to the parent, when we have multiple player/world files...
 					ReadyDisable(e);

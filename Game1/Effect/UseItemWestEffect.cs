@@ -19,7 +19,12 @@ namespace Game1.Effect
 			Initialize();
 		}
 
-		public event EventHandler OnFullyExtended;
+		private event EventHandler _onFullyExtended;
+		public event EventHandler OnFullyExtended
+		{
+			add		{ lock(_lock) { _onFullyExtended -= value; _onFullyExtended += value; } }
+			remove	{ lock(_lock) { _onFullyExtended -= value; } }
+		}
 
 		protected override void Initialize()
 		{
@@ -47,7 +52,7 @@ namespace Game1.Effect
 					{
 						_image.Rotation = _maxRotation;
 						_movingForward = false;
-						OnFullyExtended?.Invoke(this, null);
+						_onFullyExtended?.Invoke(this, null);
 					}
 				}
 				else

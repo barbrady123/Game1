@@ -78,35 +78,99 @@
 	"items": [
 		{
 			"id" : "heart",
-			"quantity": 25,
+			"quantity": 99,
 			"position": {
-				"X": 512,
-				"Y": 512
+				"X": 256,
+				"Y": 256
 			}
 		},
 		{
-			"id" : "heart",
-			"quantity": 15,
+			"id" : "gemRed",
+			"quantity": 99,
 			"position": {
-				"X": 512,
-				"Y": 1000
+				"X": 257,
+				"Y": 256
+			}
+		},
+		{
+			"id" : "potionRed",
+			"quantity": 99,
+			"position": {
+				"X": 258,
+				"Y": 256
+			}
+		},
+		{
+			"id" : "potionGreen",
+			"quantity": 99,
+			"position": {
+				"X": 259,
+				"Y": 256
+			}
+		},
+		{
+			"id" : "potionBlue",
+			"quantity": 99,
+			"position": {
+				"X": 260,
+				"Y": 256
+			}
+		},
+		{
+			"id" : "scroll",
+			"quantity": 99,
+			"position": {
+				"X": 261,
+				"Y": 256
+			}
+		},
+		{
+			"id" : "helmet",
+			"quantity": 1,
+			"position": {
+				"X": 262,
+				"Y": 256
+			}
+		},
+		{
+			"id" : "armor",
+			"quantity": 1,
+			"position": {
+				"X": 263,
+				"Y": 256
+			}
+		},
+		{
+			"id" : "upg_armor",
+			"quantity": 1,
+			"position": {
+				"X": 264,
+				"Y": 256
+			}
+		},
+		{
+			"id" : "sword",
+			"quantity": 1,
+			"position": {
+				"X": 265,
+				"Y": 256
 			}
 		},
 		{
 			"id" : "axe",
 			"quantity": 1,
 			"position": {
-				"X": 1000,
-				"Y": 1000
+				"X": 266,
+				"Y": 256
 			}
-		}
+		},
 	],
 	"interactives": [
 		{
 			"id": "rock",
 			"position": {
-				"X": 600,
-				"Y": 600
+				"X": 256,
+				"Y": 448
 			}
 		},
 		{
@@ -158,8 +222,8 @@
 			},
 			"destination": "map2",
 			"destinationposition" : {
-				"X" : 1056,
-				"Y" : 1056
+				"X" : 352,
+				"Y" : 352
 			}
 		}
 	]

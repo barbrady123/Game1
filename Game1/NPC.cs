@@ -13,9 +13,14 @@ namespace Game1
 		private const int SameDirectionBias = 99;
 		private const int ContinueStopBias = 96;
 
-		public NPC() : base()
+		public NPC(string name, CharacterSex sex, Vector2 position, int maxHP, int currentHP) : base(sex.ToString("g"))
 		{
 			_movementSpeed = 75.0f;
+			this.Name = name;
+			this.Sex = sex;
+			this.Position = position;
+			this.MaxHP = maxHP;
+			this.CurrentHP = currentHP;
 		}
 
 		public override Vector2 UpdateMotion()

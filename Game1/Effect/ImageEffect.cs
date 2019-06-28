@@ -11,6 +11,7 @@ namespace Game1.Effect
 {
 	public abstract class ImageEffect
 	{
+		protected readonly object _lock = new object();
 		protected Image _image;
 		private bool _isActive;
 
@@ -33,13 +34,6 @@ namespace Game1.Effect
 		}
 
 		protected virtual void ResetImage() { }
-
-		protected virtual void ActiveChange(bool isActive)
-		{
-			OnActiveChange?.Invoke(this, new EffectEventArgs { IsActive = isActive });
-		}
-
-		public event EventHandler OnActiveChange;
 
 		public Image Image
 		{
@@ -79,5 +73,19 @@ namespace Game1.Effect
 		}
 
 		protected virtual void Initialize() { }
+
+		#region Events
+		protected virtual void ActiveChange(bool isActive)
+		{
+			_onActiveChange?.Invoke(this, new EffectEventArgs { IsActive = isActive });
+		}
+
+		private event EventHandler _onActiveChange;
+		public event EventHandler OnActiveChange
+		{
+			add		{ lock(_lock) { _onActiveChange -= value; _onActiveChange += value; } }
+			remove	{ lock(_lock) { _onActiveChange -= value; } }
+		}
+		#endregion
 	}
 }

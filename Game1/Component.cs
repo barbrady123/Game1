@@ -18,6 +18,7 @@ namespace Game1
 {
 	public abstract class Component : IActivatable, ISupportsTooltip, ISupportsContextMenu
 	{
+		protected readonly object _lock = new object();
 		private readonly SpriteBatchData _spriteBatchData;
 		private bool _isActive;
 		protected ActivationManager _activator;
@@ -87,13 +88,6 @@ namespace Game1
 				_border.SourceRect = this.Bounds.MoveTo(0, 0);
 			}
 		}
-
-		public event EventHandler<ComponentEventArgs> OnReadyDisable;
-		public event EventHandler<ComponentEventArgs> OnMouseOver;
-		public event EventHandler<ComponentEventArgs> OnMouseIn;
-		public event EventHandler<ComponentEventArgs> OnMouseOut;
-		public event EventHandler<ComponentEventArgs> OnMouseLeftClick;
-		public event EventHandler<ComponentEventArgs> OnMouseRightClick;
 
 		protected bool _mouseover;
 		protected virtual Size ContentMargin => new Size(20, 20);
@@ -260,18 +254,6 @@ namespace Game1
 			_delayInputCycles = Math.Max(0, delayCycles);
 		}
 
-		protected virtual void ReadyDisable(ComponentEventArgs e) => OnReadyDisable?.Invoke(this, e);
-
-		protected virtual void MouseOver(ComponentEventArgs e) => OnMouseOver?.Invoke(this, e);
-
-		protected virtual void MouseIn(ComponentEventArgs e) => OnMouseIn?.Invoke(this, e);
-
-		protected virtual void MouseOut(ComponentEventArgs e) => OnMouseOut?.Invoke(this, e);
-
-		protected virtual void MouseLeftClick(ComponentEventArgs e) => OnMouseLeftClick?.Invoke(this, e);
-
-		protected virtual void MouseRightClick(ComponentEventArgs e) => OnMouseRightClick?.Invoke(this, e);
-
 		protected void SetupBorder()
 		{
 			if (_hasBorder && (this.Bounds != Rectangle.Empty))
@@ -310,5 +292,58 @@ namespace Game1
 		{
 			// Another place where it would be nice to just say "turn this off" and the activation manager would know what should be enabled (previous)...
 		}
+
+		#region Events
+		protected virtual void ReadyDisable(ComponentEventArgs e) => _onReadyDisable?.Invoke(this, e);
+		private event EventHandler<ComponentEventArgs> _onReadyDisable;
+		public event EventHandler<ComponentEventArgs> OnReadyDisable
+		{
+			add		{ lock(_lock) { _onReadyDisable -= value; _onReadyDisable += value; } }
+			remove	{ lock(_lock) { _onReadyDisable -= value; } }
+		}
+
+		protected virtual void MouseOver(ComponentEventArgs e) => _onMouseOver?.Invoke(this, e);
+		private event EventHandler<ComponentEventArgs> _onMouseOver;
+		public event EventHandler<ComponentEventArgs> OnMouseOver
+		{
+			add		{ lock(_lock) { _onMouseOver -= value; _onMouseOver += value; } }
+			remove	{ lock(_lock) { _onMouseOver -= value; } }
+		}
+
+
+		protected virtual void MouseIn(ComponentEventArgs e) => _onMouseIn?.Invoke(this, e);
+		private event EventHandler<ComponentEventArgs> _onMouseIn;
+		public event EventHandler<ComponentEventArgs> OnMouseIn
+		{
+			add		{ lock(_lock) { _onMouseIn -= value; _onMouseIn += value; } }
+			remove	{ lock(_lock) { _onMouseIn -= value; } }
+		}
+
+
+		protected virtual void MouseOut(ComponentEventArgs e) => _onMouseOut?.Invoke(this, e);
+		private event EventHandler<ComponentEventArgs> _onMouseOut;
+		public event EventHandler<ComponentEventArgs> OnMouseOut
+		{
+			add		{ lock(_lock) { _onMouseOut -= value; _onMouseOut += value; } }
+			remove	{ lock(_lock) { _onMouseOut -= value; } }
+		}
+
+
+		protected virtual void MouseLeftClick(ComponentEventArgs e) => _onMouseLeftClick?.Invoke(this, e);
+		private event EventHandler<ComponentEventArgs> _onMouseLeftClick;
+		public event EventHandler<ComponentEventArgs> OnMouseLeftClick
+		{
+			add		{ lock(_lock) { _onMouseLeftClick -= value; _onMouseLeftClick += value; } }
+			remove	{ lock(_lock) { _onMouseLeftClick -= value; } }
+		}
+
+		protected virtual void MouseRightClick(ComponentEventArgs e) => _onMouseRightClick?.Invoke(this, e);
+		private event EventHandler<ComponentEventArgs> _onMouseRightClick;
+		public event EventHandler<ComponentEventArgs> OnMouseRightClick
+		{
+			add		{ lock(_lock) { _onMouseRightClick -= value; _onMouseRightClick += value; } }
+			remove	{ lock(_lock) { _onMouseRightClick -= value; } }
+		}
+		#endregion
 	}
 }

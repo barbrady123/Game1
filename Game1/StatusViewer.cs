@@ -67,7 +67,6 @@ namespace Game1
 
 			foreach (var expired in expiredStatuses)
 			{
-				_statusViews[expired].OnMouseOver -= StatusViewer_OnMouseOver;
 				_tooltip.HideIfOwner(_statusViews[expired]);
 				_statusViews.Remove(expired);
 			}
