@@ -12,7 +12,7 @@ using Game1.Items;
 
 namespace Game1
 {
-	public class WorldItem
+	public class WorldItem : IWorldEntity
 	{
 		private bool _inRange;
 
@@ -34,14 +34,28 @@ namespace Game1
 
 		public Vector2 Position { get; set; }
 
-		public WorldItem()
+		public Rectangle Bounds { get; set; }
+
+		public bool IsSolid => false;
+
+		public WorldItem(InventoryItem item, Vector2 position, bool pickup)
 		{
 			_inRange = false;
+			this.Item = item;
+			this.Item.Icon.Scale = GamePlayCamera.MapItemScale;
+			this.Position = position;
+			this.Bounds = position.ToUnitRectangle();
+			this.Pickup = pickup;
 		}
 
 		public void Update(GameTime gameTime)
 		{
 			this.Item?.Update(gameTime);
+		}
+
+		public void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
+		{
+			this.Item.Icon.Draw(spriteBatch, position: this.Position + cameraOffset);
 		}
 	}
 }

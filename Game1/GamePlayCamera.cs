@@ -19,6 +19,11 @@ namespace Game1
 		public static readonly Vector2 ActiveItemScale = new Vector2(0.7f, 0.7f);
 		public static readonly Vector2 MapItemScale = new Vector2(0.7f, 0.7f);
 		private const float OverLayerAlpha = 0.7f;
+		private int _visibleCellStartX;
+		private int _visibleCellStartY;
+		private int _visibleCellEndX;
+		private int _visibleCellEndY;
+
 		public static readonly Dictionary<Cardinal, Vector2> ActiveItemOffsets = new Dictionary<Cardinal, Vector2>
 		{
 			{ Cardinal.North, new Vector2(10, 10) },
@@ -99,8 +104,17 @@ namespace Game1
 				npc.Draw(spriteBatch, _renderOffset);
 
 			// Items on ground...
-			foreach (var item in _world.Items)
-				item.Item.Icon.Draw(spriteBatch, position: item.Position + _renderOffset, scale: GamePlayCamera.MapItemScale);
+			int itemsDrawn = 0;
+			// Testing just items, probably could just dump everything out in this loop...
+			foreach (var item in _world.MapObjects.GetEntities(_visibleCellStartX, _visibleCellStartY, _visibleCellEndX, _visibleCellEndY).OfType<WorldItem>())
+			//foreach (var item in _world.Items)
+			{
+				// interactives and other IWorldEntity objects need a draw...
+				item.Draw(spriteBatch, _renderOffset);
+				itemsDrawn++;
+			}
+
+			Console.Out.WriteLine($"items:{itemsDrawn}");
 
 			// Interactive objects...
 			foreach (var interactive in _world.Interactives)
@@ -195,6 +209,11 @@ namespace Game1
 				staticMap.SourceRect = visibleSourceRect;
 
 			_renderOffset = new Vector2(-sourceX + _gameViewArea.X, -sourceY + _gameViewArea.Y);
+
+			_visibleCellStartX = sourceX / Game1.TileSize;
+			_visibleCellStartY = sourceY / Game1.TileSize;
+			_visibleCellEndX = (sourceX + _gameViewArea.Width) / Game1.TileSize;
+			_visibleCellEndY = (sourceY + _gameViewArea.Height) / Game1.TileSize;
 		}
 	}
 }

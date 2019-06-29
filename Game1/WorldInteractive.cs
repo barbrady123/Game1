@@ -12,7 +12,7 @@ using Game1.Items;
 
 namespace Game1
 {
-	public class WorldInteractive
+	public class WorldInteractive : IWorldEntity
 	{
 		private int? _health;
 
@@ -23,6 +23,8 @@ namespace Game1
 		public Vector2 Position { get; set; }
 
 		public Rectangle Bounds { get; set; }
+
+		public bool IsSolid => this.Interactive.IsSolid;
 
 		public event EventHandler OnDestroyed;
 

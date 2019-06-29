@@ -22,5 +22,10 @@ namespace Game1
 		{
 			return new Rectangle((int)point.X, (int)point.Y, expansionX, expansionY);
 		}
+
+		public static Point DivideBy(this Point point, int scale)
+		{
+			return new Point(point.X / scale, point.Y / scale);
+		}
 	}
 }

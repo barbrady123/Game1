@@ -12,11 +12,15 @@ using Game1.Items;
 
 namespace Game1
 {
-	public class WorldTransition
+	public class WorldTransition : IWorldEntity
 	{
 		public Transition Transition { get; set; }
 
 		public Vector2 Position { get; set; }
+
+		public Rectangle Bounds { get; set; }
+
+		public bool IsSolid => false;
 
 		public ImageTexture Icon { get; set; }
 
@@ -28,6 +32,7 @@ namespace Game1
 		{
 			this.Transition = transition;
 			this.Position = position;
+			this.Bounds = position.ExpandToRectangleCentered(Game1.TileHalfSize, Game1.TileHalfSize);
 			this.Icon = icon;
 			this.Icon.LoadContent();
 			this.DestinationMap = destinationMap;

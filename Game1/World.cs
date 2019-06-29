@@ -91,6 +91,8 @@ namespace Game1
 			// I'm not 100% sure where i even want this to live yet or what entity's responsibility this should be
 			List<WorldItem> removedItems = new List<WorldItem>();
 
+			// TODO: Need to optimize this to use the new mapObjects....
+
 			foreach (var item in this.Items)
 			{
 				item.InRange = Vector2.Distance(item.Position, this.Character.Position) <= Game1.DefaultPickupRadius;
@@ -105,6 +107,7 @@ namespace Game1
 			if (removedItems.Any())
 			{
 				this.Items.RemoveAll(x => removedItems.Contains(x));
+				removedItems.ForEach(x => this.MapObjects.Remove(x));
 				OnItemsChange?.Invoke(this, null);
 			}
 		}
@@ -115,7 +118,7 @@ namespace Game1
 				return;
 
 			position = position ?? this.Character.Position;
-			this.Items.Add(new WorldItem { Item = item, Position = (Vector2)position, Pickup = pickup });
+			this.MapObjects.Add(this.Items.AddItem(new WorldItem(item, (Vector2)position, pickup)));
 			OnItemsChange?.Invoke(this, null);
 		}
 
@@ -149,23 +152,26 @@ namespace Game1
 			OnCharacterDied?.Invoke(this, e);
 		}
 
-		public object[,] MapObjects { get; set; }
+		public WorldEntityList MapObjects { get; set; }
 
 		private void LoadDataFromCurrentMap()
 		{			
-			this.MapObjects = new object[1,2];
+			this.MapObjects = new WorldEntityList(this.CurrentMap.Width, this.CurrentMap.Height);
 
 			this.Items = new List<WorldItem>();
 			foreach (var item in this.CurrentMap.Items)
-				this.Items.Add(new WorldItem { Pickup = true, Item = ItemManager.GetItem(item.Id, item.Quantity), Position = item.Position.ToVector2() });
+				this.MapObjects.Add(this.Items.AddItem(new WorldItem(ItemManager.GetItem(item.Id, item.Quantity), item.Position.ToVector2(), true)));
 
 			this.Interactives = new List<WorldInteractive>();
 			foreach (var interactive in this.CurrentMap.Interactives)
 			{
-				var worldInteractive = MetaManager.GetInteractve(interactive.Id, interactive.Position.ToVector2());
+				var worldInteractive = this.MapObjects.Add(this.Interactives.AddItem(MetaManager.GetInteractve(interactive.Id, interactive.Position.ToVector2())));
 				worldInteractive.OnDestroyed += Interactive_OnDestroyed;
-				this.Interactives.Add(worldInteractive);
 			}
+
+			this.Transitions = new List<WorldTransition>();
+			foreach (var transition in this.CurrentMap.Transitions)
+				this.MapObjects.Add(this.Transitions.AddItem(MetaManager.GetTransition(transition)));
 
 			this.NPCs = new List<NPC>();
 			// TODO: Need Metadata for NPCs...
@@ -175,10 +181,6 @@ namespace Game1
 				worldNPC.OnDied += Npc_OnDied;
 				this.NPCs.Add(worldNPC);
 			}
-
-			this.Transitions = new List<WorldTransition>();
-			foreach (var transition in this.CurrentMap.Transitions)
-				this.Transitions.Add(MetaManager.GetTransition(transition));
 
 			_physics.CalculateParameters();
 		}

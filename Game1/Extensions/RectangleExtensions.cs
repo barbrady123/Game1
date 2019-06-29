@@ -31,5 +31,7 @@ namespace Game1
 		public static Rectangle MoveTo(this Rectangle rect, int xMove, int yMove) => new Rectangle(xMove, yMove, rect.Width, rect.Height);
 
 		public static Point TopLeftPoint(this Rectangle rect, int? xOffset = null, int? yOffset = null) => new Point(rect.X + (xOffset ?? 0), rect.Y + (yOffset ?? 0));
+
+		public static Point BottomRightPoint(this Rectangle rec, int? xOffset = null, int? yOffset = null) => new Point(rec.Right + (xOffset ?? 0), rec.Bottom + (yOffset ?? 0));
 	}
 }
