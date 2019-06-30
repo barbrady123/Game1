@@ -43,5 +43,10 @@ namespace Game1
 		{
 			this.Icon.Update(gameTime);
 		}
+
+		public void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
+		{
+			this.Icon.Draw(spriteBatch, position: this.Position + cameraOffset);
+		}
 	}
 }

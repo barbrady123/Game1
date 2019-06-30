@@ -72,6 +72,7 @@
     <Compile Include="Maps\MapTransition.cs" />
     <Compile Include="WorldCell.cs" />
     <Compile Include="WorldEntityList.cs" />
+    <Compile Include="WorldSolid.cs" />
     <Compile Include="WorldTransition.cs" />
     <Compile Include="Menus\ContextMenu.cs" />
     <Compile Include="Effect\EffectEventArgs.cs" />

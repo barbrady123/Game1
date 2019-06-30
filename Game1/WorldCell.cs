@@ -30,14 +30,13 @@ namespace Game1
 
 		public void Remove(IWorldEntity entity)
 		{
-			if (_entities != null)
-				_entities.Remove(entity);
+			_entities.Remove(entity);
 		}
 
 		public IEnumerator<IWorldEntity> GetEnumerator() => _entities.GetEnumerator();
 
 		IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-		public bool Any => _entities?.Any() ?? false;		
+		public bool Any => _entities.Any();
 	}
 }

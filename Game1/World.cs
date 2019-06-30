@@ -173,6 +173,20 @@ namespace Game1
 			foreach (var transition in this.CurrentMap.Transitions)
 				this.MapObjects.Add(this.Transitions.AddItem(MetaManager.GetTransition(transition)));
 
+			// Solid layer blocks
+			foreach (var layer in this.CurrentMap.Layers.Where(l => l.Type == LayerType.Solid))
+			{
+				for (int y = 0; y < layer.TileData.GetLength(1); y++)
+				for (int x = 0; x < layer.TileData.GetLength(0); x++)
+				{
+					// Again, coords here are reversed so file data can "visually" match the screen...
+					if (layer.TileData[y,x] < 0)
+						continue;
+
+					this.MapObjects.Add(new WorldSolid(new Vector2(x * Game1.TileSize, y * Game1.TileSize)));
+				}
+			}
+
 			this.NPCs = new List<NPC>();
 			// TODO: Need Metadata for NPCs...
 			foreach (var npc in this.CurrentMap.NPCs)

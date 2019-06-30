@@ -83,11 +83,6 @@ namespace Game1
 			Util.WrappedDraw(DrawInternal, _spriteBatchData, _gameViewArea);
 		}
 
-		// Drawing a bit off the view for pixel-perfect clipping is fine...but this will potentially draw WAY off the visible map...need some logic to resolve this
-		// so we aren't drawing tons of entities that aren't anywhere near visible within the current camera view...
-		// Actually, I'm not sure what the performance hit here is, vs just drawing everything and letting it get clipped....TBD....
-		// Also...might need to eventually just sort everything by Y-axis and draw in a single loop...right now things draw based on Y position relative to player,
-		// but we also care about other objects on the map relative to each other (mobs, etc)....
 		public void DrawInternal(SpriteBatch spriteBatch)
 		{
 			// Need a seperate param for "cameraOffset"...or just convert to matrix transformation....
@@ -96,29 +91,12 @@ namespace Game1
 			foreach (var layer in _world.CurrentMap.Layers.Where(l => l.Type == LayerType.Terrain))
 				_staticMaps[layer].Draw(spriteBatch);
 
-			foreach (var transition in _world.Transitions)
-				transition.Icon.Draw(spriteBatch, position: transition.Position + _renderOffset);	// This is weird
-			
 			// Draw characters that should be "behind" the player...when their Y coord is <= the player's...
 			foreach (var npc in _world.NPCs.Where(n => n.Position.Y <= _world.Character.Position.Y).OrderBy(n => n.Position.Y))
 				npc.Draw(spriteBatch, _renderOffset);
 
-			// Items on ground...
-			int itemsDrawn = 0;
-			// Testing just items, probably could just dump everything out in this loop...
-			foreach (var item in _world.MapObjects.GetEntities(_visibleCellStartX, _visibleCellStartY, _visibleCellEndX, _visibleCellEndY).OfType<WorldItem>())
-			//foreach (var item in _world.Items)
-			{
-				// interactives and other IWorldEntity objects need a draw...
+			foreach (var item in _world.MapObjects.GetEntities(_visibleCellStartX, _visibleCellStartY, _visibleCellEndX, _visibleCellEndY))
 				item.Draw(spriteBatch, _renderOffset);
-				itemsDrawn++;
-			}
-
-			Console.Out.WriteLine($"items:{itemsDrawn}");
-
-			// Interactive objects...
-			foreach (var interactive in _world.Interactives)
-				interactive.Icon.Draw(spriteBatch, position: interactive.Position + _renderOffset);
 
 			_world.Character.Draw(spriteBatch, _renderOffset);
 
@@ -212,8 +190,8 @@ namespace Game1
 
 			_visibleCellStartX = sourceX / Game1.TileSize;
 			_visibleCellStartY = sourceY / Game1.TileSize;
-			_visibleCellEndX = (sourceX + _gameViewArea.Width) / Game1.TileSize;
-			_visibleCellEndY = (sourceY + _gameViewArea.Height) / Game1.TileSize;
+			_visibleCellEndX = (sourceX + _gameViewArea.Width - 1) / Game1.TileSize;
+			_visibleCellEndY = (sourceY + _gameViewArea.Height - 1) / Game1.TileSize;
 		}
 	}
 }

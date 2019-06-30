@@ -19,7 +19,8 @@ namespace Game1
 		private Size _humanoidBoxSize = new Size(28, 54);
 
 		private World _world;
-		private List<Rectangle> _solidBlocks;
+		//private List<Rectangle> _solidBlocks;
+		private Rectangle _mapBounds;
 
 		public PhysicsManager(World world)
 		{
@@ -27,7 +28,7 @@ namespace Game1
 		}
 
 		// This is slooooooooow......do something about it eventually (also we can just test x and y movement seperately, instead of possibly testing 3 possibilities)
-		public bool MovementOk(Rectangle mapBounds, Character character, List<Character> allChars)
+		public bool MovementOk(Character character, List<Character> allChars)
 		{
 			if (character.Motion == Vector2.Zero)
 				return true;
@@ -35,13 +36,22 @@ namespace Game1
 			var proposedBox = (character.Position + character.Motion).ExpandToRectangleCentered(_humanoidBoxSize.Width / 2, _humanoidBoxSize.Height / 2);
 
 			// Map bounds
-			if (!mapBounds.Contains(proposedBox))
+			if (!_mapBounds.Contains(proposedBox))
 				return false;
 
 			// Solid blocks
+			// These need to be stored in the mapObjects structure for much better performance here...this is currently checking the entire map!
+			/*
 			foreach (var solidBlock in _solidBlocks)
 			{
 				if (solidBlock.Intersects(proposedBox))
+					return false;
+			}
+			*/
+			// TODO: Just testing with the solid blocks, this should just handle all collisions...
+			foreach (var block in _world.MapObjects.GetEntities(proposedBox).OfType<WorldSolid>())
+			{
+				if (block.Bounds.Intersects(proposedBox))
 					return false;
 			}
 
@@ -66,13 +76,12 @@ namespace Game1
 
 		public void Update(GameTime gameTime)
 		{
-			var mapBounds = new Rectangle(0, 0, _world.CurrentMap.Width * Game1.TileSize, _world.CurrentMap.Height * Game1.TileSize);
 			var allChars = _world.AllCharacters;
 		
 			foreach (var character in allChars)
 			{
 				var originalMotion = character.Motion;
-				if (MovementOk(mapBounds, character, allChars))
+				if (MovementOk(character, allChars))
 				{
 					character.Position += originalMotion;
 					continue;
@@ -80,7 +89,7 @@ namespace Game1
 
 				// Try X movement only...
 				character.Motion = originalMotion.XVector();
-				if (MovementOk(mapBounds, character, allChars))
+				if (MovementOk(character, allChars))
 				{
 					character.Position += character.Motion;
 					continue;
@@ -88,7 +97,7 @@ namespace Game1
 
 				// Try Y movement only...
 				character.Motion = originalMotion.YVector();
-				if (MovementOk(mapBounds, character, allChars))
+				if (MovementOk(character, allChars))
 				{
 					character.Position += character.Motion;
 					continue;
@@ -129,6 +138,7 @@ namespace Game1
 
 		public void CalculateParameters()	
 		{
+			/*
 			var solidBlocks = new Dictionary<Point, Rectangle>();
 
 			foreach (var layer in _world.CurrentMap.Layers.Where(l => l.Type == LayerType.Solid))
@@ -147,6 +157,9 @@ namespace Game1
 			}
 
 			_solidBlocks = solidBlocks.Values.ToList();
+			*/
+
+			_mapBounds = new Rectangle(0, 0, _world.CurrentMap.Width * Game1.TileSize, _world.CurrentMap.Height * Game1.TileSize);
 		}
 	}
 }

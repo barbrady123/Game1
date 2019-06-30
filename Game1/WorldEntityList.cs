@@ -16,11 +16,15 @@ namespace Game1
 {
 	public class WorldEntityList
 	{
+		private readonly int _width;
+		private readonly int _height;
 		private WorldCell[,] _cells;
 		private Dictionary<IWorldEntity, List<WorldCell>> _entityCells;
 		
 		public WorldEntityList(int width, int height)
 		{
+			_width = width;
+			_height = height;
 			_cells = new WorldCell[width, height];
 			_entityCells = new Dictionary<IWorldEntity, List<WorldCell>>();
 		}
@@ -32,6 +36,13 @@ namespace Game1
 		/// </summary>
 		public IWorldEntity[] GetEntities(int startX, int startY, int endX, int endY)
 		{
+			/* shouldn't need to clamp these... 
+			startX = Util.Clamp(startX, 0, _width);
+			startY = Util.Clamp(startY, 0, _height);
+			endX = Util.Clamp(endX, 0, _width);
+			endY = Util.Clamp(endY, 0, _height);
+			*/
+
 			var entities = new HashSet<IWorldEntity>();
 
 			for (int y = startY; y <= endY; y++)
@@ -47,8 +58,14 @@ namespace Game1
 			return entities.ToArray();
 		}
 
+		public IWorldEntity[] GetEntities(Rectangle bounds)
+		{
+			return GetEntities(bounds.X / Game1.TileSize, bounds.Y / Game1.TileSize, (bounds.Right - 1) / Game1.TileSize, (bounds.Bottom - 1) / Game1.TileSize);
+		}
+
 		public T Add<T>(T entity) where T: IWorldEntity
 		{
+			// TODO: Really, the cell resolution here should be customizable, also...weird dependency on Game1 here...
 			var startCell = entity.Bounds.TopLeftPoint().DivideBy(Game1.TileSize);
 			var endCell = entity.Bounds.BottomRightPoint().DivideBy(Game1.TileSize);
 

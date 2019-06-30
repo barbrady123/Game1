@@ -20,5 +20,7 @@ namespace Game1
 		Rectangle Bounds { get; }
 
 		bool IsSolid { get; }
+
+		void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset);
 	}
 }
