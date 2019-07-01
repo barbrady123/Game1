@@ -14,6 +14,7 @@ namespace Game1
 {
 	public class ImageTexture : Image
 	{
+		protected Texture2D _highlightTexture;
 		protected Texture2D _texture;
 		private string _name;
 
@@ -27,6 +28,7 @@ namespace Game1
 		{
 			_texture = texture;
 			this.Alignment = ImageAlignment.LeftTop;
+			GenerateHighlightTexture();
 			UpdatePosition();
 		}
 
@@ -38,7 +40,26 @@ namespace Game1
 			if (_texture == null)
 				_texture = _content.Load<Texture2D>(_name);
 
+			GenerateHighlightTexture();
 			UpdatePosition();
+		}
+
+		private void GenerateHighlightTexture()
+		{
+			var data = new Color[_texture.Width * _texture.Height];
+			_texture.GetData(data);
+			for (int i = 0; i < data.Length; i++)
+			{
+				if (data[i].A > 0)
+					data[i] = Color.White;
+			}
+
+			_highlightTexture = new Texture2D(Game1.Graphics, _texture.Width, _texture.Height);
+			_highlightTexture.SetData(data);
+
+			// We might want to just generate the entire highlight texture at this point (RenderTarget the 4 draw below)...
+			// Long-long term, we could just write a seperate script to generate those and keep/load them with the textures to begin with...
+			// Also, sharing these across ImageTextures with the same underlying texture would save RAM...
 		}
 
 		protected virtual void UpdatePosition()
@@ -66,21 +87,12 @@ namespace Game1
 			// Temp...
 			if (this.Highlight)
 			{
-				var data = new Color[_texture.Width * _texture.Height];
-				_texture.GetData(data);
-				for (int i = 0; i < data.Length; i++)
-				{
-					if (data[i].A > 0)
-						data[i] = Color.White;
-				}
-
-				var reversedTexture = new Texture2D(Game1.Graphics, _texture.Width, _texture.Height);
-				reversedTexture.SetData(data);
-
-				spriteBatch.Draw(reversedTexture, pos.Offset(-1, -1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects, 0.0f);
-				spriteBatch.Draw(reversedTexture, pos.Offset(1, -1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects, 0.0f);
-				spriteBatch.Draw(reversedTexture, pos.Offset(-1, 1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects, 0.0f);
-				spriteBatch.Draw(reversedTexture, pos.Offset(1, 1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects, 0.0f);
+				// Besides caching _highlightTexture texture, writing these to a render target to save 3 draws after the inital one might also be more performant??
+				// Also, we could just auto-generate the _highlight texture on first load of this texture??
+				spriteBatch.Draw(_highlightTexture, pos.Offset(-1, -1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects, 0.0f);
+				spriteBatch.Draw(_highlightTexture, pos.Offset(1, -1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects, 0.0f);
+				spriteBatch.Draw(_highlightTexture, pos.Offset(-1, 1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects, 0.0f);
+				spriteBatch.Draw(_highlightTexture, pos.Offset(1, 1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects, 0.0f);
 				
 			}
 			// end temp...

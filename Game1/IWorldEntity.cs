@@ -21,6 +21,8 @@ namespace Game1
 
 		bool IsSolid { get; }
 
+		bool IsHighlighted { get; set; }
+
 		void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset);
 	}
 }

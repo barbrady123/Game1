@@ -37,6 +37,8 @@ namespace Game1
 
 		private ImageTexture _gameViewBorder;
 
+		private IWorldEntity _highlightedEntity;
+
 		public GamePlayManager(Rectangle bounds, string playerId) : base(bounds, background: "wood")
 		{
 			// Might want a couple frame delay before actually running the game?
@@ -104,6 +106,7 @@ namespace Game1
 				)), true
 			);
 
+			_highlightedEntity = null;
 			//AudioManager.Start();
 		}
 
@@ -158,9 +161,13 @@ namespace Game1
 			_debuffs.Update(gameTime);
 			_newItems.Update(gameTime);
 			_gameViewBorder.Update(gameTime);
+			// For now we're allowing hotbar to remain active, which is ok since the modals which block the game from running also block
+			// all subsequent input handling....however really, we need to make the change mentioned in the InventoryItemView class, so that
+			// this doesn't need to remain in the Update loop to keep it's items correctly drawn (should be able to realtime get the items
+			// from the underlying inventory container)....
+			_hotbarView.Update(gameTime);
 			if (_world.IsActive)
 			{
-				_hotbarView.Update(gameTime);
 				_camera.Update(gameTime);
 			}
 			base.UpdateActive(gameTime);
@@ -168,6 +175,12 @@ namespace Game1
 
 		public override void UpdateInput(GameTime gameTime)
 		{
+			if (_highlightedEntity != null)
+			{
+				_highlightedEntity.IsHighlighted = false;
+				_highlightedEntity = null;
+			}
+
 			if (InputManager.KeyPressed(Keys.I))
 			{
 				_activator.SetState(_inventoryWindow, true);
@@ -191,20 +204,23 @@ namespace Game1
 					}
 			}
 
+			// TEMP: Need to see if it's over anything that should be highlighted...
 			if (InputManager.MouseOver(_gameViewArea))
 			{
 				var mousePosition = InputManager.MousePosition.Offset(-(int)_camera.RenderOffset.X, -(int)_camera.RenderOffset.Y);
-				// Need to see if it's over anything that should be highlighted...
-				// We really need to start making determinations of what is "on screen"...
-				// First so we can stop drawing shit way off the viewport, but second...
-				// So when we need these scans, it's less crap do loop through...
-				// For now, going to very inefficiently loop through these, since
-				// we don't currently maintain a graph of where objects are in the space
-				// (I'm not 100% fully sure how to implement a Quadtree yet...but at the very
-				// least we can build a 2d array that objects can 'belong to' for culling, etc...
-				foreach (var interactive in _world.Interactives)
-					interactive.Icon.Highlight = interactive.Bounds.Contains(mousePosition);
 
+				foreach (var entity in _world.MapObjects.GetEntities(mousePosition).Where(e => e != _world.Character))
+				{
+					if (entity.Bounds.Contains(mousePosition))
+					{						
+						entity.IsHighlighted = true;
+						_highlightedEntity = entity;
+						break;
+					}
+				}
+
+				// There's really no great way to prevent this from also swinging an active item...maybe we shouldn't auto-drop the
+				// held item just because it's on the cursor?
 				if (InputManager.LeftMouseClick())
 				{
 					if (_world.Character.IsItemHeld)

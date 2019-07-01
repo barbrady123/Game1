@@ -20,10 +20,13 @@ namespace Game1
 
 		public bool IsSolid => true;
 
+		public bool IsHighlighted { get; set; }
+
 		public WorldSolid(Vector2 position)
 		{
 			this.Position = position;
 			this.Bounds = position.ExpandToRectangleTopLeft(Game1.TileSize, Game1.TileSize);
+			this.IsHighlighted = false;
 		}
 
 		public void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)

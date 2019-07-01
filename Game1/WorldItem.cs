@@ -38,14 +38,17 @@ namespace Game1
 
 		public bool IsSolid => false;
 
+		public bool IsHighlighted { get; set; }
+
 		public WorldItem(InventoryItem item, Vector2 position, bool pickup)
 		{
 			_inRange = false;
 			this.Item = item;
 			this.Item.Icon.Scale = GamePlayCamera.MapItemScale;
 			this.Position = position;
-			this.Bounds = position.ToUnitRectangle();
+			this.Bounds = position.ExpandToRectangleCentered(Game1.DefaultPickupRadius / 2, Game1.DefaultPickupRadius/ 2);
 			this.Pickup = pickup;
+			this.IsHighlighted = false;
 		}
 
 		public void Update(GameTime gameTime)
@@ -55,6 +58,7 @@ namespace Game1
 
 		public void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
 		{
+			this.Item.Icon.Highlight = this.IsHighlighted;
 			this.Item.Icon.Draw(spriteBatch, position: this.Position + cameraOffset);
 		}
 	}

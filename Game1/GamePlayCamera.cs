@@ -58,6 +58,8 @@ namespace Game1
 			_staticMaps = new Dictionary<Layer, ImageTexture>();
 		}
 
+		public Rectangle VisibleMap { get; private set; }
+
 		public void LoadContent()
 		{
 			LoadTileSheets();
@@ -92,17 +94,17 @@ namespace Game1
 				_staticMaps[layer].Draw(spriteBatch);
 
 			// Draw characters that should be "behind" the player...when their Y coord is <= the player's...
-			foreach (var npc in _world.NPCs.Where(n => n.Position.Y <= _world.Character.Position.Y).OrderBy(n => n.Position.Y))
-				npc.Draw(spriteBatch, _renderOffset);
+			//foreach (var npc in _world.NPCs.Where(n => n.Position.Y <= _world.Character.Position.Y).OrderBy(n => n.Position.Y))
+				//npc.Draw(spriteBatch, _renderOffset);
 
 			foreach (var item in _world.MapObjects.GetEntities(_visibleCellStartX, _visibleCellStartY, _visibleCellEndX, _visibleCellEndY))
 				item.Draw(spriteBatch, _renderOffset);
 
-			_world.Character.Draw(spriteBatch, _renderOffset);
+			//_world.Character.Draw(spriteBatch, _renderOffset);
 
 			// Draw characters that should be "in front" of the player...when their Y coor is > the player's...
-			foreach (var npc in _world.NPCs.Where(n => n.Position.Y > _world.Character.Position.Y).OrderBy(n => n.Position.Y))
-				npc.Draw(spriteBatch, _renderOffset);
+			//foreach (var npc in _world.NPCs.Where(n => n.Position.Y > _world.Character.Position.Y).OrderBy(n => n.Position.Y))
+				//npc.Draw(spriteBatch, _renderOffset);
 
 			// We're drawing these as "above" the player, but probably doesn't matter...
 			foreach (var layer in _world.CurrentMap.Layers.Where(l => l.Type == LayerType.Solid))
@@ -181,10 +183,10 @@ namespace Game1
 			var drawAreaPadding = _gameViewArea.SizeVector() / 2;
 			int sourceX = Util.Clamp((int)( _world.Character.Position.X - drawAreaPadding.X), 0, (int)(mapSize.Width - _gameViewArea.Width));
 			int sourceY = Util.Clamp((int)( _world.Character.Position.Y - drawAreaPadding.Y), 0, (int)(mapSize.Height - _gameViewArea.Height));
-			var visibleSourceRect = new Rectangle(sourceX, sourceY, _gameViewArea.Width, _gameViewArea.Height);
+			this.VisibleMap = new Rectangle(sourceX, sourceY, _gameViewArea.Width, _gameViewArea.Height);
 
 			foreach (var staticMap in _staticMaps.Values)
-				staticMap.SourceRect = visibleSourceRect;
+				staticMap.SourceRect = this.VisibleMap;
 
 			_renderOffset = new Vector2(-sourceX + _gameViewArea.X, -sourceY + _gameViewArea.Y);
 

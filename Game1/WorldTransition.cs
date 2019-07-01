@@ -22,6 +22,8 @@ namespace Game1
 
 		public bool IsSolid => false;
 
+		public bool IsHighlighted { get; set; }
+
 		public ImageTexture Icon { get; set; }
 
 		public string DestinationMap { get; set; }
@@ -37,6 +39,7 @@ namespace Game1
 			this.Icon.LoadContent();
 			this.DestinationMap = destinationMap;
 			this.DestinationPosition = destinationPosition;
+			this.IsHighlighted = false;
 		}
 
 		public void Update(GameTime gameTime)
@@ -46,6 +49,7 @@ namespace Game1
 
 		public void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
 		{
+			this.Icon.Highlight = this.IsHighlighted;
 			this.Icon.Draw(spriteBatch, position: this.Position + cameraOffset);
 		}
 	}

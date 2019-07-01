@@ -13,5 +13,11 @@ namespace Game1
 			list.Add(item);
 			return item;
 		}
+
+		public static T RemoveItem<T>(this List<T> list, T item)
+		{
+			list.Remove(item);
+			return item;
+		}
 	}
 }

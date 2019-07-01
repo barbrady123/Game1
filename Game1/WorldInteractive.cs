@@ -26,6 +26,8 @@ namespace Game1
 
 		public bool IsSolid => this.Interactive.IsSolid;
 
+		public bool IsHighlighted { get; set; }
+
 		public event EventHandler OnDestroyed;
 
 		public int? Health
@@ -53,6 +55,7 @@ namespace Game1
 			_health = interactive.Health;
 			this.Position = position;
 			this.Bounds = position.ExpandToRectangleCentered(interactive.Size.Width / 2, interactive.Size.Height / 2);
+			this.IsHighlighted = false;
 		}
 
 		public void Update(GameTime gameTime)
@@ -62,6 +65,7 @@ namespace Game1
 
 		public void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
 		{
+			this.Icon.Highlight = this.IsHighlighted;
 			this.Icon.Draw(spriteBatch, position: this.Position + cameraOffset);
 		}
 	}

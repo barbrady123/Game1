@@ -34,7 +34,6 @@ namespace Game1
 
 		public List<Character> AllCharacters => new List<Character>((this.NPCs?.Count ?? 0) + 1) { this.Character }.Concat(this.NPCs).ToList();
 
-		public event EventHandler<ComponentEventArgs> OnItemsChange;
 		// This should probably be a more generalized event for character events...
 		public event EventHandler<ComponentEventArgs> OnCharacterDied;
 
@@ -61,11 +60,12 @@ namespace Game1
 
 			this.CurrentMap = IOManager.ObjectFromFile<Map>(Path.Combine(Game1.MapRoot, mapName));
 			this.CurrentMap.Initialize();
-			LoadDataFromCurrentMap();
 
 			this.Character.Location = mapName;
 			this.Character.PreviousPosition = Vector2.Zero;
 			this.Character.Position = playerPosition.ToVector2();
+
+			LoadDataFromCurrentMap();
 		}
 
 		public void Update(GameTime gameTime, bool mouseInWorld)
@@ -80,6 +80,15 @@ namespace Game1
 			foreach (var npc in this.NPCs)
 				npc.Update(gameTime);
 			_physics.Update(gameTime);
+
+			// TODO: Here is a good spot for this.CurrentMap.Update() ... which would update the moving entities in the entity list, and perform
+			// various other operations for character/npc/item/etc updates (all entity updates)...
+			// TODO: But, until then, TEMP: we're going to update entities that move in the entity list...
+			this.MapObjects.Move(this.Character);
+			foreach (var npc in this.NPCs)
+				this.MapObjects.Move(npc);
+
+			// TODO: these collections could/should be mainined in the Entity list object (which should be moved inside the Map class)....
 			foreach (var item in this.Items)
 				item.Update(gameTime);
 			foreach (var interactive in this.Interactives)
@@ -89,26 +98,15 @@ namespace Game1
 
 			// I think it makes sense to put things like "Item pickup" from proximity after the physics update?
 			// I'm not 100% sure where i even want this to live yet or what entity's responsibility this should be
-			List<WorldItem> removedItems = new List<WorldItem>();
-
-			// TODO: Need to optimize this to use the new mapObjects....
-
-			foreach (var item in this.Items)
+			foreach (var item in this.MapObjects.GetEntities<WorldItem>(this.Character.Bounds))
 			{
 				item.InRange = Vector2.Distance(item.Position, this.Character.Position) <= Game1.DefaultPickupRadius;
 
 				if (item.Pickup && item.InRange)
 				{
 					if (this.Character.AddItem(item.Item, true))
-						removedItems.Add(item);
+						this.MapObjects.Remove(this.Items.RemoveItem(item));
 				}
-			}
-
-			if (removedItems.Any())
-			{
-				this.Items.RemoveAll(x => removedItems.Contains(x));
-				removedItems.ForEach(x => this.MapObjects.Remove(x));
-				OnItemsChange?.Invoke(this, null);
 			}
 		}
 
@@ -119,7 +117,6 @@ namespace Game1
 
 			position = position ?? this.Character.Position;
 			this.MapObjects.Add(this.Items.AddItem(new WorldItem(item, (Vector2)position, pickup)));
-			OnItemsChange?.Invoke(this, null);
 		}
 
 		private void Npc_OnDied(object sender, ComponentEventArgs e)
@@ -132,7 +129,7 @@ namespace Game1
 		{
 			// Another thing that shouldn't be here...testing...
 			var interactive = (WorldInteractive)sender;
-			this.Interactives.Remove(interactive);
+			this.MapObjects.Remove(this.Interactives.RemoveItem(interactive));
 			// Need something to generate loot from loot table...just doing this temp...
 			foreach (var l in interactive.Interactive.LootTable)
 			{
@@ -156,7 +153,9 @@ namespace Game1
 
 		private void LoadDataFromCurrentMap()
 		{			
-			this.MapObjects = new WorldEntityList(this.CurrentMap.Width, this.CurrentMap.Height);
+			this.MapObjects = new WorldEntityList(this.CurrentMap.Width, this.CurrentMap.Height, Game1.TileSize);
+
+			this.MapObjects.Add(this.Character);
 
 			this.Items = new List<WorldItem>();
 			foreach (var item in this.CurrentMap.Items)
@@ -193,7 +192,7 @@ namespace Game1
 			{
 				var worldNPC = new NPC(npc.Id, CharacterSex.Male, npc.Position.ToVector2(), 10, 10);
 				worldNPC.OnDied += Npc_OnDied;
-				this.NPCs.Add(worldNPC);
+				this.MapObjects.Add(this.NPCs.AddItem(worldNPC));
 			}
 
 			_physics.CalculateParameters();

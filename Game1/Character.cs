@@ -14,11 +14,11 @@ using Game1.Items;
 namespace Game1
 {
 	// Either we need a new base class, or this should be the base and some of this crap needs to be moved into a child class....
-	public class Character
+	public class Character : IWorldEntity
 	{		
 		protected readonly object _lock = new object();
 		private Vector2 _position;
-		private ImageSpriteSheet _spriteSheet;
+		public ImageSpriteSheet _spriteSheet;
 		private ItemContainer _hotbar;
 		private ItemContainer _backpack;
 		protected float _movementSpeed;
@@ -53,6 +53,10 @@ namespace Game1
 
 		public List<CharacterStatus<BuffEffect>> Buffs { get; set; }
 		public List<CharacterStatus<DebuffEffect>> Debuffs { get; set; }
+
+		public bool IsSolid => true;
+
+		public bool IsHighlighted { get; set; }
 
 		// Again...if these were indexed array slots, this would be way easier!
 		public int Defense =>
@@ -169,9 +173,13 @@ namespace Game1
 				if (_position != value)
 				{
 					_position = value;
+					// Eventually need to check mob "size" or "type" for bounding box settings...
+					this.Bounds = _position.ExpandToRectangleCentered(PhysicsManager.HumanoidBoxSize.Width / 2, PhysicsManager.HumanoidBoxSize.Height / 2);
 				}
 			}
 		}
+
+		public Rectangle Bounds { get; private set; }
 
 		public Character(string spriteSheetName)
 		{
@@ -184,6 +192,7 @@ namespace Game1
 			this.Debuffs = new List<CharacterStatus<DebuffEffect>>();
 			this.PreviousPosition = -Vector2.One;
 			_spriteSheet = MetaManager.GetSpriteSheet(spriteSheetName);
+			this.IsHighlighted = false;
 		}
 
 		public virtual Vector2 UpdateMotion()
@@ -285,6 +294,7 @@ namespace Game1
 		public void Draw(SpriteBatch spriteBatch, Vector2 offset)
 		{
 			DrawBehind(spriteBatch, offset);
+			_spriteSheet.Highlight = this.IsHighlighted;
 			_spriteSheet.Draw(spriteBatch, position: this.Position + offset);
 			DrawInfront(spriteBatch, offset);
 		}

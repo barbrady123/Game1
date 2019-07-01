@@ -12,6 +12,10 @@ using Game1.Items;
 
 namespace Game1.Interface
 {
+	// TODO: We may want to change this so that it is aware of it's container (already aware of index), and require InventoryItemViews to always have a underlying container, so that
+	// the references to the actual item slot is easy.  For now that means the equipped armor slots need to change, but that kinda makes sense to have them in a "armor container" type
+	// of encapsulation anyway...this way we always have a non-null direct reference to every item in the character's inventory....also we shouldn't need awareness of the ContainingView
+	// here, because we really only use that in a few places to get to the underlying container anyway...
 	public class InventoryItemView : Component, ISupportsContextMenu
 	{
 		public const int Size = Game1.IconSize + ((InventoryItemView.BorderWidth + InventoryItemView.ImagePadding) * 2);
