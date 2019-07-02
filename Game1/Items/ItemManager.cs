@@ -19,8 +19,6 @@ namespace Game1.Items
 	public static class ItemManager
 	{
 		// TODO: This will eventually be much more organized/structured by item "type", etc...
-		private static ContentManager _content;
-
 		private static List<ItemGeneral> _generals;
 		private static List<ItemConsumable> _consumables;
 		private static List<ItemArmor> _armors;

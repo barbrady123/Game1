@@ -60,21 +60,15 @@ namespace Game1.Interface.Windows
 		public override void LoadContent()
 		{
 			base.LoadContent();
-			_characterName.LoadContent();
 			foreach (var armorView in _armorItemView)
 				armorView.LoadContent();
-			foreach (var stat in _characterStat)
-				stat.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-			_characterName.UnloadContent();
 			foreach (var armorView in _armorItemView)
 				armorView.UnloadContent();
-			foreach (var stat in _characterStat)
-				stat.UnloadContent();
 		}
 
 		public override void UpdateActive(GameTime gameTime)

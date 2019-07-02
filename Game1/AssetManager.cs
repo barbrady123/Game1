@@ -12,6 +12,7 @@ namespace Game1
 {
 	public static class AssetManager
 	{
+		// Eventually we could create either a new contentmanager or an extension method to wrap the calls that require all this Path.combine junk in the Load<> method...
 		private const string GameplayRoot = "Gameplay";
 		private const string InterfaceRoot = "Interface";
 		private const string IconRoot = GameplayRoot + "\\Icon";
@@ -28,159 +29,149 @@ namespace Game1
 
 		private static ContentManager _contentGame;
 		private static string _playerSpriteSheetName;
-		private static (Texture2D standard, Texture2D highlight) _playerSpriteSheet;
-		private static Dictionary<string, Texture2D> _interfaceElements;
-		private static Dictionary<string, (Texture2D standard, Texture2D highlight)> _iconItems;
-		private static Dictionary<string, Texture2D> _iconStatuses;
-		private static Dictionary<string, Texture2D> _iconEmptySlots;
+		private static Texture2D _playerSpriteSheetHighlight;
+		private static Dictionary<string, Texture2D> _iconItemHighlight;
 
 		private static ContentManager _contentMap;
-		private static Dictionary<string, Texture2D> _tileSheets;
-		private static Dictionary<string, (Texture2D standard, Texture2D highlight)> _spriteSheets;
-		private static Dictionary<string, (Texture2D standard, Texture2D highlight)> _iconInteractives;
-		private static Dictionary<string, (Texture2D standard, Texture2D highlight)> _iconTransitions;
+		private static Dictionary<string, Texture2D> _spriteSheetHighlight;
+		private static Dictionary<string, Texture2D> _iconInteractiveHighlight;
+		private static Dictionary<string, Texture2D> _iconTransitionHighlight;
+
+		private static ContentManager _contentScreen;
 
 		public static void LoadContent(IServiceProvider serviceProvider, GraphicsDevice graphicsDevice, string contentRoot)
-		{
+		{	
+			// Game (app) content...
 			_serviceProvider = serviceProvider;
 			_graphicsDevice = graphicsDevice;
 			_contentRoot = contentRoot;
 			_contentGame = new ContentManager(_serviceProvider, _contentRoot);
-			_interfaceElements = new Dictionary<string, Texture2D>();
-			_iconItems = new Dictionary<string, (Texture2D standard, Texture2D highlight)>();
-			_iconStatuses = new Dictionary<string, Texture2D>();
-			_iconEmptySlots = new Dictionary<string, Texture2D>();
+			_iconItemHighlight = new Dictionary<string, Texture2D>();
 			LoadGameAssets();
+
+			// Map content...
 			_contentMap = new ContentManager(_serviceProvider, _contentRoot);
-			_tileSheets = new Dictionary<string, Texture2D>();
-			_spriteSheets = new Dictionary<string, (Texture2D standard, Texture2D highlight)>();
-			_iconInteractives = new Dictionary<string, (Texture2D standard, Texture2D highlight)>();
-			_iconTransitions = new Dictionary<string, (Texture2D standard, Texture2D highlight)>();
+			_spriteSheetHighlight = new Dictionary<string, Texture2D>();
+			_iconInteractiveHighlight = new Dictionary<string, Texture2D>();
+			_iconTransitionHighlight = new Dictionary<string, Texture2D>();
+
+			// Screen content...
+			_contentScreen = new ContentManager(_serviceProvider, _contentRoot);
 		}
 
 		public static void UnloadContent()
 		{
-			_contentMap?.Unload();
-			_contentGame?.Unload();
+			_contentScreen.Unload();
+			DisposeMapContent();
+			DisposeGameContent();
+		}
+
+		private static void DisposeMapContent()
+		{			
+			_contentMap.Unload();
+			foreach (var h in _spriteSheetHighlight.Values) h.Dispose();
+			_spriteSheetHighlight.Clear();
+			foreach (var h in _iconInteractiveHighlight.Values) h.Dispose();
+			_iconInteractiveHighlight.Clear();
+			foreach (var h in _iconTransitionHighlight.Values) h.Dispose();
+			_iconTransitionHighlight.Clear();
+		}
+
+		private static void DisposeGameContent()
+		{
+			_contentGame.Unload();
+			foreach (var h in _iconItemHighlight.Values) h.Dispose();
+			_playerSpriteSheetHighlight?.Dispose();
+		}
+
+		public static ImageTexture GetBackground(string name) => new ImageTexture(_contentScreen.Load<Texture2D>(Path.Combine(Game1.BackgroundRoot, name)), true) { Alignment = ImageAlignment.Centered };
+
+		public static Texture2D GetScreenTexture(string path) => _contentScreen.Load<Texture2D>(path);
+
+		public static void UnloadScreenContent()
+		{
+			_contentScreen.Unload();
+		}
+
+		public static void LoadPlayerAssets(Character player)
+		{
+			string spriteSheet = player.SpriteSheetName.ToLower();
+			var standard = _contentGame.Load<Texture2D>(Path.Combine(SpriteSheetRoot, spriteSheet));
+
+			if (_playerSpriteSheetName != spriteSheet)
+			{
+				_playerSpriteSheetHighlight = GenerateHighlightTexture(standard);
+				_playerSpriteSheetName = spriteSheet;
+			}
+
+			player.SpriteSheet = new ImageSpriteSheet(standard, _playerSpriteSheetHighlight, true);
+		}
+
+		public static void LoadMapAssets(Map map)
+		{
+			DisposeMapContent();
+			LoadMapTileSheets(map);
+			LoadMapSpriteSheets(map);
+			LoadMapIcons(map);
+		}
+
+		public static Texture2D GetInterfaceElement(string name) => _contentGame.Load<Texture2D>(Path.Combine(InterfaceRoot, name));
+
+		public static Texture2D GetTileSheet(string id) => _contentMap.Load<Texture2D>(Path.Combine(TilesheetRoot, id));
+
+		public static ImageSpriteSheet GetSpriteSheet(string id)
+		{
+			if (!_spriteSheetHighlight.TryGetValue(id, out Texture2D highlight))
+				throw new Exception($"No spritesheet highlight with name {id} found!");
+
+			return new ImageSpriteSheet(_contentMap.Load<Texture2D>(Path.Combine(SpriteSheetRoot, id)), highlight, true) { Alignment = ImageAlignment.Centered };
+		}
+
+		public static ImageTexture GetIconStatus(string iconName) => new ImageTexture(_contentGame.Load<Texture2D>(Path.Combine(StatusIconRoot, iconName)), true);
+
+		public static ImageTexture GetIconItem(string iconName)
+		{
+			if (!_iconItemHighlight.TryGetValue(iconName, out Texture2D highlight))
+				throw new Exception($"No icon highlight with name {iconName} found!");
+
+			return new ImageTexture(_contentGame.Load<Texture2D>(Path.Combine(IconRoot, iconName)), highlight, true) { Alignment = ImageAlignment.Centered };
+		}
+
+		public static ImageTexture GetIconEmptySlot(string iconName) => new ImageTexture(_contentGame.Load<Texture2D>(Path.Combine(IconEmptyRoot, iconName)), true) { Alignment = ImageAlignment.Centered };
+
+		public static ImageTexture GetIconInteractive(string iconName)
+		{
+			if (!_iconInteractiveHighlight.TryGetValue(iconName, out Texture2D highlight))
+				throw new Exception($"No icon highlight with name {iconName} found!");
+
+			return new ImageTexture(_contentMap.Load<Texture2D>(Path.Combine(InteractiveIconRoot, iconName)), highlight, true) { Alignment = ImageAlignment.Centered };
+		}
+
+		public static ImageTexture GetIconTransition(string iconName)
+		{
+			if (!_iconTransitionHighlight.TryGetValue(iconName, out Texture2D highlight))
+				throw new Exception($"No icon highlight with name {iconName} found!");
+
+			return new ImageTexture(_contentMap.Load<Texture2D>(Path.Combine(TransitionRoot, iconName)), highlight, true) { Alignment = ImageAlignment.Centered };
 		}
 
 		private static void LoadGameAssets()
 		{
 			// Interface elements....
 			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(_contentRoot, InterfaceRoot)))
-			{
-				string fileName = Path.GetFileNameWithoutExtension(file);
-				_interfaceElements[fileName] = _contentGame.Load<Texture2D>(Path.Combine(InterfaceRoot, fileName));
-			}
+				_contentGame.Load<Texture2D>(Path.Combine(InterfaceRoot, file));
 
 			// Item icons...
 			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(_contentRoot, IconRoot)))
-			{				
-				string fileName = Path.GetFileNameWithoutExtension(file);
-				var standard = _contentGame.Load<Texture2D>(Path.Combine(IconRoot, fileName));
-				var highlight = GenerateHighlightTexture(standard);
-				_iconItems[fileName] = (standard, highlight);
-			}
+				_iconItemHighlight[file] = GenerateHighlightTexture(_contentGame.Load<Texture2D>(Path.Combine(IconRoot, file)));
 
 			// Status icons...
 			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(_contentRoot, StatusIconRoot)))
-			{				
-				string fileName = Path.GetFileNameWithoutExtension(file);
-				_iconStatuses[fileName] = _contentGame.Load<Texture2D>(Path.Combine(StatusIconRoot, fileName));
-			}
+				_contentGame.Load<Texture2D>(Path.Combine(StatusIconRoot, file));
 
 			// Empty equipment slot icons...
 			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(_contentRoot, IconEmptyRoot)))
-			{
-				string fileName = Path.GetFileNameWithoutExtension(file);
-				_iconEmptySlots[fileName] = _contentGame.Load<Texture2D>(Path.Combine(IconEmptyRoot, fileName));
-			}
-		}
-
-		public static void LoadPlayerAssets(Character player)
-		{
-			string spriteSheet = player.SpriteSheetName.ToLower();
-
-			if (_playerSpriteSheetName != spriteSheet)
-			{
-				var standard = _contentGame.Load<Texture2D>(Path.Combine(SpriteSheetRoot, spriteSheet));
-				var highlight = GenerateHighlightTexture(standard);
-				_playerSpriteSheet = (standard, highlight);
-				_playerSpriteSheetName = spriteSheet;
-			}
-
-			player.SpriteSheet = new ImageSpriteSheet(_playerSpriteSheet.standard, _playerSpriteSheet.highlight, true);
-		}
-
-		public static void LoadMapAssets(Map map)
-		{
-			_tileSheets.Clear();
-			_spriteSheets.Clear();
-			_iconInteractives.Clear();
-			_iconTransitions.Clear();
-			_contentMap.Unload();
-			LoadMapTileSheets(map);
-			LoadMapSpriteSheets(map);
-			LoadMapIcons(map);
-		}
-
-		public static Texture2D GetInterfaceElement(string name)
-		{
-			if (!_interfaceElements.TryGetValue(name, out Texture2D texture))
-				throw new Exception($"No interface element with name {name} found!");
-
-			return _interfaceElements[name];
-		}
-
-		public static Texture2D GetTileSheet(string id) => _tileSheets[id];
-
-		public static ImageSpriteSheet GetSpriteSheet(string id)
-		{
-			if (!_spriteSheets.ContainsKey(id))
-				LoadSpriteSheet(id);
-
-			(var general, var highlight) = _spriteSheets[id];
-			return new ImageSpriteSheet(general, highlight, true);
-		}
-
-		public static ImageTexture GetIconStatus(string iconName)
-		{
-			if (!_iconStatuses.TryGetValue(iconName, out Texture2D texture))
-				throw new Exception($"No status icon with name {iconName} found!");
-
-			return new ImageTexture(texture, true);
-		}
-
-		public static ImageTexture GetIconItem(string iconName)
-		{
-			if (!_iconItems.TryGetValue(iconName, out (Texture2D standard, Texture2D highlight) textures))
-				throw new Exception($"No item icon with name {iconName} found!");
-
-			return new ImageTexture(textures.standard, textures.highlight, true) { Alignment = ImageAlignment.Centered };
-		}
-
-		public static ImageTexture GetIconEmptySlot(string iconName)
-		{
-			if (!_iconEmptySlots.TryGetValue(iconName, out Texture2D texture))
-				throw new Exception($"No empty slot icon with name {iconName} found!");
-
-			return new ImageTexture(texture, true) { Alignment = ImageAlignment.Centered };
-		}
-
-		public static ImageTexture GetIconInteractive(string iconName)
-		{
-			if (!_iconInteractives.TryGetValue(iconName, out (Texture2D standard, Texture2D highlight) textures))
-				throw new Exception($"No interactive icon with name {iconName} found!");
-
-			return new ImageTexture(textures.standard, textures.highlight, true) { Alignment = ImageAlignment.Centered };
-		}
-
-		public static ImageTexture GetIconTransition(string iconName)
-		{
-			if (!_iconTransitions.TryGetValue(iconName, out (Texture2D standard, Texture2D highlight) textures))
-				throw new Exception($"No transition icon with name {iconName} found!");
-
-			return new ImageTexture(textures.standard, textures.highlight, true) { Alignment = ImageAlignment.Centered };
+				_contentGame.Load<Texture2D>(Path.Combine(IconEmptyRoot, file));
 		}
 
 		private static void LoadMapSpriteSheets(Map map)
@@ -193,25 +184,13 @@ namespace Game1
 				mapSpriteSheets.Add(sex.ToString("g").ToLower());
 
 			foreach (string spriteSheet in mapSpriteSheets)
-				if (!_spriteSheets.ContainsKey(spriteSheet))
-					LoadSpriteSheet(spriteSheet);
+				_spriteSheetHighlight[spriteSheet] = GenerateHighlightTexture(_contentMap.Load<Texture2D>(Path.Combine(SpriteSheetRoot, spriteSheet)));
 		}
 
 		private static void LoadMapTileSheets(Map map)
 		{
 			foreach (string tileSheet in map.Layers.Select(l => l.TileSheet.ToLower()).Where(l => !String.IsNullOrWhiteSpace(l)).Distinct())
-				if (!_tileSheets.ContainsKey(tileSheet))
-					_tileSheets[tileSheet] = _contentMap.Load<Texture2D>(Path.Combine(TilesheetRoot, tileSheet));
-		}
-
-		private static void LoadSpriteSheet(string name)
-		{
-			if (_spriteSheets.ContainsKey(name))
-				return;
-
-			var standard = _contentMap.Load<Texture2D>(Path.Combine(SpriteSheetRoot, name));
-			var highlight = GenerateHighlightTexture(standard);
-			_spriteSheets[name] = (standard, highlight);
+				_contentMap.Load<Texture2D>(Path.Combine(TilesheetRoot, tileSheet));
 		}
 
 		private static Texture2D GenerateHighlightTexture(Texture2D texture)
@@ -235,24 +214,10 @@ namespace Game1
 		private static void LoadMapIcons(Map map)
 		{
 			foreach (var interactive in map.Interactives)
-			{
-				if (!_iconInteractives.ContainsKey(interactive.Id))
-				{
-					var standard = _contentMap.Load<Texture2D>(Path.Combine(InteractiveIconRoot, interactive.Id));
-					var highlight = GenerateHighlightTexture(standard);
-					_iconInteractives[interactive.Id] = (standard, highlight);
-				}
-			}
+				_iconInteractiveHighlight[interactive.Id] = GenerateHighlightTexture(_contentMap.Load<Texture2D>(Path.Combine(InteractiveIconRoot, interactive.Id)));
 
 			foreach (var transition in map.Transitions)
-			{
-				if (!_iconTransitions.ContainsKey(transition.Id))
-				{
-					var standard = _contentMap.Load<Texture2D>(Path.Combine(TransitionRoot, transition.Id));
-					var highlight = GenerateHighlightTexture(standard);
-					_iconTransitions[transition.Id] = (standard, highlight);
-				}
-			}
+				_iconTransitionHighlight[transition.Id] = GenerateHighlightTexture(_contentMap.Load<Texture2D>(Path.Combine(TransitionRoot, transition.Id)));
 		}
 	}
 }

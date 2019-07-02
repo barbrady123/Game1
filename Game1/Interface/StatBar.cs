@@ -52,13 +52,11 @@ namespace Game1.Interface
 				Position = this.Bounds.CenterVector(yOffset: 2),
 				Alignment = ImageAlignment.Centered
 			};
-			_textImage.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-			_textImage.UnloadContent();
 			_fill?.UnloadContent();
 		}
 

@@ -103,7 +103,6 @@ namespace Game1.Interface
 		public override void LoadContent()
 		{
 			base.LoadContent();
-			_textImage.LoadContent();
 			_cursor.LoadContent();
 		}
 
@@ -111,7 +110,6 @@ namespace Game1.Interface
 		{
 			base.UnloadContent();
 			_cursor.UnloadContent();
-			_textImage.UnloadContent();
 		}
 
 		public override void Update(GameTime gameTime)

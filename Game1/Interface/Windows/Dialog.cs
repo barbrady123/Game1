@@ -61,13 +61,11 @@ namespace Game1.Interface.Windows
 		{
 			base.LoadContent();
 			_buttonMenu?.LoadContent();
-			_textImage.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
 			_buttonMenu?.UnloadContent();
-			_textImage.UnloadContent();
 		}
 
 		public override void UpdateActive(GameTime gameTime)

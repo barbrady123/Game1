@@ -17,7 +17,6 @@ namespace Game1
 	public abstract class Image
 	{		
 		protected List<ImageEffect> _effects;
-		protected ContentManager _content;
 		protected Vector2 _origin;
 		protected Rectangle _sourceRect;
 
@@ -95,17 +94,6 @@ namespace Game1
 			this.Color = Color.White;
 			_origin = Vector2.Zero;
 			this.OriginOffset = Vector2.Zero;
-		}
-
-		public virtual void LoadContent()
-		{
-			_content = new ContentManager(Game1.ServiceProvider, Game1.ContentRoot);
-		}
-
-		public virtual void UnloadContent()
-		{
-			if (_content != null)
-				_content.Unload();
 		}
 
 		public virtual void Update(GameTime gameTime)

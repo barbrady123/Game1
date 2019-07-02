@@ -35,13 +35,11 @@ namespace Game1.Interface
 		public override void LoadContent()
 		{
 			base.LoadContent();
-			_text.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
 			base.LoadContent();
-			_text.UnloadContent();
 		}
 
 		public override void UpdateActive(GameTime gameTime)

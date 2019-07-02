@@ -162,11 +162,6 @@ namespace Game1.Menus
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-			if (_items != null)
-			{
-				foreach (var item in _items)
-					item.Image?.UnloadContent();
-			}
 		}
 
 		public override void UpdateActive(GameTime gameTime)

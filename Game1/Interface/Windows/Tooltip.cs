@@ -69,13 +69,11 @@ namespace Game1.Interface.Windows
 		public override void LoadContent()
 		{
 			base.LoadContent();
-			_text.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-			_text.UnloadContent();
 		}
 
 		public override void Update(GameTime gameTime)

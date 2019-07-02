@@ -29,7 +29,7 @@ namespace Game1.Screens
 		public ImageTexture _characterView;
 		public CharacterNewCompositeMenu _menuCharacter;
 
-		private string CharacterPreviewImage(CharacterSex sex) => $"Character/Preview/{sex.ToString("g")}";
+		private Dictionary<CharacterSex, ImageTexture> _preview;
 
 		public CharacterCreateScreen(Rectangle bounds): base(bounds, background: "brick")
 		{
@@ -38,19 +38,25 @@ namespace Game1.Screens
 				Scale = new Vector2(1.5f, 1.5f),
 				Position = new Vector2(this.Bounds.Width / 2, 50.0f)
 			};
-			// Character View...
-			_characterViewBack = new ImageTexture("Background/black", true) {
-				Alignment = ImageAlignment.Centered,
-				Alpha = 0.6f,
-				Scale = new Vector2(320.0f, 320.0f),
-				Position = _characterViewPosition
-			};
-			_characterView = new ImageTexture(this.CharacterPreviewImage(DefaultSex), true)	{
-				Alignment = ImageAlignment.Centered,
-				Scale = new Vector2(5.0f, 5.0f),
-				Position = _characterViewPosition
-			};
 
+			// Character View...
+			_characterViewBack = AssetManager.GetBackground("black");
+			_characterViewBack.Alpha = 0.6f;
+			_characterViewBack.Scale = new Vector2(320.0f, 320.0f);
+			_characterViewBack.Position = _characterViewPosition;
+
+			_preview = new Dictionary<CharacterSex, ImageTexture>();
+			foreach (CharacterSex sex in (CharacterSex[])System.Enum.GetValues(typeof(CharacterSex)))
+			{
+				_preview[sex] = new ImageTexture(AssetManager.GetScreenTexture($"Character/Preview/{sex.ToString("g")}"), true) {
+					Alignment = ImageAlignment.Centered,
+					Scale = new Vector2(5.0f, 5.0f),
+					Position = _characterViewPosition
+				};
+				_preview[sex].LoadContent();
+			}
+			_characterView = _preview[DefaultSex];
+				
 			// Menu
 			_activator.Register(_menuCharacter = new CharacterNewCompositeMenu(new Rectangle(650, 200, 200, 200)) { CharacterName = "", CharacterSex = DefaultSex }, true, "active");
 			_menuCharacter.OnSexItemChange += _menuCharacter_OnSexItemChange;
@@ -66,9 +72,7 @@ namespace Game1.Screens
 		public override void LoadContent()
 		{
 			base.LoadContent();
-			_titleText.LoadContent();
 			_characterViewBack.LoadContent();
-			_characterView.LoadContent();
 			_menuCharacter.LoadContent();
 			_dialog.LoadContent();
 		}
@@ -76,9 +80,7 @@ namespace Game1.Screens
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-			_titleText.UnloadContent();
 			_characterViewBack.UnloadContent();
-			_characterView.UnloadContent();
 			_menuCharacter.UnloadContent();
 			_dialog.UnloadContent();
 		}
@@ -105,12 +107,8 @@ namespace Game1.Screens
 		{
 			switch (e.Value)
 			{
-				case "female" :
-					_characterView.SwapTexture(this.CharacterPreviewImage(CharacterSex.Female));
-					break;
-				case "male" :
-					_characterView.SwapTexture(this.CharacterPreviewImage(CharacterSex.Male));
-					break;
+				case "female" :	_characterView = _preview[CharacterSex.Female];	break;
+				case "male" :	_characterView = _preview[CharacterSex.Male];	break;
 			}
 		}
 

@@ -124,7 +124,6 @@ namespace Game1
 			_barMana.LoadContent();
 			_buffs.LoadContent();
 			_debuffs.LoadContent();
-			_defense.LoadContent();
 		}
 
 		public override void UnloadContent()
@@ -140,7 +139,6 @@ namespace Game1
 			_barMana.UnloadContent();
 			_buffs.UnloadContent();
 			_debuffs.UnloadContent();
-			_defense.UnloadContent();
 		}
 
 		public override void Update(GameTime gameTime)

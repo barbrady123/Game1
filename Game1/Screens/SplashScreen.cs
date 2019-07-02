@@ -25,13 +25,11 @@ namespace Game1.Screens
 		public override void LoadContent()
 		{
 			base.LoadContent();
-			_title.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-			_title.UnloadContent();
 		}
 
 		public override void UpdateActive(GameTime gameTime)

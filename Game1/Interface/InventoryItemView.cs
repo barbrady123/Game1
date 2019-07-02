@@ -62,7 +62,6 @@ namespace Game1.Interface
 			_highlightBorder.LoadContent();
 			_quantity = new ImageText("", true) { Alignment = ImageAlignment.RightBottom };
 			_quantity.Position = this.Bounds.BottomRightVector(-InventoryItemView.ImagePadding -2, -InventoryItemView.ImagePadding);
-			_quantity.LoadContent();
 			_emptyIcon?.LoadContent();
 		}
 
@@ -70,7 +69,6 @@ namespace Game1.Interface
 		{
 			base.UnloadContent();
 			_highlightBorder.UnloadContent();
-			_quantity.UnloadContent();
 			_emptyIcon?.UnloadContent();
 		}
 

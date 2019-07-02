@@ -14,11 +14,6 @@ namespace Game1
 {
 	public class ImageSpriteSheet : ImageTexture
 	{
-		public ImageSpriteSheet(string name, bool isActive = false) : base(name, isActive)
-		{
-			Alignment = ImageAlignment.Centered;
-		}
-
 		public ImageSpriteSheet(Texture2D texture, bool isActive = false) : base(texture, isActive)
 		{
 			Alignment = ImageAlignment.Centered;

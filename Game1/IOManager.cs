@@ -27,7 +27,7 @@ namespace Game1
 		public static IEnumerable<string> EnumerateDirectory(string path)
 		{
 			foreach (var file in Directory.EnumerateFiles(path))
-				yield return file;
+				yield return Path.GetFileNameWithoutExtension(file);
 		}
 	}
 }

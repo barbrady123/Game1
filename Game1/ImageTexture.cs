@@ -14,15 +14,8 @@ namespace Game1
 {
 	public class ImageTexture : Image
 	{
-		protected Texture2D _highlightTexture;
 		protected Texture2D _texture;
-		private string _name;
-
-		public ImageTexture(string name, bool isActive = false) : base(isActive)
-		{
-			_name = name;
-			this.Alignment = ImageAlignment.LeftTop;
-		}
+		protected Texture2D _highlightTexture;
 
 		public ImageTexture(Texture2D texture, bool isActive = false) : base(isActive)
 		{
@@ -41,28 +34,27 @@ namespace Game1
 
 		public Texture2D Texture => _texture;
 
-		public override void LoadContent()
+		public virtual void LoadContent()
 		{
-			base.LoadContent();
-			if (_texture == null)
-				_texture = _content.Load<Texture2D>(_name);
-
 			UpdatePosition();
 		}
 
+		/// <summary>
+		/// Only necessary if this texture is not tracked and disposed of elsewhere...
+		/// </summary>
+		public virtual void UnloadContent()
+		{
+			_texture.Dispose();
+		}
+
+		// This needs to be easily callable on position/alignment update, so we need a 
+		// better flag for whether or not it's ok to mess with the SourceRect!
 		protected virtual void UpdatePosition()
 		{
 			if (this.SourceRect == Rectangle.Empty)
 				this.SourceRect = _texture.Bounds;
 
 			SetOrigin();
-		}
-
-		public override void UnloadContent()
-		{
-			base.UnloadContent();
-			// In case this texture was generated elsewhere...
-			_texture?.Dispose();
 		}
 
 		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None)
@@ -83,15 +75,6 @@ namespace Game1
 			}
 
 			spriteBatch.Draw(_texture, pos, this.SourceRect, this.Color * this.Alpha * (alphaBlend ?? 1.0f), this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects, 0.0f);
-		}
-
-		public void SwapTexture(string name, bool resetSourceRect = true)
-		{
-			_name = name;
-			_texture = null;
-			if (resetSourceRect)
-				this.SourceRect = Rectangle.Empty;
-			LoadContent();
 		}
 	}
 }

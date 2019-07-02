@@ -69,7 +69,6 @@ namespace Game1.Interface.Windows
 		public override void LoadContent()
 		{
 			base.LoadContent();
-			_containerName.LoadContent();
 			_containerViewBackpack.LoadContent();
 			_containerViewHotbar.LoadContent();
 			_splitWindow.LoadContent();
@@ -78,7 +77,6 @@ namespace Game1.Interface.Windows
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
-			_containerName.UnloadContent();
 			_containerViewBackpack.UnloadContent();
 			_containerViewHotbar.UnloadContent();
 			_splitWindow.UnloadContent();

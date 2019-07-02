@@ -108,7 +108,6 @@ namespace Game1
 		{
 			_bounds = bounds ?? Rectangle.Empty;
 			_activator = new ActivationManager();
-			// Auto register tooltip/context/etc...when available...
 			_readyDisableOnEscape = readyDisableOnEscape;
 			_spriteBatchData = spriteBatchData;
 			_hasBorder = hasBorder;
@@ -127,14 +126,13 @@ namespace Game1
 			}
 
 			if (!String.IsNullOrWhiteSpace(_backgroundName))
-				_background = new ImageTexture($"{Game1.BackgroundRoot}/{_backgroundName}", true) { Alignment = ImageAlignment.Centered };
+				_background = AssetManager.GetBackground(_backgroundName);
 
 			BoundsChanged(true);
 		}
 
 		public virtual void LoadContent()
 		{
-			_background?.LoadContent();
 			_border?.LoadContent();
 			_tooltip?.LoadContent();
 			_contextMenu?.LoadContent();
@@ -142,7 +140,6 @@ namespace Game1
 
 		public virtual void UnloadContent()
 		{
-			_background?.UnloadContent();
 			_border?.UnloadContent();
 			_tooltip?.UnloadContent();
 			_contextMenu?.UnloadContent();
