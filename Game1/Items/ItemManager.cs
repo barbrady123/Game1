@@ -19,8 +19,6 @@ namespace Game1.Items
 	public static class ItemManager
 	{
 		// TODO: This will eventually be much more organized/structured by item "type", etc...
-		// For now, we just have a bunch of random item icons in the root folder...
-		private static Dictionary<string, Texture2D> _textures;
 		private static ContentManager _content;
 
 		private static List<ItemGeneral> _generals;
@@ -31,9 +29,6 @@ namespace Game1.Items
 
 		static ItemManager()
 		{
-			_content = new ContentManager(Game1.ServiceProvider, Game1.ContentRoot);
-			_textures = new Dictionary<string, Texture2D>();
-
 			_generals = IOManager.ObjectFromFile<List<ItemGeneral>>(Path.Combine(Game1.MetaRoot, "items_general"));
 			_consumables = IOManager.ObjectFromFile<List<ItemConsumable>>(Path.Combine(Game1.MetaRoot, "items_consumable"));
 			_armors = IOManager.ObjectFromFile<List<ItemArmor>>(Path.Combine(Game1.MetaRoot, "items_armor"));
@@ -48,20 +43,6 @@ namespace Game1.Items
 												.Concat(_weapons.Cast<Item>())
 												.Concat(_tools.Cast<Item>()).ToList();
 
-		public static void LoadContent()
-		{
-			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(Game1.ContentRoot, Game1.IconRoot)))
-			{				
-				string fileName = Path.GetFileNameWithoutExtension(file);
-				_textures[fileName] = _content.Load<Texture2D>(Path.Combine(Game1.IconRoot, fileName));
-			}
-		}
-
-		public static void UnloadContent()
-		{
-			_content.Unload();
-		}
-
 		// TODO: This is just a temp crap method so I don't pollute the main code with temp code....
 		public static InventoryItem GetItem(int? index = null)
 		{
@@ -70,7 +51,7 @@ namespace Game1.Items
 			int val = index ?? GameRandom.Next(0, items.Count - 1);
 			return new InventoryItem(
 				items[val],
-				new ImageTexture(_textures[items[val].IconName], true) { Alignment = ImageAlignment.Centered },
+				AssetManager.GetIconItem(items[val].IconName),
 				GameRandom.Next(1, items[val].MaxStackSize));
 		}
 
@@ -78,14 +59,13 @@ namespace Game1.Items
 		{
 			var items = _allItems;
 
-			// TODO: For now, we're just using the IconName as the id lookup, but we have an actual id field (maybe should change to string)...
-			var item = items.SingleOrDefault(i => i.IconName == id);
+			var item = items.SingleOrDefault(i => i.Id == id);
 			if (item == null)
 				throw new ArgumentException($"No item found with id '{id}'");
 			if (quantity > item.MaxStackSize)
 				throw new ArgumentException($"Invalid quantity '{quantity}' requested for item '{id}' (max: {item.MaxStackSize})");
 
-			return new InventoryItem(item, new ImageTexture(_textures[item.IconName], true) { Alignment = ImageAlignment.Centered }, quantity);
+			return new InventoryItem(item, AssetManager.GetIconItem(item.IconName), quantity);
 		}
 
 		public static InventoryItem FromItem(InventoryItem item, int? quantity, bool removeItemQuantity = true)
@@ -95,7 +75,7 @@ namespace Game1.Items
 				item.Quantity -= trueQuantity;
 			return new InventoryItem(
 				item.Item,
-				new ImageTexture(_textures[item.Item.IconName], true) { Alignment = ImageAlignment.Centered },
+				AssetManager.GetIconItem(item.Item.IconName),
 				trueQuantity);
 		}
 
@@ -104,7 +84,7 @@ namespace Game1.Items
 			if (item == null)
 				return null;
 
-			return new InventoryItem(item.Item, new ImageTexture(_textures[item.Item.IconName], true) { Alignment = ImageAlignment.Centered }, newQuantity ?? item.Quantity, item.Id);
+			return new InventoryItem(item.Item, AssetManager.GetIconItem(item.Item.IconName), newQuantity ?? item.Quantity, item.Id);
 		}
 	}
 }

@@ -23,12 +23,6 @@ namespace Game1
 		public const string BackgroundRoot = "Background";
 		public const string MetaRoot = "Load";
 		public const string MapRoot = MetaRoot + "\\Map";
-		public const string TilesheetRoot = "Gameplay\\TileSheet";
-		public const string SpriteSheetRoot = "Gameplay\\Character";
-		public const string TransitionRoot = "Gameplay\\Transition";
-		public const string IconRoot = "Gameplay\\Icon";
-		public const string StatusIconRoot = "Gameplay\\Status";
-		public const string InteractiveIconRoot = "Gameplay\\Interactive";
 		public const string AudioRoot = "Audio";
 		public const int TileSize = 64;
 		public const int TileHalfSize = TileSize / 2;
@@ -107,10 +101,8 @@ namespace Game1
 			// Context windows
 			SpriteBatchManager.Add(new SpriteBatch(GraphicsDevice),  new RasterizerState { ScissorTestEnable = true }, 600, "notification");
 
+			AssetManager.LoadContent(ServiceProvider, GraphicsDevice, ContentRoot);
 			FontManager.LoadContent();
-			InputManager.LoadContent();
-			ItemManager.LoadContent();
-			MetaManager.LoadContent();
 			AudioManager.LoadContent();
 			_screenManager.LoadContent();
 			_screenManager.StartScreen();
@@ -122,10 +114,8 @@ namespace Game1
 		/// </summary>
 		protected override void UnloadContent()
 		{
+			AssetManager.UnloadContent();
 			FontManager.UnloadContent();
-			InputManager.UnloadContent();
-			ItemManager.UnloadContent();
-			MetaManager.UnloadContent();
 			AudioManager.UnloadContent();
 			_screenManager.UnloadContent();
 		}

@@ -215,7 +215,7 @@
 	],
 	"transitions": [
 		{
-			"type": "StairsDown",
+			"id": "stairs_down",
 			"position": {
 				"X": 352,
 				"Y": 352

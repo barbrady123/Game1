@@ -87,7 +87,7 @@
 	],
 	"transitions": [
 		{
-			"type": "StairsUp",
+			"id": "stairs_up",
 			"position": {
 				"X": 352,
 				"Y": 352

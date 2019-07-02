@@ -94,7 +94,7 @@ namespace Game1.Interface
 				Scale = new Vector2(1.1f, 1.1f)
 			};
 
-			_cursor = new ImageTexture("Interface/cursor", true) { Position = new Vector2(this.CursorPositionX, this.TextPosition.Y) };
+			_cursor = new ImageTexture(AssetManager.GetInterfaceElement("cursor"), true) { Position = new Vector2(this.CursorPositionX, this.TextPosition.Y) };
 			var effect = _cursor.AddEffect<FadeCycleEffect>(true);
 			effect.Speed = 5.0f;	// Add dynamic params so we can include this in call above
 			CalculateVisibleText(TextInputAction.Right);

@@ -43,9 +43,12 @@ namespace Game1.Interface
 		{
 			this.Index = index;
 			this.ContainingView = containingView;
-			_emptyImageName = emptyImage;
+			_emptyImageName = emptyImage?.ToLower() ?? null;
 			if (!String.IsNullOrWhiteSpace(_emptyImageName))
-				_emptyIcon = new ImageTexture($"{Game1.IconRoot}\\Empty\\{_emptyImageName}") { Position = this.Bounds.CenterVector(), Alignment = ImageAlignment.Centered };
+			{
+				_emptyIcon = AssetManager.GetIconEmptySlot(_emptyImageName);
+				_emptyIcon.Position = this.Bounds.CenterVector();
+			}
 			this.Highlight = false;
 			this.IsEquippedSlot = isEquippedSlot;
 		}

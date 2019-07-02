@@ -20,63 +20,22 @@ namespace Game1
 	/// </summary>
 	public static class MetaManager
 	{
-		private static readonly ContentManager _content;
-		private static Dictionary<string, Texture2D> _statusTextures;
-		private static Dictionary<string, Texture2D> _interactiveTextures;
-		private static Dictionary<string, Texture2D> _transitionTextures;
-
 		private static readonly Dictionary<CharacterInstantEffect, InstantEffect> _instants;
 		private static readonly Dictionary<CharacterBuffEffect, BuffEffect> _buffs;
 		private static readonly Dictionary<CharacterDebuffEffect, DebuffEffect> _debuffs;
 		
-		private static readonly List<Interactive> _interactives;
-
-		private static readonly Dictionary<string, Texture2D> _spriteSheets;
-
-		private static readonly Dictionary<TransitionType, Transition> _transitions;
+		private static readonly Dictionary<string, Interactive> _interactives;
+		private static readonly Dictionary<string, Transition> _transitions;
+		// TODO: Should be a NPC and Mob collection here...
 
 		static MetaManager()
 		{
-			_content = new ContentManager(Game1.ServiceProvider, Game1.ContentRoot);
-			_statusTextures = new Dictionary<string, Texture2D>();
-			_interactiveTextures = new Dictionary<string, Texture2D>();
-			_transitionTextures = new Dictionary<string, Texture2D>();
-
 			_instants = new Dictionary<CharacterInstantEffect, InstantEffect>();
 			_buffs = new Dictionary<CharacterBuffEffect, BuffEffect>();
 			_debuffs = new Dictionary<CharacterDebuffEffect, DebuffEffect>();
 
-			_interactives = new List<Interactive>();
-
-			_spriteSheets = new Dictionary<string, Texture2D>();
-			_transitions = new Dictionary<TransitionType, Transition>();
-		}
-
-		public static void LoadContent()
-		{
-			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(Game1.ContentRoot, Game1.StatusIconRoot)))
-			{				
-				string fileName = Path.GetFileNameWithoutExtension(file);
-				_statusTextures[fileName] = _content.Load<Texture2D>(Path.Combine(Game1.StatusIconRoot, fileName));
-			}
-
-			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(Game1.ContentRoot, Game1.InteractiveIconRoot)))
-			{
-				string fileName = Path.GetFileNameWithoutExtension(file);
-				_interactiveTextures[fileName] = _content.Load<Texture2D>(Path.Combine(Game1.InteractiveIconRoot, fileName));
-			}
-
-			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(Game1.ContentRoot, Game1.SpriteSheetRoot)))
-			{
-				string fileName = Path.GetFileNameWithoutExtension(file);
-				_spriteSheets[fileName] = _content.Load<Texture2D>(Path.Combine(Game1.SpriteSheetRoot, fileName));
-			}
-
-			foreach (var file in IOManager.EnumerateDirectory(Path.Combine(Game1.ContentRoot, Game1.TransitionRoot)))
-			{
-				string fileName = Path.GetFileNameWithoutExtension(file);
-				_transitionTextures[fileName] = _content.Load<Texture2D>(Path.Combine(Game1.TransitionRoot, fileName));
-			}
+			_interactives = new Dictionary<string, Interactive>();
+			_transitions = new Dictionary<string, Transition>();
 
 			// TEMP: This should come from file, etc...
 			_instants[CharacterInstantEffect.MinorHeal] = new InstantEffect(
@@ -130,7 +89,8 @@ namespace Game1
 				10
 			);
 
-			_interactives.Add(new Interactive {
+			_interactives["rock"] = new Interactive {
+				Id = "rock",
 				DisplayText = "Rock",
 				IconName = "rock",
 				Health = 100,
@@ -147,15 +107,10 @@ namespace Game1
 				}},
 				IsSolid = true,
 				Size = new Size(32, 32)
-			});
+			};
 
-			_transitions.Add(TransitionType.StairsDown, new Transition { DisplayName = "Stairs Down", IconName = "stairs_down" });
-			_transitions.Add(TransitionType.StairsUp, new Transition { DisplayName = "Stairs Up", IconName = "stairs_up" });
-		}
-
-		public static void UnloadContent()
-		{
-			_content.Unload();
+			_transitions["stairs_down"] = new Transition("stairs_down", "Stairs Down", "stairs_down");
+			_transitions["stairs_up"] = new Transition("stairs_up", "Stairs Up", "stairs_up");
 		}
 
 		public static void ApplyCharacterInstantEffect(CharacterInstantEffect effect, Character character)
@@ -179,7 +134,7 @@ namespace Game1
 			var currentBuff = character.Buffs.FirstOrDefault(x => x.Effect.Effect == effect);
 			if (currentBuff == null)
 			{
-				character.AddBuff(new CharacterStatus<BuffEffect>(buff, new ImageTexture(_statusTextures[buff.IconName], true)));
+				character.AddBuff(new CharacterStatus<BuffEffect>(buff, AssetManager.GetIconStatus(buff.IconName)));
 			}
 			else
 			{
@@ -198,7 +153,7 @@ namespace Game1
 			var currentDebuff = character.Debuffs.FirstOrDefault(x => x.Effect.Effect == effect);
 			if (currentDebuff == null)
 			{
-				character.AddDebuff(new CharacterStatus<DebuffEffect>(debuff, new ImageTexture(_statusTextures[debuff.IconName], true)));
+				character.AddDebuff(new CharacterStatus<DebuffEffect>(debuff, AssetManager.GetIconStatus(debuff.IconName)));
 			}
 			else
 			{
@@ -212,29 +167,21 @@ namespace Game1
 		// Another temp test method...
 		public static WorldInteractive GetInteractve(string id, Vector2 position)
 		{
-			// TODO: For now, we're just using the IconName as the id lookup, but we have an actual id field (maybe should change to string)...
-			var interactive = _interactives.SingleOrDefault(i => i.IconName == id);
-			if (interactive == null)
+			if (!_interactives.TryGetValue(id, out Interactive interactive))
 				throw new ArgumentException($"No interactive found with id '{id}'");
-			return new WorldInteractive(interactive, new ImageTexture(_interactiveTextures[interactive.IconName], true) { Alignment = ImageAlignment.Centered }, position);
-		}
 
-		public static ImageSpriteSheet GetSpriteSheet(string name)
-		{
-			var img = new ImageSpriteSheet(_spriteSheets[name.ToLower()], true);
-			img.AddEffect<SpriteSheetEffect>(false);
-			return img;
+			return new WorldInteractive(interactive, AssetManager.GetIconInteractive(interactive.IconName), position);
 		}
 
 		public static WorldTransition GetTransition(MapTransition transition)
 		{
-			if (!_transitions.ContainsKey(transition.Type))
-				throw new ArgumentException($"No transition found for type '{transition.Type}'");
+			if (!_transitions.ContainsKey(transition.Id))
+				throw new ArgumentException($"No transition found for id '{transition.Id}'");
 
 			return new WorldTransition(
-				_transitions[transition.Type],
+				_transitions[transition.Id],
 				transition.Position.ToVector2(),
-				new ImageTexture(_transitionTextures[_transitions[transition.Type].IconName], true) { Alignment = ImageAlignment.Centered },
+				AssetManager.GetIconTransition(transition.Id),
 				transition.DestinationMap,
 				transition.DestinationPosition
 			);

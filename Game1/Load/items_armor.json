@@ -1,6 +1,6 @@
 ﻿[
   {
-    "id": 6,
+    "id": "helmet",
     "displayname": "Chain Helm",
     "iconname": "helmet",
     "maxstack": 1,
@@ -9,7 +9,7 @@
     "defense": 2
   },
   {
-    "id": 7,
+    "id": "armor",
     "displayname": "Iron Armor",
     "iconname": "armor",
     "maxstack": 1,
@@ -18,7 +18,7 @@
     "defense": 5
   },
   {
-    "id": 8,
+    "id": "upg_armor",
     "displayname": "Gold Armor",
     "iconname": "upg_armor",
     "maxstack": 1,

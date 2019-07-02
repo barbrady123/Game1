@@ -18,7 +18,6 @@ namespace Game1
 	{		
 		protected readonly object _lock = new object();
 		private Vector2 _position;
-		public ImageSpriteSheet _spriteSheet;
 		private ItemContainer _hotbar;
 		private ItemContainer _backpack;
 		protected float _movementSpeed;
@@ -30,6 +29,7 @@ namespace Game1
 		private bool _activeItemUsed;
 		private bool _activeItemMoving;
 		
+		public ImageSpriteSheet SpriteSheet { get; set; }
 		public string SpriteSheetName => this.Sex.ToString("g").ToLower();
 		public Vector2 Motion { get; set; }
 		public float MovementSpeed => _movementSpeed * MovementSpeedModifier();
@@ -68,7 +68,7 @@ namespace Game1
 
 		public void SetImageEffect<T>() where T: ImageEffect
 		{
-			_spriteSheet.AddEffect<T>(true);
+			this.SpriteSheet.AddEffect<T>(true);
 		}
 
 		// Find a better place for these types of methods...
@@ -181,7 +181,7 @@ namespace Game1
 
 		public Rectangle Bounds { get; private set; }
 
-		public Character(string spriteSheetName)
+		public Character()
 		{
 			this.Direction = Cardinal.South;
 			_movementSpeed = 150.0f;
@@ -191,7 +191,6 @@ namespace Game1
 			this.Buffs = new List<CharacterStatus<BuffEffect>>();
 			this.Debuffs = new List<CharacterStatus<DebuffEffect>>();
 			this.PreviousPosition = -Vector2.One;
-			_spriteSheet = MetaManager.GetSpriteSheet(spriteSheetName);
 			this.IsHighlighted = false;
 		}
 
@@ -221,17 +220,17 @@ namespace Game1
 			{
 				motion.Normalize();
 				motion *= (this.MovementSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
-				_spriteSheet.AddEffect<SpriteSheetEffect>(true);
+				this.SpriteSheet.AddEffect<SpriteSheetEffect>(true);
 			}
 			else
 			{
-				_spriteSheet.StopEffect(typeof(SpriteSheetEffect));
+				this.SpriteSheet.StopEffect(typeof(SpriteSheetEffect));
 			}
 
 			this.Motion = motion;
 			this.Direction = Util.DirectionFromVector(motion, this.Direction);
-			_spriteSheet.UpdateDirection(this.Direction);
-			_spriteSheet.Update(gameTime);
+			this.SpriteSheet.UpdateDirection(this.Direction);
+			this.SpriteSheet.Update(gameTime);
 
 			if (mouseInWorld)
 				UpdateMouse();
@@ -294,8 +293,8 @@ namespace Game1
 		public void Draw(SpriteBatch spriteBatch, Vector2 offset)
 		{
 			DrawBehind(spriteBatch, offset);
-			_spriteSheet.Highlight = this.IsHighlighted;
-			_spriteSheet.Draw(spriteBatch, position: this.Position + offset);
+			this.SpriteSheet.Highlight = this.IsHighlighted;
+			this.SpriteSheet.Draw(spriteBatch, position: this.Position + offset);
 			DrawInfront(spriteBatch, offset);
 		}
 
@@ -524,7 +523,7 @@ namespace Game1
 
 		public static Character New(string name, CharacterSex sex)
 		{
-			return new Character(sex.ToString("g"))	{
+			return new Character()	{
 				Name = name,
 				Sex = sex,
 				Location = "map",

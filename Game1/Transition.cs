@@ -17,8 +17,17 @@ namespace Game1
 {
 	public class Transition
 	{
+		public string Id { get; set; }
+
 		public string DisplayName { get; set; }
 
 		public string IconName { get; set; }
+
+		public Transition(string id, string displayName, string iconName)
+		{
+			this.Id = id;
+			this.DisplayName = displayName;
+			this.IconName = iconName;
+		}
 	}
 }

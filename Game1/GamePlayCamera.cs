@@ -42,7 +42,6 @@ namespace Game1
 		private readonly World _world;
 		private readonly Rectangle _gameViewArea;
 		private readonly SpriteBatchData _spriteBatchData;
-		private Dictionary<Layer, ImageTexture> _tileSheets;
 		private Dictionary<Layer, ImageTexture> _staticMaps;
 		private Vector2 _renderOffset;
 
@@ -54,7 +53,6 @@ namespace Game1
 			_gameViewArea = gameViewArea;
 			_spriteBatchData = spriteBatchData;
 			_renderOffset = Vector2.Zero;
-			_tileSheets = new Dictionary<Layer, ImageTexture>();
 			_staticMaps = new Dictionary<Layer, ImageTexture>();
 		}
 
@@ -62,16 +60,14 @@ namespace Game1
 
 		public void LoadContent()
 		{
-			LoadTileSheets();
+			GenerateStaticMaps();
+			SetStaticMapsSourceRect();
 		}
 
 		public void UnloadContent()
 		{
 			foreach (var map in _staticMaps.Values)
 				map.UnloadContent();
-
-			foreach (var tileSheet in _tileSheets.Values)
-				tileSheet.UnloadContent();
 		}
 
 		public void Update(GameTime gameTime)
@@ -93,18 +89,8 @@ namespace Game1
 			foreach (var layer in _world.CurrentMap.Layers.Where(l => l.Type == LayerType.Terrain))
 				_staticMaps[layer].Draw(spriteBatch);
 
-			// Draw characters that should be "behind" the player...when their Y coord is <= the player's...
-			//foreach (var npc in _world.NPCs.Where(n => n.Position.Y <= _world.Character.Position.Y).OrderBy(n => n.Position.Y))
-				//npc.Draw(spriteBatch, _renderOffset);
-
 			foreach (var item in _world.MapObjects.GetEntities(_visibleCellStartX, _visibleCellStartY, _visibleCellEndX, _visibleCellEndY))
 				item.Draw(spriteBatch, _renderOffset);
-
-			//_world.Character.Draw(spriteBatch, _renderOffset);
-
-			// Draw characters that should be "in front" of the player...when their Y coor is > the player's...
-			//foreach (var npc in _world.NPCs.Where(n => n.Position.Y > _world.Character.Position.Y).OrderBy(n => n.Position.Y))
-				//npc.Draw(spriteBatch, _renderOffset);
 
 			// We're drawing these as "above" the player, but probably doesn't matter...
 			foreach (var layer in _world.CurrentMap.Layers.Where(l => l.Type == LayerType.Solid))
@@ -112,24 +98,6 @@ namespace Game1
 
 			foreach (var layer in _world.CurrentMap.Layers.Where(l => l.Type == LayerType.Top))
 				_staticMaps[layer].Draw(spriteBatch);
-		}
-
-		private void LoadTileSheets()
-		{
-			foreach (var sheet in _tileSheets.Values)
-				sheet.UnloadContent();
-			_tileSheets.Clear();
-
-			foreach (var layer in _world.CurrentMap.StaticLayers)
-			{
-				// TODO: Should load up the tile sheets elsewhere, so they aren't duplicated (though typically we wouldn't use the same tilesheet for multiple layers anyway)
-				var tileSheet = new ImageTexture($"{Game1.TilesheetRoot}\\{layer.TileSheet}");
-				tileSheet.LoadContent();
-				_tileSheets.Add(layer, tileSheet);
-			}
-
-			GenerateStaticMaps();
-			SetStaticMapsSourceRect();
 		}
 
 		private void GenerateStaticMaps()
@@ -148,7 +116,7 @@ namespace Game1
 			Game1.Graphics.SetRenderTarget(renderTarget);
 			Game1.Graphics.Clear(Color.Transparent);
 			var spriteBatch = new SpriteBatch(Game1.Graphics);
-			var tileSheetTexture = _tileSheets[layer].Texture;
+			var tileSheetTexture = AssetManager.GetTileSheet(layer.TileSheet);
 			spriteBatch.Begin();
 
 			for (int y = 0; y < end.Y - start.Y + 1; y++)

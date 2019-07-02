@@ -14,7 +14,6 @@ namespace Game1
 {
 	public static class InputManager
 	{
-		private static ContentManager _content;
 		private static Texture2D _pointer;
 
 		private readonly static Dictionary<Keys, (char, char)> KeyMap = new Dictionary<Keys, (char, char)>
@@ -78,17 +77,7 @@ namespace Game1
 
 		static InputManager()
 		{
-			_content = new ContentManager(Game1.ServiceProvider, Game1.ContentRoot);
-		}
-
-		public static void LoadContent()
-		{
-			_pointer = _content.Load<Texture2D>("Interface/pointer");
-		}
-
-		public static void UnloadContent()
-		{
-			_content.Unload();
+			_pointer = AssetManager.GetInterfaceElement("pointer");
 		}
 
 		public static void Update()

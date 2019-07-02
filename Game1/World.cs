@@ -47,6 +47,7 @@ namespace Game1
 		public void Initialize()
 		{
 			this.Character = IOManager.ObjectFromFile<Character>(Game1.PlayerFile);
+			AssetManager.LoadPlayerAssets(this.Character);
 			this.Character.OnDied += Character_OnDied;
 			ChangeMap(this.Character.Location, this.Character.Position.ToPoint());
 		}
@@ -123,6 +124,7 @@ namespace Game1
 		{
 			// Just testing...should be a loot check
 			this.NPCs.Remove((NPC)sender);
+			this.MapObjects.Remove((NPC)sender);
 		}
 
 		private void Interactive_OnDestroyed(object sender, EventArgs e)
@@ -152,9 +154,9 @@ namespace Game1
 		public WorldEntityList MapObjects { get; set; }
 
 		private void LoadDataFromCurrentMap()
-		{			
+		{
+			AssetManager.LoadMapAssets(this.CurrentMap);
 			this.MapObjects = new WorldEntityList(this.CurrentMap.Width, this.CurrentMap.Height, Game1.TileSize);
-
 			this.MapObjects.Add(this.Character);
 
 			this.Items = new List<WorldItem>();
@@ -187,10 +189,12 @@ namespace Game1
 			}
 
 			this.NPCs = new List<NPC>();
+
 			// TODO: Need Metadata for NPCs...
 			foreach (var npc in this.CurrentMap.NPCs)
 			{
 				var worldNPC = new NPC(npc.Id, CharacterSex.Male, npc.Position.ToVector2(), 10, 10);
+				worldNPC.SpriteSheet = AssetManager.GetSpriteSheet(worldNPC.SpriteSheetName);
 				worldNPC.OnDied += Npc_OnDied;
 				this.MapObjects.Add(this.NPCs.AddItem(worldNPC));
 			}

@@ -14,6 +14,8 @@ namespace Game1
 {
 	public class Interactive
 	{
+		public string Id { get; set; }
+
 		public string DisplayText { get; set; }
 
 		public string IconName { get; set; }	// Overworld icon

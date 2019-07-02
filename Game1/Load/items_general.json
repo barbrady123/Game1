@@ -1,16 +1,16 @@
 ﻿[
-    {
-      "id": 0,
-      "displayname": "Heart",
-      "iconname": "heart",
-      "maxstack": 99,
-      "weight": 0.4
-    },
-    {
-      "id": 1,
-      "displayname": "Ruby",
-      "iconname": "gemRed",
-      "maxstack": 99,
-      "weight": 0.2
-    }
+  {
+    "id": "heart",
+    "displayname": "Heart",
+    "iconname": "heart",
+    "maxstack": 99,
+    "weight": 0.4
+  },
+  {
+    "id": "gemRed",
+    "displayname": "Ruby",
+    "iconname": "gemRed",
+    "maxstack": 99,
+    "weight": 0.2
+  }
  ]

@@ -196,7 +196,7 @@ namespace Game1
 			else if (InputManager.KeyPressed(Keys.Space))
 			{
 				// Testing transitions...this probably won't actually be how we interact with them lol
-				foreach (var transition in _world.Transitions)
+				foreach (var transition in _world.MapObjects.GetEntities<WorldTransition>(_world.Character.Bounds))
 					if (Vector2.Distance(transition.Position, _world.Character.Position) < 30.0f)
 					{
 						TransitionMap(transition);

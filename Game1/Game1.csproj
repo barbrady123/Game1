@@ -42,6 +42,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AssetManager.cs" />
     <Compile Include="AudioManager.cs" />
     <Compile Include="BuffEffect.cs" />
     <Compile Include="Character.cs" />
@@ -57,7 +58,6 @@
     <Compile Include="Enum\InteractiveTypeEnum.cs" />
     <Compile Include="Enum\LayerTypeEnum.cs" />
     <Compile Include="Enum\ToolTypeEnum.cs" />
-    <Compile Include="Enum\TransitionTypeEnum.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="FixedQueue.cs" />
     <Compile Include="Interactive.cs" />

@@ -14,7 +14,7 @@ namespace Game1.Items
 		public string IconName { get; set; }
 
 		[JsonProperty("id")]
-		public int Id { get; set; }
+		public string Id { get; set; }
 
 		[JsonProperty("displayname")]
 		public string DisplayName { get; set; }

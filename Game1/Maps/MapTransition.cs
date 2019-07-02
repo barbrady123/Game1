@@ -15,9 +15,6 @@ namespace Game1.Maps
 {
 	public class MapTransition : MapMeta
 	{
-		[JsonProperty("type")]
-		public TransitionType Type { get; set; }
-
 		[JsonProperty("destination")]
 		public string DestinationMap { get; set; }
 
