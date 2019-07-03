@@ -17,7 +17,6 @@ namespace Game1
 	public class Character : IWorldEntity
 	{		
 		protected readonly object _lock = new object();
-		private ImageSpriteSheet _spriteSheet;
 		private Vector2 _position;
 		private ItemContainer _hotbar;
 		private ItemContainer _backpack;
@@ -30,19 +29,7 @@ namespace Game1
 		private bool _activeItemUsed;
 		private bool _activeItemMoving;
 		
-		public ImageSpriteSheet SpriteSheet
-		{
-			get { return _spriteSheet; }
-			set
-			{
-				if (_spriteSheet != value)
-				{
-					_spriteSheet = value;
-					_spriteSheet.AddEffect<SpriteSheetEffect>(false);
-				}
-			}
-		}
-
+		public ImageSpriteSheet SpriteSheet { get; set; }
 		public string SpriteSheetName => this.Sex.ToString("g").ToLower();
 		public Vector2 Motion { get; set; }
 		public float MovementSpeed => _movementSpeed * MovementSpeedModifier();

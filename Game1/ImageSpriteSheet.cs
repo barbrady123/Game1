@@ -28,6 +28,7 @@ namespace Game1
 			_frameCount = _texture.Bounds.Width / _frameSize;
 			_direction = Cardinal.South;
 			_origin = new Vector2(frameSize / 2, frameSize / 2);
+			this.AddEffect<SpriteSheetEffect>(false);
 		}
 
 		public void UpdateDirection(Cardinal direction)
