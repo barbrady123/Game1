@@ -36,7 +36,6 @@ namespace Game1
 			this.Position = position;
 			this.Bounds = position.ExpandToRectangleCentered(Game1.TileHalfSize, Game1.TileHalfSize);
 			this.Icon = icon;
-			this.Icon.LoadContent();
 			this.DestinationMap = destinationMap;
 			this.DestinationPosition = destinationPosition;
 			this.IsHighlighted = false;

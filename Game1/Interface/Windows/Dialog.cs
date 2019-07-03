@@ -39,6 +39,7 @@ namespace Game1.Interface.Windows
 		public Dialog(string text, DialogButton buttons, Rectangle bounds, int? duration) : base(bounds, true, "black", spriteBatchData:SpriteBatchManager.Get("notification"), drawIfDisabled: false)
 		{
 			this.Buttons = buttons;
+			this.Duration = duration;
 
 			// TODO : Move this to a buttons component...
 			switch (this.Buttons)

@@ -18,7 +18,6 @@ namespace Game1.Items
 			this.Id = id ?? Guid.NewGuid();
 			this.Item = item ?? throw new ArgumentNullException(nameof(item));
 			this.Icon = icon;
-			this.Icon.LoadContent();
 			this.Quantity = quantity;
 		}
 

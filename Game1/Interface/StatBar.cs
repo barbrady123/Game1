@@ -89,7 +89,6 @@ namespace Game1.Interface
 			_fill = Util.GenerateSolidBackground((int)(fillBarBounds.Width * (max > 0 ? (float)current / (float)max : 0.0f)), fillBarBounds.Height, _barColor);
 			_fill.Alignment = ImageAlignment.LeftTop;
 			_fill.Position = fillBarBounds.TopLeftVector();
-			_fill.LoadContent();
 
 			_previousCurrent = current;
 			_previousMax = max;

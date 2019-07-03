@@ -27,12 +27,19 @@ namespace Game1.Effect
 			if (!this.IsActive)
 				return;
 
+			// It's only valid to assign this effect to an ImageSpriteSheet...should probably check this another way lol
+			if (!(_image is ImageSpriteSheet spriteSheet))
+				return;
+
 			if (_currentInterval < SpriteSheetEffect.SwitchInterval)
 			{
 				_currentInterval++;
 				return;
 			}
 
+			spriteSheet.IncrementFrame();
+			_currentInterval = 0;
+			/*
 			var sourceRect = _image.SourceRect;
 			int currentFrame = sourceRect.X / Game1.TileSize;
 			int newFrame = currentFrame + 1;
@@ -41,6 +48,7 @@ namespace Game1.Effect
 
 			_image.SourceRect = new Rectangle(newFrame * Game1.TileSize, sourceRect.Y, Game1.TileSize, Game1.TileSize);
 			_currentInterval = 0;
+			*/
 		}
 	}
 }

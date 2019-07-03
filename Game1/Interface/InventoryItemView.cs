@@ -57,19 +57,15 @@ namespace Game1.Interface
 		{
 			base.LoadContent();
 			_highlightBorder = Util.GenerateBorderTexture(this.Bounds.Width + 8, this.Bounds.Height + 8, this.BorderThickness + 2, InventoryItemView.HighlightColor, false);
-			_highlightBorder.Alignment = ImageAlignment.Centered;
 			_highlightBorder.Position = this.Bounds.CenterVector();
-			_highlightBorder.LoadContent();
 			_quantity = new ImageText("", true) { Alignment = ImageAlignment.RightBottom };
 			_quantity.Position = this.Bounds.BottomRightVector(-InventoryItemView.ImagePadding -2, -InventoryItemView.ImagePadding);
-			_emptyIcon?.LoadContent();
 		}
 
 		public override void UnloadContent()
 		{
 			base.UnloadContent();
 			_highlightBorder.UnloadContent();
-			_emptyIcon?.UnloadContent();
 		}
 
 		public override void Update(GameTime gameTime)
@@ -94,7 +90,6 @@ namespace Game1.Interface
 		public override void UpdateInput(GameTime gameTime)
 		{
 			base.UpdateInput(gameTime);
-			_background.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
 			_border.Scale = (_mouseover ? InventoryItemView.MouseOverScale : Vector2.One);
 		}
 

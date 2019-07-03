@@ -18,7 +18,8 @@ namespace Game1
 	{		
 		protected List<ImageEffect> _effects;
 		protected Vector2 _origin;
-		protected Rectangle _sourceRect;
+		protected Rectangle? _sourceRect;
+		protected Rectangle _bounds;	
 
 		public bool IsActive { get; set; }
 
@@ -31,14 +32,18 @@ namespace Game1
 		public float Rotation { get; set; }
 		public bool Highlight { get; set; }
 
+		// TODO: Instead of this, maybe just be able to explicitly set origin (since we only need this for certain things like the action items)
+		// maybe stuff like SetOriginCentered(), SetOriginTopLeft(), or SetOrigin(x,y)
 		public Vector2 OriginOffset { get; set; }
 
-		public Rectangle SourceRect
+		public Rectangle Bounds { get; protected set; }
+
+		public Rectangle? SourceRect
 		{ 
 			get { return _sourceRect; }
 			set	{
 				_sourceRect = value;
-				SetOrigin();
+				//SetOrigin();
 			}
 		}
 
@@ -88,7 +93,7 @@ namespace Game1
 			this.Position = Vector2.Zero;
 			this.PositionOffset = Vector2.Zero;
 			this.Alpha = 1.0f;
-			this.SourceRect = Rectangle.Empty;
+			_sourceRect = null;
 			_effects = new List<ImageEffect>();
 			this.Alignment = ImageAlignment.Centered;
 			this.Color = Color.White;
@@ -113,10 +118,31 @@ namespace Game1
 
 		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None);
 
+		/*
 		protected virtual void SetOrigin()
 		{
 			_origin = Vector2.Zero;
 			var originalScale = this.SourceRect.SizeVector();
+
+			switch (this.Alignment.Horizatal)
+			{
+				case (HorizontalAlignment.Center) : _origin.X += originalScale.X / 2;	break;
+				case (HorizontalAlignment.Right):	_origin.X += originalScale.X;		break;
+			}
+
+			switch (this.Alignment.Vertical)
+			{
+				case (VerticalAlignment.Center) :	_origin.Y += originalScale.Y / 2;	break;
+				case (VerticalAlignment.Bottom):	_origin.Y += originalScale.Y;		break;
+			}
+		}
+		*/
+
+		protected virtual void SetOrigin()
+		{
+			_origin = Vector2.Zero;
+
+			var originalScale = this.Bounds.SizeVector();
 
 			switch (this.Alignment.Horizatal)
 			{

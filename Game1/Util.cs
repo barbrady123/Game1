@@ -28,7 +28,7 @@ namespace Game1
 
 			var t = new Texture2D(Game1.Graphics, width, height);
 			t.SetData(data);
-			return new ImageTexture(t, isActive) { Alignment = ImageAlignment.Centered };
+			return new ImageTexture(t, ImageAlignment.Centered, isActive);
 		}
 
 		// Hmm, wouldn't it be faster to create a render target, clear it to a color, then save it/cast to texture??
@@ -43,11 +43,11 @@ namespace Game1
 
 				var t = new Texture2D(Game1.Graphics, width, height);
 				t.SetData(data);
-				return new ImageTexture(t, true);
+				return new ImageTexture(t, null, true);
 			}
 			else
 			{
-				return new ImageTexture(new Texture2D(Game1.Graphics, 1, 1));
+				return new ImageTexture(new Texture2D(Game1.Graphics, 1, 1), null, true);
 			}
 		}
 
@@ -78,5 +78,11 @@ namespace Game1
 				return Cardinal.North;
 			return defaultDir;
 		}
+
+		/// <summary>
+		/// Returns vector scale to increase start rectangle to end rectangle.  Will
+		/// return 1.0f minimum for dimensions where start >= end.
+		/// </summary>
+		public static Vector2 ScaleUpVector(Rectangle start, Rectangle end) => new Vector2(Math.Max((float)end.Width / (float)start.Width, 1.0f), Math.Max((float)end.Height / (float)start.Height, 1.0f));
 	}
 }

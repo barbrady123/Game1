@@ -84,7 +84,7 @@ namespace Game1
 			_playerSpriteSheetHighlight?.Dispose();
 		}
 
-		public static ImageTexture GetBackground(string name) => new ImageTexture(_contentScreen.Load<Texture2D>(Path.Combine(Game1.BackgroundRoot, name)), true) { Alignment = ImageAlignment.Centered };
+		public static ImageTexture GetBackground(string name) => new ImageTexture(_contentScreen.Load<Texture2D>(Path.Combine(Game1.BackgroundRoot, name)), ImageAlignment.Centered, true);
 
 		public static Texture2D GetScreenTexture(string path) => _contentScreen.Load<Texture2D>(path);
 
@@ -104,7 +104,7 @@ namespace Game1
 				_playerSpriteSheetName = spriteSheet;
 			}
 
-			player.SpriteSheet = new ImageSpriteSheet(standard, _playerSpriteSheetHighlight, true);
+			player.SpriteSheet = new ImageSpriteSheet(standard, _playerSpriteSheetHighlight, Game1.TileSize, true);
 		}
 
 		public static void LoadMapAssets(Map map)
@@ -124,27 +124,27 @@ namespace Game1
 			if (!_spriteSheetHighlight.TryGetValue(id, out Texture2D highlight))
 				throw new Exception($"No spritesheet highlight with name {id} found!");
 
-			return new ImageSpriteSheet(_contentMap.Load<Texture2D>(Path.Combine(SpriteSheetRoot, id)), highlight, true) { Alignment = ImageAlignment.Centered };
+			return new ImageSpriteSheet(_contentMap.Load<Texture2D>(Path.Combine(SpriteSheetRoot, id)), highlight, Game1.TileSize, true);
 		}
 
-		public static ImageTexture GetIconStatus(string iconName) => new ImageTexture(_contentGame.Load<Texture2D>(Path.Combine(StatusIconRoot, iconName)), true);
+		public static ImageTexture GetIconStatus(string iconName) => new ImageTexture(_contentGame.Load<Texture2D>(Path.Combine(StatusIconRoot, iconName)), null, true);
 
 		public static ImageTexture GetIconItem(string iconName)
 		{
 			if (!_iconItemHighlight.TryGetValue(iconName, out Texture2D highlight))
 				throw new Exception($"No icon highlight with name {iconName} found!");
 
-			return new ImageTexture(_contentGame.Load<Texture2D>(Path.Combine(IconRoot, iconName)), highlight, true) { Alignment = ImageAlignment.Centered };
+			return new ImageTexture(_contentGame.Load<Texture2D>(Path.Combine(IconRoot, iconName)), highlight, ImageAlignment.Centered, true);
 		}
 
-		public static ImageTexture GetIconEmptySlot(string iconName) => new ImageTexture(_contentGame.Load<Texture2D>(Path.Combine(IconEmptyRoot, iconName)), true) { Alignment = ImageAlignment.Centered };
+		public static ImageTexture GetIconEmptySlot(string iconName) => new ImageTexture(_contentGame.Load<Texture2D>(Path.Combine(IconEmptyRoot, iconName)), ImageAlignment.Centered, true);
 
 		public static ImageTexture GetIconInteractive(string iconName)
 		{
 			if (!_iconInteractiveHighlight.TryGetValue(iconName, out Texture2D highlight))
 				throw new Exception($"No icon highlight with name {iconName} found!");
 
-			return new ImageTexture(_contentMap.Load<Texture2D>(Path.Combine(InteractiveIconRoot, iconName)), highlight, true) { Alignment = ImageAlignment.Centered };
+			return new ImageTexture(_contentMap.Load<Texture2D>(Path.Combine(InteractiveIconRoot, iconName)), highlight, ImageAlignment.Centered, true);
 		}
 
 		public static ImageTexture GetIconTransition(string iconName)
@@ -152,7 +152,7 @@ namespace Game1
 			if (!_iconTransitionHighlight.TryGetValue(iconName, out Texture2D highlight))
 				throw new Exception($"No icon highlight with name {iconName} found!");
 
-			return new ImageTexture(_contentMap.Load<Texture2D>(Path.Combine(TransitionRoot, iconName)), highlight, true) { Alignment = ImageAlignment.Centered };
+			return new ImageTexture(_contentMap.Load<Texture2D>(Path.Combine(TransitionRoot, iconName)), highlight, ImageAlignment.Centered, true);
 		}
 
 		private static void LoadGameAssets()

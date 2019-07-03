@@ -14,26 +14,37 @@ namespace Game1
 {
 	public class ImageSpriteSheet : ImageTexture
 	{
-		public ImageSpriteSheet(Texture2D texture, bool isActive = false) : base(texture, isActive)
-		{
-			Alignment = ImageAlignment.Centered;
-		}
+		private int _frameSize;
+		private int _currentFrame;
+		private int _frameCount;
+		private Cardinal _direction;
 
-		public ImageSpriteSheet(Texture2D texture, Texture2D highlight, bool isActive = false) : base(texture, highlight, isActive)
-		{
-			Alignment = ImageAlignment.Centered;
-		}
+		public ImageSpriteSheet(Texture2D texture, int frameSize, bool isActive = false) : this(texture, null, frameSize, isActive) { }
 
-		public override void LoadContent()
+		public ImageSpriteSheet(Texture2D texture, Texture2D highlight, int frameSize, bool isActive = false) : base(texture, highlight, ImageAlignment.Centered, isActive)
 		{
-			base.LoadContent();
+			_frameSize = frameSize;
+			_currentFrame = 0;
+			_frameCount = _texture.Bounds.Width / _frameSize;
+			_direction = Cardinal.South;
+			_origin = new Vector2(frameSize / 2, frameSize / 2);
 		}
-
-		protected override void UpdatePosition() { }
 
 		public void UpdateDirection(Cardinal direction)
 		{
-			this.SourceRect = new Rectangle(this.SourceRect.X, (int)direction * Game1.TileSize, Game1.TileSize, Game1.TileSize);
+			_direction = direction;
+			UpdateSourceRect();
+		}
+
+		public void IncrementFrame()
+		{
+			_currentFrame = (_currentFrame < _frameCount - 1) ? _currentFrame + 1 : 0;
+			UpdateSourceRect();
+		}
+
+		private void UpdateSourceRect()
+		{
+			this.SourceRect = new Rectangle(_currentFrame * _frameSize, (int)_direction * _frameSize, _frameSize, _frameSize);
 		}
 	}
 }

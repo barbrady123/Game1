@@ -17,44 +17,26 @@ namespace Game1
 		protected Texture2D _texture;
 		protected Texture2D _highlightTexture;
 
-		public ImageTexture(Texture2D texture, bool isActive = false) : base(isActive)
-		{
-			_texture = texture;
-			this.Alignment = ImageAlignment.LeftTop;
-			UpdatePosition();
-		}
+		public ImageTexture(Texture2D texture, ImageAlignment? alignment, bool isActive = false) : this(texture, null, alignment, isActive) { }
 
-		public ImageTexture(Texture2D texture, Texture2D highlight, bool isActive = false) : base(isActive)
+		public ImageTexture(Texture2D texture, Texture2D highlight, ImageAlignment? alignment, bool isActive = false) : base(isActive)
 		{	
 			_texture = texture;
 			_highlightTexture = highlight;
-			this.Alignment = ImageAlignment.LeftTop;
-			UpdatePosition();
+			this.Alignment = alignment ?? ImageAlignment.LeftTop;	// We probably want to default this to center but i need to run through the code and reverse some assumptions first
+			this.Bounds = _texture.Bounds;
+			SetOrigin();
 		}
 
 		public Texture2D Texture => _texture;
-
-		public virtual void LoadContent()
-		{
-			UpdatePosition();
-		}
 
 		/// <summary>
 		/// Only necessary if this texture is not tracked and disposed of elsewhere...
 		/// </summary>
 		public virtual void UnloadContent()
 		{
+			// TODO: WE need to remove this and put the responsibiliy for these else...thsi is dangerous!!
 			_texture.Dispose();
-		}
-
-		// This needs to be easily callable on position/alignment update, so we need a 
-		// better flag for whether or not it's ok to mess with the SourceRect!
-		protected virtual void UpdatePosition()
-		{
-			if (this.SourceRect == Rectangle.Empty)
-				this.SourceRect = _texture.Bounds;
-
-			SetOrigin();
 		}
 
 		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None)

@@ -26,7 +26,6 @@ namespace Game1
 			this.Duration = effect.Duration;
 			this.Stacks = 1;
 			this.Icon = icon;
-			this.Icon.LoadContent();
 			this.CurrentPeriod = 0.0;
 		}
 

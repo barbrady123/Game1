@@ -115,7 +115,6 @@ namespace Game1
 			base.LoadContent();
 			_world.LoadContent();
 			_camera.LoadContent();
-			_gameViewBorder.LoadContent();
 			_characterWindow.LoadContent();
 			_inventoryWindow.LoadContent();
 			_hotbarView.LoadContent();
@@ -278,11 +277,6 @@ namespace Game1
 		private void _hotbarView_OnActiveItemChange(object sender, ComponentEventArgs e)
 		{
 			_world.Character.ActiveItem = (InventoryItem)e.Meta;
-		}
-
-		protected override void _dialog_OnReadyDisable(object sender, ComponentEventArgs e)
-		{
-			_activator.SetState(_dialog, false);
 		}
 
 		private void _world_OnCharacterDied(object sender, ComponentEventArgs e)

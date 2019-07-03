@@ -55,11 +55,6 @@ namespace Game1.Screens
 			_activator.SetState(_gameplay, true);
 		}
 
-		protected override void _dialog_OnReadyDisable(object sender, ComponentEventArgs e)
-		{
-			_activator.SetState(_gameplay, true);
-		}
-
 		protected override void ReadyDisable(ComponentEventArgs e)
 		{
 			ShowNotification("Game Paused", this.Bounds, "game");

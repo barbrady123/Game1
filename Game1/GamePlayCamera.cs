@@ -137,8 +137,7 @@ namespace Game1
 			spriteBatch.End();
 			var texture = (Texture2D)renderTarget;
 			Game1.Graphics.SetRenderTarget(null);
-			return new ImageTexture(texture) {
-				IsActive = true,
+			return new ImageTexture(texture, null, true) {
 				Position = _gameViewArea.TopLeftVector(),
 				Alpha = (layer.Type == LayerType.Top) ? GamePlayCamera.OverLayerAlpha : 1.0f
 			};

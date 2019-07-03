@@ -38,7 +38,6 @@ namespace Game1
 			_transitionImage = AssetManager.GetBackground("black");
 			_transitionImage.Scale = new Vector2(_bounds.Width, _bounds.Height);
 			_transitionImage.Position = _bounds.CenterVector();
-			_transitionImage.LoadContent();	// Temp...currently only way to reset after a position/alignment change...
 			_fadeOutEffect = _transitionImage.AddEffect<FadeOutEffect>(false);
 			_fadeOutEffect.Speed = 3.0f;
 			_fadeInEffect = _transitionImage.AddEffect<FadeInEffect>(false);
@@ -73,10 +72,10 @@ namespace Game1
 
 		public void StartScreen()
 		{
-			TransitionScreens(new SplashScreen(_bounds));
+			//TransitionScreens(new SplashScreen(_bounds));
 			//TransitionScreens(new MenuScreen<MainMenu>(_bounds));
 			//TransitionScreens(new CharacterCreateScreen(_bounds));
-			//TransitionScreens(new GameScreen(_bounds, "player"));
+			TransitionScreens(new GameScreen(_bounds, "player"));
 		}
 
 		private void TransitionScreens(Component newScreen)

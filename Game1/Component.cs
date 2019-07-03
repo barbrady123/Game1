@@ -76,17 +76,14 @@ namespace Game1
 			if (_background != null)
 			{
 				_background.Position = this.Bounds.CenterVector();
-				_background.SourceRect = this.Bounds.MoveTo(0, 0);
+				_background.Scale = Util.ScaleUpVector(_background.Bounds, this.Bounds);
 			}
 
 			if (resized)
 				SetupBorder();
 
 			if (_border != null)
-			{
 				_border.Position = this.Bounds.CenterVector();
-				_border.SourceRect = this.Bounds.MoveTo(0, 0);
-			}
 		}
 
 		protected bool _mouseover;
@@ -133,7 +130,6 @@ namespace Game1
 
 		public virtual void LoadContent()
 		{
-			_border?.LoadContent();
 			_tooltip?.LoadContent();
 			_contextMenu?.LoadContent();
 		}
@@ -266,11 +262,11 @@ namespace Game1
 
 		public virtual List<string> GetContextMenuOptions() => new List<string>();
 
-		protected void ShowNotification(string text, Rectangle parentBounds, string group = null)
+		protected void ShowNotification(string text, Rectangle parentBounds, string group = null, int? duration = null)
 		{
 			if (_dialog == null)
 			{
-				_activator.Register(_dialog = new Dialog(text, DialogButton.Ok, parentBounds.CenteredRegion(400, 200), null), true, group);
+				_activator.Register(_dialog = new Dialog(text, DialogButton.Ok, parentBounds.CenteredRegion(400, 200), duration), true, group);
 				_dialog.LoadContent();
 				_dialog.OnItemSelect += _dialog_OnItemSelect;
 				_dialog.OnReadyDisable += _dialog_OnReadyDisable;
@@ -280,6 +276,7 @@ namespace Game1
 			// Need to test that this works....
 			_dialog.Text = text;
 			_dialog.Bounds = parentBounds.CenteredRegion(400, 200);
+			_dialog.Duration = duration;
 			_activator.SetState(_dialog, true);
 		}
 
@@ -287,7 +284,7 @@ namespace Game1
 
 		protected virtual void _dialog_OnReadyDisable(object sender, ComponentEventArgs e)
 		{
-			// Another place where it would be nice to just say "turn this off" and the activation manager would know what should be enabled (previous)...
+			_activator.SetState(_dialog, false);
 		}
 
 		#region Events

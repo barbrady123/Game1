@@ -51,7 +51,6 @@ namespace Game1
 		{
 			this.Interactive = interactive ?? throw new ArgumentNullException(nameof(interactive));
 			this.Icon = icon ?? throw new ArgumentNullException(nameof(icon));
-			this.Icon.LoadContent();
 			_health = interactive.Health;
 			this.Position = position;
 			this.Bounds = position.ExpandToRectangleCentered(interactive.Size.Width / 2, interactive.Size.Height / 2);

@@ -69,7 +69,9 @@ namespace Game1
 			var baseSize = _font.MeasureString(_text);
 			this.Size = baseSize * this.Scale;
 			// SourceRect neded for SetOrigin...
-			this.SourceRect = new Rectangle(0, 0, (int)baseSize.X, (int)baseSize.Y);
+			//this.SourceRect = new Rectangle(0, 0, (int)baseSize.X, (int)baseSize.Y);
+			this.Bounds = baseSize.ToOriginRectangle();
+			// If we need to do this on every bounds set, we need to hook this into the bounds property....
 			SetOrigin();
 		}
 	}
