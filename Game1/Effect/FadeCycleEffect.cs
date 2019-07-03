@@ -9,7 +9,7 @@ namespace Game1.Effect
 {
 	public class FadeCycleEffect : ImageEffect
 	{
-		public FadeCycleEffect(bool isActive = false) : base(isActive)
+		public FadeCycleEffect(Image image, bool isActive = false) : base(image, isActive)
 		{
 			Initialize();
 		}
@@ -21,8 +21,7 @@ namespace Game1.Effect
 
 		protected override void ResetImage()
 		{
-			if (_image != null)
-				_image.Alpha = 1.0f;
+			_image.Alpha = 1.0f;
 		}
 
 		public override void Update(GameTime gameTime)

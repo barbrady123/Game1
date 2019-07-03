@@ -35,8 +35,10 @@ namespace Game1
 		/// </summary>
 		public virtual void UnloadContent()
 		{
-			// TODO: WE need to remove this and put the responsibiliy for these else...thsi is dangerous!!
-			_texture.Dispose();
+			if (_texture.Name == AssetManager.UntrackedAssetName)
+				_texture.Dispose();
+			else
+				throw new Exception("DON'T DISPOSE THIS!!");
 		}
 
 		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None)

@@ -42,6 +42,15 @@ namespace Game1
 			UpdateSourceRect();
 		}
 
+		public void SetFrame(int frameIndex)
+		{
+			if (frameIndex != Util.Clamp(frameIndex, 0, _frameCount - 1))
+				throw new ArgumentOutOfRangeException(nameof(frameIndex));
+
+			_currentFrame = frameIndex;
+			UpdateSourceRect();
+		}
+
 		private void UpdateSourceRect()
 		{
 			this.SourceRect = new Rectangle(_currentFrame * _frameSize, (int)_direction * _frameSize, _frameSize, _frameSize);

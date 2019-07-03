@@ -12,6 +12,8 @@ namespace Game1
 {
 	public static class AssetManager
 	{
+		public const string UntrackedAssetName = "__UNTRACKED_ASSET__";
+
 		// Eventually we could create either a new contentmanager or an extension method to wrap the calls that require all this Path.combine junk in the Load<> method...
 		private const string GameplayRoot = "Gameplay";
 		private const string InterfaceRoot = "Interface";

@@ -15,7 +15,7 @@ namespace Game1.Effect
 		private int _currentFrameCount;
 		private int _shakeCount;
 
-		public ShakeEffect(bool isActive = false) : base(isActive)
+		public ShakeEffect(Image image, bool isActive = false) : base(image, isActive)
 		{	
 			Initialize();
 		}

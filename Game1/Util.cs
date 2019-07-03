@@ -26,7 +26,7 @@ namespace Game1
 				if ((h < thickness) || (h >= height - thickness) || (w < thickness) || (w >= width - thickness))
 					data[w + (h * width)] = color;
 
-			var t = new Texture2D(Game1.Graphics, width, height);
+			var t = new Texture2D(Game1.Graphics, width, height) { Name = AssetManager.UntrackedAssetName };
 			t.SetData(data);
 			return new ImageTexture(t, ImageAlignment.Centered, isActive);
 		}
@@ -41,7 +41,7 @@ namespace Game1
 				for (int x = 0; x < size; x++)
 					data[x] = color;
 
-				var t = new Texture2D(Game1.Graphics, width, height);
+				var t = new Texture2D(Game1.Graphics, width, height) { Name = AssetManager.UntrackedAssetName };
 				t.SetData(data);
 				return new ImageTexture(t, null, true);
 			}

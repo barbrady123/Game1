@@ -17,6 +17,7 @@ namespace Game1
 	public class Character : IWorldEntity
 	{		
 		protected readonly object _lock = new object();
+		private ImageSpriteSheet _spriteSheet;
 		private Vector2 _position;
 		private ItemContainer _hotbar;
 		private ItemContainer _backpack;
@@ -29,7 +30,19 @@ namespace Game1
 		private bool _activeItemUsed;
 		private bool _activeItemMoving;
 		
-		public ImageSpriteSheet SpriteSheet { get; set; }
+		public ImageSpriteSheet SpriteSheet
+		{
+			get { return _spriteSheet; }
+			set
+			{
+				if (_spriteSheet != value)
+				{
+					_spriteSheet = value;
+					_spriteSheet.AddEffect<SpriteSheetEffect>(false);
+				}
+			}
+		}
+
 		public string SpriteSheetName => this.Sex.ToString("g").ToLower();
 		public Vector2 Motion { get; set; }
 		public float MovementSpeed => _movementSpeed * MovementSpeedModifier();
@@ -220,7 +233,7 @@ namespace Game1
 			{
 				motion.Normalize();
 				motion *= (this.MovementSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
-				this.SpriteSheet.AddEffect<SpriteSheetEffect>(true);
+				this.SpriteSheet.StartEffect(typeof(SpriteSheetEffect));
 			}
 			else
 			{
@@ -290,15 +303,15 @@ namespace Game1
 			_activeItemUsed = true;
 		}
 
-		public void Draw(SpriteBatch spriteBatch, Vector2 offset)
+		public void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
 		{
-			DrawBehind(spriteBatch, offset);
+			DrawBehind(spriteBatch, cameraOffset);
 			this.SpriteSheet.Highlight = this.IsHighlighted;
-			this.SpriteSheet.Draw(spriteBatch, position: this.Position + offset);
-			DrawInfront(spriteBatch, offset);
+			this.SpriteSheet.Draw(spriteBatch, position: this.Position + cameraOffset);
+			DrawInfront(spriteBatch, cameraOffset);
 		}
 
-		private void DrawBehind(SpriteBatch spriteBatch, Vector2 offset)
+		private void DrawBehind(SpriteBatch spriteBatch, Vector2 cameraOffset)
 		{
 			if (!this.ActiveItemHoldable)
 				return;
@@ -306,11 +319,11 @@ namespace Game1
 			if ((this.Direction == Cardinal.North) || (this.Direction == Cardinal.West))
 			{
 				this.ActiveItem.Icon.OriginOffset = GamePlayCamera.ActiveItemOriginOffsets[this.Direction];
-				this.ActiveItem.Icon.Draw(spriteBatch, position: this.Position + offset + GamePlayCamera.ActiveItemOffsets[this.Direction], scale: GamePlayCamera.ActiveItemScale);
+				this.ActiveItem.Icon.Draw(spriteBatch, position: this.Position + cameraOffset + GamePlayCamera.ActiveItemOffsets[this.Direction], scale: GamePlayCamera.ActiveItemScale);
 			}
 		}
 
-		private void DrawInfront(SpriteBatch spriteBatch, Vector2 offset)
+		private void DrawInfront(SpriteBatch spriteBatch, Vector2 cameraOffset)
 		{
 			if (!this.ActiveItemHoldable)
 				return;
@@ -318,7 +331,7 @@ namespace Game1
 			if ((this.Direction == Cardinal.South) || (this.Direction == Cardinal.East))
 			{
 				this.ActiveItem.Icon.OriginOffset = GamePlayCamera.ActiveItemOriginOffsets[this.Direction];
-				this.ActiveItem.Icon.Draw(spriteBatch, position: this.Position + offset + GamePlayCamera.ActiveItemOffsets[this.Direction], scale: GamePlayCamera.ActiveItemScale, spriteEffects: SpriteEffects.FlipHorizontally);
+				this.ActiveItem.Icon.Draw(spriteBatch, position: this.Position + cameraOffset + GamePlayCamera.ActiveItemOffsets[this.Direction], scale: GamePlayCamera.ActiveItemScale, spriteEffects: SpriteEffects.FlipHorizontally);
 			}
 		}
 

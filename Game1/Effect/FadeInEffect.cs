@@ -9,10 +9,7 @@ namespace Game1.Effect
 {
 	public class FadeInEffect : ImageEffect
 	{
-		public FadeInEffect(bool isActive = false) : base(isActive)
-		{
-
-		}
+		public FadeInEffect(Image image, bool isActive = false) : base(image, isActive) { }
 
 		public override void Update(GameTime gameTime)
 		{

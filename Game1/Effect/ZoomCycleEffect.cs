@@ -13,7 +13,7 @@ namespace Game1.Effect
 		private readonly Vector2 _maxScale;
 		private readonly Vector2 _deltaScale;
 
-		public ZoomCycleEffect(bool isActive = false) : base(isActive)
+		public ZoomCycleEffect(Image image, bool isActive = false) : base(image, isActive)
 		{
 			// TODO: Make these configurable in the future...
 			_minScale = new Vector2(4.0f, 4.0f);

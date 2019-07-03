@@ -12,7 +12,7 @@ namespace Game1.Effect
 		private bool _movingForward;
 		private float _maxRotation;
 
-		public UseItemEastEffect(bool isActive = false) : base(isActive)
+		public UseItemEastEffect(Image image, bool isActive = false) : base(image, isActive)
 		{			
 			_maxRotation = Convert.ToSingle(Math.PI / 3);	// 60 degrees
 			this.Speed = 3.0f;

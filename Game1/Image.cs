@@ -18,8 +18,6 @@ namespace Game1
 	{		
 		protected List<ImageEffect> _effects;
 		protected Vector2 _origin;
-		protected Rectangle? _sourceRect;
-		protected Rectangle _bounds;	
 
 		public bool IsActive { get; set; }
 
@@ -32,20 +30,9 @@ namespace Game1
 		public float Rotation { get; set; }
 		public bool Highlight { get; set; }
 
-		// TODO: Instead of this, maybe just be able to explicitly set origin (since we only need this for certain things like the action items)
-		// maybe stuff like SetOriginCentered(), SetOriginTopLeft(), or SetOrigin(x,y)
 		public Vector2 OriginOffset { get; set; }
-
 		public Rectangle Bounds { get; protected set; }
-
-		public Rectangle? SourceRect
-		{ 
-			get { return _sourceRect; }
-			set	{
-				_sourceRect = value;
-				//SetOrigin();
-			}
-		}
+		public Rectangle? SourceRect { get; set; }
 
 		public T AddEffect<T>(bool isActive) where T : ImageEffect
 		{
@@ -56,8 +43,7 @@ namespace Game1
 				return (T)currentEffect;
 			}
 
-			var effect = (T)Activator.CreateInstance(typeof(T), args:isActive);
-			effect.Image = this;
+			var effect = (T)Activator.CreateInstance(typeof(T), args:new object[] { this, isActive });
 			_effects.Add(effect);
 			return effect;
 		}
@@ -93,7 +79,7 @@ namespace Game1
 			this.Position = Vector2.Zero;
 			this.PositionOffset = Vector2.Zero;
 			this.Alpha = 1.0f;
-			_sourceRect = null;
+			this.SourceRect = null;
 			_effects = new List<ImageEffect>();
 			this.Alignment = ImageAlignment.Centered;
 			this.Color = Color.White;

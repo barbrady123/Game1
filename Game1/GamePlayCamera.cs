@@ -31,6 +31,8 @@ namespace Game1
 			{ Cardinal.East, new Vector2(-9, 12) },
 			{ Cardinal.West, new Vector2(2, 10) },
 		};
+
+		// Based against Vector2(20,22) offset...
 		public static readonly Dictionary<Cardinal, Vector2> ActiveItemOriginOffsets = new Dictionary<Cardinal, Vector2>
 		{
 			{ Cardinal.North, new Vector2(20, 22) },
@@ -136,6 +138,7 @@ namespace Game1
 
 			spriteBatch.End();
 			var texture = (Texture2D)renderTarget;
+			texture.Name = AssetManager.UntrackedAssetName;
 			Game1.Graphics.SetRenderTarget(null);
 			return new ImageTexture(texture, null, true) {
 				Position = _gameViewArea.TopLeftVector(),

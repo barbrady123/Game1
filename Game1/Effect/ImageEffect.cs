@@ -35,15 +35,9 @@ namespace Game1.Effect
 
 		protected virtual void ResetImage() { }
 
-		public Image Image
+		public ImageEffect(Image image, bool isActive = false)
 		{
-			get { return _image; }
-			set { _image = value; }
-		}
-
-
-		public ImageEffect(bool isActive = false)
-		{
+			_image = image ?? throw new ArgumentNullException(nameof(image));
 			_isActive = isActive;
 			this.Speed = 1.0f;
 		}
