@@ -23,7 +23,7 @@ namespace Game1
 			this.CurrentHP = currentHP;
 		}
 
-		public string TooltipText => this.Name;
+		public override string TooltipText => this.Name;
 
 		public override Vector2 UpdateMotion()
 		{
@@ -40,23 +40,5 @@ namespace Game1
 
 			return new Vector2(GameRandom.Next(-1, 1), GameRandom.Next(-1, 1));
 		}
-
-		#region Events
-		public void MouseOut() { _onMouseOut?.Invoke(this, null); }
-		private event EventHandler<ComponentEventArgs> _onMouseOut;
-		public event EventHandler<ComponentEventArgs> OnMouseOut
-		{
-			add		{ lock(_lock) { _onMouseOut -= value; _onMouseOut += value; } }
-			remove	{ lock(_lock) { _onMouseOut -= value; } }
-		}
-
-		public void MouseOver() { _onMouseOver?.Invoke(this, null); }
-		private event EventHandler<ComponentEventArgs> _onMouseOver;
-		public event EventHandler<ComponentEventArgs> OnMouseOver
-		{
-			add		{ lock(_lock) { _onMouseOver -= value; _onMouseOver += value; } }
-			remove	{ lock(_lock) { _onMouseOver -= value; } }
-		}
-		#endregion
 	}
 }

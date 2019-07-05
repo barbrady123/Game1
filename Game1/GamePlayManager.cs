@@ -218,8 +218,6 @@ namespace Game1
 						_targetEntity = entity;
 						if (entity is WorldEntity e)
 							e.MouseOver();
-						else if (entity is NPC n)
-							n.MouseOver();
 
 						if (leftMouseClick)
 							clickHandled = true;	// Do something here...
@@ -232,8 +230,6 @@ namespace Game1
 				{
 					if (previousTarget is WorldEntity e)
 						e.MouseOut();
-					else if (previousTarget is NPC n)
-						n.MouseOut();
 
 					if (_targetEntity != null)
 						MouseOver(new ComponentEventArgs { Meta = _targetEntity });

@@ -14,9 +14,8 @@ using Game1.Items;
 namespace Game1
 {
 	// Either we need a new base class, or this should be the base and some of this crap needs to be moved into a child class....
-	public class Character : IWorldEntity
+	public class Character : WorldEntity
 	{		
-		protected readonly object _lock = new object();
 		private Vector2 _position;
 		private ItemContainer _hotbar;
 		private ItemContainer _backpack;
@@ -54,9 +53,7 @@ namespace Game1
 		public List<CharacterStatus<BuffEffect>> Buffs { get; set; }
 		public List<CharacterStatus<DebuffEffect>> Debuffs { get; set; }
 
-		public bool IsSolid => true;
-
-		public bool IsHighlighted { get; set; }
+		public override bool IsSolid => true;
 
 		// Again...if these were indexed array slots, this would be way easier!
 		public int Defense =>
@@ -166,7 +163,7 @@ namespace Game1
 		public InventoryItem EquippedArmorLegs	{ get; set; }
 		public InventoryItem EquippedArmorFeet	{ get; set; }
 
-		public Vector2 Position
+		public override Vector2 Position
 		{
 			get { return _position; }
 			set {
@@ -178,8 +175,6 @@ namespace Game1
 				}
 			}
 		}
-
-		public Rectangle Bounds { get; private set; }
 
 		public Character()
 		{
@@ -283,7 +278,7 @@ namespace Game1
 			_activeItemSolid = true;
 		}
 
-		public void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
+		public override void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
 		{
 			DrawBehind(spriteBatch, cameraOffset);
 			this.SpriteSheet.Draw(spriteBatch, position: this.Position + cameraOffset, highlight: this.IsHighlighted);
