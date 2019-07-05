@@ -26,7 +26,7 @@ namespace Game1
 		private int _currentMana;
 		private InventoryItem _heldItem;
 		private InventoryItem _activeItem;
-		private bool _activeItemUsed;
+		private bool _activeItemSolid;
 		private bool _activeItemMoving;
 		
 		public ImageSpriteSheet SpriteSheet { get; set; }
@@ -132,7 +132,7 @@ namespace Game1
 					_activeItem = ItemManager.CopyItem(value);
 					_onActiveItemChanged?.Invoke(this, new ComponentEventArgs { Meta = _activeItem });
 					_activeItemMoving = false;
-					_activeItemUsed = false;
+					_activeItemSolid = false;
 				}
 			}
 		}
@@ -143,7 +143,7 @@ namespace Game1
 		{
 			get
 			{
-				if ((!this.ActiveItemHoldable) || (!_activeItemUsed))
+				if ((!this.ActiveItemHoldable) || (!_activeItemSolid))
 					return Rectangle.Empty;
 
 				var holdable = (ItemHoldable)this.ActiveItem.Item;
@@ -213,7 +213,7 @@ namespace Game1
 		public void Update(GameTime gameTime, bool mouseInWorld = false)
 		{
 			this.PreviousPosition = _position;
-			_activeItemUsed = false;
+			_activeItemSolid = false;
 			Vector2 motion = UpdateMotion();
 
 			if (motion != Vector2.Zero)
@@ -231,10 +231,6 @@ namespace Game1
 			this.Direction = Util.DirectionFromVector(motion, this.Direction);
 			this.SpriteSheet.UpdateDirection(this.Direction);
 			this.SpriteSheet.Update(gameTime);
-
-			if (mouseInWorld)
-				UpdateMouse();
-
 			this.Backpack.Update(gameTime);
 			this.HotBar.Update(gameTime);
 			this.EquippedArmorHead?.Update(gameTime);
@@ -250,11 +246,8 @@ namespace Game1
 				this.Debuffs[i].Update(gameTime);
 		}
 
-		private void UpdateMouse()
+		public void UseActiveItem()
 		{
-			if (!InputManager.LeftMouseClick())
-				return;
-
 			if (!(this.ActiveItem?.Item is ItemHoldable held))
 				return;
 
@@ -287,14 +280,13 @@ namespace Game1
 		private void Effect_OnFullyExtended(object sender, EventArgs e)
 		{
 			// This effectively means the tool is only 'active' for a single frame, is this enough??
-			_activeItemUsed = true;
+			_activeItemSolid = true;
 		}
 
 		public void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
 		{
 			DrawBehind(spriteBatch, cameraOffset);
-			this.SpriteSheet.Highlight = this.IsHighlighted;
-			this.SpriteSheet.Draw(spriteBatch, position: this.Position + cameraOffset);
+			this.SpriteSheet.Draw(spriteBatch, position: this.Position + cameraOffset, highlight: this.IsHighlighted);
 			DrawInfront(spriteBatch, cameraOffset);
 		}
 

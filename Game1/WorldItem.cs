@@ -12,7 +12,7 @@ using Game1.Items;
 
 namespace Game1
 {
-	public class WorldItem : IWorldEntity
+	public class WorldItem : WorldEntity
 	{
 		private bool _inRange;
 
@@ -32,13 +32,9 @@ namespace Game1
 
 		public InventoryItem Item { get; set; }
 
-		public Vector2 Position { get; set; }
+		public override bool IsSolid => false;
 
-		public Rectangle Bounds { get; set; }
-
-		public bool IsSolid => false;
-
-		public bool IsHighlighted { get; set; }
+		public override string TooltipText => this.Item.Item.DisplayName;
 
 		public WorldItem(InventoryItem item, Vector2 position, bool pickup)
 		{
@@ -56,10 +52,9 @@ namespace Game1
 			this.Item?.Update(gameTime);
 		}
 
-		public void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
+		public override void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
 		{
-			this.Item.Icon.Highlight = this.IsHighlighted;
-			this.Item.Icon.Draw(spriteBatch, position: this.Position + cameraOffset);
+			this.Item.Icon.Draw(spriteBatch, position: this.Position + cameraOffset, highlight: this.IsHighlighted);
 		}
 	}
 }

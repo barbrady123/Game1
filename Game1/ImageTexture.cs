@@ -41,14 +41,14 @@ namespace Game1
 				throw new Exception("DON'T DISPOSE THIS!!");
 		}
 
-		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None)
+		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None, bool highlight = false)
 		{	
 			// This is a lot of computation for each draw...resolve this....
 			var pos = (position ?? this.Position) + this.PositionOffset;
 			if (positionOffset != null)
 				pos += (Vector2)positionOffset;
 
-			if (this.Highlight && (_highlightTexture != null))
+			if (highlight && (_highlightTexture != null))
 			{
 				// Besides caching _highlightTexture texture, writing these to a render target to save 3 draws after the inital one might also be more performant??
 				spriteBatch.Draw(_highlightTexture, pos.Offset(-1, -1), this.SourceRect, Color.White, this.Rotation, _origin + this.OriginOffset, scale ?? this.Scale, spriteEffects, 0.0f);

@@ -38,6 +38,15 @@ namespace Game1
 			_transitions = new Dictionary<string, Transition>();
 
 			// TEMP: This should come from file, etc...
+			// Add file for NPCs...add to meta....
+			// LootTable handler (probably ItemManager responsibility)
+			// Add second tilesheet for solid walls, test map with some "dungeon" feel...
+			// Still need "breakable" layer....
+			// Test if we want things to be interactable only if highlighted, might be better to flag that object and then see if the player did something, than run additional collisions...???
+			// Add interactable - chest (after Lootable functions)
+
+
+
 			_instants[CharacterInstantEffect.MinorHeal] = new InstantEffect(
 				CharacterInstantEffect.MinorHeal,
 				CharacterAttribute.CurrentHP,
@@ -99,7 +108,7 @@ namespace Game1
 					{ ToolType.Axe, 0.5f },
 					{ ToolType.Pickaxe, 1.0f },
 				},
-				LootTable = new List<Loot> { new Loot {
+				LootTable = new LootTable { new Loot {
 					Odds = 100,
 					ItemPool = new List<int> { 0, 1 },
 					MinQuantity = 1,

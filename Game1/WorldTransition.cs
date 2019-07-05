@@ -12,23 +12,17 @@ using Game1.Items;
 
 namespace Game1
 {
-	public class WorldTransition : IWorldEntity
+	public class WorldTransition : WorldEntity
 	{
 		public Transition Transition { get; set; }
 
-		public Vector2 Position { get; set; }
-
-		public Rectangle Bounds { get; set; }
-
-		public bool IsSolid => false;
-
-		public bool IsHighlighted { get; set; }
-
-		public ImageTexture Icon { get; set; }
+		public override bool IsSolid => false;
 
 		public string DestinationMap { get; set; }
 
 		public Point DestinationPosition { get; set; }
+
+		public override string TooltipText => this.Transition.DisplayName;
 
 		public WorldTransition(Transition transition, Vector2 position, ImageTexture icon, string destinationMap, Point destinationPosition)
 		{
@@ -46,10 +40,9 @@ namespace Game1
 			this.Icon.Update(gameTime);
 		}
 
-		public void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
+		public override void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
 		{
-			this.Icon.Highlight = this.IsHighlighted;
-			this.Icon.Draw(spriteBatch, position: this.Position + cameraOffset);
+			this.Icon.Draw(spriteBatch, position: this.Position + cameraOffset, highlight: this.IsHighlighted);
 		}
 	}
 }

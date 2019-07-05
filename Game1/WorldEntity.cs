@@ -4,42 +4,31 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Game1.Enum;
+using Game1.Items;
 
 namespace Game1
 {
-	public class NPC : Character, ISupportsTooltip
+	public abstract class WorldEntity : IWorldEntity, ISupportsTooltip
 	{
-		private const int SameDirectionBias = 99;
-		private const int ContinueStopBias = 96;
+		protected readonly object _lock = new object();
+		
+		public virtual Vector2 Position { get; set; }
 
-		public NPC(string name, CharacterSex sex, Vector2 position, int maxHP, int currentHP) : base()
-		{
-			_movementSpeed = 75.0f;
-			this.Name = name;
-			this.Sex = sex;
-			this.Position = position;
-			this.MaxHP = maxHP;
-			this.CurrentHP = currentHP;
-		}
+		public virtual Rectangle Bounds { get; set; }
+ 
+		public virtual ImageTexture Icon { get; set; }
 
-		public string TooltipText => this.Name;
+		public abstract bool IsSolid { get; }
 
-		public override Vector2 UpdateMotion()
-		{
-			if (this.Motion == Vector2.Zero)
-			{
-				if (GameRandom.Percent(NPC.ContinueStopBias))
-					return this.Motion;
-			}
-			else
-			{
-				if (GameRandom.Percent(NPC.SameDirectionBias))
-					return this.Motion;
-			}
+		public virtual bool IsHighlighted { get; set; }
 
-			return new Vector2(GameRandom.Next(-1, 1), GameRandom.Next(-1, 1));
-		}
+		public virtual string TooltipText => null;
+
+		public abstract void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset);
 
 		#region Events
 		public void MouseOut() { _onMouseOut?.Invoke(this, null); }

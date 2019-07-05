@@ -49,7 +49,7 @@ namespace Game1.Maps
 		{
 			get
 			{
-				foreach (var layer in this.Layers.Where(l => l.Type != LayerType.Breakable))
+				foreach (var layer in this.Layers.Where(l => l.Type != LayerType.Interactive))
 					yield return layer;
 			}
 		}

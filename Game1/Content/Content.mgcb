@@ -758,6 +758,30 @@
 /processorParam:TextureFormat=Color
 /build:Gameplay/TileSheet/ground.png
 
+#begin Gameplay/TileSheet/interactive.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Gameplay/TileSheet/interactive.png
+
+#begin Gameplay/TileSheet/wall.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Gameplay/TileSheet/wall.png
+
 #begin Gameplay/Transition/stairs_down.png
 /importer:TextureImporter
 /processor:TextureProcessor

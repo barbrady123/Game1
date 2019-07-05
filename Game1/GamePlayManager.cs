@@ -37,9 +37,9 @@ namespace Game1
 
 		private ImageTexture _gameViewBorder;
 
-		private IWorldEntity _highlightedEntity;
+		private IWorldEntity _targetEntity;
 
-		public GamePlayManager(Rectangle bounds, string playerId) : base(bounds, background: "wood")
+		public GamePlayManager(Rectangle bounds, string playerId) : base(bounds, background: "wood", enabledTooltip: true, fireMouseEvents: false)
 		{
 			// Might want a couple frame delay before actually running the game?
 			_activator.Register(_world = new World(playerId), true, "top");
@@ -106,7 +106,7 @@ namespace Game1
 				)), true
 			);
 
-			_highlightedEntity = null;
+			_targetEntity = null;
 			//AudioManager.Start();
 		}
 
@@ -172,10 +172,12 @@ namespace Game1
 
 		public override void UpdateInput(GameTime gameTime)
 		{
-			if (_highlightedEntity != null)
+			var previousTarget = _targetEntity;
+
+			if (_targetEntity != null)
 			{
-				_highlightedEntity.IsHighlighted = false;
-				_highlightedEntity = null;
+				_targetEntity.IsHighlighted = false;
+				_targetEntity = null;
 			}
 
 			if (InputManager.KeyPressed(Keys.I))
@@ -201,28 +203,50 @@ namespace Game1
 					}
 			}
 
-			// TEMP: Need to see if it's over anything that should be highlighted...
 			if (InputManager.MouseOver(_gameViewArea))
 			{
 				var mousePosition = InputManager.MousePosition.Offset(-(int)_camera.RenderOffset.X, -(int)_camera.RenderOffset.Y);
+				bool leftMouseClick = InputManager.LeftMouseClick();
+				bool clickHandled = false;
 
 				foreach (var entity in _world.MapObjects.GetEntities(mousePosition).Where(e => e != _world.Character))
 				{
 					if (entity.Bounds.Contains(mousePosition))
 					{						
+						// How can we use a key to cycle through these??
 						entity.IsHighlighted = true;
-						_highlightedEntity = entity;
+						_targetEntity = entity;
+						if (entity is WorldEntity e)
+							e.MouseOver();
+						else if (entity is NPC n)
+							n.MouseOver();
+
+						if (leftMouseClick)
+							clickHandled = true;	// Do something here...
+
 						break;
-					}
+					}					
 				}
 
-				// There's really no great way to prevent this from also swinging an active item...maybe we shouldn't auto-drop the
-				// held item just because it's on the cursor?
-				if (InputManager.LeftMouseClick())
+				if (previousTarget != _targetEntity)
+				{
+					if (previousTarget is WorldEntity e)
+						e.MouseOut();
+					else if (previousTarget is NPC n)
+						n.MouseOut();
+
+					if (_targetEntity != null)
+						MouseOver(new ComponentEventArgs { Meta = _targetEntity });
+				}
+
+				if (leftMouseClick && !clickHandled)
 				{
 					if (_world.Character.IsItemHeld)
 						_world.AddItem(_world.Character.DropHeld(), pickup: false);
+					else 
+						_world.Character.UseActiveItem();
 				}
+
 			}
 
 			base.UpdateInput(gameTime);

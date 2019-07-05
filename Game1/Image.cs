@@ -28,7 +28,6 @@ namespace Game1
 		public Color Color { get; set; }
 		public int Index { get; set; }
 		public float Rotation { get; set; }
-		public bool Highlight { get; set; }
 
 		public Vector2 OriginOffset { get; set; }
 		public Rectangle Bounds { get; protected set; }
@@ -96,33 +95,13 @@ namespace Game1
 			}
 		}
 
-		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None)
+		public virtual void Draw(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None, bool highlight = false)
 		{
 			if (this.IsActive)
-				DrawActive(spriteBatch, alphaBlend, position, positionOffset, scale, spriteEffects);
+				DrawActive(spriteBatch, alphaBlend, position, positionOffset, scale, spriteEffects, highlight);
 		}
 
-		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None);
-
-		/*
-		protected virtual void SetOrigin()
-		{
-			_origin = Vector2.Zero;
-			var originalScale = this.SourceRect.SizeVector();
-
-			switch (this.Alignment.Horizatal)
-			{
-				case (HorizontalAlignment.Center) : _origin.X += originalScale.X / 2;	break;
-				case (HorizontalAlignment.Right):	_origin.X += originalScale.X;		break;
-			}
-
-			switch (this.Alignment.Vertical)
-			{
-				case (VerticalAlignment.Center) :	_origin.Y += originalScale.Y / 2;	break;
-				case (VerticalAlignment.Bottom):	_origin.Y += originalScale.Y;		break;
-			}
-		}
-		*/
+		public abstract void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None, bool highlight = false);
 
 		protected virtual void SetOrigin()
 		{

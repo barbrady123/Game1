@@ -25,7 +25,7 @@ namespace Game1.Effect
 		protected override void Initialize()
 		{
 			_currentInterval = 0;
-			_spriteSheet.SetFrame(0);	// Just so it doesnt render the entire sheet prior to an update...
+			_spriteSheet.SetFrame(0);
 		}
 
 		public override void Update(GameTime gameTime)
@@ -33,7 +33,7 @@ namespace Game1.Effect
 			if (!this.IsActive)
 				return;
 
-			if (_currentInterval < SpriteSheetEffect.SwitchInterval)
+			if (_currentInterval < SwitchInterval)
 			{
 				_currentInterval++;
 				return;

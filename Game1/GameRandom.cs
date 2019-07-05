@@ -19,5 +19,9 @@ namespace Game1
 		}
 
 		public static int Next(int min, int max) => _random.Next(min, max + 1);
+
+		public static int Percent() => Next(0, 99);
+
+		public static bool Percent(int odds) => Percent() < odds;
 	}
 }

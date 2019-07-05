@@ -85,8 +85,9 @@ namespace Game1
 			// TODO: Here is a good spot for this.CurrentMap.Update() ... which would update the moving entities in the entity list, and perform
 			// various other operations for character/npc/item/etc updates (all entity updates)...
 			// TODO: But, until then, TEMP: we're going to update entities that move in the entity list...
-			this.MapObjects.Move(this.Character);
-			foreach (var npc in this.NPCs)
+			if (this.Character.Moved)
+				this.MapObjects.Move(this.Character);
+			foreach (var npc in this.NPCs.Where(n => n.Moved))
 				this.MapObjects.Move(npc);
 
 			// TODO: these collections could/should be mainined in the Entity list object (which should be moved inside the Map class)....
@@ -135,7 +136,7 @@ namespace Game1
 			// Need something to generate loot from loot table...just doing this temp...
 			foreach (var l in interactive.Interactive.LootTable)
 			{
-				if (GameRandom.Next(0, 99) < l.Odds)
+				if (GameRandom.Percent(l.Odds))
 				{
 					// Makes no sense....
 					var newItem = ItemManager.GetItem(l.ItemPool.First());

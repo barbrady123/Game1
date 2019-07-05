@@ -45,7 +45,7 @@ namespace Game1
 			CalculateTextSize();
 		}
 
-		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None)
+		public override void DrawActive(SpriteBatch spriteBatch, float? alphaBlend = null, Vector2? position = null, Vector2? positionOffset = null, Vector2? scale = null, SpriteEffects spriteEffects = SpriteEffects.None, bool highlight = false)
 		{
 			var pos = (position ?? this.Position) + this.PositionOffset;
 			if (positionOffset != null)

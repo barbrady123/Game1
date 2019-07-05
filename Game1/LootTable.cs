@@ -4,16 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Game1.Enum
+namespace Game1
 {
-	public enum LayerType
+	public class LootTable : List<Loot>
 	{
-		Terrain = 0,
-
-		Solid = 1,
-
-		Interactive = 2,
-
-		Top = 3
 	}
 }

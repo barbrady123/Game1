@@ -66,11 +66,13 @@
     <Compile Include="Items\ItemTool.cs" />
     <Compile Include="IWorldEntity.cs" />
     <Compile Include="Loot.cs" />
+    <Compile Include="LootTable.cs" />
     <Compile Include="Maps\MapItem.cs" />
     <Compile Include="Maps\MapMeta.cs" />
     <Compile Include="Maps\MapMob.cs" />
     <Compile Include="Maps\MapTransition.cs" />
     <Compile Include="WorldCell.cs" />
+    <Compile Include="WorldEntity.cs" />
     <Compile Include="WorldEntityList.cs" />
     <Compile Include="WorldSolid.cs" />
     <Compile Include="WorldTransition.cs" />
@@ -252,6 +254,8 @@
     <Content Include="Content\Gameplay\Status\minorDefense.png" />
     <Content Include="Content\Gameplay\Status\minorMovementSpeed.png" />
     <Content Include="Content\Gameplay\TileSheet\ground.png" />
+    <Content Include="Content\Gameplay\TileSheet\interactive.png" />
+    <Content Include="Content\Gameplay\TileSheet\wall.png" />
     <Content Include="Content\Gameplay\Transition\stairs_down.png" />
     <Content Include="Content\Gameplay\Transition\stairs_up.png" />
     <Content Include="Content\Interface\cursor.png" />

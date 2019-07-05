@@ -12,21 +12,15 @@ using Game1.Items;
 
 namespace Game1
 {
-	public class WorldInteractive : IWorldEntity
+	public class WorldInteractive : WorldEntity
 	{
 		private int? _health;
 
-		public ImageTexture Icon { get; set; }
-
 		public Interactive Interactive { get; set; }
 
-		public Vector2 Position { get; set; }
+		public override bool IsSolid => this.Interactive.IsSolid;
 
-		public Rectangle Bounds { get; set; }
-
-		public bool IsSolid => this.Interactive.IsSolid;
-
-		public bool IsHighlighted { get; set; }
+		public override string TooltipText => this.Interactive.DisplayText;
 
 		public event EventHandler OnDestroyed;
 
@@ -62,10 +56,9 @@ namespace Game1
 			this.Icon.Update(gameTime);
 		}
 
-		public void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
+		public override void Draw(SpriteBatch spriteBatch, Vector2 cameraOffset)
 		{
-			this.Icon.Highlight = this.IsHighlighted;
-			this.Icon.Draw(spriteBatch, position: this.Position + cameraOffset);
+			this.Icon.Draw(spriteBatch, position: this.Position + cameraOffset, highlight: this.IsHighlighted);
 		}
 	}
 }

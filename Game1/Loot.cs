@@ -26,6 +26,6 @@ namespace Game1
 
 		public int MaxQuantity { get; set; }
 
-		public List<Loot> SubLoot { get; set; }
+		public LootTable SubLoot { get; set; }
 	}
 }

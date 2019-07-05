@@ -24,7 +24,7 @@ namespace Game1
 
 		public Dictionary<ToolType, float> Effectiveness { get; set; }
 
-		public List<Loot> LootTable { get; set; }
+		public LootTable LootTable { get; set; }
 
 		public bool IsSolid { get; set; }
 
