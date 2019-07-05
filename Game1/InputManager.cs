@@ -14,7 +14,7 @@ namespace Game1
 {
 	public static class InputManager
 	{
-		private static Texture2D _pointer;
+		private readonly static Texture2D _pointer;
 
 		private readonly static Dictionary<Keys, (char, char)> KeyMap = new Dictionary<Keys, (char, char)>
 		{

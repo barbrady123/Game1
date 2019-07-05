@@ -24,7 +24,7 @@ namespace Game1
 
 		private readonly Dictionary<TCharacterStatus, CharacterStatusView<TCharacterStatus, TStatusEffect>> _statusViews;
 		private readonly List<TCharacterStatus> _statuses;
-		private bool _growFromRight;
+		private readonly bool _growFromRight;
 
 		public StatusViewer(Rectangle bounds, List<TCharacterStatus> statuses, bool growFromRight = true) : base(bounds, background: null, enabledTooltip: true, fireMouseEvents: false)
 		{

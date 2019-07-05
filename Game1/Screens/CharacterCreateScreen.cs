@@ -25,7 +25,7 @@ namespace Game1.Screens
 		public ImageTexture _characterView;
 		public CharacterNewCompositeMenu _menuCharacter;
 
-		private Dictionary<CharacterSex, ImageTexture> _preview;
+		private readonly Dictionary<CharacterSex, ImageTexture> _preview;
 
 		public CharacterCreateScreen(Rectangle bounds): base(bounds, background: "brick")
 		{

@@ -12,13 +12,10 @@ using Game1.Enum;
 
 namespace Game1
 {
-	// Why are we fucking with SourceRect in here, this is just DrawString....???
 	public class ImageText : Image
 	{
-		public const string DefaultFont = "Orbitron";
-
+		private readonly string _fontName;
 		private string _text;
-		private string _fontName;
 		private SpriteFont _font;
 
 		public string FontName { get; set; }
@@ -39,7 +36,7 @@ namespace Game1
 		public ImageText(string text = null, string fontName = null, bool isActive = false, ImageAlignment? alignment = null) : base(isActive)
 		{
 			_text = text ?? "";
-			_fontName = fontName ?? ImageText.DefaultFont;
+			_fontName = fontName ?? FontManager.DefaultFontName;
 			_font = FontManager.Get(_fontName);			
 			this.Alignment = alignment ?? this.Alignment;
 			CalculateTextSize();
@@ -68,10 +65,7 @@ namespace Game1
 		{
 			var baseSize = _font.MeasureString(_text);
 			this.Size = baseSize * this.Scale;
-			// SourceRect neded for SetOrigin...
-			//this.SourceRect = new Rectangle(0, 0, (int)baseSize.X, (int)baseSize.Y);
 			this.Bounds = baseSize.ToOriginRectangle();
-			// If we need to do this on every bounds set, we need to hook this into the bounds property....
 			SetOrigin();
 		}
 	}

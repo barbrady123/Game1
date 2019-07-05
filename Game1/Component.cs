@@ -22,19 +22,19 @@ namespace Game1
 		private readonly SpriteBatchData _spriteBatchData;
 		private bool _isActive;
 		protected ActivationManager _activator;
-		private string _backgroundName;
+		private readonly string _backgroundName;
 		protected ImageTexture _background;
-		private bool _hasBorder;
+		private readonly bool _hasBorder;
 		protected ImageTexture _border;
 		private Rectangle _bounds;
 		private int _delayInputCycles;
-		private bool _readyDisableOnEscape;
-		private bool _fireMouseEvents;
-		private bool _inactiveMouseEvents;
-		private bool _drawIfDisabled;
-		private bool _enabledTooltip;
+		private readonly bool _readyDisableOnEscape;
+		private readonly bool _fireMouseEvents;
+		private readonly bool _inactiveMouseEvents;
+		private readonly bool _drawIfDisabled;
+		private readonly bool _enabledTooltip;
 		protected Tooltip _tooltip;
-		private bool _enabledContextMenu;
+		private readonly bool _enabledContextMenu;
 		protected Menu _contextMenu;
 		protected Dialog _dialog;
 

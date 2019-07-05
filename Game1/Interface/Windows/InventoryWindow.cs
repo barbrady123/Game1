@@ -20,8 +20,8 @@ namespace Game1.Interface.Windows
 		private World _world;
 		private ItemContainerView _containerViewBackpack;
 		private ItemContainerView _containerViewHotbar;
-		private ItemContainer _containerBackpack;
-		private ItemContainer _containerHotbar;
+		private readonly ItemContainer _containerBackpack;
+		private readonly ItemContainer _containerHotbar;
 		private SplitWindow _splitWindow;
 
 		public InventoryWindow(	Rectangle bounds,

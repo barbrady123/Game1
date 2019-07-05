@@ -14,9 +14,9 @@ namespace Game1
 {
 	public class ImageSpriteSheet : ImageTexture
 	{
-		private int _frameSize;
+		private readonly int _frameSize;
+		private readonly int _frameCount;
 		private int _currentFrame;
-		private int _frameCount;
 		private Cardinal _direction;
 
 		public ImageSpriteSheet(Texture2D texture, int frameSize, bool isActive = false) : this(texture, null, frameSize, isActive) { }

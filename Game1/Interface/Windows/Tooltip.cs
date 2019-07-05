@@ -59,9 +59,7 @@ namespace Game1.Interface.Windows
 		public Tooltip(Component host, SpriteBatchData spriteBatchData = null) : base(Rectangle.Empty, background: "black", spriteBatchData: spriteBatchData, drawIfDisabled: false)
 		{			
 			_timer = -1;
-			_text = new ImageText(null, true);
-			_text.Alignment = ImageAlignment.Centered;
-			_text.Scale = new Vector2(0.9f, 0.9f);
+			_text = new ImageText(null, true, ImageAlignment.Centered) { Scale = new Vector2(0.9f, 0.9f) };
 			_host = host;
 			_host.OnMouseOver += _host_OnMouseOver;
 		}

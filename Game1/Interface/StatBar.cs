@@ -23,10 +23,10 @@ namespace Game1.Interface
 		private ImageTexture _fill;
 		private ImageText _textImage;		
 
-		private object _source;
+		private readonly object _source;
 
-		private Func<int> CurrentProperty;
-		private Func<int> MaxProperty;
+		private readonly Func<int> CurrentProperty;
+		private readonly Func<int> MaxProperty;
 
 		private int _previousCurrent;
 		private int _previousMax;

@@ -23,7 +23,7 @@ namespace Game1
 		public static int FontHeight = 24;
 
 		private static ContentManager _content;
-		private static Dictionary<string, SpriteFont> _fonts;
+		private static readonly Dictionary<string, SpriteFont> _fonts;
 
 		static FontManager()
 		{

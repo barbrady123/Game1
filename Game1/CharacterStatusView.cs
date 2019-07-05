@@ -12,7 +12,7 @@ namespace Game1
 	public class CharacterStatusView<TCharacterStatus, TStatusEffect> : Component where TCharacterStatus: CharacterStatus<TStatusEffect> where TStatusEffect: StatusEffect
 	{
 		private TCharacterStatus _status;
-		private int _iconSize;
+		private readonly int _iconSize;
 
 		protected override void BoundsChanged(bool resized) { }
 

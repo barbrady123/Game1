@@ -10,7 +10,7 @@ namespace Game1.Effect
 	public class UseItemWestEffect : ImageEffect
 	{
 		private bool _movingForward;
-		private float _maxRotation;
+		private readonly float _maxRotation;
 
 		public UseItemWestEffect(Image image, bool isActive = false) : base(image, isActive)
 		{			

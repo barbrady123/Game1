@@ -30,7 +30,7 @@ namespace Game1.Interface
 		private ImageTexture _highlightBorder;
 		private ImageTexture _emptyIcon;
 		private ImageText _quantity;
-		private string _emptyImageName;
+		private readonly string _emptyImageName;
 
 		public ItemContainerView ContainingView { get; set; }
 		public InventoryItem Item { get; set; }
