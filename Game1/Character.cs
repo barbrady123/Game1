@@ -26,7 +26,7 @@ namespace Game1
 		private InventoryItem _heldItem;
 		private InventoryItem _activeItem;
 		private bool _activeItemSolid;
-		private bool _activeItemMoving;
+		private bool _inAction;
 		
 		public ImageSpriteSheet SpriteSheet { get; set; }
 		public string SpriteSheetName => this.Sex.ToString("g").ToLower();
@@ -38,6 +38,21 @@ namespace Game1
 
 		public Vector2 PreviousPosition { get; set; }
 		public bool Moved => this.PreviousPosition != this.Position;
+		public bool ActiveItemSolid => _activeItemSolid;
+		
+		public bool InAction
+		{ 
+			get { return _inAction; }
+			private set
+			{
+				_inAction = value;
+				if ((!_inAction) && (_queuedActiveItem.Item1))
+				{
+					SetActiveItem(_queuedActiveItem.Item2);
+					_queuedActiveItem = (false, null);
+				}
+			}
+		}
 
 		public string Name { get; set; }
 		public CharacterSex Sex { get; set; }
@@ -118,18 +133,23 @@ namespace Game1
 			}
 		}
 
-		public InventoryItem ActiveItem
+		public InventoryItem ActiveItem => _activeItem;
+
+		private (bool, InventoryItem) _queuedActiveItem;
+
+		public void SetActiveItem(InventoryItem item)
 		{ 
-			get { return _activeItem; }
-			set
+			if (_activeItem?.Id != item?.Id)
 			{
-				if (_activeItem?.Id != value?.Id)
+				if (this.InAction)
+				{
+					_queuedActiveItem = (true, item);
+				}
+				else
 				{
 					// We're making a copy here so effects can be applied to the in-game image without affecting the inventory image...
-					_activeItem = ItemManager.CopyItem(value);
+					_activeItem = ItemManager.CopyItem(item);
 					_onActiveItemChanged?.Invoke(this, new ComponentEventArgs { Meta = _activeItem });
-					_activeItemMoving = false;
-					_activeItemSolid = false;
 				}
 			}
 		}
@@ -140,7 +160,7 @@ namespace Game1
 		{
 			get
 			{
-				if ((!this.ActiveItemHoldable) || (!_activeItemSolid))
+				if (!_activeItemSolid)
 					return Rectangle.Empty;
 
 				var holdable = (ItemHoldable)this.ActiveItem.Item;
@@ -170,7 +190,7 @@ namespace Game1
 				if (_position != value)
 				{
 					_position = value;
-					// Eventually need to check mob "size" or "type" for bounding box settings...
+					// Eventually need to check mob "size" or "type" for bounding box settings...need meta for this...
 					this.Bounds = _position.ExpandToRectangleCentered(PhysicsManager.HumanoidBoxSize.Width / 2, PhysicsManager.HumanoidBoxSize.Height / 2);
 				}
 			}
@@ -183,10 +203,12 @@ namespace Game1
 			_toolSpeed = 3.0f;
 			_hotbar = new ItemContainer(10);
 			_backpack = new ItemContainer(40);
+			_queuedActiveItem = (false, null);
 			this.Buffs = new List<CharacterStatus<BuffEffect>>();
 			this.Debuffs = new List<CharacterStatus<DebuffEffect>>();
 			this.PreviousPosition = -Vector2.One;
 			this.IsHighlighted = false;
+			this.InAction = false;
 		}
 
 		public virtual Vector2 UpdateMotion()
@@ -205,7 +227,7 @@ namespace Game1
 			return motion;
 		}
 
-		public void Update(GameTime gameTime, bool mouseInWorld = false)
+		public void Update(GameTime gameTime)
 		{
 			this.PreviousPosition = _position;
 			_activeItemSolid = false;
@@ -246,10 +268,10 @@ namespace Game1
 			if (!(this.ActiveItem?.Item is ItemHoldable held))
 				return;
 
-			if (_activeItemMoving)
+			if (this.InAction)
 				return;
 
-			_activeItemMoving = true;
+			this.InAction = true;
 
 			// This is messy...redo this...
 			if ((this.Direction == Cardinal.North) || (this.Direction == Cardinal.West))
@@ -269,7 +291,7 @@ namespace Game1
 		private void Effect_OnActiveChange(object sender, EventArgs e)
 		{
 			if (!((EffectEventArgs)e).IsActive)
-				_activeItemMoving = false;
+				this.InAction = false;
 		}
 
 		private void Effect_OnFullyExtended(object sender, EventArgs e)

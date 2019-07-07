@@ -20,83 +20,36 @@ namespace Game1
 	/// </summary>
 	public static class MetaManager
 	{
+		public const string MetaEffectRoot = Game1.MetaRoot + "\\Effect";
+
 		private static readonly Dictionary<CharacterInstantEffect, InstantEffect> _instants;
 		private static readonly Dictionary<CharacterBuffEffect, BuffEffect> _buffs;
 		private static readonly Dictionary<CharacterDebuffEffect, DebuffEffect> _debuffs;
 		
 		private static readonly Dictionary<string, Interactive> _interactives;
 		private static readonly Dictionary<string, Transition> _transitions;
+
+		private static readonly Dictionary<string,NPC> _npcs;
+
 		// TODO: Should be a NPC and Mob collection here...
 
 		static MetaManager()
 		{
-			_instants = new Dictionary<CharacterInstantEffect, InstantEffect>();
-			_buffs = new Dictionary<CharacterBuffEffect, BuffEffect>();
-			_debuffs = new Dictionary<CharacterDebuffEffect, DebuffEffect>();
+			_instants = IOManager.ObjectFromFile<List<InstantEffect>>(Path.Combine(MetaEffectRoot, "effect_instant")).ToDictionary(e => e.Effect);
+			_buffs = IOManager.ObjectFromFile<List<BuffEffect>>(Path.Combine(MetaEffectRoot, "effect_buff")).ToDictionary(e => e.Effect);
+			_debuffs = IOManager.ObjectFromFile<List<DebuffEffect>>(Path.Combine(MetaEffectRoot, "effect_debuff")).ToDictionary(e => e.Effect);
+			_transitions = IOManager.ObjectFromFile<List<Transition>>(Path.Combine(Game1.MetaRoot, "transition")).ToDictionary(e => e.Id);
+			_npcs = IOManager.ObjectFromFile<List<NPC>>(Path.Combine(MetaEffectRoot, "npc")).ToDictionary(e => e.Name);
+
+			
 
 			_interactives = new Dictionary<string, Interactive>();
-			_transitions = new Dictionary<string, Transition>();
 
-			// TEMP: This should come from file, etc...
 			// Add file for NPCs...add to meta....
 			// LootTable handler (probably ItemManager responsibility)
-			// Add second tilesheet for solid walls, test map with some "dungeon" feel...
 			// Still need "breakable" layer....
-			// Test if we want things to be interactable only if highlighted, might be better to flag that object and then see if the player did something, than run additional collisions...???
 			// Add interactable - chest (after Lootable functions)
-
-
-
-			_instants[CharacterInstantEffect.MinorHeal] = new InstantEffect(
-				CharacterInstantEffect.MinorHeal,
-				CharacterAttribute.CurrentHP,
-				"Minor Heal",
-				"Increases Current HP by 1-5 points instantly",
-				1,
-				5
-			);
-
-			_buffs[CharacterBuffEffect.MinorDefense] = new BuffEffect(
-				CharacterBuffEffect.MinorDefense,
-				CharacterAttribute.Defense,
-				"minorDefense",
-				"Minor Defense",
-				"Increases Defense by 10 for 10 seconds",
-				10,
-				10,
-				null,
-				2,
-				10,
-				60
-			);
-
-			_buffs[CharacterBuffEffect.MinorMovementSpeed] = new BuffEffect(
-				CharacterBuffEffect.MinorMovementSpeed,
-				CharacterAttribute.MovementSpeed,
-				"minorMovementSpeed",
-				"Minor Movement Speed",
-				"Increases Movement Speed by 100% for 20 seconds",
-				100,
-				20,
-				null,
-				2,
-				20,
-				120
-			);
-
-			_debuffs[CharacterDebuffEffect.MinorDamageOverTime] = new DebuffEffect(
-				CharacterDebuffEffect.MinorDamageOverTime,
-				CharacterAttribute.CurrentHP,
-				"minorBleed",
-				"Minor Bleed",
-				"Take 1 HP damage per second for 10 seconds",
-				-1,
-				10,
-				1,
-				5,
-				10,
-				10
-			);
+			_npcs = new Dictionary<string, NPC>();
 
 			_interactives["rock"] = new Interactive {
 				Id = "rock",
@@ -117,9 +70,6 @@ namespace Game1
 				IsSolid = true,
 				Size = new Size(32, 32)
 			};
-
-			_transitions["stairs_down"] = new Transition("stairs_down", "Stairs Down", "stairs_down");
-			_transitions["stairs_up"] = new Transition("stairs_up", "Stairs Up", "stairs_up");
 		}
 
 		public static void ApplyCharacterInstantEffect(CharacterInstantEffect effect, Character character)

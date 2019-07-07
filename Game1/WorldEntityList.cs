@@ -72,7 +72,7 @@ namespace Game1
 			{
 				if (_cells[x, y]?.Any() ?? false)
 				{
-					foreach (var entity in _cells[x, y].OfType<T>())
+					foreach (var entity in _cells[x, y].OfType<T>().OrderBy(e => e.Position.Y))
 						entities.Add(entity);
 				}
 			}

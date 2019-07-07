@@ -76,32 +76,19 @@ namespace Game1
 				}
 			}
 
+			// Active item bounds...
 			var activeBounds = _world.Character.ActiveItemBounds;
 			if (activeBounds != Rectangle.Empty)
 			{
+				// Eventually we might want to allow other tools to do damage...
 				if (_world.Character.ActiveItem.Item is ItemWeapon weapon)
 				{
-					// TODO: Get NPCs in the correct cells, right now this is testing ALL npcs in the world!
-					for (int i = _world.NPCs.Count - 1; i >= 0; i--)
+					foreach (var npc in _world.MapObjects.GetEntities<NPC>(activeBounds))
 					{
-						if (_world.NPCs[i].Bounds.Intersects(activeBounds))
+						if (npc.Bounds.Intersects(activeBounds))
 						{
-							_world.NPCs[i].SetImageEffect<ShakeEffect>();
-							_world.NPCs[i].CurrentHP -= GameRandom.Next(weapon.MinDamage, weapon.MaxDamage);	// Obviously greatly simplified...
-						}
-					}
-				}
-				if (_world.Character.ActiveItem.Item is ItemTool tool)
-				{					
-					for (int i = _world.Interactives.Count - 1; i >= 0; i--)
-					{
-						if (_world.Interactives[i].Health == null)
-							continue;
-
-						if (_world.Interactives[i].Bounds.Intersects(activeBounds))
-						{
-							_world.Interactives[i].Icon.AddEffect<ShakeEffect>(true);
-							_world.Interactives[i].Health -= (int)(tool.Damage * _world.Interactives[i].Interactive.Effectiveness[tool.Type]);
+							npc.SetImageEffect<ShakeEffect>();
+							npc.CurrentHP -= GameRandom.Next(weapon.MinDamage, weapon.MaxDamage);	// Obviously greatly simplified...
 						}
 					}
 				}

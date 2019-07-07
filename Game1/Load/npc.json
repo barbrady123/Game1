@@ -1,0 +1,14 @@
+﻿[
+  {
+    "id": "man",
+    "type": "Humanoid",
+    "displayname": "Dude",
+    "spritesheet": "man"
+  },
+  {
+    "id": "female",
+    "type": "Humanoid",
+    "displayname": "Chick",
+    "spritesheet": "female"
+  }
+]

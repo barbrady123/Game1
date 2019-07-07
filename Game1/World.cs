@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Game1.Effect;
 using Game1.Enum;
 using Game1.Items;
 using Game1.Maps;
@@ -18,8 +19,8 @@ namespace Game1
 	{
 		private readonly PhysicsManager _physics;
 		private readonly string _playerId;
-		private bool _mouseInWorld;
 
+		public WorldEntityList MapObjects { get; set; }
 		public List<NPC> NPCs { get; set; }
 		public Character Character { get; set; }
 		public Map CurrentMap { get; set; }
@@ -40,7 +41,6 @@ namespace Game1
 		public World(string playerId)
 		{
 			_physics = new PhysicsManager(this);
-			_mouseInWorld = false;
 			_playerId = playerId;
 		}
 
@@ -67,24 +67,16 @@ namespace Game1
 			this.Character.Position = playerPosition.ToVector2();
 
 			LoadDataFromCurrentMap();
-		}
-
-		public void Update(GameTime gameTime, bool mouseInWorld)
-		{
-			_mouseInWorld = mouseInWorld;
-			base.Update(gameTime);
+			_onMapChanged?.Invoke(this, null);
 		}
 
 		public override void UpdateActive(GameTime gameTime)
 		{
-			this.Character.Update(gameTime, _mouseInWorld);
+			this.Character.Update(gameTime);
 			foreach (var npc in this.NPCs)
 				npc.Update(gameTime);
 			_physics.Update(gameTime);
 
-			// TODO: Here is a good spot for this.CurrentMap.Update() ... which would update the moving entities in the entity list, and perform
-			// various other operations for character/npc/item/etc updates (all entity updates)...
-			// TODO: But, until then, TEMP: we're going to update entities that move in the entity list...
 			if (this.Character.Moved)
 				this.MapObjects.Move(this.Character);
 			foreach (var npc in this.NPCs.Where(n => n.Moved))
@@ -97,9 +89,22 @@ namespace Game1
 				interactive.Update(gameTime);
 			foreach (var transition in this.Transitions)
 				transition.Update(gameTime);
+		}
 
-			// I think it makes sense to put things like "Item pickup" from proximity after the physics update?
-			// I'm not 100% sure where i even want this to live yet or what entity's responsibility this should be
+		public IWorldEntity ProcessInteractivity(Point mousePosition, bool mouseLeftClick, bool interactiveKeyPressed)
+		{
+			// Transition check...
+			if (interactiveKeyPressed)
+			{
+				foreach (var transition in this.MapObjects.GetEntities<WorldTransition>(this.Character.Bounds))
+					if (Vector2.Distance(transition.Position, this.Character.Position) < 30.0f)	// Make this distance configurable...
+					{
+						ChangeMap(transition.DestinationMap, transition.DestinationPosition);
+						break;
+					}
+			}
+
+			// Item proximity pickup...
 			foreach (var item in this.MapObjects.GetEntities<WorldItem>(this.Character.Bounds))
 			{
 				item.InRange = Vector2.Distance(item.Position, this.Character.Position) <= Game1.DefaultPickupRadius;
@@ -110,6 +115,48 @@ namespace Game1
 						this.MapObjects.Remove(this.Items.RemoveItem(item));
 				}
 			}
+
+			if (mousePosition == Point.Zero)
+				return null;
+
+			IWorldEntity targetEntity = null;
+
+			// Targetting (mouseover) entity...
+			foreach (var entity in this.MapObjects.GetEntities(mousePosition).Where(e => e != this.Character))
+			{
+				if (!entity.Bounds.Contains(mousePosition))
+					continue;
+
+				// How can we use a key to cycle through these??
+				entity.IsHighlighted = true;
+				targetEntity = entity;
+				if (entity is WorldEntity e)
+					e.MouseOver();
+
+				// Interactive/Tool check...
+				if (this.Character.ActiveItemSolid && (this.Character.ActiveItem?.Item is ItemTool tool))
+				{
+					if ((entity is WorldInteractive interactive) && (Vector2.Distance(interactive.Position, this.Character.Position) <= tool.Range))
+					{
+						interactive.Icon.AddEffect<ShakeEffect>(true);
+						if (interactive.Health != null)
+							interactive.Health -= (int)(tool.Damage * interactive.Interactive.Effectiveness[tool.Type]);
+					}
+				}
+
+				break;
+			}
+			
+			if (mouseLeftClick)
+			{
+				// Clicking on an empty space will drop item if held...
+				if (this.Character.IsItemHeld && (targetEntity == null))
+					this.AddItem(this.Character.DropHeld(), pickup: false);
+				else 
+					this.Character.UseActiveItem();
+			}
+
+			return targetEntity;
 		}
 
 		public void AddItem(InventoryItem item, Vector2? position = null, bool pickup = true)
@@ -151,8 +198,6 @@ namespace Game1
 		{
 			OnCharacterDied?.Invoke(this, e);
 		}
-
-		public WorldEntityList MapObjects { get; set; }
 
 		private void LoadDataFromCurrentMap()
 		{
@@ -202,5 +247,14 @@ namespace Game1
 
 			_physics.CalculateParameters();
 		}
+
+		#region Events
+		private event EventHandler<ComponentEventArgs> _onMapChanged;
+		public event EventHandler<ComponentEventArgs> OnMapChanged
+		{
+			add		{ lock(_lock) { _onMapChanged -= value; _onMapChanged += value; } }
+			remove	{ lock(_lock) { _onMapChanged -= value; } }
+		}
+		#endregion
 	}
 }

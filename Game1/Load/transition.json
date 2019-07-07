@@ -1,0 +1,12 @@
+﻿[
+  {
+    "id": "stairs_down",
+    "displayname": "Stairs Down",
+    "iconname": "stairs_down"
+  },
+  {
+    "id": "stairs_up",
+    "displayname": "Stairs Up",
+    "iconname": "stairs_up"
+  }
+]

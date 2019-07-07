@@ -57,6 +57,7 @@
     <Compile Include="Enum\CharacterDebuffEffectEnum.cs" />
     <Compile Include="Enum\InteractiveTypeEnum.cs" />
     <Compile Include="Enum\LayerTypeEnum.cs" />
+    <Compile Include="Enum\MobTypeEnum.cs" />
     <Compile Include="Enum\ToolTypeEnum.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="FixedQueue.cs" />
@@ -250,6 +251,7 @@
     <Content Include="Content\Gameplay\Icon\wand.png" />
     <Content Include="Content\Gameplay\Icon\x.png" />
     <Content Include="Content\Gameplay\Interactive\rock.png" />
+    <Content Include="Content\Gameplay\Mob\orc.png" />
     <Content Include="Content\Gameplay\Status\minorBleed.png" />
     <Content Include="Content\Gameplay\Status\minorDefense.png" />
     <Content Include="Content\Gameplay\Status\minorMovementSpeed.png" />
@@ -261,20 +263,35 @@
     <Content Include="Content\Interface\cursor.png" />
     <Content Include="Content\Interface\pointer.png" />
     <Content Include="Icon.ico" />
+    <None Include="Load\Effect\effect_buff.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Load\Effect\effect_debuff.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Load\Effect\effect_instant.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Load\transition.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Load\npc.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Content\Fonts\orbitron.spritefont" />
-    <None Include="Load\items_armor.json">
+    <None Include="Load\Item\items_armor.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Load\items_consumable.json">
+    <None Include="Load\Item\items_consumable.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Load\items_general.json">
+    <None Include="Load\Item\items_general.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Load\items_tool.json">
+    <None Include="Load\Item\items_tool.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Load\items_weapon.json">
+    <None Include="Load\Item\items_weapon.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Load\Map\map.json">

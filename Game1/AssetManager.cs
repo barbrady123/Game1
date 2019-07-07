@@ -20,7 +20,8 @@ namespace Game1
 		private const string IconRoot = GameplayRoot + "\\Icon";
 		private const string IconEmptyRoot = IconRoot + "\\Empty";
 		private const string TilesheetRoot = GameplayRoot + "\\TileSheet";
-		private const string SpriteSheetRoot = GameplayRoot + "\\Character";
+		private const string CharacterSpriteSheetRoot = GameplayRoot + "\\Character";
+		private const string MobSpriteSheetRoot = GameplayRoot + "\\Mob";
 		private const string TransitionRoot = GameplayRoot + "\\Transition";
 		private const string StatusIconRoot = GameplayRoot + "\\Status";
 		private const string InteractiveIconRoot = GameplayRoot + "\\Interactive";
@@ -98,7 +99,7 @@ namespace Game1
 		public static void LoadPlayerAssets(Character player)
 		{
 			string spriteSheet = player.SpriteSheetName.ToLower();
-			var standard = _contentGame.Load<Texture2D>(Path.Combine(SpriteSheetRoot, spriteSheet));
+			var standard = _contentGame.Load<Texture2D>(Path.Combine(CharacterSpriteSheetRoot, spriteSheet));
 
 			if (_playerSpriteSheetName != spriteSheet)
 			{
@@ -126,7 +127,7 @@ namespace Game1
 			if (!_spriteSheetHighlight.TryGetValue(id, out Texture2D highlight))
 				throw new Exception($"No spritesheet highlight with name {id} found!");
 
-			return new ImageSpriteSheet(_contentMap.Load<Texture2D>(Path.Combine(SpriteSheetRoot, id)), highlight, Game1.TileSize, true);
+			return new ImageSpriteSheet(_contentMap.Load<Texture2D>(Path.Combine(CharacterSpriteSheetRoot, id)), highlight, Game1.TileSize, true);
 		}
 
 		public static ImageTexture GetIconStatus(string iconName) => new ImageTexture(_contentGame.Load<Texture2D>(Path.Combine(StatusIconRoot, iconName)), null, true);
@@ -186,7 +187,7 @@ namespace Game1
 				mapSpriteSheets.Add(sex.ToString("g").ToLower());
 
 			foreach (string spriteSheet in mapSpriteSheets)
-				_spriteSheetHighlight[spriteSheet] = GenerateHighlightTexture(_contentMap.Load<Texture2D>(Path.Combine(SpriteSheetRoot, spriteSheet)));
+				_spriteSheetHighlight[spriteSheet] = GenerateHighlightTexture(_contentMap.Load<Texture2D>(Path.Combine(CharacterSpriteSheetRoot, spriteSheet)));
 		}
 
 		private static void LoadMapTileSheets(Map map)

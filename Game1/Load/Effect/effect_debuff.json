@@ -1,0 +1,16 @@
+﻿[
+  {
+    "id": "minorBleed",
+    "effect": "MinorDamageOverTime",
+    "attribute": "CurrentHP",
+    "iconname": "minorBleed",
+    "text": "Minor Bleed",
+    "description": "Take 1 HP damage per second for 10 seconds",
+    "effectvalue": -1,
+    "duration": 10,
+    "period": 1,
+    "maxeffectstacks": 5,
+    "durationstack": 10,
+    "maxduration": 10
+  }
+]

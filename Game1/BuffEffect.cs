@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Game1.Enum;
 
 namespace Game1
@@ -11,30 +12,7 @@ namespace Game1
 	// i.e. A "minor defense potion" buff might get overwritten by a "major defense potion", not stack...	
 	public class BuffEffect : StatusEffect
 	{
+		[JsonProperty("effect")]
 		public CharacterBuffEffect Effect { get; set; }
-
-		public BuffEffect(	CharacterBuffEffect effect,
-							CharacterAttribute affectedAttribute,
-							string iconName,
-							string text,
-							string description,
-							int effectValue,
-							int? duration,
-							int? period,
-							int maxEffectStacks,
-							int durationStack,
-							int? maxDuration) : base(	affectedAttribute,
-														iconName,
-														text,
-														description,
-														effectValue,
-														duration,
-														period,
-														maxEffectStacks,
-														durationStack,
-														maxDuration)
-		{
-			this.Effect = effect;
-		}
 	}
 }

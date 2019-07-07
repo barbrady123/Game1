@@ -15,7 +15,7 @@ namespace Game1
 
 		public NPC(string name, CharacterSex sex, Vector2 position, int maxHP, int currentHP) : base()
 		{
-			_movementSpeed = 75.0f;
+			_movementSpeed = 40.0f;
 			this.Name = name;
 			this.Sex = sex;
 			this.Position = position;

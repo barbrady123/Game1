@@ -18,6 +18,8 @@ namespace Game1.Items
 	/// </summary>
 	public static class ItemManager
 	{
+		public const string MetaItemRoot = Game1.MetaRoot + "\\Item";
+
 		// TODO: This will eventually be much more organized/structured by item "type", etc...
 		private static List<ItemGeneral> _generals;
 		private static List<ItemConsumable> _consumables;
@@ -27,11 +29,11 @@ namespace Game1.Items
 
 		static ItemManager()
 		{
-			_generals = IOManager.ObjectFromFile<List<ItemGeneral>>(Path.Combine(Game1.MetaRoot, "items_general"));
-			_consumables = IOManager.ObjectFromFile<List<ItemConsumable>>(Path.Combine(Game1.MetaRoot, "items_consumable"));
-			_armors = IOManager.ObjectFromFile<List<ItemArmor>>(Path.Combine(Game1.MetaRoot, "items_armor"));
-			_weapons = IOManager.ObjectFromFile<List<ItemWeapon>>(Path.Combine(Game1.MetaRoot, "items_weapon"));
-			_tools = IOManager.ObjectFromFile<List<ItemTool>>(Path.Combine(Game1.MetaRoot, "items_tool"));
+			_generals = IOManager.ObjectFromFile<List<ItemGeneral>>(Path.Combine(MetaItemRoot, "items_general"));
+			_consumables = IOManager.ObjectFromFile<List<ItemConsumable>>(Path.Combine(MetaItemRoot, "items_consumable"));
+			_armors = IOManager.ObjectFromFile<List<ItemArmor>>(Path.Combine(MetaItemRoot, "items_armor"));
+			_weapons = IOManager.ObjectFromFile<List<ItemWeapon>>(Path.Combine(MetaItemRoot, "items_weapon"));
+			_tools = IOManager.ObjectFromFile<List<ItemTool>>(Path.Combine(MetaItemRoot, "items_tool"));
 		}
 
 		// TEMP...this is dumb lol...

@@ -47,6 +47,7 @@ namespace Game1
 			_world.Character.OnHeldItemChanged += InputManager.HandleCursorChange;
 			_world.Character.OnGotExternalItem += Character_OnGotExternalItem;
 			_world.OnCharacterDied += _world_OnCharacterDied;
+			_world.OnMapChanged += _world_OnMapChanged;
 
 			_gameViewArea = new Rectangle(
 				this.ContentMargin.Width + GamePlayManager.ViewAreaBorderThickness,
@@ -150,7 +151,7 @@ namespace Game1
 			// Modal windows go first, block all input after update...
 			_characterWindow.Update(gameTime);
 			_inventoryWindow.Update(gameTime);
-			_world.Update(gameTime, InputManager.MouseOver(_gameViewArea));
+			_world.Update(gameTime);
 			_barHealth.Update(gameTime);
 			_barMana.Update(gameTime);
 			UpdateVisibleStats(gameTime);
@@ -192,57 +193,18 @@ namespace Game1
 			{
 				Game1.Instance.ToggleFullScreen();
 			}
-			else if (InputManager.KeyPressed(Keys.Space))
+
+			var mousePosition = InputManager.MouseOver(_gameViewArea) ? InputManager.MousePosition.Offset(-(int)_camera.RenderOffset.X, -(int)_camera.RenderOffset.Y) : Point.Zero;
+			_targetEntity = _world.ProcessInteractivity(mousePosition, InputManager.LeftMouseClick(), InputManager.KeyPressed(Keys.Space));
+
+			if (previousTarget != _targetEntity)
 			{
-				// Testing transitions...this probably won't actually be how we interact with them lol
-				foreach (var transition in _world.MapObjects.GetEntities<WorldTransition>(_world.Character.Bounds))
-					if (Vector2.Distance(transition.Position, _world.Character.Position) < 30.0f)
-					{
-						TransitionMap(transition);
-						break;
-					}
-			}
+				if (previousTarget is WorldEntity e)
+					e.MouseOut();
 
-			if (InputManager.MouseOver(_gameViewArea))
-			{
-				var mousePosition = InputManager.MousePosition.Offset(-(int)_camera.RenderOffset.X, -(int)_camera.RenderOffset.Y);
-				bool leftMouseClick = InputManager.LeftMouseClick();
-				bool clickHandled = false;
-
-				foreach (var entity in _world.MapObjects.GetEntities(mousePosition).Where(e => e != _world.Character))
-				{
-					if (entity.Bounds.Contains(mousePosition))
-					{						
-						// How can we use a key to cycle through these??
-						entity.IsHighlighted = true;
-						_targetEntity = entity;
-						if (entity is WorldEntity e)
-							e.MouseOver();
-
-						if (leftMouseClick)
-							clickHandled = true;	// Do something here...
-
-						break;
-					}					
-				}
-
-				if (previousTarget != _targetEntity)
-				{
-					if (previousTarget is WorldEntity e)
-						e.MouseOut();
-
-					if (_targetEntity != null)
-						MouseOver(new ComponentEventArgs { Meta = _targetEntity });
-				}
-
-				if (leftMouseClick && !clickHandled)
-				{
-					if (_world.Character.IsItemHeld)
-						_world.AddItem(_world.Character.DropHeld(), pickup: false);
-					else 
-						_world.Character.UseActiveItem();
-				}
-
+				// We only need to fire this once for the tooltip object to pickup it's current owner...
+				if (_targetEntity != null)
+					MouseOver(new ComponentEventArgs { Meta = _targetEntity });
 			}
 
 			base.UpdateInput(gameTime);
@@ -296,7 +258,7 @@ namespace Game1
 
 		private void _hotbarView_OnActiveItemChange(object sender, ComponentEventArgs e)
 		{
-			_world.Character.ActiveItem = (InventoryItem)e.Meta;
+			_world.Character.SetActiveItem((InventoryItem)e.Meta);
 		}
 
 		private void _world_OnCharacterDied(object sender, ComponentEventArgs e)
@@ -309,10 +271,8 @@ namespace Game1
 			_newItems.AddNotification(e.Meta as InventoryItem);
 		}
 
-		private void TransitionMap(WorldTransition transition)
+		private void _world_OnMapChanged(object sender, ComponentEventArgs e)
 		{
-			// Should show a loading thing here...
-			_world.ChangeMap(transition.DestinationMap, transition.DestinationPosition);
 			_camera.UnloadContent();
 			_camera.LoadContent();
 		}

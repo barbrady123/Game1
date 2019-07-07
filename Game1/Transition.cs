@@ -17,17 +17,13 @@ namespace Game1
 {
 	public class Transition
 	{
+		[JsonProperty("id")]
 		public string Id { get; set; }
 
+		[JsonProperty("displayname")]
 		public string DisplayName { get; set; }
 
+		[JsonProperty("iconname")]
 		public string IconName { get; set; }
-
-		public Transition(string id, string displayName, string iconName)
-		{
-			this.Id = id;
-			this.DisplayName = displayName;
-			this.IconName = iconName;
-		}
 	}
 }

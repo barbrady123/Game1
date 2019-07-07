@@ -1,0 +1,30 @@
+﻿[
+  {
+    "id": "minorDefense",
+    "effect": "MinorDefense",
+    "attribute": "Defense",
+    "iconname": "minorDefense",
+    "text": "Minor Defense",
+    "description": "Increases Defense by 10 for 10 seconds",
+    "effectvalue": 10,
+    "duration": 10,
+    "period": null,
+    "maxeffectstacks": 2,
+    "durationstack": 10,
+    "maxduration": 60
+  },
+  {
+    "id": "minorMovementSpeed",
+    "effect": "MinorMovementSpeed",
+    "attribute": "MovementSpeed",
+    "iconname": "minorMovementSpeed",
+    "text": "Minor Movement Speed",
+    "description": "Increases Movement Speed by 100% for 20 seconds",
+    "effectvalue": 100,
+    "duration": 20,
+    "period": null,
+    "maxeffectstacks": 2,
+    "durationstack": 20,
+    "maxduration": 120
+  }
+]

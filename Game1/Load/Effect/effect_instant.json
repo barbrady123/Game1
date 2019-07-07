@@ -1,0 +1,11 @@
+﻿[
+  {
+    "id": "minorHeal",
+    "effect": "MinorHeal",
+    "attribute": "CurrentHP",
+    "text": "Minor Heal",
+    "description": "Increases Current HP by 1-5 points instantly",
+    "effectmin": 1,
+    "effectmax": 5
+  }
+]
