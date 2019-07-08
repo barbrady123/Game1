@@ -127,7 +127,9 @@ namespace Game1
 			if (!_spriteSheetHighlight.TryGetValue(id, out Texture2D highlight))
 				throw new Exception($"No spritesheet highlight with name {id} found!");
 
-			return new ImageSpriteSheet(_contentMap.Load<Texture2D>(Path.Combine(CharacterSpriteSheetRoot, id)), highlight, Game1.TileSize, true);
+			var spriteSheet = new ImageSpriteSheet(_contentMap.Load<Texture2D>(Path.Combine(CharacterSpriteSheetRoot, id)), highlight, Game1.TileSize, true);
+			spriteSheet.SetFrame(0);
+			return spriteSheet;
 		}
 
 		public static ImageTexture GetIconStatus(string iconName) => new ImageTexture(_contentGame.Load<Texture2D>(Path.Combine(StatusIconRoot, iconName)), null, true);

@@ -29,9 +29,9 @@ namespace Game1
 		private static readonly Dictionary<string, Interactive> _interactives;
 		private static readonly Dictionary<string, Transition> _transitions;
 
-		private static readonly Dictionary<string,NPC> _npcs;
+		private static readonly Dictionary<string, Character> _characters;
 
-		// TODO: Should be a NPC and Mob collection here...
+		// TODO: Should be a Mob collection here...
 
 		static MetaManager()
 		{
@@ -39,17 +39,13 @@ namespace Game1
 			_buffs = IOManager.ObjectFromFile<List<BuffEffect>>(Path.Combine(MetaEffectRoot, "effect_buff")).ToDictionary(e => e.Effect);
 			_debuffs = IOManager.ObjectFromFile<List<DebuffEffect>>(Path.Combine(MetaEffectRoot, "effect_debuff")).ToDictionary(e => e.Effect);
 			_transitions = IOManager.ObjectFromFile<List<Transition>>(Path.Combine(Game1.MetaRoot, "transition")).ToDictionary(e => e.Id);
-			_npcs = IOManager.ObjectFromFile<List<NPC>>(Path.Combine(MetaEffectRoot, "npc")).ToDictionary(e => e.Name);
-
-			
+			_characters = IOManager.ObjectFromFile<List<Character>>(Path.Combine(MetaEffectRoot, "npc")).ToDictionary(e => e.Id);
 
 			_interactives = new Dictionary<string, Interactive>();
 
-			// Add file for NPCs...add to meta....
 			// LootTable handler (probably ItemManager responsibility)
 			// Still need "breakable" layer....
 			// Add interactable - chest (after Lootable functions)
-			_npcs = new Dictionary<string, NPC>();
 
 			_interactives["rock"] = new Interactive {
 				Id = "rock",
@@ -144,6 +140,26 @@ namespace Game1
 				transition.DestinationMap,
 				transition.DestinationPosition
 			);
+		}
+
+		public static WorldCharacter GetCharacter(string id, Vector2 position)
+		{
+			if (!_characters.TryGetValue(id, out Character character))
+				throw new ArgumentException($"No character found with id '{id}'");
+
+			return new WorldCharacter(character, AssetManager.GetSpriteSheet(character.SpriteSheetName), position);
+		}
+
+		// This shold eventually be loaded in as well...
+		public static readonly Size HumanoidBoundsSize = new Size(28, 54);
+		public static Size GetCreatureSize(CreatureType type)
+		{
+			switch (type)
+			{
+				case CreatureType.Humanoid: return HumanoidBoundsSize;
+			}
+
+			throw new ArgumentException($"Unknown CreatureType {type}");
 		}
 	}
 }

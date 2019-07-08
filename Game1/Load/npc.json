@@ -3,12 +3,18 @@
     "id": "man",
     "type": "Humanoid",
     "displayname": "Dude",
-    "spritesheet": "man"
+    "spritesheet": "man",
+    "sex": "Male",
+    "movementspeed": 40.0,
+    "motion": "RandomBias"
   },
   {
     "id": "female",
     "type": "Humanoid",
     "displayname": "Chick",
-    "spritesheet": "female"
+    "spritesheet": "female",
+    "sex": "Female",
+    "movementspeed": 40.0,
+    "motion": "RandomBias"
   }
 ]

@@ -42,6 +42,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AIManager.cs" />
     <Compile Include="AssetManager.cs" />
     <Compile Include="AudioManager.cs" />
     <Compile Include="BuffEffect.cs" />
@@ -57,7 +58,7 @@
     <Compile Include="Enum\CharacterDebuffEffectEnum.cs" />
     <Compile Include="Enum\InteractiveTypeEnum.cs" />
     <Compile Include="Enum\LayerTypeEnum.cs" />
-    <Compile Include="Enum\MobTypeEnum.cs" />
+    <Compile Include="Enum\CreatureTypeEnum.cs" />
     <Compile Include="Enum\ToolTypeEnum.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="FixedQueue.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Maps\MapMob.cs" />
     <Compile Include="Maps\MapTransition.cs" />
     <Compile Include="WorldCell.cs" />
+    <Compile Include="WorldCharacter.cs" />
     <Compile Include="WorldEntity.cs" />
     <Compile Include="WorldEntityList.cs" />
     <Compile Include="WorldSolid.cs" />

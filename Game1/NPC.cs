@@ -4,41 +4,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
 using Game1.Enum;
 
 namespace Game1
 {
-	public class NPC : Character, ISupportsTooltip
+	public class Character
 	{
-		private const int SameDirectionBias = 99;
-		private const int ContinueStopBias = 96;
+		[JsonProperty("id")]
+		public string Id { get; set; }
 
-		public NPC(string name, CharacterSex sex, Vector2 position, int maxHP, int currentHP) : base()
-		{
-			_movementSpeed = 40.0f;
-			this.Name = name;
-			this.Sex = sex;
-			this.Position = position;
-			this.MaxHP = maxHP;
-			this.CurrentHP = currentHP;
-		}
+		[JsonProperty("type")]
+		public CreatureType CreatureType { get; set; }
 
-		public override string TooltipText => this.Name;
+		[JsonProperty("name")]
+		public string Name { get; set; }
 
-		public override Vector2 UpdateMotion()
-		{
-			if (this.Motion == Vector2.Zero)
-			{
-				if (GameRandom.Percent(NPC.ContinueStopBias))
-					return this.Motion;
-			}
-			else
-			{
-				if (GameRandom.Percent(NPC.SameDirectionBias))
-					return this.Motion;
-			}
+		[JsonProperty("spritesheet")]
+		public string SpriteSheetName { get; set; }
 
-			return new Vector2(GameRandom.Next(-1, 1), GameRandom.Next(-1, 1));
-		}
+		[JsonProperty("sex")]
+		public CharacterSex Sex { get; set; }
+
+		[JsonProperty("movementspeed")]
+		public float MovementSpeed { get; set; }
+
+		[JsonProperty("motion")]
+		public string Motion { get; set; }
 	}
 }

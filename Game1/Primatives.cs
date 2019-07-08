@@ -33,5 +33,10 @@ namespace Game1
 		{
 			return new Size(size.Width * i, size.Height * i);
 		}
+
+		public static Size operator /(Size size, int i)
+		{
+			return new Size(size.Width / i, size.Height / i);
+		}
 	}
 }

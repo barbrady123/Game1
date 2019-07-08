@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Game1.Enum
 {
-	public enum MobType
+	public enum CreatureType
 	{
 		Humanoid = 0
 	}
