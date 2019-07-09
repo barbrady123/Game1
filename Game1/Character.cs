@@ -14,6 +14,7 @@ using Game1.Items;
 namespace Game1
 {
 	// Either we need a new base class, or this should be the base and some of this crap needs to be moved into a child class....
+	/*
 	public class CharacterOld : WorldEntity
 	{		
 		private Vector2 _position;
@@ -581,4 +582,5 @@ namespace Game1
 		}
 		#endregion
 	}
+	*/
 }

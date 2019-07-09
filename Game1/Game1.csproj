@@ -50,6 +50,7 @@
     <Compile Include="CharacterEventArgs.cs" />
     <Compile Include="CharacterStatus.cs" />
     <Compile Include="CharacterStatusView.cs" />
+    <Compile Include="CombatCharacter.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="ComponentEventArgs.cs" />
     <Compile Include="ActivationManager.cs" />
@@ -73,6 +74,8 @@
     <Compile Include="Maps\MapMeta.cs" />
     <Compile Include="Maps\MapMob.cs" />
     <Compile Include="Maps\MapTransition.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="PlayerSerializer.cs" />
     <Compile Include="WorldCell.cs" />
     <Compile Include="WorldCharacter.cs" />
     <Compile Include="WorldEntity.cs" />

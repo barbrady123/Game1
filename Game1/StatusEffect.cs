@@ -11,6 +11,7 @@ namespace Game1
 	// This could be StatusEffect<TCharacterEffect> where TCharacterEffect: System.Enum
 	public abstract class StatusEffect
 	{
+		// Seems like we actually don't need this for anything...
 		[JsonProperty("id")]
 		public string Id {  get; set; }
 
@@ -43,30 +44,5 @@ namespace Game1
 
 		[JsonProperty("maxduration")]
 		public int? MaxDuration { get; set; }
-
-		/*
-		public StatusEffect(CharacterAttribute affectedAttribute,
-							string iconName,
-							string text,
-							string description,
-							int effectValue,
-							int? duration,
-							int? period,
-							int maxEffectStacks,
-							int durationStack,
-							int? maxDuration)
-		{
-			this.AffectedAttribute = affectedAttribute;
-			this.IconName = iconName;
-			this.Text = text;
-			this.Description = description;
-			this.EffectValue = effectValue;
-			this.Duration = duration;
-			this.Period = period;
-			this.MaxEffectStacks = maxEffectStacks;
-			this.DurationStack = durationStack;
-			this.MaxDuration = maxDuration;
-		}
-		*/
 	}
 }

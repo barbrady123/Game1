@@ -74,7 +74,7 @@ namespace Game1
 
 		public void Update(GameTime gameTime)
 		{
-			if (_world.Character.Moved)
+			if (_world.Player.Moved)
 				SetStaticMapsSourceRect();
 		}
 
@@ -151,8 +151,8 @@ namespace Game1
 			var mapSize = _world.CurrentMap.Size;
 
 			var drawAreaPadding = _gameViewArea.SizeVector() / 2;
-			int sourceX = Util.Clamp((int)( _world.Character.Position.X - drawAreaPadding.X), 0, (int)(mapSize.Width - _gameViewArea.Width));
-			int sourceY = Util.Clamp((int)( _world.Character.Position.Y - drawAreaPadding.Y), 0, (int)(mapSize.Height - _gameViewArea.Height));
+			int sourceX = Util.Clamp((int)( _world.Player.Position.X - drawAreaPadding.X), 0, (int)(mapSize.Width - _gameViewArea.Width));
+			int sourceY = Util.Clamp((int)( _world.Player.Position.Y - drawAreaPadding.Y), 0, (int)(mapSize.Height - _gameViewArea.Height));
 			this.VisibleMap = new Rectangle(sourceX, sourceY, _gameViewArea.Width, _gameViewArea.Height);
 
 			foreach (var staticMap in _staticMaps.Values)

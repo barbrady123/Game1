@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Game1.Items
 {
-	public class ItemContainer
+	public class ItemContainer : IEnumerable<InventoryItem>
 	{
 		private readonly InventoryItem[] _items;
 		
@@ -25,6 +26,10 @@ namespace Game1.Items
 		public InventoryItem[] Items => _items;
 
 		public InventoryItem this[int key] => _items[key];
+
+		public IEnumerator<InventoryItem> GetEnumerator() => (IEnumerator<InventoryItem>)_items.Select(x => x).GetEnumerator();
+
+		IEnumerator IEnumerable.GetEnumerator() => _items.GetEnumerator();
 
 		public event EventHandler<ComponentEventArgs> OnItemChanged;
 
@@ -154,5 +159,5 @@ namespace Game1.Items
 		{
 			OnItemChanged?.Invoke(this, new ComponentEventArgs { Index = index, Meta = _items[index] });
 		}
-	}
+}
 }

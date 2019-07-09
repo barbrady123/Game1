@@ -44,8 +44,8 @@ namespace Game1
 			// Might want a couple frame delay before actually running the game?
 			_activator.Register(_world = new World(playerId), true, "top");
 			_world.Initialize();
-			_world.Character.OnHeldItemChanged += InputManager.HandleCursorChange;
-			_world.Character.OnGotExternalItem += Character_OnGotExternalItem;
+			_world.Player.OnHeldItemChanged += InputManager.HandleCursorChange;
+			_world.Player.OnGotExternalItem += Character_OnGotExternalItem;
 			_world.OnCharacterDied += _world_OnCharacterDied;
 			_world.OnMapChanged += _world_OnMapChanged;
 
@@ -65,14 +65,14 @@ namespace Game1
 			_activator.Register(_inventoryWindow = new InventoryWindow(this.Bounds.CenteredRegion(870, 575),  _world, "Backpack", modalSpriteBatchData), false, "top");
 			_inventoryWindow.OnReadyDisable += _inventoryView_OnReadyDisable;
 
-			_activator.Register(_hotbarView = ItemContainerView.New<HotbarView>(_world.Character.HotBar, new Point(this.ContentMargin.Width, _gameViewArea.Bottom + this.ContentMargin.Height), true), true);
+			_activator.Register(_hotbarView = ItemContainerView.New<HotbarView>(_world.Player.HotBar, new Point(this.ContentMargin.Width, _gameViewArea.Bottom + this.ContentMargin.Height), true), true);
 			_hotbarView.OnActiveItemChange += _hotbarView_OnActiveItemChange;
 
 			_activator.Register(_barHealth = new StatBar(
 				GamePlayManager.StatBarSize, 
 				this.Bounds.TopRightVector((-GamePlayManager.StatBarSize / 2) - this.ContentMargin.Width, this.ContentMargin.Height + StatBar.Height / 2),
 				Color.Red,
-				_world.Character,
+				_world.Player,
 				"CurrentHP",
 				"MaxHP"
 			), true);
@@ -80,7 +80,7 @@ namespace Game1
 				GamePlayManager.StatBarSize,
 				this.Bounds.TopRightVector((-GamePlayManager.StatBarSize / 2) - this.ContentMargin.Width, this.ContentMargin.Height * 3 + StatBar.Height / 2),
 				Color.Blue,
-				_world.Character,
+				_world.Player,
 				"CurrentMana",
 				"MaxMana"
 			), true);
@@ -90,11 +90,11 @@ namespace Game1
 			// Since we don't have the ability to set groups back to their previous states, we would have to turn these back on manually like we do the world
 			// in every place...so we'll leave this for now but when the ActivationManager is improved with the ability to return to previous state this will be fixed...
 			_activator.Register(_buffs = new StatusViewer<CharacterStatus<BuffEffect>, BuffEffect>(
-				new Rectangle(this.Bounds.TopRightVector(-300 - this.ContentMargin.Width, this.ContentMargin.Height * 6).ToPoint(), new Point(300, 120)), _world.Character.Buffs), true
+				new Rectangle(this.Bounds.TopRightVector(-300 - this.ContentMargin.Width, this.ContentMargin.Height * 6).ToPoint(), new Point(300, 120)), _world.Player.Buffs), true
 			);
 
 			_activator.Register(_debuffs = new StatusViewer<CharacterStatus<DebuffEffect>, DebuffEffect>(
-				new Rectangle(this.Bounds.TopRightVector(-300 - this.ContentMargin.Width, this.ContentMargin.Height * 6 + 130).ToPoint(), new Point(300, 120)), _world.Character.Debuffs), true
+				new Rectangle(this.Bounds.TopRightVector(-300 - this.ContentMargin.Width, this.ContentMargin.Height * 6 + 130).ToPoint(), new Point(300, 120)), _world.Player.Debuffs), true
 			);
 
 			// Eventually make a component for display of this stuff on the right...
@@ -252,13 +252,13 @@ namespace Game1
 		private void UpdateVisibleStats(GameTime gameTime)
 		{
 			// Currently the only stat is Defense...
-			_defense.UpdateText($"Defense: {_world.Character.Defense}");
+			_defense.UpdateText($"Defense: {_world.Player.Defense}");
 			_defense.Update(gameTime);
 		}
 
 		private void _hotbarView_OnActiveItemChange(object sender, ComponentEventArgs e)
 		{
-			_world.Character.SetActiveItem((InventoryItem)e.Meta);
+			_world.Player.SetActiveItem((InventoryItem)e.Meta);
 		}
 
 		private void _world_OnCharacterDied(object sender, ComponentEventArgs e)

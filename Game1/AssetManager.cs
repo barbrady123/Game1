@@ -96,9 +96,9 @@ namespace Game1
 			_contentScreen.Unload();
 		}
 
-		public static void LoadPlayerAssets(Character player)
+		public static void LoadPlayerAssets(Player player)
 		{
-			string spriteSheet = player.SpriteSheetName.ToLower();
+			string spriteSheet = player.Character.SpriteSheetName.ToLower();
 			var standard = _contentGame.Load<Texture2D>(Path.Combine(CharacterSpriteSheetRoot, spriteSheet));
 
 			if (_playerSpriteSheetName != spriteSheet)

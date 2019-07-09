@@ -36,7 +36,7 @@ namespace Game1.Interface.Windows
 			_world = world;
 			_armorItemView = new InventoryItemView[System.Enum.GetNames(typeof(ArmorSlot)).Length];
 
-			_characterName = new ImageText(_world.Character.Name, true) {
+			_characterName = new ImageText(_world.Player.Character.Name, true) {
 				Alignment = ImageAlignment.Centered,
 				Position = this.Bounds.TopCenterVector(yOffset: this.ContentMargin.Height + (FontManager.FontHeight / 2))
 			};
@@ -113,10 +113,10 @@ namespace Game1.Interface.Windows
 
 		private void UpdateArmorViews()
 		{
-			_armorItemView[(int)ArmorSlot.Head].Item = _world.Character.EquippedArmorHead;
-			_armorItemView[(int)ArmorSlot.Chest].Item = _world.Character.EquippedArmorChest;
-			_armorItemView[(int)ArmorSlot.Legs].Item = _world.Character.EquippedArmorLegs;
-			_armorItemView[(int)ArmorSlot.Feet].Item = _world.Character.EquippedArmorFeet;
+			_armorItemView[(int)ArmorSlot.Head].Item = _world.Player.EquippedArmorHead;
+			_armorItemView[(int)ArmorSlot.Chest].Item = _world.Player.EquippedArmorChest;
+			_armorItemView[(int)ArmorSlot.Legs].Item = _world.Player.EquippedArmorLegs;
+			_armorItemView[(int)ArmorSlot.Feet].Item = _world.Player.EquippedArmorFeet;
 		}
 
 		private void UpdateCharacterStats()
@@ -126,7 +126,7 @@ namespace Game1.Interface.Windows
 			for (int i = 0; i < 6; i++)
 			{
 				string statName = ((CharacterAttribute)i).ToString("g");
-				int currentVal = (int)typeof(Character).InvokeMember(statName, Util.GetPropertyFlags, Type.DefaultBinder, _world.Character, null);
+				int currentVal = (int)typeof(Character).InvokeMember(statName, Util.GetPropertyFlags, Type.DefaultBinder, _world.Player, null);
 				_characterStat[i].UpdateText($"{statName}: {currentVal}");
 			}
 		}
@@ -140,11 +140,11 @@ namespace Game1.Interface.Windows
 			switch (e.Value)
 			{
 				case "unequip"	:	
-					var previous = _world.Character.UnequipArmor((ArmorSlot)itemView.Index);
-					_world.Character.AddItem(previous);
+					var previous = _world.Player.UnequipArmor((ArmorSlot)itemView.Index);
+					_world.Player.AddItem(previous);
 					break;
 				case "drop"		:
-					var item = _world.Character.UnequipArmor((ArmorSlot)itemView.Index);
+					var item = _world.Player.UnequipArmor((ArmorSlot)itemView.Index);
 					_world.AddItem(item, pickup: false);
 					break;
 			}

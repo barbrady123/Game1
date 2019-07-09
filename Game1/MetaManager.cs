@@ -39,7 +39,7 @@ namespace Game1
 			_buffs = IOManager.ObjectFromFile<List<BuffEffect>>(Path.Combine(MetaEffectRoot, "effect_buff")).ToDictionary(e => e.Effect);
 			_debuffs = IOManager.ObjectFromFile<List<DebuffEffect>>(Path.Combine(MetaEffectRoot, "effect_debuff")).ToDictionary(e => e.Effect);
 			_transitions = IOManager.ObjectFromFile<List<Transition>>(Path.Combine(Game1.MetaRoot, "transition")).ToDictionary(e => e.Id);
-			_characters = IOManager.ObjectFromFile<List<Character>>(Path.Combine(MetaEffectRoot, "npc")).ToDictionary(e => e.Id);
+			_characters = IOManager.ObjectFromFile<List<Character>>(Path.Combine(Game1.MetaRoot, "npc")).ToDictionary(e => e.Id);
 
 			_interactives = new Dictionary<string, Interactive>();
 
@@ -68,7 +68,7 @@ namespace Game1
 			};
 		}
 
-		public static void ApplyCharacterInstantEffect(CharacterInstantEffect effect, Character character)
+		public static void ApplyCharacterInstantEffect(CharacterInstantEffect effect, CombatCharacter character)
 		{
 			if (!_instants.TryGetValue(effect, out InstantEffect instant))
 				throw new Exception($"Unexpected CharacterInstantEffect type {effect} encountered!");
@@ -81,7 +81,7 @@ namespace Game1
 			}
 		}
 
-		public static void ApplyCharacterBuffEffect(CharacterBuffEffect effect, Character character)
+		public static CharacterStatus<BuffEffect> ApplyCharacterBuffEffect(CharacterBuffEffect effect, CombatCharacter character)
 		{
 			if (!_buffs.TryGetValue(effect, out BuffEffect buff))
 				throw new Exception($"Unexpected CharacterBuffEffect type {effect} encountered!");
@@ -89,7 +89,8 @@ namespace Game1
 			var currentBuff = character.Buffs.FirstOrDefault(x => x.Effect.Effect == effect);
 			if (currentBuff == null)
 			{
-				character.AddBuff(new CharacterStatus<BuffEffect>(buff, AssetManager.GetIconStatus(buff.IconName)));
+				currentBuff = new CharacterStatus<BuffEffect>(buff, AssetManager.GetIconStatus(buff.IconName));
+				character.AddBuff(currentBuff);
 			}
 			else
 			{
@@ -98,9 +99,11 @@ namespace Game1
 				if (currentBuff.Duration != null) 
 					currentBuff.Duration = Math.Min((double)currentBuff.Duration + buff.DurationStack, (int)currentBuff.Effect.MaxDuration);
 			}
+
+			return currentBuff;
 		}
 
-		public static void ApplyCharacterDebuffEffect(CharacterDebuffEffect effect, Character character)
+		public static CharacterStatus<DebuffEffect> ApplyCharacterDebuffEffect(CharacterDebuffEffect effect, CombatCharacter character)
 		{
 			if (!_debuffs.TryGetValue(effect, out DebuffEffect debuff))
 				throw new Exception($"Unexpected CharacterDebuffEffect type {effect} encountered!");
@@ -108,7 +111,8 @@ namespace Game1
 			var currentDebuff = character.Debuffs.FirstOrDefault(x => x.Effect.Effect == effect);
 			if (currentDebuff == null)
 			{
-				character.AddDebuff(new CharacterStatus<DebuffEffect>(debuff, AssetManager.GetIconStatus(debuff.IconName)));
+				currentDebuff = new CharacterStatus<DebuffEffect>(debuff, AssetManager.GetIconStatus(debuff.IconName));
+				character.AddDebuff(currentDebuff);
 			}
 			else
 			{
@@ -117,6 +121,8 @@ namespace Game1
 				if (currentDebuff.Duration != null) 
 					currentDebuff.Duration = Math.Min((double)currentDebuff.Duration + debuff.DurationStack, (int)currentDebuff.Effect.MaxDuration);
 			}
+
+			return currentDebuff;
 		}
 
 		// Another temp test method...

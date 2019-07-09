@@ -100,9 +100,9 @@ namespace Game1.Screens
 			switch (e.Value)
 			{
 				case "startgame" :
-					var newChar = Character.New(_menuCharacter.CharacterName, _menuCharacter.CharacterSex);
+					var newChar = Player.New(_menuCharacter.CharacterName, _menuCharacter.CharacterSex);
 					// TODO: Needs to store in it's own directory...based on a Guid/some other ID...
-					IOManager.ObjectToFile(Game1.PlayerFile, newChar);
+					IOManager.ObjectToFile(Game1.PlayerFile, new PlayerSerializer(newChar));
 					e.Meta = Guid.NewGuid().ToString();	// meaningless for now...
 					// TODO: Eventually we need to handle some kind of identifier of this new player to the parent, when we have multiple player/world files...
 					ReadyDisable(e);

@@ -38,6 +38,7 @@ namespace Game1
 		public const int DefaultPickupRadius = 20;
 		public const string PlayerStartMap = "map";
 		public static readonly Point PlayerStartLocation = new Point(32, 32);
+		public const float DefaultPlayerMovementSpeed = 150.0f;
 
 		GraphicsDeviceManager _graphicsManager;
 		ScreenManager _screenManager;

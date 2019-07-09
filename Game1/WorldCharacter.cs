@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 using Game1.Effect;
 using Game1.Enum;
 using Game1.Items;
@@ -13,9 +14,10 @@ namespace Game1
 {
 	public class WorldCharacter : WorldEntity
 	{
-		private Size _boundsExpansionSize;
-
 		protected Vector2 _position;
+
+		public Size BoundsExpansionSize { get; protected set; }
+		public Func<Vector2, Vector2> UpdateMotion { get; protected set; }
 
 		public Character Character { get; set; }
 		public ImageSpriteSheet SpriteSheet { get; set; }
@@ -24,10 +26,19 @@ namespace Game1
 		public Cardinal Direction { get; set; }
 
 		public override bool IsSolid => true;
+		public bool Moved => this.PreviousPosition != this.Position;
+
 		public override Vector2 Position
 		{
 			get { return _position; }
-			set { throw new NotSupportedException("Use Move() to change position"); }
+			set
+			{
+				if (_position == value)
+					return;
+
+				_position = value;
+				RecalculatePosition(Vector2.Zero);
+			}
 		}
 
 		public virtual float MovementSpeed => this.Character.MovementSpeed;
@@ -43,17 +54,15 @@ namespace Game1
 		private void RecalculatePosition(Vector2 movement)
 		{
 			_position += movement;
-			this.Bounds = _position.ExpandToRectangleCentered(_boundsExpansionSize.Width, _boundsExpansionSize.Height);
+			this.Bounds = _position.ExpandToRectangleCentered(this.BoundsExpansionSize.Width, this.BoundsExpansionSize.Height);
 			this.Direction = Util.DirectionFromVector(Motion, this.Direction);
 		}
-
-		public Func<Vector2, Vector2> UpdateMotion { get; private set; }
 
 		public WorldCharacter(Character character, ImageSpriteSheet spriteSheet, Vector2 position)
 		{
 			this.Character = character;
 			this.SpriteSheet = spriteSheet;
-			_boundsExpansionSize = MetaManager.GetCreatureSize(character.CreatureType) / 2;
+			this.BoundsExpansionSize = MetaManager.GetCreatureSize(character.CreatureType) / 2;
 			this.Direction = Cardinal.South;
 			this.Position = position;
 			this.Motion = Vector2.Zero;

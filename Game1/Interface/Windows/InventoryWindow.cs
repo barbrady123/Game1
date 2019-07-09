@@ -37,7 +37,7 @@ namespace Game1.Interface.Windows
 																				enabledContextMenu: true)
 		{
 			_world = world;
-			_containerBackpack = _world.Character.Backpack;
+			_containerBackpack = _world.Player.Backpack;
 			var viewPosition = bounds.TopLeftPoint(this.ContentMargin.Width, this.ContentMargin.Height);
 
 			_containerName = new ImageText(text, true) {
@@ -51,7 +51,7 @@ namespace Game1.Interface.Windows
 			_containerViewBackpack.OnMouseRightClick += _containerView_OnMouseRightClick;
 			_containerViewBackpack.OnMouseOver += _containerView_OnMouseOver;
 
-			_containerHotbar = _world.Character.HotBar;
+			_containerHotbar = _world.Player.HotBar;
 			_activator.Register(
 				_containerViewHotbar = ItemContainerView.New<ItemContainerView>(
 					_containerHotbar,
@@ -105,7 +105,7 @@ namespace Game1.Interface.Windows
 		{
 			var clickedItemView = (InventoryItemView)e.Meta;
 			var clickedContainer = ((ItemContainerView)sender).Container;
-			_world.Character.SwapHeld(clickedContainer, clickedItemView.Index);
+			_world.Player.SwapHeld(clickedContainer, clickedItemView.Index);
 		}
 
 		private void _containerView_OnMouseRightClick(object sender, ComponentEventArgs e) => MouseRightClick(e);
@@ -120,12 +120,12 @@ namespace Game1.Interface.Windows
 			switch (e.Value)
 			{
 				case "equip"	:	
-					_world.Character.EquipArmor(itemView.ContainingView.Container, itemView.Index);
+					_world.Player.EquipArmor(itemView.ContainingView.Container, itemView.Index);
 					break;
 				case "eat"		:
 				case "drink"	:
 				case "read"		:
-					_world.Character.Consume(itemView.ContainingView.Container, itemView.Index);
+					_world.Player.Consume(itemView.ContainingView.Container, itemView.Index);
 					break;
 				case "drop"		:
 					var item = itemView.ContainingView.Container.RemoveItem(itemView.Index);
@@ -162,7 +162,7 @@ namespace Game1.Interface.Windows
 		// This functionality needs to be sharable somehow....move elsewhere...
 		private void SplitItem(InventoryItemView itemView, int quantity)
 		{
-			if (!_world.Character.HoldItemQuantity(itemView.ContainingView.Container, itemView.Index, quantity))
+			if (!_world.Player.HoldItemQuantity(itemView.ContainingView.Container, itemView.Index, quantity))
 			{
 				// Need to tell user this failed...if we get here it means that we couldn't
 				// combine the quantity specified with the currently held item, and we also

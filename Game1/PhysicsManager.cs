@@ -27,9 +27,9 @@ namespace Game1
 			_world = world;
 		}
 
-		public bool MovementOk(Character character, List<Character> allChars)
+		public bool MovementOk(WorldCharacter character, List<WorldCharacter> allChars)
 		{
-			var proposedBox = (character.Position + character.Motion).ExpandToRectangleCentered(HumanoidBoxSize.Width / 2, HumanoidBoxSize.Height / 2);
+			var proposedBox = (character.Position + character.Motion).ExpandToRectangleCentered(character.BoundsExpansionSize.Width, character.BoundsExpansionSize.Height);
 
 			if (!_mapBounds.Contains(proposedBox))
 				return false;
@@ -55,7 +55,7 @@ namespace Game1
 				var originalMotion = character.Motion;
 				if (MovementOk(character, allChars))
 				{
-					character.Position += originalMotion;
+					character.Move(originalMotion);
 					continue;
 				}
 
@@ -63,7 +63,7 @@ namespace Game1
 				character.Motion = originalMotion.XVector();
 				if (MovementOk(character, allChars))
 				{
-					character.Position += character.Motion;
+					character.Move(character.Motion);
 					continue;
 				}
 
@@ -71,19 +71,22 @@ namespace Game1
 				character.Motion = originalMotion.YVector();
 				if (MovementOk(character, allChars))
 				{
-					character.Position += character.Motion;
+					character.Move(character.Motion);
 					continue;
 				}
 			}
 
 			// Active item bounds...
-			var activeBounds = _world.Character.ActiveItemBounds;
+			// TODO: We support all CombatCharacters with ActiveItems...may need to add this (or just keep mob combat simpler?)...
+			var activeBounds = _world.Player.ActiveItemBounds;
 			if (activeBounds != Rectangle.Empty)
 			{
 				// Eventually we might want to allow other tools to do damage...
-				if (_world.Character.ActiveItem.Item is ItemWeapon weapon)
+				if (_world.Player.ActiveItem.Item is ItemWeapon weapon)
 				{
-					foreach (var npc in _world.MapObjects.GetEntities<NPC>(activeBounds))
+					// TODO: Re-implement this when mobs are available...right now this is invalid as NPCs (base WorldCharacters) are no longer attackable...
+					/*
+					foreach (var npc in _world.MapObjects.GetEntities<WorldCharacter>(activeBounds).Where(e => e != _world.Player))
 					{
 						if (npc.Bounds.Intersects(activeBounds))
 						{
@@ -91,6 +94,7 @@ namespace Game1
 							npc.CurrentHP -= GameRandom.Next(weapon.MinDamage, weapon.MaxDamage);	// Obviously greatly simplified...
 						}
 					}
+					*/
 				}
 			}
 		}

@@ -12,8 +12,11 @@ namespace Game1
 	{
 		public static Func<Vector2, Vector2> GetMotionMethod(string id)
 		{
+			if (id == null)
+				return null;
+
 			var method = typeof(AIManager).GetMethod(id);
-			return (Func<Vector2, Vector2>)method.CreateDelegate(typeof(AIManager));
+			return (Func<Vector2, Vector2>)method.CreateDelegate(typeof(Func<Vector2, Vector2>));
 		}
 
 		private static Vector2 RandomBias(Vector2 previousMotion)

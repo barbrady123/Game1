@@ -13,18 +13,19 @@ namespace Game1
 {
 	public class CombatCharacter : WorldCharacter
 	{
-		private int _currentHP;
-		private int _currentMana;
-		private bool _inAction;
-		private int _baseDefense;
+		protected int _currentHP;
+		protected int _currentMana;
+		protected bool _inAction;
+		protected int _baseDefense;
 
 		public virtual int Defense => _baseDefense + DefenseModifier();
-		public bool ActiveItemSolid { get; private set; }
-		public virtual bool InAction { get; private set; }
-		public InventoryItem ActiveItem { get; private set; }
+		public bool ActiveItemSolid { get; protected set; }
+		public virtual bool InAction { get; protected set; }
+		public InventoryItem ActiveItem { get; protected set; }
 		public virtual bool ActiveItemHoldable => this.ActiveItem?.Item is ItemHoldable;
 
 		public int Level { get; set; }
+		public int Experience { get; set; }
 		public int Strength { get; set; }
 		public int Dexterity { get; set; }
 		public int Intelligence { get; set; }
@@ -198,12 +199,12 @@ namespace Game1
 			}
 		}
 
-		private int DefenseModifier()
+		protected int DefenseModifier()
 		{
 			return this.Buffs.Where(b => b.Effect.AffectedAttribute == CharacterAttribute.Defense).Sum(b => b.Effect.EffectValue * b.Stacks);
 		}
 
-		private float MovementSpeedModifier()
+		protected float MovementSpeedModifier()
 		{
 			return 1.0f + (float)this.Buffs.Where(b => b.Effect.AffectedAttribute == CharacterAttribute.MovementSpeed).Sum(b => b.Effect.EffectValue * b.Stacks) / 100.0f;
 		}
@@ -221,6 +222,7 @@ namespace Game1
 
 		#region Events
 		// World entities probably shouldn't use ComponentEventArgs...
+		protected void ActiveItemChanged(ComponentEventArgs args) { _onActiveItemChanged?.Invoke(this, args); }
 		private event EventHandler<ComponentEventArgs> _onActiveItemChanged;
 		public event EventHandler<ComponentEventArgs> OnActiveItemChanged
 		{
@@ -228,6 +230,7 @@ namespace Game1
 			remove	{ lock(_lock) { _onActiveItemChanged -= value; } }
 		}
 
+		protected void Died() { _onDied?.Invoke(this, null); }
 		private event EventHandler<ComponentEventArgs> _onDied;
 		public event EventHandler<ComponentEventArgs> OnDied
 		{

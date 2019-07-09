@@ -72,10 +72,10 @@ namespace Game1
 
 		public void StartScreen()
 		{
-			//TransitionScreens(new SplashScreen(_bounds));
+			TransitionScreens(new SplashScreen(_bounds));
 			//TransitionScreens(new MenuScreen<MainMenu>(_bounds));
 			//TransitionScreens(new CharacterCreateScreen(_bounds));
-			TransitionScreens(new GameScreen(_bounds, "player"));
+			//TransitionScreens(new GameScreen(_bounds, "player"));
 		}
 
 		private void TransitionScreens(Component newScreen)

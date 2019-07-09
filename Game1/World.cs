@@ -21,19 +21,19 @@ namespace Game1
 		private readonly string _playerId;
 
 		public WorldEntityList MapObjects { get; set; }
-		public List<NPC> NPCs { get; set; }
-		public Character Character { get; set; }
+		public List<WorldCharacter> NPCs { get; set; }
+		public Player Player { get; set; }
 		public Map CurrentMap { get; set; }
+
+		// TODO: Move these to WorldEntityList (I think).....
 		// Testing this out as objects that sit directly on the map....
 		public List<WorldItem> Items { get; set; }
-
 		// Testing this out as interactives that sit directly on the map...
 		public List<WorldInteractive> Interactives { get; set; }
-
 		// Testing this out as transitions that sit directly on the map...
 		public List<WorldTransition> Transitions { get; set; }
 
-		public List<Character> AllCharacters => new List<Character>((this.NPCs?.Count ?? 0) + 1) { this.Character }.Concat(this.NPCs).ToList();
+		public List<WorldCharacter> AllCharacters => new List<WorldCharacter>((this.NPCs?.Count ?? 0) + 1) { this.Player }.Concat(this.NPCs).ToList();
 
 		// This should probably be a more generalized event for character events...
 		public event EventHandler<ComponentEventArgs> OnCharacterDied;
@@ -46,10 +46,11 @@ namespace Game1
 
 		public void Initialize()
 		{
-			this.Character = IOManager.ObjectFromFile<Character>(Game1.PlayerFile);
-			AssetManager.LoadPlayerAssets(this.Character);
-			this.Character.OnDied += Character_OnDied;
-			ChangeMap(this.Character.Location, this.Character.Position.ToPoint());
+			var serializer = IOManager.ObjectFromFile<PlayerSerializer>(Game1.PlayerFile);
+			this.Player = serializer.ToPlayer();
+			AssetManager.LoadPlayerAssets(this.Player);
+			this.Player.OnDied += Character_OnDied;
+			ChangeMap(this.Player.Location, this.Player.Position.ToPoint());
 		}
 
 		public void ChangeMap(string mapName, Point playerPosition)
@@ -62,9 +63,9 @@ namespace Game1
 			this.CurrentMap = IOManager.ObjectFromFile<Map>(Path.Combine(Game1.MapRoot, mapName));
 			this.CurrentMap.Initialize();
 
-			this.Character.Location = mapName;
-			this.Character.PreviousPosition = Vector2.Zero;
-			this.Character.Position = playerPosition.ToVector2();
+			this.Player.Location = mapName;
+			this.Player.PreviousPosition = Vector2.Zero;
+			this.Player.Position = playerPosition.ToVector2();
 
 			LoadDataFromCurrentMap();
 			_onMapChanged?.Invoke(this, null);
@@ -72,13 +73,13 @@ namespace Game1
 
 		public override void UpdateActive(GameTime gameTime)
 		{
-			this.Character.Update(gameTime);
+			this.Player.Update(gameTime);
 			foreach (var npc in this.NPCs)
 				npc.Update(gameTime);
 			_physics.Update(gameTime);
 
-			if (this.Character.Moved)
-				this.MapObjects.Move(this.Character);
+			if (this.Player.Moved)
+				this.MapObjects.Move(this.Player);
 			foreach (var npc in this.NPCs.Where(n => n.Moved))
 				this.MapObjects.Move(npc);
 
@@ -96,8 +97,8 @@ namespace Game1
 			// Transition check...
 			if (interactiveKeyPressed)
 			{
-				foreach (var transition in this.MapObjects.GetEntities<WorldTransition>(this.Character.Bounds))
-					if (Vector2.Distance(transition.Position, this.Character.Position) < 30.0f)	// Make this distance configurable...
+				foreach (var transition in this.MapObjects.GetEntities<WorldTransition>(this.Player.Bounds))
+					if (Vector2.Distance(transition.Position, this.Player.Position) < 30.0f)	// Make this distance configurable...
 					{
 						ChangeMap(transition.DestinationMap, transition.DestinationPosition);
 						break;
@@ -105,13 +106,13 @@ namespace Game1
 			}
 
 			// Item proximity pickup...
-			foreach (var item in this.MapObjects.GetEntities<WorldItem>(this.Character.Bounds))
+			foreach (var item in this.MapObjects.GetEntities<WorldItem>(this.Player.Bounds))
 			{
-				item.InRange = Vector2.Distance(item.Position, this.Character.Position) <= Game1.DefaultPickupRadius;
+				item.InRange = Vector2.Distance(item.Position, this.Player.Position) <= Game1.DefaultPickupRadius;
 
 				if (item.Pickup && item.InRange)
 				{
-					if (this.Character.AddItem(item.Item, true))
+					if (this.Player.AddItem(item.Item, true))
 						this.MapObjects.Remove(this.Items.RemoveItem(item));
 				}
 			}
@@ -122,7 +123,7 @@ namespace Game1
 			IWorldEntity targetEntity = null;
 
 			// Targetting (mouseover) entity...
-			foreach (var entity in this.MapObjects.GetEntities(mousePosition).Where(e => e != this.Character))
+			foreach (var entity in this.MapObjects.GetEntities(mousePosition).Where(e => e != this.Player))
 			{
 				if (!entity.Bounds.Contains(mousePosition))
 					continue;
@@ -134,9 +135,9 @@ namespace Game1
 					e.MouseOver();
 
 				// Interactive/Tool check...
-				if (this.Character.ActiveItemSolid && (this.Character.ActiveItem?.Item is ItemTool tool))
+				if (this.Player.ActiveItemSolid && (this.Player.ActiveItem?.Item is ItemTool tool))
 				{
-					if ((entity is WorldInteractive interactive) && (Vector2.Distance(interactive.Position, this.Character.Position) <= tool.Range))
+					if ((entity is WorldInteractive interactive) && (Vector2.Distance(interactive.Position, this.Player.Position) <= tool.Range))
 					{
 						interactive.Icon.AddEffect<ShakeEffect>(true);
 						if (interactive.Health != null)
@@ -150,10 +151,10 @@ namespace Game1
 			if (mouseLeftClick)
 			{
 				// Clicking on an empty space will drop item if held...
-				if (this.Character.IsItemHeld && (targetEntity == null))
-					this.AddItem(this.Character.DropHeld(), pickup: false);
+				if (this.Player.IsItemHeld && (targetEntity == null))
+					this.AddItem(this.Player.DropHeld(), pickup: false);
 				else 
-					this.Character.UseActiveItem();
+					this.Player.UseActiveItem();
 			}
 
 			return targetEntity;
@@ -164,15 +165,8 @@ namespace Game1
 			if (item == null)
 				return;
 
-			position = position ?? this.Character.Position;
+			position = position ?? this.Player.Position;
 			this.MapObjects.Add(this.Items.AddItem(new WorldItem(item, (Vector2)position, pickup)));
-		}
-
-		private void Npc_OnDied(object sender, ComponentEventArgs e)
-		{
-			// Just testing...should be a loot check
-			this.NPCs.Remove((NPC)sender);
-			this.MapObjects.Remove((NPC)sender);
 		}
 
 		private void Interactive_OnDestroyed(object sender, EventArgs e)
@@ -203,7 +197,7 @@ namespace Game1
 		{
 			AssetManager.LoadMapAssets(this.CurrentMap);
 			this.MapObjects = new WorldEntityList(this.CurrentMap.Width, this.CurrentMap.Height, Game1.TileSize);
-			this.MapObjects.Add(this.Character);
+			this.MapObjects.Add(this.Player);
 
 			this.Items = new List<WorldItem>();
 			foreach (var item in this.CurrentMap.Items)
@@ -234,15 +228,15 @@ namespace Game1
 				}
 			}
 
-			this.NPCs = new List<NPC>();
+			this.NPCs = new List<WorldCharacter>();
 
-			// TODO: Need Metadata for NPCs...
 			foreach (var npc in this.CurrentMap.NPCs)
 			{
-				var worldNPC = new NPC(npc.Id, CharacterSex.Male, npc.Position.ToVector2(), 10, 10);
-				worldNPC.SpriteSheet = AssetManager.GetSpriteSheet(worldNPC.SpriteSheetName);
-				worldNPC.OnDied += Npc_OnDied;
-				this.MapObjects.Add(this.NPCs.AddItem(worldNPC));
+				//var worldNPC = MetaManager.GetCharacter(npc.Id, npc.Position.ToVector2());
+				//var worldNPC = new NPC(npc.Id, CharacterSex.Male, npc.Position.ToVector2(), 10, 10);
+				//worldNPC.SpriteSheet = AssetManager.GetSpriteSheet(worldNPC.SpriteSheetName);
+				//worldNPC.OnDied += Npc_OnDied;
+				this.MapObjects.Add(this.NPCs.AddItem(MetaManager.GetCharacter(npc.Id, npc.Position.ToVector2())));
 			}
 
 			_physics.CalculateParameters();
