@@ -48,7 +48,7 @@ namespace Game1
 
 		public void Update(GameTime gameTime)
 		{
-			var allChars = _world.AllCharacters;
+			var allChars = _world.MapObjects.Characters.ToList();
 		
 			foreach (var character in allChars.Where(c => c.Motion != Vector2.Zero))
 			{

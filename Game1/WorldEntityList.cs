@@ -16,7 +16,6 @@ namespace Game1
 {
 	// TODO: Should this become MapEntityList and have it contained in the Map...given that's actually what this data is...
 	// (and then rename all the world shit lol)
-	// Character and NPCs should be contained in here...
 	public class WorldEntityList
 	{
 		private readonly int _width;
@@ -25,13 +24,42 @@ namespace Game1
 		private WorldCell[,] _cells;
 		private Dictionary<IWorldEntity, List<WorldCell>> _entityCells;
 		
-		public WorldEntityList(int width, int height, int cellSize)
+		public HashSet<WorldInteractive> Interactives { get; private set; }
+		public HashSet<WorldTransition> Transitions { get; private set; }
+		public HashSet<WorldItem> Items { get; private set; }
+		public HashSet<WorldCharacter> Characters { get; private set; }
+
+		public WorldEntityList(Map map, Player player, int cellSize)
 		{
-			_width = width;
-			_height = height;
+			_width = map.Width;
+			_height = map.Height;
 			_cellSize = cellSize;
-			_cells = new WorldCell[width, height];
+			_cells = new WorldCell[_width, _height];
 			_entityCells = new Dictionary<IWorldEntity, List<WorldCell>>();
+			this.Interactives = new HashSet<WorldInteractive>();
+			this.Transitions = new HashSet<WorldTransition>();
+			this.Items = new HashSet<WorldItem>();
+			this.Characters = new HashSet<WorldCharacter>();
+
+			Add(player);
+			foreach (var item in map.Items)					Add(this.Items.AddItem(new WorldItem(ItemManager.GetItem(item.Id, item.Quantity), item.Position.ToVector2(), true)));
+			foreach (var interactive in map.Interactives)	Add(this.Interactives.AddItem(MetaManager.GetInteractve(interactive.Id, interactive.Position.ToVector2())));
+			foreach (var transition in map.Transitions)		Add(this.Transitions.AddItem(MetaManager.GetTransition(transition)));
+			foreach (var npc in map.NPCs)					Add(this.Characters.AddItem(MetaManager.GetCharacter(npc.Id, npc.Position.ToVector2())));
+
+			// Solid layer blocks
+			foreach (var layer in map.Layers.Where(l => l.Type == LayerType.Solid))
+			{
+				for (int y = 0; y < layer.TileData.GetLength(1); y++)
+				for (int x = 0; x < layer.TileData.GetLength(0); x++)
+				{
+					// Again, coords here are reversed so file data can "visually" match the screen...
+					if (layer.TileData[y,x] < 0)
+						continue;
+
+					Add(new WorldSolid(new Vector2(x * _cellSize, y * _cellSize)));
+				}
+			}
 		}
 
 		public WorldCell this[int xIndex, int yIndex] => _cells[xIndex, yIndex];
@@ -100,7 +128,7 @@ namespace Game1
 			return GetEntities<T>(bounds.X / _cellSize, bounds.Y / _cellSize, (bounds.Right - 1) / _cellSize, (bounds.Bottom - 1) / _cellSize);
 		}
 
-		public T Add<T>(T entity) where T: IWorldEntity
+		public T Add<T>(T entity, bool addToSet = true) where T: IWorldEntity
 		{
 			var startCell = entity.Bounds.TopLeftPoint().DivideBy(_cellSize);
 			var endCell = entity.Bounds.BottomRightPoint().DivideBy(_cellSize);
@@ -119,16 +147,27 @@ namespace Game1
 					_entityCells[entity] = new List<WorldCell> { _cells[x, y] };
 			}
 
+			if (!addToSet)
+				return entity;
+
+			switch (entity)
+			{
+				case WorldInteractive i:	this.Interactives.Add(i);	break;
+				case WorldTransition t:		this.Transitions.Add(t);	break;
+				case WorldItem i:			this.Items.Add(i);			break;
+				case WorldCharacter c:		this.Characters.Add(c);		break;
+			}
+
 			return entity;
 		}
 
 		public void Move(IWorldEntity entity)
 		{
-			Remove(entity);
-			Add(entity);
+			Remove(entity, false);
+			Add(entity, false);
 		}
 
-		public void Remove(IWorldEntity entity)
+		public void Remove(IWorldEntity entity, bool removeFromSet = true)
 		{
 			if (_entityCells.TryGetValue(entity, out var cells) && cells != null)
 			{
@@ -136,6 +175,17 @@ namespace Game1
 					cell.Remove(entity);
 
 				_entityCells[entity].Clear();
+			}
+
+			if (!removeFromSet)
+				return;
+
+			switch (entity)
+			{
+				case WorldInteractive i:	this.Interactives.Remove (i);	break;
+				case WorldTransition t:		this.Transitions.Remove(t);		break;
+				case WorldItem i:			this.Items.Remove(i);			break;
+				case WorldCharacter c:		this.Characters.Remove(c);		break;
 			}
 		}
 	}

@@ -21,19 +21,8 @@ namespace Game1
 		private readonly string _playerId;
 
 		public WorldEntityList MapObjects { get; set; }
-		public List<WorldCharacter> NPCs { get; set; }
 		public Player Player { get; set; }
 		public Map CurrentMap { get; set; }
-
-		// TODO: Move these to WorldEntityList (I think).....
-		// Testing this out as objects that sit directly on the map....
-		public List<WorldItem> Items { get; set; }
-		// Testing this out as interactives that sit directly on the map...
-		public List<WorldInteractive> Interactives { get; set; }
-		// Testing this out as transitions that sit directly on the map...
-		public List<WorldTransition> Transitions { get; set; }
-
-		public List<WorldCharacter> AllCharacters => new List<WorldCharacter>((this.NPCs?.Count ?? 0) + 1) { this.Player }.Concat(this.NPCs).ToList();
 
 		// This should probably be a more generalized event for character events...
 		public event EventHandler<ComponentEventArgs> OnCharacterDied;
@@ -73,22 +62,16 @@ namespace Game1
 
 		public override void UpdateActive(GameTime gameTime)
 		{
-			this.Player.Update(gameTime);
-			foreach (var npc in this.NPCs)
+			foreach (var npc in this.MapObjects.Characters)
 				npc.Update(gameTime);
 			_physics.Update(gameTime);
-
-			if (this.Player.Moved)
-				this.MapObjects.Move(this.Player);
-			foreach (var npc in this.NPCs.Where(n => n.Moved))
-				this.MapObjects.Move(npc);
-
-			// TODO: these collections could/should be mainined in the Entity list object (which should be moved inside the Map class)....
-			foreach (var item in this.Items)
+			foreach (var character in this.MapObjects.Characters.Where(n => n.Moved))
+				this.MapObjects.Move(character);
+			foreach (var item in this.MapObjects.Items)
 				item.Update(gameTime);
-			foreach (var interactive in this.Interactives)
+			foreach (var interactive in this.MapObjects.Interactives)
 				interactive.Update(gameTime);
-			foreach (var transition in this.Transitions)
+			foreach (var transition in this.MapObjects.Transitions)
 				transition.Update(gameTime);
 		}
 
@@ -113,7 +96,7 @@ namespace Game1
 				if (item.Pickup && item.InRange)
 				{
 					if (this.Player.AddItem(item.Item, true))
-						this.MapObjects.Remove(this.Items.RemoveItem(item));
+						this.MapObjects.Remove(item);
 				}
 			}
 
@@ -166,14 +149,14 @@ namespace Game1
 				return;
 
 			position = position ?? this.Player.Position;
-			this.MapObjects.Add(this.Items.AddItem(new WorldItem(item, (Vector2)position, pickup)));
+			this.MapObjects.Add(new WorldItem(item, (Vector2)position, pickup));
 		}
 
 		private void Interactive_OnDestroyed(object sender, EventArgs e)
 		{
 			// Another thing that shouldn't be here...testing...
 			var interactive = (WorldInteractive)sender;
-			this.MapObjects.Remove(this.Interactives.RemoveItem(interactive));
+			this.MapObjects.Remove(interactive);
 			// Need something to generate loot from loot table...just doing this temp...
 			foreach (var l in interactive.Interactive.LootTable)
 			{
@@ -196,48 +179,9 @@ namespace Game1
 		private void LoadDataFromCurrentMap()
 		{
 			AssetManager.LoadMapAssets(this.CurrentMap);
-			this.MapObjects = new WorldEntityList(this.CurrentMap.Width, this.CurrentMap.Height, Game1.TileSize);
-			this.MapObjects.Add(this.Player);
-
-			this.Items = new List<WorldItem>();
-			foreach (var item in this.CurrentMap.Items)
-				this.MapObjects.Add(this.Items.AddItem(new WorldItem(ItemManager.GetItem(item.Id, item.Quantity), item.Position.ToVector2(), true)));
-
-			this.Interactives = new List<WorldInteractive>();
-			foreach (var interactive in this.CurrentMap.Interactives)
-			{
-				var worldInteractive = this.MapObjects.Add(this.Interactives.AddItem(MetaManager.GetInteractve(interactive.Id, interactive.Position.ToVector2())));
-				worldInteractive.OnDestroyed += Interactive_OnDestroyed;
-			}
-
-			this.Transitions = new List<WorldTransition>();
-			foreach (var transition in this.CurrentMap.Transitions)
-				this.MapObjects.Add(this.Transitions.AddItem(MetaManager.GetTransition(transition)));
-
-			// Solid layer blocks
-			foreach (var layer in this.CurrentMap.Layers.Where(l => l.Type == LayerType.Solid))
-			{
-				for (int y = 0; y < layer.TileData.GetLength(1); y++)
-				for (int x = 0; x < layer.TileData.GetLength(0); x++)
-				{
-					// Again, coords here are reversed so file data can "visually" match the screen...
-					if (layer.TileData[y,x] < 0)
-						continue;
-
-					this.MapObjects.Add(new WorldSolid(new Vector2(x * Game1.TileSize, y * Game1.TileSize)));
-				}
-			}
-
-			this.NPCs = new List<WorldCharacter>();
-
-			foreach (var npc in this.CurrentMap.NPCs)
-			{
-				//var worldNPC = MetaManager.GetCharacter(npc.Id, npc.Position.ToVector2());
-				//var worldNPC = new NPC(npc.Id, CharacterSex.Male, npc.Position.ToVector2(), 10, 10);
-				//worldNPC.SpriteSheet = AssetManager.GetSpriteSheet(worldNPC.SpriteSheetName);
-				//worldNPC.OnDied += Npc_OnDied;
-				this.MapObjects.Add(this.NPCs.AddItem(MetaManager.GetCharacter(npc.Id, npc.Position.ToVector2())));
-			}
+			this.MapObjects = new WorldEntityList(this.CurrentMap, this.Player, Game1.TileSize);
+			foreach (var interactive in this.MapObjects.Interactives)
+				interactive.OnDestroyed += Interactive_OnDestroyed;
 
 			_physics.CalculateParameters();
 		}

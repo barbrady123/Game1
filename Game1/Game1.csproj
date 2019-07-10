@@ -61,6 +61,7 @@
     <Compile Include="Enum\LayerTypeEnum.cs" />
     <Compile Include="Enum\CreatureTypeEnum.cs" />
     <Compile Include="Enum\ToolTypeEnum.cs" />
+    <Compile Include="Extensions\HashSetExtensions.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="FixedQueue.cs" />
     <Compile Include="Interactive.cs" />
