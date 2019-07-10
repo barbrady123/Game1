@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
@@ -15,7 +16,7 @@ namespace Game1
 			if (id == null)
 				return null;
 
-			var method = typeof(AIManager).GetMethod(id);
+			var method = typeof(AIManager).GetMethod(id, BindingFlags.NonPublic | BindingFlags.Static);
 			return (Func<Vector2, Vector2>)method.CreateDelegate(typeof(Func<Vector2, Vector2>));
 		}
 

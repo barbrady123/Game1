@@ -68,6 +68,8 @@ namespace Game1
 		public List<InventoryItemMeta> HotBar { get; set; }
 		public List<InventoryItemMeta> Backpack { get; set; }
 
+		public PlayerSerializer() { }
+
 		public PlayerSerializer(Player player)
 		{
 			this.Location = player.Location;
@@ -115,7 +117,7 @@ namespace Game1
 					SpriteSheetName = this.SpriteSheetName,
 					MovementSpeed = Game1.DefaultPlayerMovementSpeed
 				},
-				AssetManager.GetSpriteSheet(this.SpriteSheetName),
+				null,
 				this.Position
 			)
 			{

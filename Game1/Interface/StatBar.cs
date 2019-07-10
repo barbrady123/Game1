@@ -36,9 +36,9 @@ namespace Game1.Interface
 		public StatBar(int width, Vector2 position, Color color, object source, string currentProperty, string maxProperty) : base(position.ExpandToRectangleCentered(width / 2, StatBar.Height / 2), hasBorder: true)
 		{
 			_source = source;
-			var propInfo = typeof(Character).GetProperty(currentProperty, typeof(int));
+			var propInfo = typeof(CombatCharacter).GetProperty(currentProperty, typeof(int));
 			CurrentProperty = (Func<int>) Delegate.CreateDelegate(typeof(Func<int>), source, propInfo.GetGetMethod());
-			propInfo = typeof(Character).GetProperty(maxProperty, typeof(int));
+			propInfo = typeof(CombatCharacter).GetProperty(maxProperty, typeof(int));
 			MaxProperty = (Func<int>)Delegate.CreateDelegate(typeof(Func<int>), source, propInfo.GetGetMethod());
 			_barColor = color;
 			_previousCurrent = -1;

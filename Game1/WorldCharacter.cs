@@ -27,6 +27,7 @@ namespace Game1
 
 		public override bool IsSolid => true;
 		public bool Moved => this.PreviousPosition != this.Position;
+		public override string TooltipText => this.Character.Name;
 
 		public override Vector2 Position
 		{
@@ -73,7 +74,7 @@ namespace Game1
 		public virtual void Update(GameTime gameTime)
 		{
 			this.PreviousPosition = _position;
-			var motion = UpdateMotion.Invoke(this.PreviousPosition);
+			var motion = UpdateMotion.Invoke(this.Motion);
 
 			if (motion != Vector2.Zero)
 			{

@@ -19,6 +19,7 @@ namespace Game1
 		protected int _baseDefense;
 
 		public virtual int Defense => _baseDefense + DefenseModifier();
+		public override float MovementSpeed => base.MovementSpeed * MovementSpeedModifier();
 		public bool ActiveItemSolid { get; protected set; }
 		public virtual bool InAction { get; protected set; }
 		public InventoryItem ActiveItem { get; protected set; }

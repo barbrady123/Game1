@@ -1,9 +1,9 @@
 ﻿[
   {
-    "id": "man",
+    "id": "male",
     "type": "Humanoid",
-    "displayname": "Dude",
-    "spritesheet": "man",
+    "name": "Dude",
+    "spritesheet": "male",
     "sex": "Male",
     "movementspeed": 40.0,
     "motion": "RandomBias"
@@ -11,7 +11,7 @@
   {
     "id": "female",
     "type": "Humanoid",
-    "displayname": "Chick",
+    "name": "Chick",
     "spritesheet": "female",
     "sex": "Female",
     "movementspeed": 40.0,
