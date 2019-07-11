@@ -35,8 +35,7 @@ namespace Game1
 
 		public void Initialize()
 		{
-			var serializer = IOManager.ObjectFromFile<PlayerSerializer>(Game1.PlayerFile);
-			this.Player = serializer.ToPlayer();
+			this.Player = IOManager.ObjectFromFile<PlayerSerializer>(Game1.PlayerFile).ToPlayer();
 			AssetManager.LoadPlayerAssets(this.Player);
 			this.Player.OnDied += Character_OnDied;
 			ChangeMap(this.Player.Location, this.Player.Position.ToPoint());
